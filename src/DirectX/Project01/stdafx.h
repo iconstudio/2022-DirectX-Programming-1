@@ -31,3 +31,6 @@
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 using Microsoft::WRL::ComPtr;
+
+constexpr auto FRAME_BUFFER_WIDTH = 800;
+constexpr auto FRAME_BUFFER_HEIGHT = 600;

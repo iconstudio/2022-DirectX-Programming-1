@@ -150,10 +150,12 @@
     <ResourceCompile Include="MyDirectX.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CGameFramework.cpp" />
     <ClCompile Include="MyDirectX.cpp" />
     <ClCompile Include="pch.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CGameFramework.hpp" />
     <ClInclude Include="MyDirectX.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
