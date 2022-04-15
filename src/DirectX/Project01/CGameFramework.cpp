@@ -30,10 +30,10 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	//Direct3D 디바이스, 명령 큐와 명령 리스트, 스왑 체인 등을 생성하는 함수를 호출한다.
 	CreateDirect3DDevice();
 	CreateCommandQueueAndList();
-	CreateSwapChain();
 	CreateRtvAndDsvDescriptorHeaps();
-	CreateRenderTargetViews();
-	CreateDepthStencilView();
+	CreateSwapChain();
+	//CreateRenderTargetViews();
+	//CreateDepthStencilView();
 
 	//렌더링할 게임 객체를 생성한다.
 	BuildObjects();
@@ -187,19 +187,32 @@ void CGameFramework::CreateSwapChain()
 	m_nWndClientWidth = rcClient.right - rcClient.left;
 	m_nWndClientHeight = rcClient.bottom - rcClient.top;
 
-	DXGI_SWAP_CHAIN_DESC1 dxgiSwapChainDesc;
-	::ZeroMemory(&dxgiSwapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC1));
-	dxgiSwapChainDesc.Width = m_nWndClientWidth;
-	dxgiSwapChainDesc.Height = m_nWndClientHeight;
-	dxgiSwapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
+	::ZeroMemory(&dxgiSwapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
+	dxgiSwapChainDesc.BufferCount = m_nSwapChainBuffers;
+	dxgiSwapChainDesc.BufferDesc.Width = m_nWndClientWidth;
+	dxgiSwapChainDesc.BufferDesc.Height = m_nWndClientHeight;
+	dxgiSwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	dxgiSwapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
+	dxgiSwapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
+	dxgiSwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+
 	dxgiSwapChainDesc.SampleDesc.Count = (m_bMsaa4xEnable) ? 4 : 1;
 	dxgiSwapChainDesc.SampleDesc.Quality = (m_bMsaa4xEnable) ? (m_nMsaa4xQualityLevels - 1) : 0;
-	dxgiSwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	dxgiSwapChainDesc.BufferCount = m_nSwapChainBuffers;
-	dxgiSwapChainDesc.Scaling = DXGI_SCALING_NONE;
+
 	dxgiSwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	dxgiSwapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
+	dxgiSwapChainDesc.OutputWindow = m_hWnd;
+	dxgiSwapChainDesc.Windowed = TRUE;
+
+	//dxgiSwapChainDesc.BufferDesc.Scaling = DXGI_SCALING_NONE;
+	//dxgiSwapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
+#ifdef _WITH_ONLY_RESIZE_BACKBUFFERS
+	//전체화면 모드에서 바탕화면의 해상도를 바꾸지 않고 후면버퍼의 크기를 바탕화면 크기로 변경한다.
 	dxgiSwapChainDesc.Flags = 0;
+#else
+	//전체화면 모드에서 바탕화면의 해상도를 스왑체인(후면버퍼)의 크기에 맞게 변경한다.
+	dxgiSwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+#endif
 
 	DXGI_SWAP_CHAIN_FULLSCREEN_DESC dxgiSwapChainFullScreenDesc;
 	::ZeroMemory(&dxgiSwapChainFullScreenDesc, sizeof(DXGI_SWAP_CHAIN_FULLSCREEN_DESC));
@@ -209,10 +222,22 @@ void CGameFramework::CreateSwapChain()
 	dxgiSwapChainFullScreenDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	dxgiSwapChainFullScreenDesc.Windowed = TRUE;
 
+	auto queue = controlCommands.m_pd3dCommandQueue;
+
 	// 스왑체인을 생성한다.
-	m_pdxgiFactory->CreateSwapChainForHwnd(controlCommands.m_pd3dCommandQueue, m_hWnd
+	HRESULT result = m_pdxgiFactory->CreateSwapChain(queue, &dxgiSwapChainDesc
+		, (IDXGISwapChain**)&m_pdxgiSwapChain);
+	
+	/*
+	HRESULT result = m_pdxgiFactory->CreateSwapChainForHwnd(queue, m_hWnd
 		, &dxgiSwapChainDesc, &dxgiSwapChainFullScreenDesc
 		, NULL, (IDXGISwapChain1**)&m_pdxgiSwapChain);
+	*/
+	if (FAILED(result))
+	{
+		ErrorDisplay(L"CreateSwapChain()");
+		return;
+	}
 
 	// “Alt+Enter” 키의 동작을 비활성화한다
 	m_pdxgiFactory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER);
@@ -241,10 +266,8 @@ void CGameFramework::CreateRtvAndDsvDescriptorHeaps()
 	// 깊이-스텐실 서술자 힙(서술자의 개수는 1)을 생성한다.
 	hResult = m_pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dDsvDescriptorHeap);
 
-
 	// 깊이-스텐실 서술자 힙의 원소의 크기를 저장한다.
 	m_nDsvDescriptorIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-
 }
 
 // 스왑체인의 각 후면 버퍼에 대한 렌더 타겟 뷰를 생성한다.
@@ -308,81 +331,55 @@ void CGameFramework::BuildObjects()
 void CGameFramework::ReleaseObjects()
 {}
 
-void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam,
-	LPARAM lParam)
+void CGameFramework::OnResizeBackBuffers()
 {
-	switch (nMessageID)
+	controlCommands.WaitForGpuComplete();
+
+	HRESULT result = controlCommands.TryResetList();
+	if (FAILED(result))
 	{
-		case WM_LBUTTONDOWN:
-		case WM_RBUTTONDOWN:
-		break;
-		case WM_LBUTTONUP:
-		case WM_RBUTTONUP:
-		break;
-		case WM_MOUSEMOVE:
-		break;
-		default:
-		break;
-	}
-}
-
-void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM
-	wParam, LPARAM lParam)
-{
-	switch (nMessageID)
-	{
-		case WM_KEYUP:
-		switch (wParam)
-		{
-			case VK_ESCAPE:
-			::PostQuitMessage(0);
-			break;
-			case VK_RETURN:
-			break;
-			case VK_F8:
-			break;
-			case VK_F9:
-			break;
-			default:
-			break;
-		}
-		break;
-		default:
-		break;
-	}
-}
-
-LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID,
-	WPARAM wParam, LPARAM lParam)
-{
-	switch (nMessageID)
-	{
-		case WM_SIZE:
-		{
-			m_nWndClientWidth = LOWORD(lParam);
-			m_nWndClientHeight = HIWORD(lParam);
-		}
-		break;
-
-		case WM_LBUTTONDOWN:
-		case WM_RBUTTONDOWN:
-		case WM_LBUTTONUP:
-		case WM_RBUTTONUP:
-		case WM_MOUSEMOVE:
-		{
-			OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
-		}
-		break;
-
-		case WM_KEYDOWN:
-		case WM_KEYUP:
-		{
-			OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
-		}
-		break;
+		ErrorDisplay(L"OnResizeBackBuffers → ID3D12GraphicsCommandList.Reset()");
+		return;
 	}
 
-	return(0);
+	for (int i = 0; i < m_nSwapChainBuffers; i++)
+	{
+		if (m_ppd3dRenderTargetBuffers[i])
+			m_ppd3dRenderTargetBuffers[i]->Release();
+	}
+	if (m_pd3dDepthStencilBuffer)
+	{
+		m_pd3dDepthStencilBuffer->Release();
+	}
+
+	m_nSwapChainBufferIndex = 0;
+	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
+	m_pdxgiSwapChain->GetDesc(&dxgiSwapChainDesc);
+#ifdef _WITH_ONLY_RESIZE_BACKBUFFERS
+	result = m_pdxgiSwapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+#else
+	result = m_pdxgiSwapChain->ResizeBuffers(m_nSwapChainBuffers
+		, m_nWndClientWidth, m_nWndClientHeight
+		, dxgiSwapChainDesc.BufferDesc.Format, dxgiSwapChainDesc.Flags);
+#endif
+	if (FAILED(result))
+	{
+		ErrorDisplay(L"OnResizeBackBuffers → ResizeBuffers()");
+		return;
+	}
+
+	CreateRenderTargetViews();
+	CreateDepthStencilView();
+
+	result = controlCommands.TryCloseList();
+	if (FAILED(result))
+	{
+		ErrorDisplay(L"OnResizeBackBuffers → ID3D12GraphicsCommandList.Close()");
+		return;
+	}
+
+	controlCommands.Execute();
+	controlCommands.WaitForGpuComplete();
 }
 
 void CGameFramework::ProcessInput()
@@ -401,14 +398,14 @@ void CGameFramework::FrameAdvance()
 	HRESULT result = controlCommands.TryResetAllocator();
 	if (FAILED(result))
 	{
-		ErrorDisplay(L"ID3DCommandAllocator.Reset()");
+		ErrorDisplay(L"FrameAdvance → ID3DCommandAllocator.Reset()");
 		return;
 	}
 
 	result = controlCommands.TryResetList();
 	if (FAILED(result))
 	{
-		ErrorDisplay(L"ID3DCommandList.Reset()");
+		ErrorDisplay(L"FrameAdvance → ID3DGraphicsCommandList.Reset()");
 		return;
 	}
 
@@ -437,7 +434,7 @@ void CGameFramework::FrameAdvance()
 	auto handleDescriptorRT = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	handleDescriptorRT.ptr += (m_nSwapChainBufferIndex * m_nRtvDescriptorIncrementSize);
 
-	float rcolor[] = {0.0f, 0.125f, 0.3f, 1.0f};
+	float rcolor[] = { 0.0f, 0.125f, 0.3f, 1.0f };
 
 	// 원하는 색상으로 렌더 타겟(뷰)을 지운다.
 	controlCommands.ClearRenderTargetView(handleDescriptorRT, rcolor);
@@ -468,7 +465,7 @@ void CGameFramework::FrameAdvance()
 	result = controlCommands.TryCloseList();
 	if (FAILED(result))
 	{
-		ErrorDisplay(L"ID3DCommandList.Close()");
+		ErrorDisplay(L"FrameAdvance → ID3DGraphicsCommandList.Close()");
 		return;
 	}
 
@@ -491,7 +488,7 @@ void CGameFramework::FrameAdvance()
 	result = m_pdxgiSwapChain->Present1(0, 0, &presentOptions);
 	if (FAILED(result))
 	{
-		ErrorDisplay(L"Present1()");
+		ErrorDisplay(L"FrameAdvance → Present1()");
 		return;
 	}
 
@@ -500,4 +497,116 @@ void CGameFramework::FrameAdvance()
 	Timer.GetFrameRate(m_pszFrameRate + 12, 37);
 
 	::SetWindowText(m_hWnd, m_pszFrameRate);
+}
+
+void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	switch (nMessageID)
+	{
+		case WM_LBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+		break;
+		case WM_LBUTTONUP:
+		case WM_RBUTTONUP:
+		break;
+		case WM_MOUSEMOVE:
+		break;
+		default:
+		break;
+	}
+}
+
+void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	switch (nMessageID)
+	{
+		case WM_KEYUP:
+		switch (wParam)
+		{
+			case VK_ESCAPE:
+			::PostQuitMessage(0);
+			break;
+
+			case VK_RETURN:
+			break;
+
+			case VK_F8:
+			break;
+
+			// “F9” 키가 눌려지면 윈도우 모드와 전체화면 모드의 전환을 처리한다.
+			case VK_F9:
+			{
+				BOOL bFullScreenState = FALSE;
+				m_pdxgiSwapChain->GetFullscreenState(&bFullScreenState, NULL);
+				m_pdxgiSwapChain->SetFullscreenState(!bFullScreenState, NULL);
+
+				DXGI_MODE_DESC dxgiTargetParameters;
+				dxgiTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+				dxgiTargetParameters.Width = m_nWndClientWidth;
+				dxgiTargetParameters.Height = m_nWndClientHeight;
+				dxgiTargetParameters.RefreshRate.Numerator = 60;
+				dxgiTargetParameters.RefreshRate.Denominator = 1;
+				dxgiTargetParameters.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+				dxgiTargetParameters.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+				m_pdxgiSwapChain->ResizeTarget(&dxgiTargetParameters);
+				OnResizeBackBuffers();
+			}
+			break;
+
+			default:
+			break;
+		}
+		break;
+		default:
+		break;
+	}
+}
+
+LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+{
+	switch (nMessageID)
+	{
+		case WM_ACTIVATE:
+		{
+			if (LOWORD(wParam) == WA_INACTIVE)
+				Timer.Stop();
+			else
+				Timer.Start();
+			break;
+		}
+
+		/*
+			WM_SIZE 메시지는 윈도우가 생성될 때 한번 호출되거나 윈도우의 크기가 변경될 때 호출된다.
+			주 윈도우의 크기 를 사용자가 변경할 수 없으므로 윈도우의 크기가 변경되는 경우는
+			윈도우 모드와 전체화면 모드의 전환이 발생할 때이다.
+		*/
+		case WM_SIZE:
+		{
+			m_nWndClientWidth = LOWORD(lParam);
+			m_nWndClientHeight = HIWORD(lParam);
+
+			// 윈도우의 크기가 변경되면 후면버퍼의 크기를 변경한다.
+			OnResizeBackBuffers();
+		}
+		break;
+
+		case WM_LBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+		case WM_LBUTTONUP:
+		case WM_RBUTTONUP:
+		case WM_MOUSEMOVE:
+		{
+			OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+		}
+		break;
+
+		case WM_KEYDOWN:
+		case WM_KEYUP:
+		{
+			OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+		}
+		break;
+	}
+
+	return(0);
 }

@@ -20,6 +20,7 @@ public:
 	HRESULT TryResetList();
 	HRESULT TryCloseList();
 
+	void OnResizeBackBuffers();
 	void WaitForPresent(D3D12_RESOURCE_BARRIER& barrier);
 	void WaitForGpuComplete();
 	void Execute();

@@ -9,9 +9,9 @@ public:
 	CGameTimer();
 	virtual ~CGameTimer();
 
-	//void Start() {}
+	void Start() {}
 	void Tick(float fLockFPS = 0.0f);
-	//void Stop() {}
+	void Stop() {}
 	void Reset();
 
 	unsigned long GetFrameRate(LPTSTR lpszString = NULL, int nCharacters = 0);

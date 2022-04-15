@@ -111,7 +111,8 @@ void CommandController::ClearRenderTargetView(D3D12_CPU_DESCRIPTOR_HANDLE& ptr, 
 
 void CommandController::ClearDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE& ptr)
 {
-	m_pd3dCommandList->ClearDepthStencilView(ptr, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL
+	m_pd3dCommandList->ClearDepthStencilView(ptr
+		, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL
 		, 1.0f, 0, 0, NULL);
 }
 
@@ -133,6 +134,14 @@ HRESULT CommandController::TryResetList()
 HRESULT CommandController::TryCloseList()
 {
 	return m_pd3dCommandList->Close();
+}
+
+void CommandController::OnResizeBackBuffers()
+{
+	m_pd3dCommandList->Close();
+	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
+	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+	WaitForGpuComplete();
 }
 
 void CommandController::WaitForPresent(D3D12_RESOURCE_BARRIER& barrier)
