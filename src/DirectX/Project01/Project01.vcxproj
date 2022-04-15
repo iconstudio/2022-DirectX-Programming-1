@@ -151,6 +151,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CGameFramework.cpp" />
+    <ClCompile Include="CGameTimer.cpp" />
     <ClCompile Include="CommandController.cpp" />
     <ClCompile Include="DirectObject.cpp" />
     <ClCompile Include="MyDirectX.cpp" />
@@ -158,6 +159,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CGameFramework.hpp" />
+    <ClInclude Include="CGameTimer.h" />
     <ClInclude Include="CommandController.hpp" />
     <ClInclude Include="DirectObject.hpp" />
     <ClInclude Include="MyDirectX.h" />

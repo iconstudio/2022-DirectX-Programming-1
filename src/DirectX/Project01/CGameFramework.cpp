@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "CGameFramework.hpp"
 #include "CommandController.hpp"
+#include "CGameTimer.h"
 
 CGameFramework::CGameFramework()
 	: m_nWndClientWidth(::FRAME_BUFFER_WIDTH), m_nWndClientHeight(::FRAME_BUFFER_HEIGHT)
