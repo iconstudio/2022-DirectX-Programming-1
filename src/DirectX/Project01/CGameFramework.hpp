@@ -39,6 +39,7 @@ public:
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
+	void SetRenderingSize(const int width, const int height);
 	void OnResizeBackBuffers();
 
 private:
@@ -61,17 +62,19 @@ private:
 	// 스왑 체인 인터페이스에 대한 포인터이다. 주로 디스플레이를 제어하기 위하여 필요하다.
 	IDXGISwapChain3* m_pdxgiSwapChain;
 	// 스왑 체인의 후면 버퍼의 개수
-	static const UINT m_nSwapChainBuffers = 2;
+	static constexpr UINT m_nSwapChainBuffers = 2;
 	// 현재 스왑 체인의 후면 버퍼 인덱스
 	UINT m_nSwapChainBufferIndex;
 	// 뷰포트와 씨저 사각형이다.
 	D3D12_VIEWPORT m_d3dViewport;
 	D3D12_RECT m_d3dScissorRect;
 
-	// 렌더 타겟 버퍼
+	// 렌더 타겟 버퍼 목록
 	ID3D12Resource* m_ppd3dRenderTargetBuffers[m_nSwapChainBuffers];
 	// 서술자 힙 인터페이스 포인터
 	ID3D12DescriptorHeap* m_pd3dRtvDescriptorHeap;
+	// 렌더 타겟 모드 서술자
+	DXGI_MODE_DESC dxgiRenderTargetParameters;
 	// 렌더 타겟 서술자 원소의 크기
 	UINT m_nRtvDescriptorIncrementSize;
 

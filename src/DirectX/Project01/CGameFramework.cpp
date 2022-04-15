@@ -16,6 +16,12 @@ CGameFramework::CGameFramework()
 {
 	ZeroMemory(m_ppd3dRenderTargetBuffers, sizeof(m_ppd3dRenderTargetBuffers));
 
+	dxgiRenderTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	dxgiRenderTargetParameters.RefreshRate.Numerator = 60;
+	dxgiRenderTargetParameters.RefreshRate.Denominator = 1;
+	dxgiRenderTargetParameters.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+	dxgiRenderTargetParameters.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+
 	wcscpy_s(m_pszFrameRate, L"LapProject (");
 }
 
@@ -32,8 +38,6 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	CreateCommandQueueAndList();
 	CreateRtvAndDsvDescriptorHeaps();
 	CreateSwapChain();
-	//CreateRenderTargetViews();
-	//CreateDepthStencilView();
 
 	//렌더링할 게임 객체를 생성한다.
 	BuildObjects();
@@ -184,18 +188,21 @@ void CGameFramework::CreateSwapChain()
 {
 	RECT rcClient;
 	::GetClientRect(m_hWnd, &rcClient);
-	m_nWndClientWidth = rcClient.right - rcClient.left;
-	m_nWndClientHeight = rcClient.bottom - rcClient.top;
+
+	auto width = static_cast<int>(rcClient.right - rcClient.left);
+	auto height = static_cast<int>(rcClient.bottom - rcClient.top);
+	SetRenderingSize(width, height);
 
 	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
 	::ZeroMemory(&dxgiSwapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
 	dxgiSwapChainDesc.BufferCount = m_nSwapChainBuffers;
-	dxgiSwapChainDesc.BufferDesc.Width = m_nWndClientWidth;
-	dxgiSwapChainDesc.BufferDesc.Height = m_nWndClientHeight;
-	dxgiSwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	dxgiSwapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
-	dxgiSwapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
 	dxgiSwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	dxgiSwapChainDesc.BufferDesc = dxgiRenderTargetParameters;
+	//dxgiSwapChainDesc.BufferDesc.Width = m_nWndClientWidth;
+	//dxgiSwapChainDesc.BufferDesc.Height = m_nWndClientHeight;
+	//dxgiSwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	//dxgiSwapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
+	//dxgiSwapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
 
 	dxgiSwapChainDesc.SampleDesc.Count = (m_bMsaa4xEnable) ? 4 : 1;
 	dxgiSwapChainDesc.SampleDesc.Quality = (m_bMsaa4xEnable) ? (m_nMsaa4xQualityLevels - 1) : 0;
@@ -214,6 +221,13 @@ void CGameFramework::CreateSwapChain()
 	dxgiSwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 #endif
 
+	auto queue = controlCommands.m_pd3dCommandQueue;
+
+	// 스왑체인을 생성한다.
+	HRESULT result = m_pdxgiFactory->CreateSwapChain(queue, &dxgiSwapChainDesc
+		, (IDXGISwapChain**)&m_pdxgiSwapChain);
+	
+	/*
 	DXGI_SWAP_CHAIN_FULLSCREEN_DESC dxgiSwapChainFullScreenDesc;
 	::ZeroMemory(&dxgiSwapChainFullScreenDesc, sizeof(DXGI_SWAP_CHAIN_FULLSCREEN_DESC));
 	dxgiSwapChainFullScreenDesc.RefreshRate.Numerator = 60;
@@ -222,13 +236,6 @@ void CGameFramework::CreateSwapChain()
 	dxgiSwapChainFullScreenDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	dxgiSwapChainFullScreenDesc.Windowed = TRUE;
 
-	auto queue = controlCommands.m_pd3dCommandQueue;
-
-	// 스왑체인을 생성한다.
-	HRESULT result = m_pdxgiFactory->CreateSwapChain(queue, &dxgiSwapChainDesc
-		, (IDXGISwapChain**)&m_pdxgiSwapChain);
-	
-	/*
 	HRESULT result = m_pdxgiFactory->CreateSwapChainForHwnd(queue, m_hWnd
 		, &dxgiSwapChainDesc, &dxgiSwapChainFullScreenDesc
 		, NULL, (IDXGISwapChain1**)&m_pdxgiSwapChain);
@@ -330,6 +337,15 @@ void CGameFramework::BuildObjects()
 
 void CGameFramework::ReleaseObjects()
 {}
+
+void CGameFramework::SetRenderingSize(const int width, const int height)
+{
+	m_nWndClientWidth = width;
+	m_nWndClientHeight = height;
+
+	dxgiRenderTargetParameters.Width = width;
+	dxgiRenderTargetParameters.Height = height;
+}
 
 void CGameFramework::OnResizeBackBuffers()
 {
@@ -540,15 +556,10 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				m_pdxgiSwapChain->GetFullscreenState(&bFullScreenState, NULL);
 				m_pdxgiSwapChain->SetFullscreenState(!bFullScreenState, NULL);
 
-				DXGI_MODE_DESC dxgiTargetParameters;
-				dxgiTargetParameters.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-				dxgiTargetParameters.Width = m_nWndClientWidth;
-				dxgiTargetParameters.Height = m_nWndClientHeight;
-				dxgiTargetParameters.RefreshRate.Numerator = 60;
-				dxgiTargetParameters.RefreshRate.Denominator = 1;
-				dxgiTargetParameters.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-				dxgiTargetParameters.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-				m_pdxgiSwapChain->ResizeTarget(&dxgiTargetParameters);
+				dxgiRenderTargetParameters.Width = m_nWndClientWidth;
+				dxgiRenderTargetParameters.Height = m_nWndClientHeight;
+
+				m_pdxgiSwapChain->ResizeTarget(&dxgiRenderTargetParameters);
 				OnResizeBackBuffers();
 			}
 			break;
