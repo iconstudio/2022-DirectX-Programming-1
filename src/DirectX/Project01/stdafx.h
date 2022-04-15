@@ -13,8 +13,6 @@
 #include <memory.h>
 #include <tchar.h>
 
-#include <string>
-
 #include <d3d12.h>
 #include <DirectXCollision.h>
 #include <DirectXMath.h>
@@ -27,6 +25,10 @@
 #include <d3d12.h>
 #include <dxgi1_4.h>
 #include <D3Dcompiler.h>
+
+#include <memory>
+#include <algorithm>
+#include <string>
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;

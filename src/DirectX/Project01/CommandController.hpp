@@ -10,6 +10,11 @@ public:
 	bool OnCreate() override;
 	void OnDestroy() override;
 
+	void RSSetViewports(const D3D12_VIEWPORT& port);
+	void RSSetScissorRects(const D3D12_RECT& window);
+	void ClearRenderTargetView(D3D12_CPU_DESCRIPTOR_HANDLE ptr, const FLOAT rgba[4]);
+	void ClearDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE ptr);
+
 	HRESULT TryResetAllocator();
 	HRESULT TryResetList();
 

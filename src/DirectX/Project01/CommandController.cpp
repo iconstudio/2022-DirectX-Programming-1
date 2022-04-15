@@ -67,6 +67,27 @@ void CommandController::OnDestroy()
 	if (m_pd3dCommandList) m_pd3dCommandList->Release();
 }
 
+void CommandController::RSSetViewports(const D3D12_VIEWPORT& port)
+{
+	m_pd3dCommandList->RSSetViewports(1, &port);
+}
+
+void CommandController::RSSetScissorRects(const D3D12_RECT& window)
+{
+	m_pd3dCommandList->RSSetScissorRects(1, &window);
+}
+
+void CommandController::ClearRenderTargetView(D3D12_CPU_DESCRIPTOR_HANDLE ptr, const FLOAT rgba[4])
+{
+	m_pd3dCommandList->ClearRenderTargetView(ptr, rgba, 0, NULL);
+}
+
+void CommandController::ClearDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE ptr)
+{
+	m_pd3dCommandList->ClearDepthStencilView(ptr, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL
+		, 1.0f, 0, 0, NULL);
+}
+
 HRESULT CommandController::TryResetAllocator()
 {
 	return m_pd3dCommandAllocator->Reset();
