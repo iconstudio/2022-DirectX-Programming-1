@@ -88,6 +88,11 @@ void CommandController::ClearDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE ptr)
 		, 1.0f, 0, 0, NULL);
 }
 
+void CommandController::OMSetRenderTargets(D3D12_CPU_DESCRIPTOR_HANDLE& rt, D3D12_CPU_DESCRIPTOR_HANDLE& ds)
+{
+	m_pd3dCommandList->OMSetRenderTargets(1, &rt, TRUE, &ds);
+}
+
 HRESULT CommandController::TryResetAllocator()
 {
 	return m_pd3dCommandAllocator->Reset();
@@ -98,7 +103,18 @@ HRESULT CommandController::TryResetList()
 	return m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 }
 
+HRESULT CommandController::TryCloseList()
+{
+	return m_pd3dCommandList->Close();
+}
+
 inline void CommandController::WaitForPresent(D3D12_RESOURCE_BARRIER& barrier)
 {
 	m_pd3dCommandList->ResourceBarrier(1, &barrier);
+}
+
+inline void CommandController::Execute()
+{
+	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
+	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 }

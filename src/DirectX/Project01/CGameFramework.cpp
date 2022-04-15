@@ -429,28 +429,36 @@ void CGameFramework::FrameAdvance()
 	// 원하는 값으로 깊이-스텐실(뷰)을 지운다.
 	controlCommands.ClearRenderTargetView(handleDescriptorDS, clearColor);
 
-	//렌더 타겟 뷰(서술자)와 깊이-스텐실 뷰(서술자)를 출력-병합 단계(OM)에 연결한다.
-	m_pd3dCommandList->OMSetRenderTargets(1, &handleDescriptorRT, TRUE, &handleDescriptorDS);
+	// 렌더 타겟 뷰(서술자)와 깊이-스텐실 뷰(서술자)를 출력-병합 단계(OM)에 연결한다.
+	controlCommands.OMSetRenderTargets(handleDescriptorRT, handleDescriptorDS);
 
-	//렌더링 코드는 여기에 추가될 것이다.
+	// 렌더링 코드는 여기에 추가될 것이다.
 
 
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
+	/*
+		현재 렌더 타겟에 대한 렌더링이 끝나기를 기다린다.
+		GPU가 렌더 타겟(버퍼)을 더 이상 사용하지 않으면
+		렌더 타겟의 상태는 프리젠트 상태(D3D12_RESOURCE_STATE_PRESENT)로 바뀔 것이다.
+	*/
 	controlCommands.WaitForPresent(d3dResourceBarrier);
-	/*현재 렌더 타겟에 대한 렌더링이 끝나기를 기다린다. GPU가 렌더 타겟(버퍼)을 더 이상 사용하지 않으면 렌더 타겟의 상태는 프리젠트 상태(D3D12_RESOURCE_STATE_PRESENT)로 바뀔 것이다.*/
 
-	result = m_pd3dCommandList->Close();
-	//명령 리스트를 닫힌 상태로 만든다.
+	// 명령 리스트를 닫힌 상태로 만든다.
+	result = controlCommands.TryCloseList();
+	if (FAILED(result))
+	{
+		ErrorDisplay(L"ID3DCommandList.Close()");
+		return;
+	}
 
-	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
-	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
-	//명령 리스트를 명령 큐에 추가하여 실행한다.
+	// 명령 리스트를 명령 큐에 추가하여 실행한다.
+	controlCommands.Execute();
 
-	WaitForGpuComplete();
 	//GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
+	WaitForGpuComplete();
 
 	DXGI_PRESENT_PARAMETERS dxgiPresentParameters;
 	dxgiPresentParameters.DirtyRectsCount = 0;

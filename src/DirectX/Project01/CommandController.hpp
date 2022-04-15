@@ -14,11 +14,14 @@ public:
 	void RSSetScissorRects(const D3D12_RECT& window);
 	void ClearRenderTargetView(D3D12_CPU_DESCRIPTOR_HANDLE ptr, const FLOAT rgba[4]);
 	void ClearDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE ptr);
+	void OMSetRenderTargets(D3D12_CPU_DESCRIPTOR_HANDLE& rt, D3D12_CPU_DESCRIPTOR_HANDLE& ds);
 
 	HRESULT TryResetAllocator();
 	HRESULT TryResetList();
+	HRESULT TryCloseList();
 
 	inline void WaitForPresent(D3D12_RESOURCE_BARRIER& barrier);
+	inline void Execute();
 
 private:
 	ID3D12CommandQueue* m_pd3dCommandQueue; //¸í·É Å¥
