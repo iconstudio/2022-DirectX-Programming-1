@@ -11,7 +11,6 @@ CGameFramework::CGameFramework()
 	, m_pd3dRtvDescriptorHeap(nullptr), m_nRtvDescriptorIncrementSize(0)
 	, m_pd3dDsvDescriptorHeap(nullptr), m_nDsvDescriptorIncrementSize(0)
 	, m_pd3dDepthStencilBuffer(nullptr)
-	, m_hFenceEvent(NULL), m_pd3dFence(nullptr), m_nFenceValue(0)
 {
 	ZeroMemory(m_ppd3dRenderTargetBuffers, sizeof(m_ppd3dRenderTargetBuffers));
 }
@@ -38,11 +37,9 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 
 void CGameFramework::OnDestroy()
 {
-	WaitForGpuComplete(); //GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
+	controlCommands.WaitForGpuComplete(); //GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
 
 	ReleaseObjects(); //게임 객체(게임 월드 객체)를 소멸한다.
-
-	::CloseHandle(m_hFenceEvent);
 
 	for (int i = 0; i < m_nSwapChainBuffers; i++) if (m_ppd3dRenderTargetBuffers[i])
 		m_ppd3dRenderTargetBuffers[i]->Release();
@@ -50,13 +47,12 @@ void CGameFramework::OnDestroy()
 	if (m_pd3dDepthStencilBuffer) m_pd3dDepthStencilBuffer->Release();
 	if (m_pd3dDsvDescriptorHeap) m_pd3dDsvDescriptorHeap->Release();
 	if (m_pd3dPipelineState) m_pd3dPipelineState->Release();
-	if (m_pd3dFence) m_pd3dFence->Release();
+
+	controlCommands.OnDestroy();
 	m_pdxgiSwapChain->SetFullscreenState(FALSE, NULL);
 	if (m_pdxgiSwapChain) m_pdxgiSwapChain->Release();
 	if (m_pd3dDevice) m_pd3dDevice->Release();
 	if (m_pdxgiFactory) m_pdxgiFactory->Release();
-
-	controlCommands.OnDestroy();
 
 #if defined(_DEBUG)
 	IDXGIDebug1* pdxgiDebug = NULL;
@@ -71,6 +67,7 @@ void CGameFramework::CreateDirect3DDevice()
 {
 	HRESULT hResult;
 	UINT nDXGIFactoryFlags = 0;
+
 #if defined(_DEBUG)
 	ID3D12Debug* pd3dDebugController = NULL;
 	hResult = D3D12GetDebugInterface(__uuidof(ID3D12Debug), (void
@@ -82,9 +79,11 @@ void CGameFramework::CreateDirect3DDevice()
 	}
 	nDXGIFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 #endif
+
 	hResult = ::CreateDXGIFactory2(nDXGIFactoryFlags, __uuidof(IDXGIFactory4), (void
 		**)&m_pdxgiFactory);
 
+	//모든 하드웨어 어댑터 대하여 특성 레벨 12.0을 지원하는 하드웨어 디바이스를 생성한다.
 	IDXGIAdapter1* pd3dAdapter = NULL;
 	for (UINT i = 0; DXGI_ERROR_NOT_FOUND != m_pdxgiFactory->EnumAdapters1(i,
 		&pd3dAdapter); i++)
@@ -95,38 +94,30 @@ void CGameFramework::CreateDirect3DDevice()
 		if (SUCCEEDED(D3D12CreateDevice(pd3dAdapter, D3D_FEATURE_LEVEL_12_0,
 			_uuidof(ID3D12Device), (void**)&m_pd3dDevice))) break;
 	}
-	//모든 하드웨어 어댑터 대하여 특성 레벨 12.0을 지원하는 하드웨어 디바이스를 생성한다.
 
+	//특성 레벨 12.0을 지원하는 하드웨어 디바이스를 생성할 수 없으면 WARP 디바이스를 생성한다.
 	if (!pd3dAdapter)
 	{
 		m_pdxgiFactory->EnumWarpAdapter(_uuidof(IDXGIAdapter1), (void**)&pd3dAdapter);
 		D3D12CreateDevice(pd3dAdapter, D3D_FEATURE_LEVEL_11_0, _uuidof(ID3D12Device), (void
 			**)&m_pd3dDevice);
 	}
-	//특성 레벨 12.0을 지원하는 하드웨어 디바이스를 생성할 수 없으면 WARP 디바이스를 생성한다.
 
 	D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS d3dMsaaQualityLevels{};
 	d3dMsaaQualityLevels.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	d3dMsaaQualityLevels.SampleCount = 4; //Msaa4x 다중 샘플링
 	d3dMsaaQualityLevels.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
 	d3dMsaaQualityLevels.NumQualityLevels = 0;
+
+	//디바이스가 지원하는 다중 샘플의 품질 수준을 확인한다.
 	m_pd3dDevice->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS,
 		&d3dMsaaQualityLevels, sizeof(D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS));
 	m_nMsaa4xQualityLevels = d3dMsaaQualityLevels.NumQualityLevels;
-	//디바이스가 지원하는 다중 샘플의 품질 수준을 확인한다.
-	m_bMsaa4xEnable = (m_nMsaa4xQualityLevels > 1) ? true : false;
+
 	//다중 샘플의 품질 수준이 1보다 크면 다중 샘플링을 활성화한다.
+	m_bMsaa4xEnable = (1 < m_nMsaa4xQualityLevels) ? true : false;
 
-	hResult = m_pd3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, __uuidof(ID3D12Fence),
-		(void**)&m_pd3dFence);
-
-	m_nFenceValue = 0; //펜스를 생성하고 펜스 값을 0으로 설정한다.
-	m_hFenceEvent = ::CreateEvent(NULL, FALSE, FALSE, NULL);
-	/*
-	펜스와 동기화를 위한 이벤트 객체를 생성한다(이벤트 객체의 초기값을 FALSE이다).
-	이벤트가 실행되면(Signal) 이벤트의 값을 자동적으로 FALSE가 되도록 생성한다.
-	*/
-
+	//뷰포트를 주 윈도우의 클라이언트 영역 전체로 설정한다.
 	m_d3dViewport.TopLeftX = 0;
 	m_d3dViewport.TopLeftY = 0;
 	m_d3dViewport.Width = static_cast<float>(m_nWndClientWidth);
@@ -134,15 +125,15 @@ void CGameFramework::CreateDirect3DDevice()
 	m_d3dViewport.MinDepth = 0.0f;
 	m_d3dViewport.MaxDepth = 1.0f;
 
-	//뷰포트를 주 윈도우의 클라이언트 영역 전체로 설정한다.
+	//씨저 사각형을 주 윈도우의 클라이언트 영역 전체로 설정한다.
 	m_d3dScissorRect = { 0, 0, m_nWndClientWidth, m_nWndClientHeight };
 
-	//씨저 사각형을 주 윈도우의 클라이언트 영역 전체로 설정한다.
 	if (pd3dAdapter) pd3dAdapter->Release();
 }
 
 void CGameFramework::CreateCommandQueueAndList()
 {
+	controlCommands.OnCreate();
 }
 
 void CGameFramework::CreateSwapChain()
@@ -158,8 +149,7 @@ void CGameFramework::CreateSwapChain()
 	dxgiSwapChainDesc.Height = m_nWndClientHeight;
 	dxgiSwapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	dxgiSwapChainDesc.SampleDesc.Count = (m_bMsaa4xEnable) ? 4 : 1;
-	dxgiSwapChainDesc.SampleDesc.Quality = (m_bMsaa4xEnable) ? (m_nMsaa4xQualityLevels -
-		1) : 0;
+	dxgiSwapChainDesc.SampleDesc.Quality = (m_bMsaa4xEnable) ? (m_nMsaa4xQualityLevels - 1) : 0;
 	dxgiSwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	dxgiSwapChainDesc.BufferCount = m_nSwapChainBuffers;
 	dxgiSwapChainDesc.Scaling = DXGI_SCALING_NONE;
@@ -175,7 +165,7 @@ void CGameFramework::CreateSwapChain()
 	dxgiSwapChainFullScreenDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	dxgiSwapChainFullScreenDesc.Windowed = TRUE;
 
-	m_pdxgiFactory->CreateSwapChainForHwnd(m_pd3dCommandQueue, m_hWnd,
+	m_pdxgiFactory->CreateSwapChainForHwnd(controlCommands.m_pd3dCommandQueue, m_hWnd,
 		&dxgiSwapChainDesc, &dxgiSwapChainFullScreenDesc, NULL, (IDXGISwapChain1
 		**)&m_pdxgiSwapChain);
 	// 스왑체인을 생성한다.
@@ -359,21 +349,6 @@ void CGameFramework::ProcessInput()
 void CGameFramework::AnimateObjects()
 {}
 
-void CGameFramework::WaitForGpuComplete()
-{
-	m_nFenceValue++; //CPU 펜스의 값을 증가한다. 
-
-	const UINT64 nFence = m_nFenceValue;
-	HRESULT hResult = m_pd3dCommandQueue->Signal(m_pd3dFence, nFence); //GPU가 펜스의 값을 설정하는 명령을 명령 큐에 추가한다. 
-
-	if (m_pd3dFence->GetCompletedValue() < nFence)
-	{
-		//펜스의 현재 값이 설정한 값보다 작으면 펜스의 현재 값이 설정한 값이 될 때까지 기다린다. 
-
-		hResult = m_pd3dFence->SetEventOnCompletion(nFence, m_hFenceEvent);
-		::WaitForSingleObject(m_hFenceEvent, INFINITE);
-	}
-}
 void CGameFramework::FrameAdvance()
 {
 	ProcessInput();
@@ -458,7 +433,7 @@ void CGameFramework::FrameAdvance()
 	controlCommands.Execute();
 
 	//GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
-	WaitForGpuComplete();
+	controlCommands.WaitForGpuComplete();
 
 	DXGI_PRESENT_PARAMETERS dxgiPresentParameters;
 	dxgiPresentParameters.DirtyRectsCount = 0;

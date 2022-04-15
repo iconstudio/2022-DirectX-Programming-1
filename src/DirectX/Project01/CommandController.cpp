@@ -5,6 +5,7 @@
 CommandController::CommandController(ID3D12Device*& device)
 	: DirectObject(device)
 	, m_pd3dCommandQueue(nullptr), m_pd3dCommandList(nullptr), m_pd3dCommandAllocator(nullptr)
+	, m_hFenceEvent(NULL), m_pd3dFence(nullptr), m_nFenceValue(0)
 {}
 
 bool CommandController::OnCreate()
@@ -49,11 +50,34 @@ bool CommandController::OnCreate()
 		return false;
 	}
 
-	//명령 리스트는 생성되면 열린(Open) 상태이므로 닫힌(Closed) 상태로 만든다.
+	// 명령 리스트는 생성되면 열린(Open) 상태이므로 닫힌(Closed) 상태로 만든다.
 	result = m_pd3dCommandList->Close();
 	if (FAILED(result))
 	{
 		ErrorDisplay(L"CreateCommandList()");
+		return false;
+	}
+
+	// 펜스를 생성하고 펜스 값을 0으로 설정한다.
+	place = reinterpret_cast<void**>(&m_pd3dFence);
+	id = _uuidof(ID3D12Fence);
+
+	result = Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, id, place);
+	if (FAILED(result))
+	{
+		ErrorDisplay(L"CreateFence()");
+		return false;
+	}
+
+	/*
+		펜스와 동기화를 위한 이벤트 객체를 생성한다 (이벤트 객체의 초기값을 FALSE이다).
+		이벤트가 실행되면(Signal) 이벤트의 값을 자동적으로 FALSE가 되도록 생성한다.
+	*/
+	m_nFenceValue = 0;
+	m_hFenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	if (NULL == m_hFenceEvent)
+	{
+		ErrorDisplay(L"CreateEvent()");
 		return false;
 	}
 
@@ -62,9 +86,12 @@ bool CommandController::OnCreate()
 
 void CommandController::OnDestroy()
 {
+	CloseHandle(m_hFenceEvent);
+
 	if (m_pd3dCommandAllocator) m_pd3dCommandAllocator->Release();
 	if (m_pd3dCommandQueue) m_pd3dCommandQueue->Release();
 	if (m_pd3dCommandList) m_pd3dCommandList->Release();
+	if (m_pd3dFence) m_pd3dFence->Release();
 }
 
 void CommandController::RSSetViewports(const D3D12_VIEWPORT& port)
@@ -108,12 +135,28 @@ HRESULT CommandController::TryCloseList()
 	return m_pd3dCommandList->Close();
 }
 
-inline void CommandController::WaitForPresent(D3D12_RESOURCE_BARRIER& barrier)
+void CommandController::WaitForPresent(D3D12_RESOURCE_BARRIER& barrier)
 {
 	m_pd3dCommandList->ResourceBarrier(1, &barrier);
 }
 
-inline void CommandController::Execute()
+void CommandController::WaitForGpuComplete()
+{
+	m_nFenceValue++; //CPU 펜스의 값을 증가한다. 
+
+	const UINT64 nFence = m_nFenceValue;
+	HRESULT hResult = m_pd3dCommandQueue->Signal(m_pd3dFence, nFence); //GPU가 펜스의 값을 설정하는 명령을 명령 큐에 추가한다. 
+
+	if (m_pd3dFence->GetCompletedValue() < nFence)
+	{
+		//펜스의 현재 값이 설정한 값보다 작으면 펜스의 현재 값이 설정한 값이 될 때까지 기다린다. 
+
+		hResult = m_pd3dFence->SetEventOnCompletion(nFence, m_hFenceEvent);
+		::WaitForSingleObject(m_hFenceEvent, INFINITE);
+	}
+}
+
+void CommandController::Execute()
 {
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);

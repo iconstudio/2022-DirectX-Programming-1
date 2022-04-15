@@ -2,7 +2,7 @@
 #include "pch.h"
 #include "DirectObject.hpp"
 
-class CommandController : protected DirectObject
+class CommandController : public DirectObject
 {
 public:
 	CommandController(ID3D12Device*& device);
@@ -20,11 +20,19 @@ public:
 	HRESULT TryResetList();
 	HRESULT TryCloseList();
 
-	inline void WaitForPresent(D3D12_RESOURCE_BARRIER& barrier);
-	inline void Execute();
+	void WaitForPresent(D3D12_RESOURCE_BARRIER& barrier);
+	void WaitForGpuComplete();
+	void Execute();
+
+	friend class CGameFramework;
 
 private:
-	ID3D12CommandQueue* m_pd3dCommandQueue; //명령 큐
-	ID3D12CommandAllocator* m_pd3dCommandAllocator; //명령 할당자
+	ID3D12CommandQueue* m_pd3dCommandQueue; // 명령 큐
+	ID3D12CommandAllocator* m_pd3dCommandAllocator; // 명령 할당자
 	ID3D12GraphicsCommandList* m_pd3dCommandList; // 명령 리스트
+
+	ID3D12Fence* m_pd3dFence; // 펜스 인터페이스 포인터
+	UINT64 m_nFenceValue; // 펜스의 값
+	HANDLE m_hFenceEvent; // 이벤트 핸들
+
 };

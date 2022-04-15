@@ -1,4 +1,6 @@
 #pragma once
+#include "pch.h"
+#include "CommandController.hpp"
 
 class CGameFramework
 {
@@ -13,6 +15,10 @@ private:
 	IDXGISwapChain3* m_pdxgiSwapChain; //스왑 체인 인터페이스에 대한 포인터이다. 주로 디스플레이를 제어하기 위하여 필요하다.
 	ID3D12Device* m_pd3dDevice; //Direct3D 디바이스 인터페이스에 대한 포인터이다. 주로 리소스를 생성하기 위하여 필요하다.
 
+	CommandController controlCommands;
+
+	ID3D12PipelineState* m_pd3dPipelineState; //그래픽스 파이프라인 상태 객체에 대한 인터페이스 포인터이다.
+
 	bool m_bMsaa4xEnable = false;
 	UINT m_nMsaa4xQualityLevels = 0; //MSAA 다중 샘플링을 활성화하고 다중 샘플링 레벨을 설정한다.
 
@@ -25,14 +31,6 @@ private:
 	ID3D12Resource* m_pd3dDepthStencilBuffer;
 	ID3D12DescriptorHeap* m_pd3dDsvDescriptorHeap;
 	UINT m_nDsvDescriptorIncrementSize; //깊이-스텐실 버퍼, 서술자 힙 인터페이스 포인터, 깊이-스텐실 서술자 원소의 크기이다.
-
-	CommandController controlCommands;
-
-	ID3D12PipelineState* m_pd3dPipelineState; //그래픽스 파이프라인 상태 객체에 대한 인터페이스 포인터이다.
-
-	ID3D12Fence* m_pd3dFence;
-	UINT64 m_nFenceValue;
-	HANDLE m_hFenceEvent; //펜스 인터페이스 포인터, 펜스의 값, 이벤트 핸들이다.
 
 	D3D12_VIEWPORT m_d3dViewport;
 	D3D12_RECT m_d3dScissorRect;
@@ -59,7 +57,6 @@ public:
 	void ProcessInput();
 	void AnimateObjects();
 	void FrameAdvance();
-	void WaitForGpuComplete();
 
 	//CPU와 GPU를 동기화하는 함수이다.
 	void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
