@@ -34,9 +34,11 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	CreateRtvAndDsvDescriptorHeaps();
 	CreateRenderTargetViews();
 	CreateDepthStencilView();
-	BuildObjects();
+
 	//렌더링할 게임 객체를 생성한다.
-	return(true);
+	BuildObjects();
+
+	return true;
 }
 
 void CGameFramework::OnDestroy()
@@ -45,16 +47,24 @@ void CGameFramework::OnDestroy()
 
 	ReleaseObjects(); //게임 객체(게임 월드 객체)를 소멸한다.
 
-	for (int i = 0; i < m_nSwapChainBuffers; i++) if (m_ppd3dRenderTargetBuffers[i])
-		m_ppd3dRenderTargetBuffers[i]->Release();
+	for (int i = 0; i < m_nSwapChainBuffers; i++)
+	{
+		if (m_ppd3dRenderTargetBuffers[i])
+		{
+			m_ppd3dRenderTargetBuffers[i]->Release();
+		}
+	}
 	if (m_pd3dRtvDescriptorHeap) m_pd3dRtvDescriptorHeap->Release();
 	if (m_pd3dDepthStencilBuffer) m_pd3dDepthStencilBuffer->Release();
 	if (m_pd3dDsvDescriptorHeap) m_pd3dDsvDescriptorHeap->Release();
 	if (m_pd3dPipelineState) m_pd3dPipelineState->Release();
 
 	controlCommands.OnDestroy();
-	m_pdxgiSwapChain->SetFullscreenState(FALSE, NULL);
-	if (m_pdxgiSwapChain) m_pdxgiSwapChain->Release();
+	if (m_pdxgiSwapChain)
+	{
+		m_pdxgiSwapChain->SetFullscreenState(FALSE, NULL);
+		m_pdxgiSwapChain->Release();
+	}
 	if (m_pd3dDevice) m_pd3dDevice->Release();
 	if (m_pdxgiFactory) m_pdxgiFactory->Release();
 
