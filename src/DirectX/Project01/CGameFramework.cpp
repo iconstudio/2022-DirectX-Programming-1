@@ -379,9 +379,19 @@ void CGameFramework::FrameAdvance()
 	ProcessInput();
 	AnimateObjects();
 
-	HRESULT hResult = m_pd3dCommandAllocator->Reset();
-	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
-	//명령 할당자와 명령 리스트를 리셋한다.
+	HRESULT result = controlCommands.TryResetAllocator();
+	if (FAILED(result))
+	{
+		ErrorDisplay(L"ID3DCommandAllocator.Reset()");
+		return;
+	}
+
+	result = controlCommands.TryResetList();
+	if (FAILED(result))
+	{
+		ErrorDisplay(L"ID3DCommandList.Reset()");
+		return;
+	}
 
 	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
 	::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
@@ -391,11 +401,14 @@ void CGameFramework::FrameAdvance()
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-
-	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
-	/*현재 렌더 타겟에 대한 프리젠트가 끝나기를 기다린다. 프리젠트가 끝나면 렌더 타겟 버퍼의 상태는 프리젠트 상태
-	(D3D12_RESOURCE_STATE_PRESENT)에서 렌더 타겟 상태(D3D12_RESOURCE_STATE_RENDER_TARGET)로 바
-	뀔 것이다.*/
+	
+	/*
+		현재 렌더 타겟에 대한 프리젠트가 끝나기를 기다린다.
+		프리젠트가 끝나면 렌더 타겟 버퍼의 상태는
+		프리젠트 상태 (D3D12_RESOURCE_STATE_PRESENT)
+		에서 렌더 타겟 상태(D3D12_RESOURCE_STATE_RENDER_TARGET)로 바뀔 것이다.
+	*/
+	controlCommands.WaitForPresent(d3dResourceBarrier);
 
 	m_pd3dCommandList->RSSetViewports(1, &m_d3dViewport);
 	m_pd3dCommandList->RSSetScissorRects(1, &m_d3dScissorRect);
@@ -432,7 +445,7 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
 	/*현재 렌더 타겟에 대한 렌더링이 끝나기를 기다린다. GPU가 렌더 타겟(버퍼)을 더 이상 사용하지 않으면 렌더 타겟의 상태는 프리젠트 상태(D3D12_RESOURCE_STATE_PRESENT)로 바뀔 것이다.*/
 
-	hResult = m_pd3dCommandList->Close();
+	result = m_pd3dCommandList->Close();
 	//명령 리스트를 닫힌 상태로 만든다.
 
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
