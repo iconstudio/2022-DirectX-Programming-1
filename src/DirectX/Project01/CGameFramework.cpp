@@ -369,14 +369,14 @@ void CGameFramework::FrameAdvance()
 		return;
 	}
 
-	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
-	::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
-	d3dResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	d3dResourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	d3dResourceBarrier.Transition.pResource = m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex];
-	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	D3D12_RESOURCE_BARRIER barrier;
+	::ZeroMemory(&barrier, sizeof(D3D12_RESOURCE_BARRIER));
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barrier.Transition.pResource = m_ppd3dRenderTargetBuffers[m_nSwapChainBufferIndex];
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
 	/*
 		현재 렌더 타겟에 대한 프리젠트가 끝나기를 기다린다.
@@ -384,7 +384,7 @@ void CGameFramework::FrameAdvance()
 		프리젠트 상태 (D3D12_RESOURCE_STATE_PRESENT)
 		에서 렌더 타겟 상태(D3D12_RESOURCE_STATE_RENDER_TARGET)로 바뀔 것이다.
 	*/
-	controlCommands.WaitForPresent(d3dResourceBarrier);
+	controlCommands.WaitForPresent(barrier);
 
 	// 뷰포트와 씨저 사각형을 설정한다.
 	controlCommands.RSSetViewports(m_d3dViewport);
@@ -411,16 +411,16 @@ void CGameFramework::FrameAdvance()
 	// 렌더링 코드는 여기에 추가될 것이다.
 
 
-	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
 	/*
 		현재 렌더 타겟에 대한 렌더링이 끝나기를 기다린다.
 		GPU가 렌더 타겟(버퍼)을 더 이상 사용하지 않으면
 		렌더 타겟의 상태는 프리젠트 상태(D3D12_RESOURCE_STATE_PRESENT)로 바뀔 것이다.
 	*/
-	controlCommands.WaitForPresent(d3dResourceBarrier);
+	controlCommands.WaitForPresent(barrier);
 
 	// 명령 리스트를 닫힌 상태로 만든다.
 	result = controlCommands.TryCloseList();
@@ -433,7 +433,7 @@ void CGameFramework::FrameAdvance()
 	// 명령 리스트를 명령 큐에 추가하여 실행한다.
 	controlCommands.Execute();
 
-	//GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
+	// GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
 	controlCommands.WaitForGpuComplete();
 
 	DXGI_PRESENT_PARAMETERS dxgiPresentParameters;
@@ -441,9 +441,11 @@ void CGameFramework::FrameAdvance()
 	dxgiPresentParameters.pDirtyRects = NULL;
 	dxgiPresentParameters.pScrollRect = NULL;
 	dxgiPresentParameters.pScrollOffset = NULL;
-	m_pdxgiSwapChain->Present1(1, 0, &dxgiPresentParameters);
-	/*스왑체인을 프리젠트한다. 프리젠트를 하면 현재 렌더 타겟(후면버퍼)의 내용이 전면버퍼로 옮겨지고 렌더 타겟 인
-	덱스가 바뀔 것이다.*/
 
+	/*
+		스왑체인을 프리젠트한다.
+		프리젠트를 하면 현재 렌더 타겟(후면버퍼)의 내용이 전면버퍼로 옮겨지고 렌더 타겟 인덱스가 바뀔 것이다.
+	*/
+	m_pdxgiSwapChain->Present1(1, 0, &dxgiPresentParameters);
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
 }
