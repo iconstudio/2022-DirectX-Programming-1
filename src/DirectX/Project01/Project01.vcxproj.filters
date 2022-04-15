@@ -46,6 +46,9 @@
     <ClCompile Include="CGameTimer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="FactoryController.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyDirectX.h">
@@ -73,6 +76,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="CGameTimer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="FactoryController.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

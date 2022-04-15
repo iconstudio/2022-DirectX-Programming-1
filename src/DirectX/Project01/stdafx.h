@@ -43,5 +43,6 @@ void ErrorDisplay(const wchar_t* description);
 
 class CGameFramework;
 class DirectObject;
+class FactroyController;
 class CommandController;
 class CGameTimer;

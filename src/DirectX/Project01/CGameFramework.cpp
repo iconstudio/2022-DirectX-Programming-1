@@ -1,13 +1,13 @@
 #include "pch.h"
 #include "CGameFramework.hpp"
 #include "CommandController.hpp"
+#include "FactroyController.hpp"
 #include "CGameTimer.h"
 
 CGameFramework::CGameFramework()
 	: m_nWndClientWidth(::FRAME_BUFFER_WIDTH), m_nWndClientHeight(::FRAME_BUFFER_HEIGHT)
 	, Timer()
-	, m_pdxgiFactory(nullptr), m_pd3dDevice(nullptr)
-	, m_pd3dPipelineState(nullptr)
+	, controlFactory()
 	, controlCommands()
 	, m_pdxgiSwapChain(nullptr), m_nSwapChainBufferIndex(0)
 	, m_pd3dRtvDescriptorHeap(nullptr), m_nRtvDescriptorIncrementSize(0)
@@ -79,9 +79,9 @@ void CGameFramework::OnDestroy()
 
 void CGameFramework::CreateDirect3DDevice()
 {
-	HRESULT hResult;
-	UINT nDXGIFactoryFlags = 0;
+	controlFactory.OnCreate();
 
+	HRESULT hResult;
 #if defined(_DEBUG)
 	ID3D12Debug* pd3dDebugController = NULL;
 	hResult = D3D12GetDebugInterface(__uuidof(ID3D12Debug), (void
@@ -94,28 +94,6 @@ void CGameFramework::CreateDirect3DDevice()
 	nDXGIFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 #endif
 
-	hResult = ::CreateDXGIFactory2(nDXGIFactoryFlags, __uuidof(IDXGIFactory4), (void
-		**)&m_pdxgiFactory);
-
-	//모든 하드웨어 어댑터 대하여 특성 레벨 12.0을 지원하는 하드웨어 디바이스를 생성한다.
-	IDXGIAdapter1* pd3dAdapter = NULL;
-	for (UINT i = 0; DXGI_ERROR_NOT_FOUND != m_pdxgiFactory->EnumAdapters1(i,
-		&pd3dAdapter); i++)
-	{
-		DXGI_ADAPTER_DESC1 dxgiAdapterDesc;
-		pd3dAdapter->GetDesc1(&dxgiAdapterDesc);
-		if (dxgiAdapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) continue;
-		if (SUCCEEDED(D3D12CreateDevice(pd3dAdapter, D3D_FEATURE_LEVEL_12_0,
-			_uuidof(ID3D12Device), (void**)&m_pd3dDevice))) break;
-	}
-
-	//특성 레벨 12.0을 지원하는 하드웨어 디바이스를 생성할 수 없으면 WARP 디바이스를 생성한다.
-	if (!pd3dAdapter)
-	{
-		m_pdxgiFactory->EnumWarpAdapter(_uuidof(IDXGIAdapter1), (void**)&pd3dAdapter);
-		D3D12CreateDevice(pd3dAdapter, D3D_FEATURE_LEVEL_11_0, _uuidof(ID3D12Device), (void
-			**)&m_pd3dDevice);
-	}
 
 	D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS d3dMsaaQualityLevels{};
 	d3dMsaaQualityLevels.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
