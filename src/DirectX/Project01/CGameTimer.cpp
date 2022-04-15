@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "CGameTimer.h"
-#include <Timeapi.h>
 
 CGameTimer::CGameTimer()
 {
@@ -13,7 +12,7 @@ CGameTimer::CGameTimer()
 	else
 	{
 		m_bHardwareHasPerformanceCounter = FALSE;
-		m_nLastTime = ::timeGetTime();
+		m_nLastTime = timeGetTime();
 		m_fTimeScale = 0.001f;
 	}
 	m_nSampleCount = 0;
@@ -24,6 +23,7 @@ CGameTimer::CGameTimer()
 
 CGameTimer::~CGameTimer()
 {}
+
 void CGameTimer::Tick(float fLockFPS)
 {
 	if (m_bHardwareHasPerformanceCounter)

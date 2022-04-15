@@ -3,6 +3,7 @@
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "winmm.lib")
 
 #include "targetver.h"
 #define WIN32_LEAN_AND_MEAN 거의 사용되지 않는 내용을 Windows 헤더에서 제외합니다.
@@ -12,6 +13,7 @@
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
+#include <Timeapi.h>
 
 #include <d3d12.h>
 #include <DirectXCollision.h>
@@ -38,3 +40,8 @@ constexpr auto FRAME_BUFFER_WIDTH = 800;
 constexpr auto FRAME_BUFFER_HEIGHT = 600;
 
 void ErrorDisplay(const wchar_t* description);
+
+class CGameFramework;
+class DirectObject;
+class CommandController;
+class CGameTimer;

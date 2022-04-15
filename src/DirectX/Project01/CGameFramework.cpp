@@ -5,6 +5,7 @@
 
 CGameFramework::CGameFramework()
 	: m_nWndClientWidth(::FRAME_BUFFER_WIDTH), m_nWndClientHeight(::FRAME_BUFFER_HEIGHT)
+	, Timer()
 	, m_pdxgiFactory(nullptr), m_pd3dDevice(nullptr)
 	, m_pd3dPipelineState(nullptr)
 	, controlCommands()
@@ -14,6 +15,8 @@ CGameFramework::CGameFramework()
 	, m_pd3dDepthStencilBuffer(nullptr)
 {
 	ZeroMemory(m_ppd3dRenderTargetBuffers, sizeof(m_ppd3dRenderTargetBuffers));
+
+	wcscpy_s(m_pszFrameRate, L"LapProject (");
 }
 
 CGameFramework::~CGameFramework()
@@ -353,6 +356,8 @@ void CGameFramework::AnimateObjects()
 
 void CGameFramework::FrameAdvance()
 {
+	Timer.Tick(0.0f);
+
 	ProcessInput();
 	AnimateObjects();
 
@@ -437,7 +442,7 @@ void CGameFramework::FrameAdvance()
 	// GPU가 모든 명령 리스트를 실행할 때 까지 기다린다.
 	controlCommands.WaitForGpuComplete();
 
-	DXGI_PRESENT_PARAMETERS dxgiPresentParameters;
+	DXGI_PRESENT_PARAMETERS dxgiPresentParameters{};
 	dxgiPresentParameters.DirtyRectsCount = 0;
 	dxgiPresentParameters.pDirtyRects = NULL;
 	dxgiPresentParameters.pScrollRect = NULL;
@@ -447,6 +452,10 @@ void CGameFramework::FrameAdvance()
 		스왑체인을 프리젠트한다.
 		프리젠트를 하면 현재 렌더 타겟(후면버퍼)의 내용이 전면버퍼로 옮겨지고 렌더 타겟 인덱스가 바뀔 것이다.
 	*/
-	m_pdxgiSwapChain->Present1(1, 0, &dxgiPresentParameters);
+	m_pdxgiSwapChain->Present1(0, 0, &dxgiPresentParameters);
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
+
+	Timer.GetFrameRate(m_pszFrameRate + 12, 37);
+
+	::SetWindowText(m_hWnd, m_pszFrameRate);
 }

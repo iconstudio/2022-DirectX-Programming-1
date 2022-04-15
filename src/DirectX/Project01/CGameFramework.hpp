@@ -10,7 +10,9 @@ private:
 	HWND m_hWnd;
 	int m_nWndClientWidth;
 	int m_nWndClientHeight;
+
 	CGameTimer Timer;
+	WCHAR m_pszFrameRate[50];
 
 	// DXGI 팩토리 인터페이스에 대한 포인터이다.
 	IDXGIFactory4* m_pdxgiFactory;
