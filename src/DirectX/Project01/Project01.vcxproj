@@ -154,7 +154,6 @@
     <ClCompile Include="CGameTimer.cpp" />
     <ClCompile Include="CommandController.cpp" />
     <ClCompile Include="DirectObject.cpp" />
-    <ClCompile Include="FactoryController.cpp" />
     <ClCompile Include="MyDirectX.cpp" />
     <ClCompile Include="pch.cpp" />
   </ItemGroup>
@@ -163,7 +162,6 @@
     <ClInclude Include="CGameTimer.h" />
     <ClInclude Include="CommandController.hpp" />
     <ClInclude Include="DirectObject.hpp" />
-    <ClInclude Include="FactoryController.hpp" />
     <ClInclude Include="MyDirectX.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
