@@ -34,3 +34,5 @@ using Microsoft::WRL::ComPtr;
 
 constexpr auto FRAME_BUFFER_WIDTH = 800;
 constexpr auto FRAME_BUFFER_HEIGHT = 600;
+
+void ErrorDisplay(const wchar_t* description);
