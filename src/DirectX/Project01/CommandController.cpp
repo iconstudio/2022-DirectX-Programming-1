@@ -2,8 +2,8 @@
 #include "CommandController.hpp"
 #include "DirectObject.hpp"
 
-CommandController::CommandController(ID3D12Device*& device)
-	: DirectObject(device)
+CommandController::CommandController()
+	: DirectObject()
 	, m_pd3dCommandQueue(nullptr), m_pd3dCommandList(nullptr), m_pd3dCommandAllocator(nullptr)
 	, m_hFenceEvent(NULL), m_pd3dFence(nullptr), m_nFenceValue(0)
 {}
@@ -104,12 +104,12 @@ void CommandController::RSSetScissorRects(const D3D12_RECT& window)
 	m_pd3dCommandList->RSSetScissorRects(1, &window);
 }
 
-void CommandController::ClearRenderTargetView(D3D12_CPU_DESCRIPTOR_HANDLE ptr, const FLOAT rgba[4])
+void CommandController::ClearRenderTargetView(D3D12_CPU_DESCRIPTOR_HANDLE& ptr, const FLOAT rgba[4])
 {
 	m_pd3dCommandList->ClearRenderTargetView(ptr, rgba, 0, NULL);
 }
 
-void CommandController::ClearDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE ptr)
+void CommandController::ClearDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE& ptr)
 {
 	m_pd3dCommandList->ClearDepthStencilView(ptr, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL
 		, 1.0f, 0, 0, NULL);

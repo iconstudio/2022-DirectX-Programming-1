@@ -3,12 +3,14 @@
 class DirectObject
 {
 public:
-	DirectObject(ID3D12Device*& device);
+	DirectObject();
+
+	void SetDevice(ID3D12Device* device);
 
 	virtual bool OnCreate() = 0;
 	virtual void OnDestroy() = 0;
 
 protected:
-	ID3D12Device*& Device;
+	ID3D12Device* Device;
 };
 

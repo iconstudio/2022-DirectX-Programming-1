@@ -6,7 +6,7 @@ CGameFramework::CGameFramework()
 	: m_nWndClientWidth(::FRAME_BUFFER_WIDTH), m_nWndClientHeight(::FRAME_BUFFER_HEIGHT)
 	, m_pdxgiFactory(nullptr), m_pd3dDevice(nullptr)
 	, m_pd3dPipelineState(nullptr)
-	, controlCommands(m_pd3dDevice)
+	, controlCommands()
 	, m_pdxgiSwapChain(nullptr), m_nSwapChainBufferIndex(0)
 	, m_pd3dRtvDescriptorHeap(nullptr), m_nRtvDescriptorIncrementSize(0)
 	, m_pd3dDsvDescriptorHeap(nullptr), m_nDsvDescriptorIncrementSize(0)
@@ -133,6 +133,7 @@ void CGameFramework::CreateDirect3DDevice()
 
 void CGameFramework::CreateCommandQueueAndList()
 {
+	controlCommands.SetDevice(m_pd3dDevice);
 	controlCommands.OnCreate();
 }
 
@@ -165,16 +166,16 @@ void CGameFramework::CreateSwapChain()
 	dxgiSwapChainFullScreenDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	dxgiSwapChainFullScreenDesc.Windowed = TRUE;
 
+	// 스왑체인을 생성한다.
 	m_pdxgiFactory->CreateSwapChainForHwnd(controlCommands.m_pd3dCommandQueue, m_hWnd,
 		&dxgiSwapChainDesc, &dxgiSwapChainFullScreenDesc, NULL, (IDXGISwapChain1
 		**)&m_pdxgiSwapChain);
-	// 스왑체인을 생성한다.
 
-	m_pdxgiFactory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER);
 	// “Alt+Enter” 키의 동작을 비활성화한다
+	m_pdxgiFactory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER);
 
-	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
 	// 스왑체인의 현재 후면버퍼 인덱스를 저장한다.
+	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
 }
 
 void CGameFramework::CreateRtvAndDsvDescriptorHeaps()
@@ -376,7 +377,7 @@ void CGameFramework::FrameAdvance()
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-	
+
 	/*
 		현재 렌더 타겟에 대한 프리젠트가 끝나기를 기다린다.
 		프리젠트가 끝나면 렌더 타겟 버퍼의 상태는
@@ -388,21 +389,21 @@ void CGameFramework::FrameAdvance()
 	// 뷰포트와 씨저 사각형을 설정한다.
 	controlCommands.RSSetViewports(m_d3dViewport);
 	controlCommands.RSSetScissorRects(m_d3dScissorRect);
-	
+
 	// 현재의 렌더 타겟에 해당하는 서술자의 CPU 주소(핸들)를 계산한다.
 	auto handleDescriptorRT = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	handleDescriptorRT.ptr += (m_nSwapChainBufferIndex * m_nRtvDescriptorIncrementSize);
 
-	float clearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f }; // 파란색
+	float rcolor[] = {0.0f, 0.125f, 0.3f, 1.0f};
 
 	// 원하는 색상으로 렌더 타겟(뷰)을 지운다.
-	controlCommands.ClearRenderTargetView(handleDescriptorRT, clearColor);
+	controlCommands.ClearRenderTargetView(handleDescriptorRT, rcolor);
 
 	// 깊이-스텐실 서술자의 CPU 주소를 계산한다.
 	auto handleDescriptorDS = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 
 	// 원하는 값으로 깊이-스텐실(뷰)을 지운다.
-	controlCommands.ClearRenderTargetView(handleDescriptorDS, clearColor);
+	controlCommands.ClearDepthStencilView(handleDescriptorDS);
 
 	// 렌더 타겟 뷰(서술자)와 깊이-스텐실 뷰(서술자)를 출력-병합 단계(OM)에 연결한다.
 	controlCommands.OMSetRenderTargets(handleDescriptorRT, handleDescriptorDS);

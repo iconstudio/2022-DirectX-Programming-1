@@ -5,15 +5,15 @@
 class CommandController : public DirectObject
 {
 public:
-	CommandController(ID3D12Device*& device);
+	CommandController();
 
 	bool OnCreate() override;
 	void OnDestroy() override;
 
 	void RSSetViewports(const D3D12_VIEWPORT& port);
 	void RSSetScissorRects(const D3D12_RECT& window);
-	void ClearRenderTargetView(D3D12_CPU_DESCRIPTOR_HANDLE ptr, const FLOAT rgba[4]);
-	void ClearDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE ptr);
+	void ClearRenderTargetView(D3D12_CPU_DESCRIPTOR_HANDLE& ptr, const FLOAT rgba[4]);
+	void ClearDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE& ptr);
 	void OMSetRenderTargets(D3D12_CPU_DESCRIPTOR_HANDLE& rt, D3D12_CPU_DESCRIPTOR_HANDLE& ds);
 
 	HRESULT TryResetAllocator();

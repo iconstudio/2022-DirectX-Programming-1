@@ -11,6 +11,7 @@
 #include "stdafx.h"
 
 class CGameFramework;
+class DirectObject;
 class CommandController;
 
 #endif //PCH_H
