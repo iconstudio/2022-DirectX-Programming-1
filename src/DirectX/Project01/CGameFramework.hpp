@@ -26,9 +26,7 @@ private:
 	ID3D12DescriptorHeap* m_pd3dDsvDescriptorHeap;
 	UINT m_nDsvDescriptorIncrementSize; //깊이-스텐실 버퍼, 서술자 힙 인터페이스 포인터, 깊이-스텐실 서술자 원소의 크기이다.
 
-	ID3D12CommandQueue* m_pd3dCommandQueue;
-	ID3D12CommandAllocator* m_pd3dCommandAllocator;
-	ID3D12GraphicsCommandList* m_pd3dCommandList; //명령 큐, 명령 할당자, 명령 리스트 인터페이스 포인터이다.
+	CommandController controlCommands;
 
 	ID3D12PipelineState* m_pd3dPipelineState; //그래픽스 파이프라인 상태 객체에 대한 인터페이스 포인터이다.
 

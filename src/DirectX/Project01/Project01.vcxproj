@@ -151,11 +151,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CGameFramework.cpp" />
+    <ClCompile Include="CommandController.cpp" />
+    <ClCompile Include="DirectObject.cpp" />
     <ClCompile Include="MyDirectX.cpp" />
     <ClCompile Include="pch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CGameFramework.hpp" />
+    <ClInclude Include="CommandController.hpp" />
+    <ClInclude Include="DirectObject.hpp" />
     <ClInclude Include="MyDirectX.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />

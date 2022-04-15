@@ -37,6 +37,12 @@
     <ClCompile Include="CGameFramework.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="CommandController.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectObject.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyDirectX.h">
@@ -55,6 +61,12 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="CGameFramework.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandController.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectObject.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

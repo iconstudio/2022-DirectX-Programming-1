@@ -1,0 +1,14 @@
+#pragma once
+
+class DirectObject
+{
+public:
+	DirectObject(ID3D12Device*& device);
+
+	virtual bool OnCreate() = 0;
+	virtual void OnDestroy() = 0;
+
+protected:
+	ID3D12Device*& Device;
+};
+
