@@ -189,7 +189,8 @@ void CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 
 CGameObject* CScene::PickObjectPointedByCursor(int xClient, int yClient, CCamera* pCamera)
 {
-	XMFLOAT3 xmf3PickPosition;
+	XMFLOAT3 xmf3PickPosition{};
+
 	xmf3PickPosition.x = (((2.0f * xClient) / (float)pCamera->m_Viewport.m_nWidth) - 1) / pCamera->m_xmf4x4PerspectiveProject._11;
 	xmf3PickPosition.y = -(((2.0f * yClient) / (float)pCamera->m_Viewport.m_nHeight) - 1) / pCamera->m_xmf4x4PerspectiveProject._22;
 	xmf3PickPosition.z = 1.0f;

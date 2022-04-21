@@ -1,27 +1,25 @@
-#include "stdafx.h"
-#include "Camera.h"
-#include "Mesh.h"
-#include "Player.h"
+#include "stdafx.hpp"
+#include "GameCamera.hpp"
+#include "Mesh.hpp"
+#include "Player.hpp"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-void CViewport::SetViewport(int nLeft, int nTop, int nWidth, int nHeight)
+void GameViewport::SetViewport(int nLeft, int nTop, int nWidth, int nHeight)
 {
-	m_nLeft = nLeft; 
-	m_nTop = nTop; 
-	m_nWidth = nWidth; 
-	m_nHeight = nHeight; 
+	m_nLeft = nLeft;
+	m_nTop = nTop;
+	m_nWidth = nWidth;
+	m_nHeight = nHeight;
 }
 
-CCamera::CCamera()
-{
-}
+GameCamera::GameCamera()
+{}
 
-CCamera::~CCamera()
-{
-}
+GameCamera::~GameCamera()
+{}
 
-void CCamera::GenerateViewMatrix()
+void GameCamera::GenerateViewMatrix()
 {
 	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
 	m_xmf3Right = Vector3::Normalize(Vector3::CrossProduct(m_xmf3Up, m_xmf3Look));
@@ -44,7 +42,7 @@ void CCamera::GenerateViewMatrix()
 	m_xmFrustumView.Transform(m_xmFrustumWorld, XMLoadFloat4x4(&m_xmf4x4InverseView));
 }
 
-void CCamera::SetLookAt(const XMFLOAT3 xmf3Position, const XMFLOAT3 xmf3LookAt, const XMFLOAT3 xmf3Up)
+void GameCamera::SetLookAt(const XMFLOAT3 xmf3Position, const XMFLOAT3 xmf3LookAt, const XMFLOAT3 xmf3Up)
 {
 	m_xmf3Position = xmf3Position;
 	m_xmf4x4View = Matrix4x4::LookAtLH(m_xmf3Position, xmf3LookAt, xmf3Up);
@@ -54,7 +52,7 @@ void CCamera::SetLookAt(const XMFLOAT3 xmf3Position, const XMFLOAT3 xmf3LookAt, 
 	m_xmf3Look = Vector3::Normalize(XMFLOAT3(m_xmf4x4View._13, m_xmf4x4View._23, m_xmf4x4View._33));
 }
 
-void CCamera::SetLookAt(const XMFLOAT3 xmf3LookAt, const XMFLOAT3 xmf3Up)
+void GameCamera::SetLookAt(const XMFLOAT3 xmf3LookAt, const XMFLOAT3 xmf3Up)
 {
 	XMFLOAT4X4 xmf4x4View = Matrix4x4::LookAtLH(m_xmf3Position, xmf3LookAt, xmf3Up);
 	//m_xmf3Right = Vector3::Normalize(XMFLOAT3(xmf4x4View._11, xmf4x4View._21, xmf4x4View._31));
@@ -62,19 +60,19 @@ void CCamera::SetLookAt(const XMFLOAT3 xmf3LookAt, const XMFLOAT3 xmf3Up)
 	//m_xmf3Look = Vector3::Normalize(XMFLOAT3(xmf4x4View._13, xmf4x4View._23, xmf4x4View._33));
 }
 
-void CCamera::SetViewport(int nLeft, int nTop, int nWidth, int nHeight)
+void GameCamera::SetViewport(int nLeft, int nTop, int nWidth, int nHeight)
 {
 	m_Viewport.SetViewport(nLeft, nTop, nWidth, nHeight);
 	m_fAspectRatio = float(m_Viewport.m_nWidth) / float(m_Viewport.m_nHeight);
 }
 
-void CCamera::SetFOVAngle(float fFOVAngle)
+void GameCamera::SetFOVAngle(float fFOVAngle)
 {
 	m_fFOVAngle = fFOVAngle;
 	m_fProjectRectDistance = float(1.0f / tan(DegreeToRadian(fFOVAngle * 0.5f)));
 }
 
-void CCamera::GeneratePerspectiveProjectionMatrix(float fNearPlaneDistance, float fFarPlaneDistance, float fFOVAngle)
+void GameCamera::GeneratePerspectiveProjectionMatrix(float fNearPlaneDistance, float fFarPlaneDistance, float fFOVAngle)
 {
 	float fAspectRatio = (float(m_Viewport.m_nWidth) / float(m_Viewport.m_nHeight));
 	XMMATRIX xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(fFOVAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
@@ -83,33 +81,33 @@ void CCamera::GeneratePerspectiveProjectionMatrix(float fNearPlaneDistance, floa
 	BoundingFrustum::CreateFromMatrix(m_xmFrustumView, xmmtxProjection);
 }
 
-void CCamera::GenerateOrthographicProjectionMatrix(float fNearPlaneDistance, float fFarPlaneDistance, float fWidth, float hHeight)
+void GameCamera::GenerateOrthographicProjectionMatrix(float fNearPlaneDistance, float fFarPlaneDistance, float fWidth, float hHeight)
 {
 	XMMATRIX xmmtxProjection = XMMatrixOrthographicLH(fWidth, hHeight, fNearPlaneDistance, fFarPlaneDistance);
 	XMStoreFloat4x4(&m_xmf4x4OrthographicProject, xmmtxProjection);
 }
 
-bool CCamera::IsInFrustum(BoundingOrientedBox& xmBoundingBox)
+bool GameCamera::IsInFrustum(BoundingOrientedBox& xmBoundingBox)
 {
 	return(m_xmFrustumWorld.Intersects(xmBoundingBox));
 }
 
-void CCamera::Move(const XMFLOAT3& xmf3Shift)
+void GameCamera::Move(const XMFLOAT3& xmf3Shift)
 {
 	m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
 }
 
-void CCamera::Move(XMFLOAT3&& xmf3Shift)
+void GameCamera::Move(XMFLOAT3&& xmf3Shift)
 {
 	m_xmf3Position = Vector3::Add(std::move(m_xmf3Position), xmf3Shift);
 }
 
-void CCamera::Move(float x, float y, float z)
+void GameCamera::Move(float x, float y, float z)
 {
 	Move(XMFLOAT3(x, y, z));
 }
 
-void CCamera::Rotate(float fPitch, float fYaw, float fRoll)
+void GameCamera::Rotate(float fPitch, float fYaw, float fRoll)
 {
 	if (fPitch != 0.0f)
 	{
@@ -131,7 +129,7 @@ void CCamera::Rotate(float fPitch, float fYaw, float fRoll)
 	}
 }
 
-void CCamera::Update(CPlayer* pPlayer, XMFLOAT3& xmf3LookAt, float fTimeElapsed)
+void GameCamera::Update(Player* pPlayer, XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
 	XMFLOAT4X4 mtxRotate = Matrix4x4::Identity();
 	mtxRotate._11 = pPlayer->m_xmf3Right.x; mtxRotate._21 = pPlayer->m_xmf3Up.x; mtxRotate._31 = pPlayer->m_xmf3Look.x;

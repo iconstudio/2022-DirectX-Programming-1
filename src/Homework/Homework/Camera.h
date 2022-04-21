@@ -59,10 +59,11 @@ public:
 	void GenerateOrthographicProjectionMatrix(float fNearPlaneDistance, float fFarPlaneDistance, float fWidth, float hHeight);
 	void SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight);
 
-	void SetLookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up);
-	void SetLookAt(XMFLOAT3& vPosition, XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up);
+	void SetLookAt(const XMFLOAT3 xmf3LookAt, const XMFLOAT3 xmf3Up);
+	void SetLookAt(const XMFLOAT3 vPosition, const XMFLOAT3 xmf3LookAt, const XMFLOAT3 xmf3Up);
 
-	void Move(XMFLOAT3& xmf3Shift);
+	void Move(const XMFLOAT3& xmf3Shift);
+	void Move(XMFLOAT3&& xmf3Shift);
 	void Move(float x, float y, float z);
 	void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
 	void Update(CPlayer* pPlayer, XMFLOAT3& xmf3LookAt, float fTimeElapsed = 0.016f);

@@ -38,11 +38,13 @@ public:
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3& xmf3Position);
 
-	void SetMovingDirection(XMFLOAT3& xmf3MovingDirection) { m_xmf3MovingDirection = Vector3::Normalize(xmf3MovingDirection); }
+	void SetMovingDirection(const XMFLOAT3& xmf3MovingDirection);
+	void SetMovingDirection(XMFLOAT3&& xmf3MovingDirection);
 	void SetMovingSpeed(float fSpeed) { m_fMovingSpeed = fSpeed; }
 	void SetMovingRange(float fRange) { m_fMovingRange = fRange; }
 
-	void SetRotationAxis(XMFLOAT3& xmf3RotationAxis) { m_xmf3RotationAxis = Vector3::Normalize(xmf3RotationAxis); }
+	void SetRotationAxis(const XMFLOAT3& xmf3RotationAxis);
+	void SetRotationAxis(XMFLOAT3&& xmf3RotationAxis);
 	void SetRotationSpeed(float fSpeed) { m_fRotationSpeed = fSpeed; }
 
 	void MoveStrafe(float fDistance = 1.0f);

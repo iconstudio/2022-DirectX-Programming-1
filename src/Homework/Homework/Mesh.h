@@ -5,24 +5,25 @@
 class CVertex
 {
 public:
-	CVertex() { }
+	CVertex() {}
 	CVertex(float x, float y, float z) { m_xmf3Position = XMFLOAT3(x, y, z); }
-	virtual ~CVertex() { }
+	virtual ~CVertex() {}
 
-	XMFLOAT3					m_xmf3Position;
+	XMFLOAT3 m_xmf3Position;
 };
 
 class CPolygon
 {
 public:
-	CPolygon() { }
+	CPolygon() {}
 	CPolygon(int nVertices);
 	virtual ~CPolygon();
 
-	int							m_nVertices = 0;
-	CVertex						*m_pVertices = NULL;
+	int m_nVertices = 0;
+	CVertex* m_pVertices = NULL;
 
-	void SetVertex(int nIndex, CVertex& vertex);
+	void SetVertex(int nIndex, const CVertex& vertex);
+	void SetVertex(int nIndex, CVertex&& vertex);
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -30,7 +31,7 @@ public:
 class CMesh
 {
 public:
-	CMesh() { }
+	CMesh() {}
 	CMesh(int nPolygons);
 	virtual ~CMesh();
 
@@ -43,13 +44,13 @@ public:
 
 protected:
 	int							m_nPolygons = 0;
-	CPolygon					**m_ppPolygons = NULL;
+	CPolygon** m_ppPolygons = NULL;
 
 public:
 	BoundingOrientedBox			m_xmOOBB = BoundingOrientedBox();
 
 public:
-	void SetPolygon(int nIndex, CPolygon *pPolygon);
+	void SetPolygon(int nIndex, CPolygon* pPolygon);
 
 	virtual void Render(HDC hDCFrameBuffer);
 
@@ -61,28 +62,28 @@ class CCubeMesh : public CMesh
 {
 public:
 	CCubeMesh(float fWidth = 4.0f, float fHeight = 4.0f, float fDepth = 4.0f);
-	virtual ~CCubeMesh() { }
+	virtual ~CCubeMesh() {}
 };
 
 class CWallMesh : public CMesh
 {
 public:
 	CWallMesh(float fWidth = 4.0f, float fHeight = 4.0f, float fDepth = 4.0f, int nSubRects = 20);
-	virtual ~CWallMesh() { }
+	virtual ~CWallMesh() {}
 };
 
 class CAirplaneMesh : public CMesh
 {
 public:
 	CAirplaneMesh(float fWidth = 20.0f, float fHeight = 20.0f, float fDepth = 4.0f);
-	virtual ~CAirplaneMesh() { }
+	virtual ~CAirplaneMesh() {}
 };
 
 class CAxisMesh : public CMesh
 {
 public:
 	CAxisMesh(float fWidth = 4.0f, float fHeight = 4.0f, float fDepth = 4.0f);
-	virtual ~CAxisMesh() { }
+	virtual ~CAxisMesh() {}
 
 	virtual void Render(HDC hDCFrameBuffer);
 };

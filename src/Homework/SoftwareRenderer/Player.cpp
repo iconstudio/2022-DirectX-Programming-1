@@ -1,37 +1,36 @@
-#include "stdafx.h"
-#include "Player.h"
+#include "stdafx.hpp"
+#include "Player.hpp"
+#include "GameObject.hpp"
+#include "GameCamera.hpp"
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-CPlayer::CPlayer()
-{
-}
+Player::Player()
+{}
 
-CPlayer::~CPlayer()
+Player::~Player()
 {
 	if (m_pCamera) delete m_pCamera;
 }
 
-void CPlayer::SetPosition(float x, float y, float z)
+void Player::SetPosition(float x, float y, float z)
 {
 	m_xmf3Position = XMFLOAT3(x, y, z);
 
-	CGameObject::SetPosition(x, y, z);
+	GameObject::SetPosition(x, y, z);
 }
 
-void CPlayer::SetCameraOffset(const XMFLOAT3& xmf3CameraOffset)
+void Player::SetCameraOffset(const XMFLOAT3& xmf3CameraOffset)
 {
 	SetCameraOffset(std::move(XMFLOAT3(xmf3CameraOffset)));
 }
 
-void CPlayer::SetCameraOffset(XMFLOAT3&& xmf3CameraOffset)
+void Player::SetCameraOffset(XMFLOAT3&& xmf3CameraOffset)
 {
 	m_xmf3CameraOffset = xmf3CameraOffset;
 	m_pCamera->SetLookAt(Vector3::Add(m_xmf3Position, m_xmf3CameraOffset), m_xmf3Position, m_xmf3Up);
 	m_pCamera->GenerateViewMatrix();
 }
 
-void CPlayer::Move(DWORD dwDirection, float fDistance)
+void Player::Move(DWORD dwDirection, float fDistance)
 {
 	if (dwDirection)
 	{
@@ -47,12 +46,12 @@ void CPlayer::Move(DWORD dwDirection, float fDistance)
 	}
 }
 
-void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
+void Player::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 {
 	Move(std::move(XMFLOAT3(xmf3Shift)), bUpdateVelocity);
 }
 
-void CPlayer::Move(XMFLOAT3&& xmf3Shift, bool bUpdateVelocity)
+void Player::Move(XMFLOAT3&& xmf3Shift, bool bUpdateVelocity)
 {
 	if (bUpdateVelocity)
 	{
@@ -65,12 +64,12 @@ void CPlayer::Move(XMFLOAT3&& xmf3Shift, bool bUpdateVelocity)
 	}
 }
 
-void CPlayer::Move(float x, float y, float z)
+void Player::Move(float x, float y, float z)
 {
 	Move(XMFLOAT3(x, y, z), false);
 }
 
-void CPlayer::Rotate(float fPitch, float fYaw, float fRoll)
+void Player::Rotate(float fPitch, float fYaw, float fRoll)
 {
 	m_pCamera->Rotate(fPitch, fYaw, fRoll);
 	if (fPitch != 0.0f)
@@ -97,7 +96,7 @@ void CPlayer::Rotate(float fPitch, float fYaw, float fRoll)
 	m_xmf3Up = Vector3::Normalize(Vector3::CrossProduct(m_xmf3Look, m_xmf3Right));
 }
 
-void CPlayer::LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up)
+void Player::LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up)
 {
 	XMFLOAT4X4 xmf4x4View = Matrix4x4::LookAtLH(m_xmf3Position, xmf3LookAt, xmf3Up);
 	m_xmf3Right = Vector3::Normalize(XMFLOAT3(xmf4x4View._11, xmf4x4View._21, xmf4x4View._31));
@@ -105,7 +104,7 @@ void CPlayer::LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up)
 	m_xmf3Look = Vector3::Normalize(XMFLOAT3(xmf4x4View._13, xmf4x4View._23, xmf4x4View._33));
 }
 
-void CPlayer::Update(float fTimeElapsed)
+void Player::Update(float fTimeElapsed)
 {
 	Move(m_xmf3Velocity, false);
 
@@ -119,14 +118,14 @@ void CPlayer::Update(float fTimeElapsed)
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Deceleration, fDeceleration);
 }
 
-void CPlayer::Animate(float fElapsedTime)
+void Player::Animate(float fElapsedTime)
 {
 	OnUpdateTransform();
 
-	CGameObject::Animate(fElapsedTime);
+	GameObject::Animate(fElapsedTime);
 }
 
-void CPlayer::OnUpdateTransform()
+void Player::OnUpdateTransform()
 {
 	m_xmf4x4World._11 = m_xmf3Right.x; m_xmf4x4World._12 = m_xmf3Right.y; m_xmf4x4World._13 = m_xmf3Right.z;
 	m_xmf4x4World._21 = m_xmf3Up.x; m_xmf4x4World._22 = m_xmf3Up.y; m_xmf4x4World._23 = m_xmf3Up.z;
@@ -134,95 +133,7 @@ void CPlayer::OnUpdateTransform()
 	m_xmf4x4World._41 = m_xmf3Position.x; m_xmf4x4World._42 = m_xmf3Position.y; m_xmf4x4World._43 = m_xmf3Position.z;
 }
 
-void CPlayer::Render(HDC hDCFrameBuffer, CCamera* pCamera)
+void Player::Render(HDC hDCFrameBuffer, GameCamera* pCamera)
 {
-	CGameObject::Render(hDCFrameBuffer, pCamera);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-//
-CAirplanePlayer::CAirplanePlayer()
-{
-	CCubeMesh* pBulletMesh = new CCubeMesh(1.0f, 4.0f, 1.0f);
-	auto dir = XMFLOAT3(0.0f, 1.0f, 0.0f);
-
-	for (int i = 0; i < BULLETS; i++)
-	{
-		m_ppBullets[i] = new CBulletObject(m_fBulletEffectiveRange);
-		m_ppBullets[i]->SetMesh(pBulletMesh);
-		m_ppBullets[i]->SetRotationAxis(dir);
-		m_ppBullets[i]->SetRotationSpeed(360.0f);
-		m_ppBullets[i]->SetMovingSpeed(120.0f);
-		m_ppBullets[i]->SetActive(false);
-	}
-}
-
-CAirplanePlayer::~CAirplanePlayer()
-{
-	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) delete m_ppBullets[i];
-}
-
-void CAirplanePlayer::Animate(float fElapsedTime)
-{
-	CPlayer::Animate(fElapsedTime);
-
-	for (int i = 0; i < BULLETS; i++)
-	{
-		if (m_ppBullets[i]->m_bActive) m_ppBullets[i]->Animate(fElapsedTime);
-	}
-}
-
-void CAirplanePlayer::OnUpdateTransform()
-{
-	CPlayer::OnUpdateTransform();
-
-	m_xmf4x4World = Matrix4x4::Multiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), m_xmf4x4World);
-}
-
-void CAirplanePlayer::Render(HDC hDCFrameBuffer, CCamera* pCamera)
-{
-	CPlayer::Render(hDCFrameBuffer, pCamera);
-
-	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]->m_bActive) m_ppBullets[i]->Render(hDCFrameBuffer, pCamera);
-}
-
-void CAirplanePlayer::FireBullet(CGameObject* pLockedObject)
-{
-/*
-	if (pLockedObject) 
-	{
-		LookAt(pLockedObject->GetPosition(), XMFLOAT3(0.0f, 1.0f, 0.0f));
-		OnUpdateTransform();
-	}
-*/
-
-	CBulletObject* pBulletObject = NULL;
-	for (int i = 0; i < BULLETS; i++)
-	{
-		if (!m_ppBullets[i]->m_bActive)
-		{
-			pBulletObject = m_ppBullets[i];
-			break;
-		}
-	}
-
-	if (pBulletObject)
-	{
-		XMFLOAT3 xmf3Position = GetPosition();
-		XMFLOAT3 xmf3Direction = GetUp();
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 6.0f, false));
-
-		pBulletObject->m_xmf4x4World = m_xmf4x4World;
-
-		pBulletObject->SetFirePosition(xmf3FirePosition);
-		pBulletObject->SetMovingDirection(xmf3Direction);
-		pBulletObject->SetColor(RGB(255, 0, 0));
-		pBulletObject->SetActive(true);
-
-		if (pLockedObject)
-		{
-			pBulletObject->m_pLockedObject = pLockedObject;
-			pBulletObject->SetColor(RGB(0, 0, 255));
-		}
-	}
+	GameObject::Render(hDCFrameBuffer, pCamera);
 }

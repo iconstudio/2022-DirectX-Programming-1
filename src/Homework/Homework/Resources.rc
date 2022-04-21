@@ -54,6 +54,20 @@ END
 // remains consistent on all systems.
 IDI_ICON1               ICON                    "icon.ico"
 
+IDI_ICON2               ICON                    "icon2.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    IDS_APP_TITLE           "Software Renderer"
+    IDC_APP                 "DXHOMEWORK"
+END
+
 #endif    // 한국어(대한민국) resources
 /////////////////////////////////////////////////////////////////////////////
 

@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{94067e58-f758-4cb8-8a12-30d2cbd77dea}</ProjectGuid>
-    <RootNamespace>Homework</RootNamespace>
+    <ProjectGuid>{4b086806-982c-423a-af6c-1b0779308b66}</ProjectGuid>
+    <RootNamespace>SoftwareRenderer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -118,6 +118,8 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -141,37 +143,36 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="GameFramework.h" />
-    <ClInclude Include="GameObject.h" />
-    <ClInclude Include="GraphicsPipeline.h" />
-    <ClInclude Include="Main.h" />
-    <ClInclude Include="Mesh.h" />
-    <ClInclude Include="Player.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="stdafx.h" />
-    <ClInclude Include="targetver.h" />
-    <ClInclude Include="Timer.h" />
+    <ClInclude Include="GameCamera.hpp" />
+    <ClInclude Include="GameFramework.hpp" />
+    <ClInclude Include="GameObject.hpp" />
+    <ClInclude Include="GamePipeline.hpp" />
+    <ClInclude Include="GameWorld.hpp" />
+    <ClInclude Include="Main.hpp" />
+    <ClInclude Include="Mesh.hpp" />
+    <ClInclude Include="MyMesh.hpp" />
+    <ClInclude Include="Player.hpp" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="stdafx.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Homework.rc" />
+    <ClCompile Include="GameCamera.cpp" />
+    <ClCompile Include="GameFramework.cpp" />
+    <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="GamePipeline.cpp" />
+    <ClCompile Include="GameWorld.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="MyMesh.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="icon.ico" />
     <Image Include="icon2.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="GameFramework.cpp" />
-    <ClCompile Include="GameObject.cpp" />
-    <ClCompile Include="GraphicsPipeline.cpp" />
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="Timer.cpp" />
+    <ResourceCompile Include="Resources.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

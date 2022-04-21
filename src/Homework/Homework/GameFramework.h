@@ -7,8 +7,8 @@
 class CGameFramework
 {
 public:
-	CGameFramework() { }
-	~CGameFramework() { }
+	CGameFramework() {}
+	~CGameFramework() {}
 
 private:
 	HINSTANCE					m_hInstance = NULL;
@@ -18,19 +18,18 @@ private:
 
 	RECT						m_rcClient;
 
-    HDC							m_hDCFrameBuffer = NULL;
-    HBITMAP						m_hBitmapFrameBuffer = NULL;
-    HBITMAP						m_hBitmapSelect = NULL;
+	HDC							m_hDCFrameBuffer = NULL;
+	HBITMAP						m_hBitmapFrameBuffer = NULL;
+	HBITMAP						m_hBitmapSelect = NULL;
 
-	CPlayer*					m_pPlayer = NULL;
-	CScene*						m_pScene = NULL;
-	CGameObject*				m_pLockedObject = NULL;
+	CScene* m_pScene = NULL;
+	CGameTimer m_GameTimer;
+	CPlayer* m_pPlayer = NULL;
+	CGameObject* m_pLockedObject = NULL;
 
-	CGameTimer					m_GameTimer;
+	POINT m_ptOldCursorPos;
 
-	POINT						m_ptOldCursorPos;
-
-	_TCHAR						m_pszFrameRate[50];
+	WCHAR m_pszFrameRate[50];
 
 public:
 	void OnCreate(HINSTANCE hInstance, HWND hMainWnd);

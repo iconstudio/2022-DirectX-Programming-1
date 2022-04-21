@@ -16,7 +16,7 @@ void CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 
 	BuildObjects(); 
 
-	_tcscpy_s(m_pszFrameRate, _T("LabProject ("));
+	_tcscpy_s(m_pszFrameRate, L"LabProject (");
 }
 
 void CGameFramework::OnDestroy()

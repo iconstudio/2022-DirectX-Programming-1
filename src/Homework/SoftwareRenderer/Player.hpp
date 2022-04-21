@@ -1,13 +1,13 @@
 #pragma once
+#include "stdafx.hpp"
+#include "GameObject.hpp"
+#include "GameCamera.hpp"
 
-#include "GameObject.h"
-#include "Camera.h"
-
-class CPlayer : public CGameObject
+class Player : public GameObject
 {
 public:
-	CPlayer();
-	virtual ~CPlayer();
+	Player();
+	virtual ~Player();
 
 public:
 	XMFLOAT3					m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -24,7 +24,7 @@ public:
 	float           			m_fYaw = 0.0f;
 	float           			m_fRoll = 0.0f;
 
-	CCamera*					m_pCamera = NULL;
+	GameCamera* m_pCamera;
 
 public:
 	void SetPosition(float x, float y, float z);
@@ -46,27 +46,8 @@ public:
 
 	virtual void OnUpdateTransform();
 	virtual void Animate(float fElapsedTime);
-	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
+	virtual void Render(HDC hDCFrameBuffer, GameCamera* pCamera);
 
-	void SetCamera(CCamera* pCamera) { m_pCamera = pCamera; }
-	CCamera* GetCamera() { return(m_pCamera); }
+	void SetCamera(GameCamera* pCamera) { m_pCamera = pCamera; }
+	GameCamera* GetCamera() { return(m_pCamera); }
 };
-
-#define BULLETS					50
-
-class CAirplanePlayer : public CPlayer
-{
-public:
-	CAirplanePlayer();
-	virtual ~CAirplanePlayer();
-
-	float						m_fBulletEffectiveRange = 150.0f;
-	CBulletObject*				m_ppBullets[BULLETS];
-
-	void FireBullet(CGameObject* pLockedObject);
-
-	virtual void OnUpdateTransform();
-	virtual void Animate(float fElapsedTime);
-	virtual void Render(HDC hDCFrameBuffer, CCamera* pCamera);
-};
-

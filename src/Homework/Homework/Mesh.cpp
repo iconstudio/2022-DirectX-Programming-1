@@ -15,11 +15,19 @@ CPolygon::~CPolygon()
 	if (m_pVertices) delete[] m_pVertices;
 }
 
-void CPolygon::SetVertex(int nIndex, CVertex& vertex)
+void CPolygon::SetVertex(int nIndex, const CVertex& vertex)
 {
 	if ((0 <= nIndex) && (nIndex < m_nVertices) && m_pVertices)
 	{
 		m_pVertices[nIndex] = vertex;
+	}
+}
+
+void CPolygon::SetVertex(int nIndex, CVertex&& vertex)
+{
+	if ((0 <= nIndex) && (nIndex < m_nVertices) && m_pVertices)
+	{
+		m_pVertices[nIndex] = std::move(vertex);
 	}
 }
 

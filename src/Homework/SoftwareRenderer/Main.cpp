@@ -1,17 +1,17 @@
-ï»¿#include "stdafx.h"
-#include "Main.h"
-#include "GameFramework.h"
+#include "stdafx.hpp"
+#include "Main.hpp"
+#include "GameFramework.hpp"
 
 #define MAX_LOADSTRING 100
 
-// ì „ì—­ ë³€ìˆ˜:
-HINSTANCE hInst;								// í˜„ì¬ ì¸ìŠ¤í„´ìŠ¤ì…ë‹ˆë‹¤.
-TCHAR szTitle[MAX_LOADSTRING];					// ì œëª© í‘œì‹œì¤„ í…ìŠ¤íŠ¸ì…ë‹ˆë‹¤.
-TCHAR szWindowClass[MAX_LOADSTRING];			// ê¸°ë³¸ ì°½ í´ë˜ìŠ¤ ì´ë¦„ì…ë‹ˆë‹¤.
+// Àü¿ª º¯¼ö:
+HINSTANCE hInst;								// ÇöÀç ÀÎ½ºÅÏ½ºÀÔ´Ï´Ù.
+TCHAR szTitle[MAX_LOADSTRING];					// Á¦¸ñ Ç¥½ÃÁÙ ÅØ½ºÆ®ÀÔ´Ï´Ù.
+TCHAR szWindowClass[MAX_LOADSTRING];			// ±âº» Ã¢ Å¬·¡½º ÀÌ¸§ÀÔ´Ï´Ù.
 
-CGameFramework		gGameFramework;
+GameFramework		gGameFramework;
 
-// ì´ ì½”ë“œ ëª¨ë“ˆì— ë“¤ì–´ ìˆëŠ” í•¨ìˆ˜ì˜ ì •ë°©í–¥ ì„ ì–¸ì…ë‹ˆë‹¤.
+// ÀÌ ÄÚµå ¸ğµâ¿¡ µé¾î ÀÖ´Â ÇÔ¼öÀÇ Á¤¹æÇâ ¼±¾ğÀÔ´Ï´Ù.
 ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -25,21 +25,17 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	// ì „ì—­ ë¬¸ìì—´ì„ ì´ˆê¸°í™”í•©ë‹ˆë‹¤.
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 	LoadString(hInstance, IDC_APP, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
 
-	// ì‘ìš© í”„ë¡œê·¸ë¨ ì´ˆê¸°í™”ë¥¼ ìˆ˜í–‰í•©ë‹ˆë‹¤.
 	if (!InitInstance(hInstance, nCmdShow))
 	{
 		return FALSE;
 	}
 
 	MSG msg;
-
-	// ê¸°ë³¸ ë©”ì‹œì§€ ë£¨í”„ì…ë‹ˆë‹¤.
-	while (1)
+	while (true)
 	{
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -56,6 +52,98 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	gGameFramework.OnDestroy();
 
 	return (int)msg.wParam;
+}
+
+AirplanePlayer::AirplanePlayer()
+{
+	CCubeMesh* pBulletMesh = new CCubeMesh(1.0f, 4.0f, 1.0f);
+	auto dir = XMFLOAT3(0.0f, 1.0f, 0.0f);
+
+	for (int i = 0; i < BULLETS; i++)
+	{
+		m_ppBullets[i] = new CBulletObject(m_fBulletEffectiveRange);
+		m_ppBullets[i]->SetMesh(pBulletMesh);
+		m_ppBullets[i]->SetRotationAxis(dir);
+		m_ppBullets[i]->SetRotationSpeed(360.0f);
+		m_ppBullets[i]->SetMovingSpeed(120.0f);
+		m_ppBullets[i]->SetActive(false);
+	}
+}
+
+AirplanePlayer::~AirplanePlayer()
+{
+	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) delete m_ppBullets[i];
+}
+
+void AirplanePlayer::Animate(float fElapsedTime)
+{
+	Player::Animate(fElapsedTime);
+
+	for (int i = 0; i < BULLETS; i++)
+	{
+		if (m_ppBullets[i]->m_bActive) m_ppBullets[i]->Animate(fElapsedTime);
+	}
+}
+
+void AirplanePlayer::OnUpdateTransform()
+{
+	Player::OnUpdateTransform();
+
+	m_xmf4x4World = Matrix4x4::Multiply(XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.0f), 0.0f, 0.0f), m_xmf4x4World);
+}
+
+void AirplanePlayer::Render(HDC hDCFrameBuffer, GameCamera* pCamera)
+{
+	Player::Render(hDCFrameBuffer, pCamera);
+
+	for (int i = 0; i < BULLETS; i++)
+	{
+		if (m_ppBullets[i]->m_bActive)
+		{
+			m_ppBullets[i]->Render(hDCFrameBuffer, pCamera);
+		}
+	}
+}
+
+void AirplanePlayer::FireBullet(GameObject* pLockedObject)
+{
+/*
+	if (pLockedObject)
+	{
+		LookAt(pLockedObject->GetPosition(), XMFLOAT3(0.0f, 1.0f, 0.0f));
+		OnUpdateTransform();
+	}
+*/
+
+	CBulletObject* pBulletObject = NULL;
+	for (int i = 0; i < BULLETS; i++)
+	{
+		if (!m_ppBullets[i]->m_bActive)
+		{
+			pBulletObject = m_ppBullets[i];
+			break;
+		}
+	}
+
+	if (pBulletObject)
+	{
+		XMFLOAT3 xmf3Position = GetPosition();
+		XMFLOAT3 xmf3Direction = GetUp();
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 6.0f, false));
+
+		pBulletObject->m_xmf4x4World = m_xmf4x4World;
+
+		pBulletObject->SetFirePosition(xmf3FirePosition);
+		pBulletObject->SetMovingDirection(xmf3Direction);
+		pBulletObject->SetColor(RGB(255, 0, 0));
+		pBulletObject->SetActive(true);
+
+		if (pLockedObject)
+		{
+			pBulletObject->m_pLockedObject = pLockedObject;
+			pBulletObject->SetColor(RGB(0, 0, 255));
+		}
+	}
 }
 
 ATOM MyRegisterClass(HINSTANCE hInstance)
@@ -81,7 +169,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-	hInst = hInstance; // ì¸ìŠ¤í„´ìŠ¤ í•¸ë“¤ì„ ì „ì—­ ë³€ìˆ˜ì— ì €ì¥í•©ë‹ˆë‹¤.
+	hInst = hInstance; // ÀÎ½ºÅÏ½º ÇÚµéÀ» Àü¿ª º¯¼ö¿¡ ÀúÀåÇÕ´Ï´Ù.
 
 	RECT rc = { 0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT };
 	DWORD dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_BORDER;
