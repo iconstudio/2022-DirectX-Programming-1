@@ -3,8 +3,6 @@
 #include "Mesh.h"
 #include "Player.h"
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-//
 void CViewport::SetViewport(int nLeft, int nTop, int nWidth, int nHeight)
 {
 	m_nLeft = nLeft; 

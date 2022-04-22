@@ -5,64 +5,68 @@
 class GameObject
 {
 public:
-	GameObject();
+	GameObject(GameScene& scene);
+	GameObject(GameScene& scene, float x, float y, float z);
+	GameObject(GameScene& scene, const XMFLOAT3& position);
+	GameObject(GameScene& scene, XMFLOAT3&& position);
 	virtual ~GameObject();
 
 	void SetActive(bool bActive);
-	void SetMesh(CMesh* pMesh);
-
-	void SetColor(DWORD dwColor) { m_dwColor = dwColor; }
-
-	void SetRotationTransform(XMFLOAT4X4* pmxf4x4Transform);
+	void SetMesh(std::shared_ptr<CMesh> pMesh);
+	void SetColor(DWORD dwColor);
+	void SetCamera(std::shared_ptr<GameCamera>& cam);
 
 	void SetPosition(float x, float y, float z);
-	void SetPosition(XMFLOAT3& xmf3Position);
+	void SetPosition(const XMFLOAT3& xmf3Position);
+	void SetPosition(XMFLOAT3&& xmf3Position);
+	void SetRotationTransform(XMFLOAT4X4* pmxf4x4Transform);
+	void AddPosition(XMFLOAT3&& xmf3Position);
+
+	XMFLOAT3&& GetPosition();
+	XMFLOAT3&& GetLook();
+	XMFLOAT3&& GetUp();
+	XMFLOAT3&& GetRight();
 
 	void SetMovingDirection(const XMFLOAT3& xmf3MovingDirection);
 	void SetMovingDirection(XMFLOAT3&& xmf3MovingDirection);
-	void SetMovingSpeed(float fSpeed) { m_fMovingSpeed = fSpeed; }
-	void SetMovingRange(float fRange) { m_fMovingRange = fRange; }
+	void SetMovingSpeed(float fSpeed);
+	void SetMovingRange(float fRange);
+
+	void Move(XMFLOAT3& vDirection, float fSpeed);
+	void MoveForward(float fDistance = 1.0f);
+	void MoveUp(float fDistance = 1.0f);
+	void MoveStrafe(float fDistance = 1.0f);
 
 	void SetRotationAxis(const XMFLOAT3& xmf3RotationAxis);
 	void SetRotationAxis(XMFLOAT3&& xmf3RotationAxis);
-	void SetRotationSpeed(float fSpeed) { m_fRotationSpeed = fSpeed; }
-
-	void MoveStrafe(float fDistance = 1.0f);
-	void MoveUp(float fDistance = 1.0f);
-	void MoveForward(float fDistance = 1.0f);
-	void Move(XMFLOAT3& vDirection, float fSpeed);
+	void SetRotationSpeed(float fSpeed);
 
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3& xmf3Axis, float fAngle);
 
-	XMFLOAT3 GetPosition();
-	XMFLOAT3 GetLook();
-	XMFLOAT3 GetUp();
-	XMFLOAT3 GetRight();
-
 	void LookTo(XMFLOAT3& xmf3LookTo, XMFLOAT3& xmf3Up);
 	void LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up);
 
-	void UpdateBoundingBox();
-
-	void Render(HDC hDCFrameBuffer, XMFLOAT4X4* pxmf4x4World, CMesh* pMesh);
-
 	virtual void OnUpdateTransform() {}
 	virtual void Animate(float fElapsedTime);
-	virtual void Render(HDC hDCFrameBuffer, GameCamera* pCamera);
+	virtual void Render(HDC hDCFrameBuffer, XMFLOAT4X4* pxmf4x4World, CMesh* pMesh);
+	virtual void Render(HDC hDCFrameBuffer);
+	void UpdateBoundingBox();
 
-	void GenerateRayForPicking(XMVECTOR& xmvPickPosition, XMMATRIX& xmmtxView, XMVECTOR& xmvPickRayOrigin, XMVECTOR& xmvPickRayDirection);
-	int PickObjectByRayIntersection(XMVECTOR& xmPickPosition, XMMATRIX& xmmtxView, float* pfHitDistance);
+	void GenerateRayForPicking(XMVECTOR& pick_pos, XMMATRIX& view, XMVECTOR& ray_pos, XMVECTOR& xmvPickRayDirection);
+	int PickObjectByRayIntersection(XMVECTOR& pick_pos, XMMATRIX& view, float* max_distance);
 
-	bool						m_bActive = true;
+	bool m_bActive = true;
+	GameScene& Scene;
+	std::shared_ptr<GameCamera> Camera;
 
-	CMesh* m_pMesh = NULL;
-	XMFLOAT4X4					m_xmf4x4World = Matrix4x4::Identity();
+	std::shared_ptr<CMesh> m_pMesh;
+	DWORD m_dwColor;
+	HPEN m_Pen;
 
-	BoundingOrientedBox			m_xmOOBB = BoundingOrientedBox();
-
+	XMFLOAT4X4 m_xmf4x4World;
+	BoundingOrientedBox Collider;
 	GameObject* m_pObjectCollided = NULL;
-	DWORD						m_dwColor = RGB(255, 0, 0);
 
 	XMFLOAT3					m_xmf3MovingDirection = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	float						m_fMovingSpeed = 0.0f;

@@ -1,15 +1,15 @@
 #include "stdafx.hpp"
 #include "Player.hpp"
-#include "GameObject.hpp"
+#include "GameScene.hpp"
 #include "GameCamera.hpp"
+#include "GameObject.hpp"
 
-Player::Player()
+Player::Player(GameScene& scene)
+	: GameObject(scene)
 {}
 
 Player::~Player()
-{
-	if (m_pCamera) delete m_pCamera;
-}
+{}
 
 void Player::SetPosition(float x, float y, float z)
 {
@@ -26,8 +26,9 @@ void Player::SetCameraOffset(const XMFLOAT3& xmf3CameraOffset)
 void Player::SetCameraOffset(XMFLOAT3&& xmf3CameraOffset)
 {
 	m_xmf3CameraOffset = xmf3CameraOffset;
-	m_pCamera->SetLookAt(Vector3::Add(m_xmf3Position, m_xmf3CameraOffset), m_xmf3Position, m_xmf3Up);
-	m_pCamera->GenerateViewMatrix();
+
+	Camera->SetLookAt(Vector3::Add(m_xmf3Position, m_xmf3CameraOffset), m_xmf3Position, m_xmf3Up);
+	Camera->GenerateViewMatrix();
 }
 
 void Player::Move(DWORD dwDirection, float fDistance)
@@ -60,7 +61,7 @@ void Player::Move(XMFLOAT3&& xmf3Shift, bool bUpdateVelocity)
 	else
 	{
 		m_xmf3Position = Vector3::Add(xmf3Shift, m_xmf3Position);
-		m_pCamera->Move(xmf3Shift);
+		Camera->Move(xmf3Shift);
 	}
 }
 
@@ -71,7 +72,8 @@ void Player::Move(float x, float y, float z)
 
 void Player::Rotate(float fPitch, float fYaw, float fRoll)
 {
-	m_pCamera->Rotate(fPitch, fYaw, fRoll);
+	Camera->Rotate(fPitch, fYaw, fRoll);
+
 	if (fPitch != 0.0f)
 	{
 		XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(fPitch));
@@ -108,13 +110,14 @@ void Player::Update(float fTimeElapsed)
 {
 	Move(m_xmf3Velocity, false);
 
-	m_pCamera->Update(this, m_xmf3Position, fTimeElapsed);
-	m_pCamera->GenerateViewMatrix();
+	Camera->Update(this, m_xmf3Position, fTimeElapsed);
+	Camera->GenerateViewMatrix();
 
 	XMFLOAT3 xmf3Deceleration = Vector3::Normalize(Vector3::ScalarProduct(m_xmf3Velocity, -1.0f));
 	float fLength = Vector3::Length(m_xmf3Velocity);
 	float fDeceleration = m_fFriction * fTimeElapsed;
 	if (fDeceleration > fLength) fDeceleration = fLength;
+
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Deceleration, fDeceleration);
 }
 
@@ -133,7 +136,7 @@ void Player::OnUpdateTransform()
 	m_xmf4x4World._41 = m_xmf3Position.x; m_xmf4x4World._42 = m_xmf3Position.y; m_xmf4x4World._43 = m_xmf3Position.z;
 }
 
-void Player::Render(HDC hDCFrameBuffer, GameCamera* pCamera)
+void Player::Render(HDC hDCFrameBuffer)
 {
-	GameObject::Render(hDCFrameBuffer, pCamera);
+	GameObject::Render(hDCFrameBuffer);
 }

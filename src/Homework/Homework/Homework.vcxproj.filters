@@ -53,7 +53,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Homework.rc">
+    <ResourceCompile Include="Resources.rc">
       <Filter>리소스 파일</Filter>
     </ResourceCompile>
   </ItemGroup>

@@ -52,9 +52,9 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON1               ICON                    "icon.ico"
+IDI_ICON               ICON                    "icon.ico"
 
-IDI_ICON2               ICON                    "icon2.ico"
+IDI_SMALL               ICON                    "icon2.ico"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -65,6 +65,10 @@ IDI_ICON2               ICON                    "icon2.ico"
 STRINGTABLE
 BEGIN
     IDS_APP_TITLE           "Software Renderer"
+END
+
+STRINGTABLE
+BEGIN
     IDC_APP                 "DXHOMEWORK"
 END
 

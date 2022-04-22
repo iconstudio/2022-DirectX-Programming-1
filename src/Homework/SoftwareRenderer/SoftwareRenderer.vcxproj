@@ -147,12 +147,11 @@
     <ClInclude Include="GameFramework.hpp" />
     <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="GamePipeline.hpp" />
-    <ClInclude Include="GameWorld.hpp" />
     <ClInclude Include="Main.hpp" />
     <ClInclude Include="Mesh.hpp" />
-    <ClInclude Include="MyMesh.hpp" />
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="GameScene.hpp" />
     <ClInclude Include="stdafx.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -160,11 +159,10 @@
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GamePipeline.cpp" />
-    <ClCompile Include="GameWorld.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="MyMesh.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="GameScene.cpp" />
     <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>

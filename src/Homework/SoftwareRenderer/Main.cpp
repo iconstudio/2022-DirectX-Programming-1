@@ -49,7 +49,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			gGameFramework.FrameAdvance();
 		}
 	}
-	gGameFramework.OnDestroy();
 
 	return (int)msg.wParam;
 }
@@ -199,6 +198,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	switch (message)
 	{
+		case WM_CREATE:
+		{
+			gGameFramework.Start();
+		}
+		break;
+
 		case WM_SIZE:
 		case WM_LBUTTONDOWN:
 		case WM_LBUTTONUP:

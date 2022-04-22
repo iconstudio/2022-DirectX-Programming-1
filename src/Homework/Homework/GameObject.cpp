@@ -2,26 +2,6 @@
 #include "GameObject.h"
 #include "GraphicsPipeline.h"
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-inline float RandF(float fMin, float fMax)
-{
-	return(fMin + ((float)rand() / (float)RAND_MAX) * (fMax - fMin));
-}
-
-XMVECTOR RandomUnitVectorOnSphere()
-{
-	XMVECTOR xmvOne = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
-	XMVECTOR xmvZero = XMVectorZero();
-
-	while (true)
-	{
-		XMVECTOR v = XMVectorSet(RandF(-1.0f, 1.0f), RandF(-1.0f, 1.0f), RandF(-1.0f, 1.0f), 0.0f);
-		if (!XMVector3Greater(XMVector3LengthSq(v), xmvOne)) return(XMVector3Normalize(v));
-	}
-}
-
-
 CGameObject::~CGameObject(void)
 {
 	if (m_pMesh) m_pMesh->Release();
@@ -370,11 +350,12 @@ void CBulletObject::Animate(float fElapsedTime)
 
 	UpdateBoundingBox();
 
-	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime)) Reset();
+	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime))
+	{
+		Reset();
+	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-//
 void CAxisObject::Render(HDC hDCFrameBuffer, CCamera* pCamera)
 {
 	CGraphicsPipeline::SetWorldTransform(&m_xmf4x4World);

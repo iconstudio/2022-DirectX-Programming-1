@@ -20,7 +20,7 @@ public:
 	BOOL RayIntersectionByTriangle(XMVECTOR& ray, XMVECTOR& ray_dir, XMVECTOR v0, XMVECTOR v1, XMVECTOR v2, float* out_near);
 	int CheckRayIntersection(XMVECTOR& ray, XMVECTOR& ray_dir, float* out_near);
 
-	BoundingOrientedBox m_xmOOBB;
+	BoundingOrientedBox Collider;
 
 protected:
 	std::vector<CPolygon> Polygons;

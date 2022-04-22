@@ -1,8 +1,12 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include "GraphicsPipeline.h"
+#include "GameObject.h"
+#include "Camera.h"
+#include "Player.h"
 
 CScene::CScene(CPlayer* pPlayer)
+	: Instances()
 {
 	m_pPlayer = pPlayer;
 }

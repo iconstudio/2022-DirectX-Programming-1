@@ -11,12 +11,19 @@
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
 
+#include <cmath>
 #include <vector>
 #include <algorithm>
 #include <memory>
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;
+
+// 게임 월드의 크기
+constexpr UINT WORLD_H = 1000, WORLD_V = 3000, WORLD_U = 1000;
+
+// 충돌 영역의 크기
+constexpr UINT COLLIDE_AREA_H = 1000, COLLIDE_AREA_V = 3000, COLLIDE_AREA_U = 1000;
 
 #define FRAMEBUFFER_WIDTH		800
 #define FRAMEBUFFER_HEIGHT		600
@@ -40,10 +47,12 @@ class GameFramework;
 class GamePipeline;
 class GameCamera;
 class GameViewport;
-class GameWorld;
+class GameScene;
+class GameCollsionGroup;
 class GameObject;
 class Player;
 
+constexpr float Distance(float x1, float y1, float z1, float x2, float y2, float z2);
 void Draw2DLine(HDC hDCFrameBuffer, XMFLOAT3& f3PreviousProject, XMFLOAT3& f3CurrentProject);
 
 namespace Vector3

@@ -1,12 +1,13 @@
 #pragma once
 #include "stdafx.hpp"
-#include "GameObject.hpp"
+#include "GameScene.hpp"
 #include "GameCamera.hpp"
+#include "GameObject.hpp"
 
 class Player : public GameObject
 {
 public:
-	Player();
+	Player(GameScene& scene);
 	virtual ~Player();
 
 public:
@@ -23,8 +24,6 @@ public:
 	float           			m_fPitch = 0.0f;
 	float           			m_fYaw = 0.0f;
 	float           			m_fRoll = 0.0f;
-
-	GameCamera* m_pCamera;
 
 public:
 	void SetPosition(float x, float y, float z);
@@ -46,8 +45,5 @@ public:
 
 	virtual void OnUpdateTransform();
 	virtual void Animate(float fElapsedTime);
-	virtual void Render(HDC hDCFrameBuffer, GameCamera* pCamera);
-
-	void SetCamera(GameCamera* pCamera) { m_pCamera = pCamera; }
-	GameCamera* GetCamera() { return(m_pCamera); }
+	virtual void Render(HDC hDCFrameBuffer);
 };

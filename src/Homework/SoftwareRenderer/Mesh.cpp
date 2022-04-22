@@ -3,11 +3,11 @@
 #include "GamePipeline.hpp"
 
 CMesh::CMesh()
-	: m_xmOOBB()
+	: Collider()
 {}
 
 CMesh::CMesh(int number_polygons)
-	: m_xmOOBB(), Polygons(number_polygons)
+	: Collider(), Polygons(number_polygons)
 {}
 
 CMesh::~CMesh()
@@ -63,7 +63,7 @@ BOOL CMesh::RayIntersectionByTriangle(XMVECTOR& xmRayOrigin, XMVECTOR& xmRayDire
 int CMesh::CheckRayIntersection(XMVECTOR& xmvPickRayOrigin, XMVECTOR& xmvPickRayDirection, float* pfNearHitDistance)
 {
 	int nIntersections = 0;
-	bool bIntersected = m_xmOOBB.Intersects(xmvPickRayOrigin, xmvPickRayDirection, *pfNearHitDistance);
+	bool bIntersected = Collider.Intersects(xmvPickRayOrigin, xmvPickRayDirection, *pfNearHitDistance);
 
 	if (bIntersected)
 	{
