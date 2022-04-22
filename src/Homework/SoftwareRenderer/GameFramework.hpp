@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.hpp"
+#include "GameTimer.hpp"
 #include "GameScene.hpp"
-#include "GameCamera.hpp"
 
 class GameFramework
 {
@@ -9,27 +9,31 @@ public:
 	GameFramework();
 	~GameFramework();
 
-	void OnCreate(HINSTANCE instance, HWND hwnd);
-
+	void Awake(HINSTANCE instance, HWND hwnd, RECT&& rect);
 	void Start();
+	void Update();
+	void Render(HDC surface);
 
-	void ProcessInput();
-	void AnimateObjects();
-	void FrameAdvance();
+	void ClearFrameBuffer(COLORREF color);
+	void PresentFrameBuffer(HDC surface);
 
-	void BuildFrameBuffer();
-	void ClearFrameBuffer(DWORD dwColor);
-	void PresentFrameBuffer();
-
-	void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
-	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
-	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+	void OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+	void OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+	void OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
 private:
 	HINSTANCE process;
 	HWND window;
 
+	RECT myFrame;
+	HDC mySurface;
+	HBITMAP myFrameBuffer;
+
+	POINT Cursor;
+
+	std::unique_ptr<GameTimer> myTimer;
 	std::unique_ptr<GameScene> myScene;
 	std::shared_ptr<GameCamera> myCamera;
+	std::shared_ptr<Player> myPlayer;
 };
 

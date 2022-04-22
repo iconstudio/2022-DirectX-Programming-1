@@ -32,6 +32,7 @@ private:
 class CPolygon
 {
 public:
+	CPolygon();
 	CPolygon(const UINT number_vertices);
 	virtual ~CPolygon();
 

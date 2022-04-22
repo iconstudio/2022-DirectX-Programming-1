@@ -1,10 +1,13 @@
 #include "stdafx.hpp"
 #include "GameScene.hpp"
+#include "GameObject.hpp"
+#include "GameCamera.hpp"
+#include "Player.hpp"
 
 GameScene::GameScene(UINT sz_horizontal, UINT sz_vertical, UINT sz_up)
 	: worldSizeH(sz_horizontal), worldSizeV(sz_vertical), worldSizeU(sz_up), collisionAreaIndex(0)
 	, Instances()
-	, Camera(nullptr)
+	, myPlayer(nullptr), myCamera(nullptr)
 {}
 
 GameScene::~GameScene()
@@ -12,7 +15,7 @@ GameScene::~GameScene()
 
 void GameScene::SetCamera(std::shared_ptr<GameCamera> cam)
 {
-	Camera = cam;
+	myCamera = cam;
 }
 
 void GameScene::Start()
@@ -21,29 +24,31 @@ void GameScene::Start()
 	const auto cgrp_cnt_y = worldSizeV / COLLIDE_AREA_V;
 	const auto cgrp_cnt_z = worldSizeU / COLLIDE_AREA_U;
 
-	XMFLOAT3 position{};
-	for (int i = 0; i < cgrp_cnt_x; ++i)
+	for (UINT i = 0; i < cgrp_cnt_x; ++i)
 	{
-		for (int j = 0; j < cgrp_cnt_y; ++j)
+		for (UINT j = 0; j < cgrp_cnt_y; ++j)
 		{
-			for (int k = 0; k < cgrp_cnt_z; ++k)
+			for (UINT k = 0; k < cgrp_cnt_z; ++k)
 			{
-				position.x = i * COLLIDE_AREA_H + 0.5 * COLLIDE_AREA_H;
-				position.y = j * COLLIDE_AREA_V + 0.5 * COLLIDE_AREA_V;
-				position.z = k * COLLIDE_AREA_U + 0.5 * COLLIDE_AREA_U;
+				XMFLOAT3 position{};
+				position.x = i * COLLIDE_AREA_H + 0.5f * COLLIDE_AREA_H;
+				position.y = j * COLLIDE_AREA_V + 0.5f * COLLIDE_AREA_V;
+				position.z = k * COLLIDE_AREA_U + 0.5f * COLLIDE_AREA_U;
 
 				auto&& group = CreateCollisionGroup();
 				group->SetPosition(std::move(position));
 			}
 		}
 	}
+
+	auto player = CreateInstance<Player>(playerSpawnPoint);
 }
 
-void GameScene::Animate(float elapsed_time)
+void GameScene::Update(float elapsed_time)
 {
 	for (auto& instance : Instances)
 	{
-		instance->Animate(elapsed_time);
+		instance->Update(elapsed_time);
 	}
 }
 
@@ -55,13 +60,13 @@ void GameScene::Render(HDC surface)
 	}
 }
 
-constexpr CGroupPtr&& GameScene::CreateCollisionGroup()
+CGroupPtr GameScene::CreateCollisionGroup()
 {
 	auto index = collisionAreas.size();
 	auto&& ptr = std::make_shared<GameCollsionGroup>(index, COLLIDE_AREA_H, COLLIDE_AREA_V, COLLIDE_AREA_U);
 	collisionAreas.push_back(ptr);
 
-	return std::move(ptr);
+	return ptr;
 }
 
 CGroupPtr GameScene::FindProperGroup(const XMFLOAT3& position)
@@ -77,28 +82,34 @@ CGroupPtr GameScene::FindProperGroup(const XMFLOAT3& position)
 			return group;
 		}
 	}
+
+	return CGroupPtr(nullptr);
 }
 
 template<class Type>
-ObjectPtr&& GameScene::CreateInstance(float x, float y, float z)
+ObjectPtr GameScene::CreateInstance(float x, float y, float z)
 {
 	return CreateInstance<Type>(std::move(XMFLOAT3(x, y, z)));
 }
 
 template<class Type>
-ObjectPtr&& GameScene::CreateInstance(const XMFLOAT3& position)
+ObjectPtr GameScene::CreateInstance(const XMFLOAT3& position)
 {
 	return CreateInstance<Type>(std::move(XMFLOAT3(position)));
 }
 
 template<class Type>
-ObjectPtr&& GameScene::CreateInstance(XMFLOAT3&& position)
+ObjectPtr GameScene::CreateInstance(XMFLOAT3&& position)
 {
 	auto group = FindProperGroup(position);
 	auto&& inst = std::make_shared<GameObject>(*this, position);
-	group->AddInstance(group);
+	inst->SetCamera(myCamera);
 
-	return std::move(inst);
+	group->AddInstance(inst);
+
+	Instances.push_back(inst);
+
+	return inst;
 }
 
 GameCollsionGroup::GameCollsionGroup(const UINT index, UINT sz_horizontal, UINT sz_vertical, UINT sz_up)

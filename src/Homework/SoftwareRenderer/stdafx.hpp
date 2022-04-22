@@ -19,6 +19,11 @@
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 
+constexpr FLOAT FPS_LIMIT = 100.0f;
+constexpr COLORREF C_WHITE = RGB(0xff, 0xff, 0xff);
+constexpr COLORREF C_GREEN = RGB(0x00, 0x80, 0x00);
+constexpr COLORREF FRAMEBUFFER_CLS_COLOR = C_GREEN;
+
 // 게임 월드의 크기
 constexpr UINT WORLD_H = 1000, WORLD_V = 3000, WORLD_U = 1000;
 
@@ -52,7 +57,7 @@ class GameCollsionGroup;
 class GameObject;
 class Player;
 
-constexpr float Distance(float x1, float y1, float z1, float x2, float y2, float z2);
+float Distance(float x1, float y1, float z1, float x2, float y2, float z2);
 void Draw2DLine(HDC hDCFrameBuffer, XMFLOAT3& f3PreviousProject, XMFLOAT3& f3CurrentProject);
 
 namespace Vector3

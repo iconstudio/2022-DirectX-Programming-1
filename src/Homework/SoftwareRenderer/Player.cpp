@@ -6,6 +6,7 @@
 
 Player::Player(GameScene& scene)
 	: GameObject(scene)
+	, Cursor()
 {}
 
 Player::~Player()
@@ -17,6 +18,9 @@ void Player::SetPosition(float x, float y, float z)
 
 	GameObject::SetPosition(x, y, z);
 }
+
+void Player::SetRotation(float x, float y, float z)
+{}
 
 void Player::SetCameraOffset(const XMFLOAT3& xmf3CameraOffset)
 {
@@ -108,6 +112,8 @@ void Player::LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up)
 
 void Player::Update(float fTimeElapsed)
 {
+	GameObject::Update(fTimeElapsed);
+
 	Move(m_xmf3Velocity, false);
 
 	Camera->Update(this, m_xmf3Position, fTimeElapsed);
@@ -119,14 +125,54 @@ void Player::Update(float fTimeElapsed)
 	if (fDeceleration > fLength) fDeceleration = fLength;
 
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Deceleration, fDeceleration);
-}
 
-void Player::Animate(float fElapsedTime)
-{
 	OnUpdateTransform();
-
-	GameObject::Animate(fElapsedTime);
 }
+
+void Player::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	if (GetCapture() == hwnd)
+	{
+		switch (msg)
+		{
+			case WM_LBUTTONDOWN:
+			break;
+
+			case WM_RBUTTONDOWN:
+			break;
+
+			case WM_LBUTTONUP:
+			break;
+
+			case WM_RBUTTONUP:
+			break;
+
+			case WM_MOUSEMOVE:
+			{
+				POINT ptCursorPos;
+				GetCursorPos(&ptCursorPos);
+
+				float cxMouseDelta = (float)(ptCursorPos.x - Cursor.x) / 3.0f;
+				float cyMouseDelta = (float)(ptCursorPos.y - Cursor.y) / 3.0f;
+				SetCursorPos(Cursor.x, Cursor.y);
+
+				if (cxMouseDelta || cyMouseDelta)
+				{
+					//if (pKeyBuffer[VK_RBUTTON] & 0xF0)
+					//	myPlayer->Rotate(cyMouseDelta, 0.0f, -cxMouseDelta);
+					//else
+					Rotate(cyMouseDelta, cxMouseDelta, 0.0f);
+				}
+
+				Cursor = ptCursorPos;
+			}
+			break;
+		}
+	}
+}
+
+void Player::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{}
 
 void Player::OnUpdateTransform()
 {
@@ -134,9 +180,4 @@ void Player::OnUpdateTransform()
 	m_xmf4x4World._21 = m_xmf3Up.x; m_xmf4x4World._22 = m_xmf3Up.y; m_xmf4x4World._23 = m_xmf3Up.z;
 	m_xmf4x4World._31 = m_xmf3Look.x; m_xmf4x4World._32 = m_xmf3Look.y; m_xmf4x4World._33 = m_xmf3Look.z;
 	m_xmf4x4World._41 = m_xmf3Position.x; m_xmf4x4World._42 = m_xmf3Position.y; m_xmf4x4World._43 = m_xmf3Position.z;
-}
-
-void Player::Render(HDC hDCFrameBuffer)
-{
-	GameObject::Render(hDCFrameBuffer);
 }

@@ -47,12 +47,11 @@ public:
 	void LookTo(XMFLOAT3& xmf3LookTo, XMFLOAT3& xmf3Up);
 	void LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up);
 
-	virtual void OnUpdateTransform() {}
-	virtual void Animate(float fElapsedTime);
-	virtual void Render(HDC hDCFrameBuffer, XMFLOAT4X4* pxmf4x4World, CMesh* pMesh);
-	virtual void Render(HDC hDCFrameBuffer);
-	void UpdateBoundingBox();
+	virtual void Update(float fElapsedTime);
+	virtual void Render(HDC surface, XMFLOAT4X4* world, CMesh* mesh);
+	virtual void Render(HDC surface);
 
+	void UpdateBoundingBox();
 	void GenerateRayForPicking(XMVECTOR& pick_pos, XMMATRIX& view, XMVECTOR& ray_pos, XMVECTOR& xmvPickRayDirection);
 	int PickObjectByRayIntersection(XMVECTOR& pick_pos, XMMATRIX& view, float* max_distance);
 

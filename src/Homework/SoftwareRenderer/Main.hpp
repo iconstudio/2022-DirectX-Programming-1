@@ -15,9 +15,9 @@ public:
 	void FireBullet(GameObject* pLockedObject);
 
 	virtual void OnUpdateTransform();
-	virtual void Animate(float fElapsedTime);
+	virtual void Update(float fElapsedTime);
 	virtual void Render(HDC hDCFrameBuffer, GameCamera* pCamera);
 
-	CBulletObject* m_ppBullets[BULLETS];
+	//CBulletObject* m_ppBullets[BULLETS];
 	float m_fBulletEffectiveRange = 150.0f;
 };

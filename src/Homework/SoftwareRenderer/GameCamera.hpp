@@ -22,32 +22,6 @@ public:
 	GameCamera();
 	virtual ~GameCamera();
 
-private:
-	XMFLOAT3		m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	XMFLOAT3		m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	XMFLOAT3		m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	XMFLOAT3		m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
-
-	float			m_fFOVAngle = 90.0f;
-	float			m_fProjectRectDistance = 1.0f;
-
-	float			m_fAspectRatio = float(FRAMEBUFFER_WIDTH) / float(FRAMEBUFFER_HEIGHT);
-
-	BoundingFrustum	m_xmFrustumView = BoundingFrustum();
-	BoundingFrustum	m_xmFrustumWorld = BoundingFrustum();
-	XMFLOAT4X4		m_xmf4x4InverseView = Matrix4x4::Identity();
-
-public:
-	XMFLOAT4X4		m_xmf4x4View = Matrix4x4::Identity();
-	XMFLOAT4X4		m_xmf4x4PerspectiveProject = Matrix4x4::Identity();
-	XMFLOAT4X4		m_xmf4x4ViewPerspectiveProject = Matrix4x4::Identity();
-
-	XMFLOAT4X4		m_xmf4x4OrthographicProject = Matrix4x4::Identity();
-	XMFLOAT4X4		m_xmf4x4ViewOrthographicProject = Matrix4x4::Identity();
-
-	GameViewport		m_Viewport;
-
-public:
 	void SetFOVAngle(float fFOVAngle);
 
 	void GenerateViewMatrix();
@@ -65,4 +39,29 @@ public:
 	void Update(Player* pPlayer, XMFLOAT3& xmf3LookAt, float fTimeElapsed = 0.016f);
 
 	bool IsInFrustum(BoundingOrientedBox& xmBoundingBox);
+
+	XMFLOAT4X4		m_xmf4x4View = Matrix4x4::Identity();
+	XMFLOAT4X4		m_xmf4x4PerspectiveProject = Matrix4x4::Identity();
+	XMFLOAT4X4		m_xmf4x4ViewPerspectiveProject = Matrix4x4::Identity();
+
+	XMFLOAT4X4		m_xmf4x4OrthographicProject = Matrix4x4::Identity();
+	XMFLOAT4X4		m_xmf4x4ViewOrthographicProject = Matrix4x4::Identity();
+
+	GameViewport		m_Viewport;
+
+private:
+	XMFLOAT3 m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3 m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	XMFLOAT3 m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	XMFLOAT3 m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
+
+	float m_fFOVAngle = 90.0f;
+	float m_fProjectRectDistance = 1.0f;
+
+	float m_fAspectRatio = float(FRAMEBUFFER_WIDTH) / float(FRAMEBUFFER_HEIGHT);
+
+	BoundingFrustum	m_xmFrustumView = BoundingFrustum();
+	BoundingFrustum	m_xmFrustumWorld = BoundingFrustum();
+	XMFLOAT4X4		m_xmf4x4InverseView = Matrix4x4::Identity();
+
 };

@@ -10,26 +10,10 @@ public:
 	Player(GameScene& scene);
 	virtual ~Player();
 
-public:
-	XMFLOAT3					m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	XMFLOAT3					m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	XMFLOAT3					m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	XMFLOAT3					m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
-
-	XMFLOAT3					m_xmf3CameraOffset = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	XMFLOAT3					m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-
-	float						m_fFriction = 125.0f;
-
-	float           			m_fPitch = 0.0f;
-	float           			m_fYaw = 0.0f;
-	float           			m_fRoll = 0.0f;
-
-public:
 	void SetPosition(float x, float y, float z);
 	void SetRotation(float x, float y, float z);
-
-	void LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up);
+	void SetCameraOffset(const XMFLOAT3& xmf3CameraOffset);
+	void SetCameraOffset(XMFLOAT3&& xmf3CameraOffset);
 
 	void Move(DWORD dwDirection, float fDistance);
 	void Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity);
@@ -38,12 +22,28 @@ public:
 
 	void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
 
-	void SetCameraOffset(const XMFLOAT3& xmf3CameraOffset);
-	void SetCameraOffset(XMFLOAT3&& xmf3CameraOffset);
+	void LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up);
 
-	void Update(float fTimeElapsed = 0.016f);
+	virtual void Update(float fTimeElapsed);
+	void OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+	void OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+	void OnUpdateTransform();
 
-	virtual void OnUpdateTransform();
-	virtual void Animate(float fElapsedTime);
-	virtual void Render(HDC hDCFrameBuffer);
+	friend class GameCamera;
+
+private:
+	XMFLOAT3 m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3 m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	XMFLOAT3 m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	XMFLOAT3 m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
+
+	XMFLOAT3 m_xmf3CameraOffset = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3 m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	float m_fFriction = 125.0f;
+
+	float m_fPitch = 0.0f;
+	float m_fYaw = 0.0f;
+	float m_fRoll = 0.0f;
+
+	POINT Cursor;
 };

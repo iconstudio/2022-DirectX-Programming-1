@@ -2,6 +2,7 @@
 #include "stdafx.hpp"
 #include "GameObject.hpp"
 #include "GameCamera.hpp"
+#include "Player.hpp"
 
 using ObjectPtr = std::shared_ptr<GameObject>;
 using CGroupPtr = std::shared_ptr<GameCollsionGroup>;
@@ -15,25 +16,25 @@ public:
 	void SetCamera(std::shared_ptr<GameCamera> cam);
 
 	void Start();
-	void Animate(float elapsed_time);
+	void Update(float elapsed_time);
 	void Render(HDC surface);
 
-	constexpr CGroupPtr&& CreateCollisionGroup();
+	CGroupPtr CreateCollisionGroup();
 	CGroupPtr FindProperGroup(const XMFLOAT3& position);
 
 	template<class Type>
-	ObjectPtr&& CreateInstance(float x, float y, float z);
+	ObjectPtr CreateInstance(float x, float y, float z);
 
 	template<class Type>
-	ObjectPtr&& CreateInstance(const XMFLOAT3& position);
+	ObjectPtr CreateInstance(const XMFLOAT3& position);
 
 	template<class Type>
-	ObjectPtr&& CreateInstance(XMFLOAT3&& position);
+	ObjectPtr CreateInstance(XMFLOAT3&& position);
 
 	friend class GameCollsionGroup;
 
 	// 게임 월드의 크기
-	const UINT worldSizeH, worldSizeV, worldSizeU;
+	const INT worldSizeH, worldSizeV, worldSizeU;
 
 	// 기준 충돌 영역
 	UINT collisionAreaIndex;
@@ -44,9 +45,15 @@ private:
 
 	// 씬 내의 충돌 영역
 	std::vector<CGroupPtr> collisionAreas;
-	
+
+	// 플레이어 객체 (Instances 안에도 있음)
+	std::shared_ptr<Player> myPlayer;
+
 	// 프레임워크에서 받은 카메라
-	std::shared_ptr<GameCamera> Camera;
+	std::shared_ptr<GameCamera> myCamera;
+
+	// 플레이어 생성 위치
+	XMFLOAT3 playerSpawnPoint = XMFLOAT3{ 50.0f, 50.0f, 0.0f };
 };
 
 class GameCollsionGroup

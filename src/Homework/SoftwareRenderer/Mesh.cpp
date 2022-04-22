@@ -72,14 +72,18 @@ int CMesh::CheckRayIntersection(XMVECTOR& xmvPickRayOrigin, XMVECTOR& xmvPickRay
 			auto& vertices = polygon.Vertices;
 			auto vertex_number = vertices.size();
 
+			const auto& vertex_0 = vertices[0].TranformedPosition;
+			const auto& vertex_1 = vertices[1].TranformedPosition;
+			const auto& vertex_2 = vertices[2].TranformedPosition;
+
+			auto v0 = XMLoadFloat3(&vertex_0);
+			auto v1 = XMLoadFloat3(&vertex_1);
+			auto v2 = XMLoadFloat3(&vertex_2);
+
 			switch (vertex_number)
 			{
 				case 3:
 				{
-					XMVECTOR v0 = XMLoadFloat3(&(vertices[0].TranformedPosition));
-					XMVECTOR v1 = XMLoadFloat3(&(vertices[1].TranformedPosition));
-					XMVECTOR v2 = XMLoadFloat3(&(vertices[2].TranformedPosition));
-
 					BOOL bIntersected = RayIntersectionByTriangle(xmvPickRayOrigin, xmvPickRayDirection, v0, v1, v2, pfNearHitDistance);
 					
 					if (bIntersected)
@@ -91,9 +95,6 @@ int CMesh::CheckRayIntersection(XMVECTOR& xmvPickRayOrigin, XMVECTOR& xmvPickRay
 
 				case 4:
 				{
-					XMVECTOR v0 = XMLoadFloat3(&(vertices[0].TranformedPosition));
-					XMVECTOR v1 = XMLoadFloat3(&(vertices[1].TranformedPosition));
-					XMVECTOR v2 = XMLoadFloat3(&(vertices[2].TranformedPosition));
 					BOOL bIntersected = RayIntersectionByTriangle(xmvPickRayOrigin, xmvPickRayDirection, v0, v1, v2, pfNearHitDistance);
 					
 					if (bIntersected)
@@ -101,10 +102,10 @@ int CMesh::CheckRayIntersection(XMVECTOR& xmvPickRayOrigin, XMVECTOR& xmvPickRay
 						nIntersections++;
 					}
 
-					XMVECTOR v0 = XMLoadFloat3(&(vertices[0].TranformedPosition));
-					XMVECTOR v1 = XMLoadFloat3(&(vertices[2].TranformedPosition));
-					XMVECTOR v2 = XMLoadFloat3(&(vertices[3].TranformedPosition));
-					bIntersected = RayIntersectionByTriangle(xmvPickRayOrigin, xmvPickRayDirection, v0, v1, v2, pfNearHitDistance);
+					const auto& vertex_3 = vertices[3].TranformedPosition;
+					auto v3 = XMLoadFloat3(&(vertices[3].TranformedPosition));
+
+					bIntersected = RayIntersectionByTriangle(xmvPickRayOrigin, xmvPickRayDirection, v0, v2, v3, pfNearHitDistance);
 					
 					if (bIntersected)
 					{
@@ -128,6 +129,7 @@ void CMesh::Render(HDC hDCFrameBuffer)
 		auto& vertices = polygon.Vertices;
 
 		f3InitialProject = GamePipeline::Project(vertices[0].Position);
+
 		f3PreviousProject = f3InitialProject;
 
 		bInitialInside = (-1.0f <= f3InitialProject.x) && (f3InitialProject.x <= 1.0f) && (-1.0f <= f3InitialProject.y) && (f3InitialProject.y <= 1.0f);
@@ -135,7 +137,8 @@ void CMesh::Render(HDC hDCFrameBuffer)
 		
 		for (auto& vertex : vertices)
 		{
-			XMFLOAT3& f3CurrentProject = GamePipeline::Project(vertex.Position);
+			auto f3CurrentProject = GamePipeline::Project(vertex.Position);
+
 			vertex.TranformedPosition = f3CurrentProject;
 
 			bCurrentInside = (-1.0f <= f3CurrentProject.x) && (f3CurrentProject.x <= 1.0f) && (-1.0f <= f3CurrentProject.y) && (f3CurrentProject.y <= 1.0f);
@@ -157,6 +160,10 @@ void CMesh::Render(HDC hDCFrameBuffer)
 		}
 	}
 }
+
+CPolygon::CPolygon()
+	: Vertices()
+{}
 
 CPolygon::CPolygon(const UINT number_vertices)
 	: Vertices(number_vertices)

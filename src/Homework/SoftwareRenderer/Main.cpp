@@ -9,11 +9,10 @@ HINSTANCE hInst;								// 현재 인스턴스입니다.
 TCHAR szTitle[MAX_LOADSTRING];					// 제목 표시줄 텍스트입니다.
 TCHAR szWindowClass[MAX_LOADSTRING];			// 기본 창 클래스 이름입니다.
 
-GameFramework		gGameFramework;
+GameFramework gGameFramework;
 
-// 이 코드 모듈에 들어 있는 함수의 정방향 선언입니다.
-ATOM				MyRegisterClass(HINSTANCE hInstance);
-BOOL				InitInstance(HINSTANCE, int);
+ATOM				MyRegisterClass(HINSTANCE instance);
+BOOL				InitInstance(HINSTANCE instance, int show);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
@@ -44,15 +43,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		else
-		{
-			gGameFramework.FrameAdvance();
-		}
+
+		gGameFramework.Update();
 	}
 
 	return (int)msg.wParam;
 }
-
+/*
 AirplanePlayer::AirplanePlayer()
 {
 	CCubeMesh* pBulletMesh = new CCubeMesh(1.0f, 4.0f, 1.0f);
@@ -71,7 +68,10 @@ AirplanePlayer::AirplanePlayer()
 
 AirplanePlayer::~AirplanePlayer()
 {
-	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) delete m_ppBullets[i];
+	for (int i = 0; i < BULLETS; i++)
+	{
+		if (m_ppBullets[i]) delete m_ppBullets[i];
+	}
 }
 
 void AirplanePlayer::Animate(float fElapsedTime)
@@ -106,13 +106,11 @@ void AirplanePlayer::Render(HDC hDCFrameBuffer, GameCamera* pCamera)
 
 void AirplanePlayer::FireBullet(GameObject* pLockedObject)
 {
-/*
 	if (pLockedObject)
 	{
 		LookAt(pLockedObject->GetPosition(), XMFLOAT3(0.0f, 1.0f, 0.0f));
 		OnUpdateTransform();
 	}
-*/
 
 	CBulletObject* pBulletObject = NULL;
 	for (int i = 0; i < BULLETS; i++)
@@ -144,8 +142,9 @@ void AirplanePlayer::FireBullet(GameObject* pLockedObject)
 		}
 	}
 }
+*/
 
-ATOM MyRegisterClass(HINSTANCE hInstance)
+ATOM MyRegisterClass(HINSTANCE instance)
 {
 	WNDCLASSEX wcex;
 	ZeroMemory(&wcex, sizeof(wcex));
@@ -155,8 +154,8 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.lpfnWndProc = WndProc;
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
-	wcex.hInstance = hInstance;
-	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON));
+	wcex.hInstance = instance;
+	wcex.hIcon = LoadIcon(instance, MAKEINTRESOURCE(IDI_ICON));
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wcex.lpszMenuName = NULL;
@@ -166,22 +165,25 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	return RegisterClassEx(&wcex);
 }
 
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
+BOOL InitInstance(HINSTANCE instance, int nCmdShow)
 {
-	hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
+	hInst = instance; // 인스턴스 핸들을 전역 변수에 저장합니다.
 
-	RECT rc = { 0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT };
-	DWORD dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_BORDER;
-	AdjustWindowRect(&rc, dwStyle, FALSE);
+	RECT rect = { 0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT };
+	DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_BORDER;
+	AdjustWindowRect(&rect, style, FALSE);
 
-	HWND hMainWnd = CreateWindow(szWindowClass, szTitle, dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance, NULL);
+	HWND hMainWnd = CreateWindow(szWindowClass, szTitle, style
+		, CW_USEDEFAULT, CW_USEDEFAULT
+		, rect.right - rect.left, rect.bottom - rect.top
+		, NULL, NULL, instance, NULL);
 
 	if (!hMainWnd)
 	{
 		return(FALSE);
 	}
 
-	gGameFramework.OnCreate(hInstance, hMainWnd);
+	gGameFramework.Awake(instance, hMainWnd, std::move(rect));
 
 	ShowWindow(hMainWnd, nCmdShow);
 	UpdateWindow(hMainWnd);
@@ -189,38 +191,60 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	return TRUE;
 }
 
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
-	int wmId = 0, wmEvent = 0;
-
 	PAINTSTRUCT ps;
 	HDC hdc;
+	const UINT timer_id = 0;
 
-	switch (message)
+	switch (msg)
 	{
 		case WM_CREATE:
 		{
 			gGameFramework.Start();
+
+			SetCapture(hwnd);
+			SetTimer(hwnd, timer_id, UINT(FPS_LIMIT * 1000), NULL);
 		}
 		break;
 
-		case WM_SIZE:
 		case WM_LBUTTONDOWN:
 		case WM_LBUTTONUP:
 		case WM_RBUTTONDOWN:
 		case WM_RBUTTONUP:
 		case WM_MOUSEMOVE:
+		{
+			gGameFramework.OnMouse(hwnd, msg, wparam, lparam);
+		}
+		break;
+
 		case WM_KEYDOWN:
 		case WM_KEYUP:
 		{
-			gGameFramework.OnProcessingWindowMessage(hWnd, message, wParam, lParam);
+			gGameFramework.OnKeyboard(hwnd, msg, wparam, lparam);
+		}
+		break;
+
+		case WM_ACTIVATE:
+		case WM_SIZE:
+		{
+			gGameFramework.OnHWND(hwnd, msg, wparam, lparam);
+		}
+		break;
+
+		case WM_TIMER:
+		{
+			InvalidateRect(hwnd, NULL, FALSE);
 		}
 		break;
 
 		case WM_PAINT:
 		{
-			hdc = BeginPaint(hWnd, &ps);
-			EndPaint(hWnd, &ps);
+			hdc = BeginPaint(hwnd, &ps);
+
+			gGameFramework.Render(hdc);
+
+			EndPaint(hwnd, &ps);
 		}
 		break;
 
@@ -232,8 +256,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		default:
 		{
-			return DefWindowProc(hWnd, message, wParam, lParam);
+			return DefWindowProc(hwnd, msg, wparam, lparam);
 		}
 	}
+
 	return 0;
 }

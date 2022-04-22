@@ -223,7 +223,7 @@ void GameObject::LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up)
 	m_xmf4x4World._31 = xmf4x4View._13; m_xmf4x4World._32 = xmf4x4View._23; m_xmf4x4World._33 = xmf4x4View._33;
 }
 
-void GameObject::Animate(float fElapsedTime)
+void GameObject::Update(float fElapsedTime)
 {
 	if (m_fRotationSpeed != 0.0f)
 	{
@@ -238,23 +238,26 @@ void GameObject::Animate(float fElapsedTime)
 	UpdateBoundingBox();
 }
 
-void GameObject::Render(HDC hDCFrameBuffer, XMFLOAT4X4* pxmf4x4World, CMesh* pMesh)
+void GameObject::Render(HDC surface, XMFLOAT4X4* world, CMesh* mesh)
 {
-	if (pMesh)
+	if (mesh)
 	{
-		GamePipeline::SetWorldTransform(pxmf4x4World);
+		GamePipeline::SetWorldTransform(world);
 
-		HPEN hOldPen = (HPEN)::SelectObject(hDCFrameBuffer, m_Pen);
-		pMesh->Render(hDCFrameBuffer);
-		::SelectObject(hDCFrameBuffer, hOldPen);
+		HPEN hOldPen = (HPEN)::SelectObject(surface, m_Pen);
+		mesh->Render(surface);
+		::SelectObject(surface, hOldPen);
 	}
 }
 
-void GameObject::Render(HDC hDCFrameBuffer)
+void GameObject::Render(HDC surface)
 {
-	if (Camera->IsInFrustum(Collider))
+	if (Camera)
 	{
-		GameObject::Render(hDCFrameBuffer, &m_xmf4x4World, m_pMesh.get());
+		if (Camera->IsInFrustum(Collider))
+		{
+			GameObject::Render(surface, &m_xmf4x4World, m_pMesh.get());
+		}
 	}
 }
 
