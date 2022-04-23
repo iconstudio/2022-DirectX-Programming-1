@@ -2,6 +2,7 @@
 #include "GamePipeline.hpp"
 #include "GameCamera.hpp"
 #include "GameObject.hpp"
+#include "GameTransform.hpp"
 #include "Mesh.hpp"
 
 GameObject::GameObject(GameScene& scene)
@@ -79,19 +80,19 @@ void GameObject::SetPosition(XMFLOAT3&& xmf3Position)
 	m_xmf4x4World._43 = xmf3Position.z;
 }
 
-void GameObject::SetRotationTransform(XMFLOAT4X4* pmxf4x4Transform)
+void GameObject::SetRotation(const XMFLOAT4X4& pmxf4x4Transform)
 {
-	m_xmf4x4World._11 = pmxf4x4Transform->_11;
-	m_xmf4x4World._12 = pmxf4x4Transform->_12;
-	m_xmf4x4World._13 = pmxf4x4Transform->_13;
+	m_xmf4x4World._11 = pmxf4x4Transform._11;
+	m_xmf4x4World._12 = pmxf4x4Transform._12;
+	m_xmf4x4World._13 = pmxf4x4Transform._13;
 
-	m_xmf4x4World._21 = pmxf4x4Transform->_21;
-	m_xmf4x4World._22 = pmxf4x4Transform->_22;
-	m_xmf4x4World._23 = pmxf4x4Transform->_23;
+	m_xmf4x4World._21 = pmxf4x4Transform._21;
+	m_xmf4x4World._22 = pmxf4x4Transform._22;
+	m_xmf4x4World._23 = pmxf4x4Transform._23;
 
-	m_xmf4x4World._31 = pmxf4x4Transform->_31;
-	m_xmf4x4World._32 = pmxf4x4Transform->_32;
-	m_xmf4x4World._33 = pmxf4x4Transform->_33;
+	m_xmf4x4World._31 = pmxf4x4Transform._31;
+	m_xmf4x4World._32 = pmxf4x4Transform._32;
+	m_xmf4x4World._33 = pmxf4x4Transform._33;
 }
 
 void GameObject::AddPosition(XMFLOAT3&& xmf3Position)
@@ -238,7 +239,7 @@ void GameObject::Update(float fElapsedTime)
 	UpdateBoundingBox();
 }
 
-void GameObject::Render(HDC surface, XMFLOAT4X4* world, CMesh* mesh)
+void GameObject::Render(HDC surface, const XMFLOAT4X4& world, CMesh* mesh)
 {
 	if (mesh)
 	{
@@ -256,7 +257,7 @@ void GameObject::Render(HDC surface)
 	{
 		if (Camera->IsInFrustum(Collider))
 		{
-			GameObject::Render(surface, &m_xmf4x4World, m_pMesh.get());
+			GameObject::Render(surface, m_xmf4x4World, m_pMesh.get());
 		}
 	}
 }
@@ -292,5 +293,6 @@ int GameObject::PickObjectByRayIntersection(XMVECTOR& pick_pos, XMMATRIX& view, 
 
 		nIntersected = m_pMesh->CheckRayIntersection(ray_pos, ray_dir, max_distance);
 	}
+
 	return (nIntersected);
 }

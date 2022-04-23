@@ -4,18 +4,18 @@
 class GamePipeline
 {
 public:
-	static void SetWorldTransform(XMFLOAT4X4* pxmf4x4World) { m_pxmf4x4World = pxmf4x4World; }
-	static void SetViewPerspectiveProjectTransform(XMFLOAT4X4* pxmf4x4ViewPerspectiveProject);
-	static void SetViewOrthographicProjectTransform(XMFLOAT4X4* pxmf4x4OrthographicProject);
-	static void SetViewport(GameViewport* pViewport) { m_pViewport = pViewport; }
+	static void SetWorldTransform(const XMFLOAT4X4& world);
+	static void SetViewPerspectiveProjectTransform(const XMFLOAT4X4& projection);
+	static void SetViewOrthographicProjectTransform(const XMFLOAT4X4& projection);
+	static void SetViewport(const GameViewport& pViewport);
 
 	static XMFLOAT3 ScreenTransform(const XMFLOAT3& xmf3Project);
 	static XMFLOAT3 Project(const XMFLOAT3& xmf3Model);
 	static XMFLOAT3 Transform(const XMFLOAT3& xmf3Model);
 
 private:
-	static XMFLOAT4X4* m_pxmf4x4World;
-	static XMFLOAT4X4* m_pxmf4x4ViewProject;
-	static GameViewport* m_pViewport;
+	static XMFLOAT4X4 m_pxmf4x4World;
+	static XMFLOAT4X4 m_pxmf4x4ViewProject;
+	static GameViewport m_pViewport;
 };
 

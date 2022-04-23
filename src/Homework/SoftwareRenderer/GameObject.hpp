@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.hpp"
+#include "GameTransform.hpp"
 #include "Mesh.hpp"
 
 class GameObject
@@ -21,7 +22,7 @@ public:
 	virtual void SetPosition(float x, float y, float z);
 	virtual void SetPosition(const XMFLOAT3& xmf3Position);
 	virtual void SetPosition(XMFLOAT3&& xmf3Position);
-	virtual void SetRotationTransform(XMFLOAT4X4* pmxf4x4Transform);
+	virtual void SetRotation(const XMFLOAT4X4& pmxf4x4Transform);
 	virtual void AddPosition(XMFLOAT3&& xmf3Position);
 
 	XMFLOAT3&& GetPosition();
@@ -50,7 +51,7 @@ public:
 	void LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up);
 
 	virtual void Update(float fElapsedTime);
-	virtual void Render(HDC surface, XMFLOAT4X4* world, CMesh* mesh);
+	virtual void Render(HDC surface, const XMFLOAT4X4& world, CMesh* mesh);
 	virtual void Render(HDC surface);
 
 	void UpdateBoundingBox();
@@ -65,6 +66,7 @@ public:
 	DWORD m_dwColor;
 	HPEN m_Pen;
 
+	GameTransform Transform;
 	XMFLOAT4X4 m_xmf4x4World;
 	BoundingOrientedBox Collider;
 	GameObject* m_pObjectCollided = NULL;

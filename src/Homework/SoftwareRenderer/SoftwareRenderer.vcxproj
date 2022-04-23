@@ -154,6 +154,7 @@
     <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="GamePipeline.hpp" />
     <ClInclude Include="GameTimer.hpp" />
+    <ClInclude Include="GameTransform.hpp" />
     <ClInclude Include="Main.hpp" />
     <ClInclude Include="Mesh.hpp" />
     <ClInclude Include="Player.hpp" />
@@ -168,6 +169,7 @@
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GamePipeline.cpp" />
     <ClCompile Include="GameTimer.cpp" />
+    <ClCompile Include="GameTransform.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Player.cpp" />

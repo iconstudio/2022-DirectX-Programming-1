@@ -87,9 +87,9 @@ void GameScene::Update(float elapsed_time)
 
 void GameScene::Render(HDC surface)
 {
-	GamePipeline::SetViewport(&myCamera->m_Viewport);
+	GamePipeline::SetViewport(myCamera->m_Viewport);
 
-	GamePipeline::SetViewPerspectiveProjectTransform(&myCamera->m_xmf4x4ViewPerspectiveProject);
+	GamePipeline::SetViewPerspectiveProjectTransform(myCamera->m_xmf4x4ViewPerspectiveProject);
 
 	if (myPlayer)
 	{

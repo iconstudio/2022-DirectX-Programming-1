@@ -50,12 +50,35 @@ class CPolygon;
 class CVertex;
 class GameFramework;
 class GamePipeline;
+class GameTransform;
 class GameCamera;
 class GameViewport;
 class GameScene;
 class GameCollsionGroup;
 class GameObject;
 class Player;
+
+class XYZWrapper
+{
+public:
+	XYZWrapper(float& x, float& y, float& z) : X(x), Y(y), Z(z) {}
+
+	XYZWrapper& operator=(float list[3])
+	{
+		X = list[0];
+		Y = list[1];
+		Z = list[2];
+	}
+
+	explicit operator XMFLOAT3()
+	{
+		return std::move(XMFLOAT3(X, Y, Z));
+	}
+
+	float& X;
+	float& Y;
+	float& Z;
+};
 
 inline float Clamp(float value, float min, float max)
 {
