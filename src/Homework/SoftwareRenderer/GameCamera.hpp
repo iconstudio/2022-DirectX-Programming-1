@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.hpp"
-#include "Mesh.hpp"
+#include "GameTransform.hpp"
+#include "GameObject.hpp"
 
 class GameViewport
 {
@@ -22,6 +23,7 @@ public:
 	GameCamera();
 	virtual ~GameCamera();
 
+	void SetFollower(GameObject* target);
 	void SetFOVAngle(float fFOVAngle);
 
 	void GenerateViewMatrix();
@@ -36,7 +38,8 @@ public:
 	void Move(XMFLOAT3&& xmf3Shift);
 	void Move(float x, float y, float z);
 	void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
-	void Update(Player* pPlayer, XMFLOAT3& xmf3LookAt, float fTimeElapsed = 0.016f);
+
+	void Update(const XMFLOAT3& offset, float fTimeElapsed = 0.016f);
 
 	bool IsInFrustum(BoundingOrientedBox& xmBoundingBox);
 
@@ -50,6 +53,8 @@ public:
 	GameViewport		m_Viewport;
 
 private:
+	GameTransform Transform;
+
 	XMFLOAT3 m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3 m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	XMFLOAT3 m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);

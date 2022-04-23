@@ -68,8 +68,8 @@ public:
 	GameTransform Transform;
 	BoundingOrientedBox Collider;
 
-	XMFLOAT3 m_xmf3MovingDirection = XMFLOAT3(0.0f, 0.0f, 1.0f);
-	float m_fMovingSpeed = 0.0f;
+	XMFLOAT3 Direction;
+	float Speed;
 
 	XMFLOAT3 m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	float m_fRotationSpeed = 0.0f;

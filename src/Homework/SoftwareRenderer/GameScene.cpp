@@ -63,10 +63,12 @@ void GameScene::BuildObjects()
 
 	myPlayer = std::make_shared<Player>(*this);
 	myPlayer->SetHwnd(Window);
+	myPlayer->SetPosition(playerSpawnPoint);
 	myPlayer->SetMesh(player_mesh);
 	myPlayer->SetColor(RGB(0, 0, 255));
 	myPlayer->SetCamera(myCamera);
 	myPlayer->SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -10.0f));
+	myCamera->SetFollower(myPlayer.get());
 
 	auto cube = CreateInstance<GameObject>(XMFLOAT3(40.0f, 0.0f, 60.0f));
 	cube->SetMesh(player_mesh);

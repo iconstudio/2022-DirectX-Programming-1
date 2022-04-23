@@ -40,17 +40,31 @@ void GameFramework::Awake(HINSTANCE instance, HWND hwnd, RECT&& rect)
 
 void GameFramework::Start()
 {
-	myCamera = std::make_shared<GameCamera>();
-	myCamera->SetViewport(0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
-	myCamera->GeneratePerspectiveProjectionMatrix(1.01f, 500.0f, 60.0f);
-	myCamera->SetFOVAngle(60.0f);
-	myCamera->GenerateOrthographicProjectionMatrix(1.01f, 50.0f, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+	try
+	{
+		myCamera = std::make_shared<GameCamera>();
+		myCamera->SetViewport(0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+		myCamera->GeneratePerspectiveProjectionMatrix(1.01f, 500.0f, 60.0f);
+		myCamera->SetFOVAngle(60.0f);
+		myCamera->GenerateOrthographicProjectionMatrix(1.01f, 50.0f, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+	}
+	catch (std::exception& e)
+	{
+		throw ("카메라 오류!");
+	}
 
-	myScene = std::make_unique<GameScene>(*this, WORLD_H, WORLD_V, WORLD_U);
-	myScene->SetHwnd(Window);
-	myScene->SetCamera(myCamera);
+	try
+	{
+		myScene = std::make_unique<GameScene>(*this, WORLD_H, WORLD_V, WORLD_U);
+		myScene->SetHwnd(Window);
+		myScene->SetCamera(myCamera);
 
-	myScene->Start();
+		myScene->Start();
+	}
+	catch (std::exception& e)
+	{
+		throw ("씬 오류!");
+	}
 }
 
 void GameFramework::Update()

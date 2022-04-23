@@ -4,12 +4,15 @@
 GameTransform::GameTransform()
 	: World(Matrix4x4::Identity())
 	, myRight(World._11, World._12, World._13)
-	, myUp(World._21, World._32, World._23)
+	, myUp(World._21, World._22, World._23)
 	, myLook(World._31, World._32, World._33)
 	, myPosition(World._41, World._42, World._43)
-	, Speed(0.0f), Direction()
 	, Updated(false)
-{}
+{
+	myRight = GameTransform::Right;
+	myUp = GameTransform::Up;
+	myLook = GameTransform::Forward;
+}
 
 void GameTransform::SetPosition(float x, float y, float z)
 {

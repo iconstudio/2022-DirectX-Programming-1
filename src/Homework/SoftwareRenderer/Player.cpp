@@ -8,7 +8,8 @@ Player::Player(GameScene& scene)
 	: GameObject(scene)
 	, Window(NULL), Cursor()
 	, m_xmf3CameraOffset(), m_xmf3Velocity()
-{}
+{
+}
 
 Player::~Player()
 {}
@@ -71,8 +72,8 @@ void Player::Move(XMFLOAT3&& xmf3Shift, bool bUpdateVelocity)
 	}
 	else
 	{
-		Transform.Translate(std::forward<XMFLOAT3>(xmf3Shift));
 		Camera->Move(xmf3Shift);
+		Transform.Translate(std::forward<XMFLOAT3>(xmf3Shift));
 	}
 }
 
@@ -81,26 +82,28 @@ void Player::Move(float x, float y, float z)
 	Move(XMFLOAT3(x, y, z), false);
 }
 
-void Player::Rotate(float fPitch, float fYaw, float fRoll)
+void Player::Rotate(float pitch, float yaw, float roll)
 {
-	Camera->Rotate(fPitch, fYaw, fRoll);
-
-	//*
-	if (fPitch != 0.0f) // x
+	Camera->Rotate(pitch, yaw, roll);
+	Transform.Rotate(pitch, yaw, roll);
+	
+	
+	/*
+	if (pitch != 0.0f) // x
 	{
-		XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(fPitch));
-		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, mtxRotate);
+		auto mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(pitch));
+		Transform.myLook = Vector3::TransformNormal(m_xmf3Look, mtxRotate);
 		m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, mtxRotate);
 	}
-	if (fYaw != 0.0f) // y
+	if (yaw != 0.0f) // y
 	{
-		XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(fYaw));
+		auto mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(yaw));
 		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, mtxRotate);
 		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, mtxRotate);
 	}
-	if (fRoll != 0.0f) // z
+	if (roll != 0.0f) // z
 	{
-		XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Look), XMConvertToRadians(fRoll));
+		auto mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Look), XMConvertToRadians(roll));
 		m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, mtxRotate);
 		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, mtxRotate);
 	}
@@ -138,14 +141,14 @@ void Player::Update(float fTimeElapsed)
 			//if (pKeyBuffer[VK_RBUTTON] & 0xF0)
 			//Rotate(cyMouseDelta, 0.0f, -cxMouseDelta);
 			//else
-			//Rotate(0, cxMouseDelta, 0.0f);
-			Rotate(cyMouseDelta, cxMouseDelta, 0.0f);
+			Rotate(0, cxMouseDelta, 0.0f);
+			//Rotate(cyMouseDelta, cxMouseDelta, 0.0f);
 		}
 	}
 
 	Move(m_xmf3Velocity, false);
 
-	Camera->Update(this, m_xmf3Position, fTimeElapsed);
+	Camera->Update(m_xmf3CameraOffset, fTimeElapsed);
 	Camera->GenerateViewMatrix();
 
 	XMFLOAT3 xmf3Deceleration = Vector3::Normalize(Vector3::ScalarProduct(m_xmf3Velocity, -1.0f));
@@ -155,9 +158,9 @@ void Player::Update(float fTimeElapsed)
 
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Deceleration, fDeceleration);
 
-	GameObject::Update(fTimeElapsed);
-
 	OnUpdateTransform();
+
+	GameObject::Update(fTimeElapsed);
 }
 
 void Player::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -236,8 +239,13 @@ void Player::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
 void Player::OnUpdateTransform()
 {
+	/*
 	m_xmf4x4World._11 = m_xmf3Right.x; m_xmf4x4World._12 = m_xmf3Right.y; m_xmf4x4World._13 = m_xmf3Right.z;
+
 	m_xmf4x4World._21 = m_xmf3Up.x; m_xmf4x4World._22 = m_xmf3Up.y; m_xmf4x4World._23 = m_xmf3Up.z;
+
 	m_xmf4x4World._31 = m_xmf3Look.x; m_xmf4x4World._32 = m_xmf3Look.y; m_xmf4x4World._33 = m_xmf3Look.z;
+
 	m_xmf4x4World._41 = m_xmf3Position.x; m_xmf4x4World._42 = m_xmf3Position.y; m_xmf4x4World._43 = m_xmf3Position.z;
+	*/
 }

@@ -9,6 +9,7 @@ GameObject::GameObject(GameScene& scene)
 	: Scene(scene), Camera(nullptr)
 	, MeshPtr(nullptr), m_dwColor(RGB(255, 0, 0)), m_Pen(CreatePen(PS_SOLID, 0, m_dwColor))
 	, Collider()
+	, Speed(0.0f), Direction(XMFLOAT3(0.0f, 0.0f, 1.0f))
 {}
 
 GameObject::GameObject(GameScene & scene, float x, float y, float z)
@@ -152,12 +153,12 @@ void GameObject::SetDirection(const XMFLOAT3& xmf3MovingDirection)
 
 void GameObject::SetDirection(XMFLOAT3&& xmf3MovingDirection)
 {
-	m_xmf3MovingDirection = Vector3::Normalize(std::forward<XMFLOAT3>(xmf3MovingDirection));
+	Direction = Vector3::Normalize(std::forward<XMFLOAT3>(xmf3MovingDirection));
 }
 
 void GameObject::SetSpeed(float fSpeed)
 {
-	m_fMovingSpeed = fSpeed;
+	Speed = fSpeed;
 }
 
 void GameObject::SetRotationAxis(const XMFLOAT3& xmf3RotationAxis)
@@ -182,9 +183,9 @@ void GameObject::Update(float fElapsedTime)
 		Rotate(m_xmf3RotationAxis, m_fRotationSpeed * fElapsedTime);
 	}
 
-	if (m_fMovingSpeed != 0.0f)
+	if (Speed != 0.0f)
 	{
-		Move(m_xmf3MovingDirection, m_fMovingSpeed * fElapsedTime);
+		Move(Direction, Speed * fElapsedTime);
 	}
 
 	UpdateBoundingBox();

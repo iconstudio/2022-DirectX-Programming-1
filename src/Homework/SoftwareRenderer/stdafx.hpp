@@ -68,9 +68,17 @@ public:
 		X = list[0];
 		Y = list[1];
 		Z = list[2];
+		return *this;
+	}
+	XYZWrapper& operator=(const XMFLOAT3& vector)
+	{
+		X = vector.x;
+		Y = vector.y;
+		Z = vector.z;
+		return *this;
 	}
 
-	explicit operator XMFLOAT3()
+	explicit operator XMFLOAT3() const noexcept
 	{
 		return std::move(XMFLOAT3(X, Y, Z));
 	}
