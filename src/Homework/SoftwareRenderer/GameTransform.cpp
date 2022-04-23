@@ -2,7 +2,7 @@
 #include "GameTransform.hpp"
 
 GameTransform::GameTransform()
-	: World()
+	: World(Matrix4x4::Identity())
 	, myRight(World._11, World._12, World._13)
 	, myUp(World._21, World._32, World._23)
 	, myLook(World._31, World._32, World._33)
@@ -50,6 +50,13 @@ void GameTransform::Translate(float x, float y, float z)
 	myPosition.X += x;
 	myPosition.Y += y;
 	myPosition.Z += z;
+}
+
+void GameTransform::Translate(const XMFLOAT3& pos)
+{
+	myPosition.X += pos.x;
+	myPosition.Y += pos.y;
+	myPosition.Z += pos.z;
 }
 
 void GameTransform::Translate(XMFLOAT3&& pos)
@@ -106,7 +113,7 @@ void GameTransform::Rotate(float pitch, float yaw, float roll)
 	World = Matrix4x4::Multiply(mtxRotate, World);
 }
 
-void GameTransform::Rotate(XMFLOAT3& axis, float angle)
+void GameTransform::Rotate(const XMFLOAT3& axis, float angle)
 {
 	XMFLOAT4X4 mtxRotate = Matrix4x4::RotationAxis(axis, angle);
 
@@ -129,6 +136,11 @@ void GameTransform::LookAt(XMFLOAT3& look, XMFLOAT3& up)
 	World._11 = view._11; World._12 = view._21; World._13 = view._31;
 	World._21 = view._12; World._22 = view._22; World._23 = view._32;
 	World._31 = view._13; World._32 = view._23; World._33 = view._33;
+}
+
+XMFLOAT4X4& GameTransform::GetWorldMatrix()
+{
+	return World;
 }
 
 XYZWrapper& GameTransform::GetRight()

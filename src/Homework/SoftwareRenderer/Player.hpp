@@ -11,10 +11,6 @@ public:
 	virtual ~Player();
 
 	void SetHwnd(HWND hwnd);
-	virtual void SetPosition(float x, float y, float z);
-	virtual void SetPosition(const XMFLOAT3& xmf3Position);
-	virtual void SetPosition(XMFLOAT3&& xmf3Position);
-	void SetRotation(float x, float y, float z);
 	void SetCameraOffset(const XMFLOAT3& xmf3CameraOffset);
 	void SetCameraOffset(XMFLOAT3&& xmf3CameraOffset);
 
@@ -36,11 +32,6 @@ public:
 	friend class GameCamera;
 
 private:
-	XMFLOAT3 m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	XMFLOAT3 m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	XMFLOAT3 m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	XMFLOAT3 m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
-
 	XMFLOAT3 m_xmf3CameraOffset;
 	XMFLOAT3 m_xmf3Velocity;
 	float m_fFriction = 125.0f;

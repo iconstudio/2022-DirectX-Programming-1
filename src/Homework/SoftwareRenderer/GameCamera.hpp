@@ -64,4 +64,5 @@ private:
 	BoundingFrustum	m_xmFrustumWorld = BoundingFrustum();
 	XMFLOAT4X4		m_xmf4x4InverseView = Matrix4x4::Identity();
 
+	GameObject* Follower;
 };

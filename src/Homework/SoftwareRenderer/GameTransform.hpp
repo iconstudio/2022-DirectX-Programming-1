@@ -6,6 +6,7 @@ class GameTransform
 public:
 	GameTransform();
 
+	XMFLOAT4X4& GetWorldMatrix();
 	XYZWrapper& GetRight();
 	XYZWrapper& GetUp();
 	XYZWrapper& GetLook();
@@ -17,6 +18,7 @@ public:
 	void SetRotation(const XMFLOAT4X4& tfrm);
 
 	void Translate(float x, float y, float z);
+	void Translate(const XMFLOAT3& pos);
 	void Translate(XMFLOAT3&& pos);
 	void Move(const XMFLOAT3& dir, float distance);
 	void Move(XMFLOAT3&& dir, float distance);
@@ -25,8 +27,8 @@ public:
 	void MoveUp(float distance);
 
 	void Rotate(const XMFLOAT4X4& tfrm);
-	void Rotate(float pitch = 10.0f, float yaw = 10.0f, float roll = 10.0f);
-	void Rotate(XMFLOAT3& axis, float angle);
+	void Rotate(float pitch, float yaw, float roll);
+	void Rotate(const XMFLOAT3& axis, float angle);
 
 	void LookTo(XMFLOAT3& look, XMFLOAT3& up);
 	void LookAt(XMFLOAT3& look, XMFLOAT3& up);
@@ -36,9 +38,6 @@ public:
 	XYZWrapper myUp;
 	XYZWrapper myLook;
 	XYZWrapper myPosition;
-
-	float Speed;
-	XMFLOAT3 Direction;
 
 	static constexpr XMFLOAT3 Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	static constexpr XMFLOAT3 Forward = XMFLOAT3(0.0f, 0.0f, 1.0f);

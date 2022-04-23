@@ -18,30 +18,6 @@ void Player::SetHwnd(HWND hwnd)
 	Window = hwnd;
 }
 
-void Player::SetPosition(float x, float y, float z)
-{
-	m_xmf3Position = XMFLOAT3(x, y, z);
-
-	GameObject::SetPosition(x, y, z);
-}
-
-void Player::SetPosition(const XMFLOAT3& xmf3Position)
-{
-	m_xmf3Position = xmf3Position;
-
-	GameObject::SetPosition(XMFLOAT3(xmf3Position));
-}
-
-void Player::SetPosition(XMFLOAT3&& xmf3Position)
-{
-	m_xmf3Position = xmf3Position;
-
-	GameObject::SetPosition(xmf3Position);
-}
-
-void Player::SetRotation(float x, float y, float z)
-{}
-
 void Player::SetCameraOffset(const XMFLOAT3& xmf3CameraOffset)
 {
 	SetCameraOffset(std::move(XMFLOAT3(xmf3CameraOffset)));
@@ -51,7 +27,10 @@ void Player::SetCameraOffset(XMFLOAT3&& xmf3CameraOffset)
 {
 	m_xmf3CameraOffset = xmf3CameraOffset;
 
-	Camera->SetLookAt(Vector3::Add(m_xmf3Position, m_xmf3CameraOffset), m_xmf3Position, m_xmf3Up);
+	auto pos = XMFLOAT3(Transform.GetPosition());
+	auto up = XMFLOAT3(Transform.GetUp());
+
+	Camera->SetLookAt(Vector3::Add(pos, m_xmf3CameraOffset), pos, up);
 	Camera->GenerateViewMatrix();
 }
 
@@ -60,12 +39,20 @@ void Player::Move(DWORD dwDirection, float fDistance)
 	if (dwDirection)
 	{
 		XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
-		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
-		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
-		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance);
-		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
-		if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, fDistance);
-		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance);
+
+		auto pos = XMFLOAT3(Transform.GetPosition());
+		auto right = XMFLOAT3(Transform.GetRight());
+		auto up = XMFLOAT3(Transform.GetUp());
+		auto look = XMFLOAT3(Transform.GetLook());
+
+		if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, up, fDistance);
+		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, up, -fDistance);
+
+		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, right, fDistance);
+		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, right, -fDistance);
+
+		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, look, fDistance);
+		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, look, -fDistance);
 
 		Move(std::move(xmf3Shift), true);
 	}
@@ -84,7 +71,7 @@ void Player::Move(XMFLOAT3&& xmf3Shift, bool bUpdateVelocity)
 	}
 	else
 	{
-		m_xmf3Position = Vector3::Add(xmf3Shift, m_xmf3Position);
+		Transform.Translate(std::forward<XMFLOAT3>(xmf3Shift));
 		Camera->Move(xmf3Shift);
 	}
 }
@@ -97,7 +84,6 @@ void Player::Move(float x, float y, float z)
 void Player::Rotate(float fPitch, float fYaw, float fRoll)
 {
 	Camera->Rotate(fPitch, fYaw, fRoll);
-	//GameObject::Rotate(fPitch, fYaw, fRoll);
 
 	//*
 	if (fPitch != 0.0f) // x
@@ -127,10 +113,12 @@ void Player::Rotate(float fPitch, float fYaw, float fRoll)
 
 void Player::LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up)
 {
-	XMFLOAT4X4 xmf4x4View = Matrix4x4::LookAtLH(m_xmf3Position, xmf3LookAt, xmf3Up);
-	m_xmf3Right = Vector3::Normalize(XMFLOAT3(xmf4x4View._11, xmf4x4View._21, xmf4x4View._31));
-	m_xmf3Up = Vector3::Normalize(XMFLOAT3(xmf4x4View._12, xmf4x4View._22, xmf4x4View._32));
-	m_xmf3Look = Vector3::Normalize(XMFLOAT3(xmf4x4View._13, xmf4x4View._23, xmf4x4View._33));
+	Transform.LookAt(xmf3LookAt, xmf3Up);
+
+	//XMFLOAT4X4 xmf4x4View = Matrix4x4::LookAtLH(m_xmf3Position, xmf3LookAt, xmf3Up);
+	//m_xmf3Right = Vector3::Normalize(XMFLOAT3(xmf4x4View._11, xmf4x4View._21, xmf4x4View._31));
+	//m_xmf3Up = Vector3::Normalize(XMFLOAT3(xmf4x4View._12, xmf4x4View._22, xmf4x4View._32));
+	//m_xmf3Look = Vector3::Normalize(XMFLOAT3(xmf4x4View._13, xmf4x4View._23, xmf4x4View._33));
 }
 
 void Player::Update(float fTimeElapsed)
