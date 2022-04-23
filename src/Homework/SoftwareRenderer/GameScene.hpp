@@ -10,26 +10,19 @@ using CGroupPtr = std::shared_ptr<GameCollsionGroup>;
 class GameScene
 {
 public:
-	GameScene(UINT sz_horizontal, UINT sz_vertical, UINT sz_up);
+	GameScene(GameFramework& framework, UINT sz_horizontal, UINT sz_vertical, UINT sz_up);
 	~GameScene();
 
+	void SetHwnd(HWND hwnd);
 	void SetCamera(std::shared_ptr<GameCamera> cam);
 
 	void Start();
 	void Update(float elapsed_time);
 	void Render(HDC surface);
 
-	CGroupPtr CreateCollisionGroup();
-	CGroupPtr FindProperGroup(const XMFLOAT3& position);
-
-	template<class Type>
-	ObjectPtr CreateInstance(float x, float y, float z);
-
-	template<class Type>
-	ObjectPtr CreateInstance(const XMFLOAT3& position);
-
-	template<class Type>
-	ObjectPtr CreateInstance(XMFLOAT3&& position);
+	void OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+	void OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+	void OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
 	friend class GameCollsionGroup;
 
@@ -40,6 +33,27 @@ public:
 	UINT collisionAreaIndex;
 
 private:
+	void BuildCollisionGroups();
+	void BuildObjects();
+
+	CGroupPtr CreateCollisionGroup();
+	CGroupPtr FindProperGroup(const XMFLOAT3& position);
+
+	template<class Type>
+	Type* CreateInstance(float x, float y, float z);
+
+	template<class Type>
+	Type* CreateInstance(const XMFLOAT3& position);
+
+	template<class Type>
+	Type* CreateInstance(XMFLOAT3&& position);
+
+	// 윈도우 핸들
+	HWND Window;
+
+	// 프레임워크
+	GameFramework& Framework;
+
 	// 씬 내의 모든 인스턴스
 	std::vector<ObjectPtr> Instances;
 
@@ -53,7 +67,7 @@ private:
 	std::shared_ptr<GameCamera> myCamera;
 
 	// 플레이어 생성 위치
-	XMFLOAT3 playerSpawnPoint = XMFLOAT3{ 50.0f, 50.0f, 0.0f };
+	XMFLOAT3 playerSpawnPoint = XMFLOAT3{ 50.0f, 0.0f, 50.0f };
 };
 
 class GameCollsionGroup

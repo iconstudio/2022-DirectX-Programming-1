@@ -4,11 +4,16 @@
 
 CMesh::CMesh()
 	: Collider()
-{}
+{
+	Polygons.clear();
+}
 
 CMesh::CMesh(int number_polygons)
 	: Collider(), Polygons(number_polygons)
-{}
+{
+	Polygons.reserve(number_polygons);
+	Polygons.clear();
+}
 
 CMesh::~CMesh()
 {}
@@ -47,23 +52,33 @@ void CMesh::Push(CPolygon&& poly)
 	Polygons.push_back(std::move(poly));
 }
 
-BOOL CMesh::RayIntersectionByTriangle(XMVECTOR& xmRayOrigin, XMVECTOR& xmRayDirection, XMVECTOR v0, XMVECTOR v1, XMVECTOR v2, float* pfNearHitDistance)
+bool CMesh::CheckProjection(const float prj_x, const float prj_y) const
+{
+	return -1.0f <= prj_x && prj_x <= 1.0f && -1.0f <= prj_y && prj_y <= 1.0f;
+}
+
+bool CMesh::CheckDepth(const float prj_z) const
+{
+	return 0.0f <= prj_z && prj_z <= 1.0f;
+}
+
+BOOL CMesh::RayIntersectionByTriangle(XMVECTOR& ray_pos, XMVECTOR& ray_dir, XMVECTOR v0, XMVECTOR v1, XMVECTOR v2, float* out_distance) const
 {
 	float fHitDistance;
-	BOOL bIntersected = TriangleTests::Intersects(xmRayOrigin, xmRayDirection, v0, v1, v2, fHitDistance);
+	BOOL bIntersected = TriangleTests::Intersects(ray_pos, ray_dir, v0, v1, v2, fHitDistance);
 
-	if (bIntersected && (fHitDistance < *pfNearHitDistance))
+	if (bIntersected && (fHitDistance < *out_distance))
 	{
-		*pfNearHitDistance = fHitDistance;
+		*out_distance = fHitDistance;
 	}
 
 	return bIntersected;
 }
 
-int CMesh::CheckRayIntersection(XMVECTOR& xmvPickRayOrigin, XMVECTOR& xmvPickRayDirection, float* pfNearHitDistance)
+int CMesh::CheckRayIntersection(XMVECTOR& ray_pos, XMVECTOR& ray_dir, float* out_distance) const
 {
 	int nIntersections = 0;
-	bool bIntersected = Collider.Intersects(xmvPickRayOrigin, xmvPickRayDirection, *pfNearHitDistance);
+	bool bIntersected = Collider.Intersects(ray_pos, ray_dir, *out_distance);
 
 	if (bIntersected)
 	{
@@ -84,8 +99,8 @@ int CMesh::CheckRayIntersection(XMVECTOR& xmvPickRayOrigin, XMVECTOR& xmvPickRay
 			{
 				case 3:
 				{
-					BOOL bIntersected = RayIntersectionByTriangle(xmvPickRayOrigin, xmvPickRayDirection, v0, v1, v2, pfNearHitDistance);
-					
+					BOOL bIntersected = RayIntersectionByTriangle(ray_pos, ray_dir, v0, v1, v2, out_distance);
+
 					if (bIntersected)
 					{
 						nIntersections++;
@@ -95,8 +110,8 @@ int CMesh::CheckRayIntersection(XMVECTOR& xmvPickRayOrigin, XMVECTOR& xmvPickRay
 
 				case 4:
 				{
-					BOOL bIntersected = RayIntersectionByTriangle(xmvPickRayOrigin, xmvPickRayDirection, v0, v1, v2, pfNearHitDistance);
-					
+					BOOL bIntersected = RayIntersectionByTriangle(ray_pos, ray_dir, v0, v1, v2, out_distance);
+
 					if (bIntersected)
 					{
 						nIntersections++;
@@ -105,8 +120,8 @@ int CMesh::CheckRayIntersection(XMVECTOR& xmvPickRayOrigin, XMVECTOR& xmvPickRay
 					const auto& vertex_3 = vertices[3].TranformedPosition;
 					auto v3 = XMLoadFloat3(&(vertices[3].TranformedPosition));
 
-					bIntersected = RayIntersectionByTriangle(xmvPickRayOrigin, xmvPickRayDirection, v0, v2, v3, pfNearHitDistance);
-					
+					bIntersected = RayIntersectionByTriangle(ray_pos, ray_dir, v0, v2, v3, out_distance);
+
 					if (bIntersected)
 					{
 						nIntersections++;
@@ -119,55 +134,67 @@ int CMesh::CheckRayIntersection(XMVECTOR& xmvPickRayOrigin, XMVECTOR& xmvPickRay
 	return nIntersections;
 }
 
-void CMesh::Render(HDC hDCFrameBuffer)
+void CMesh::DrawSide(HDC surface, const XMFLOAT3& pos1, const XMFLOAT3& pos2)
 {
-	XMFLOAT3 f3InitialProject, f3PreviousProject;
-	bool bPreviousInside = false, bInitialInside = false, bCurrentInside = false, bIntersectInside = false;
+	auto from = GamePipeline::ScreenTransform(pos1);
+	auto to = GamePipeline::ScreenTransform(pos2);
+	DrawLine(surface, int(from.x), int(from.y), int(to.x), int(to.y));
+}
 
-	for (auto& polygon : Polygons)
+void CMesh::Render(HDC surface)
+{
+	bool is_inside_first = false;
+	bool is_inside_it = false;
+	bool is_inside_last = false;
+
+	for (const auto& polygon : Polygons)
 	{
-		auto& vertices = polygon.Vertices;
+		const auto& vertices = polygon.Vertices;
+		const auto sz = vertices.size();
 
-		f3InitialProject = GamePipeline::Project(vertices[0].Position);
+		if (0 == sz) continue;
 
-		f3PreviousProject = f3InitialProject;
+		const XMFLOAT3 vtx_first = GamePipeline::Project(vertices.at(0).Position);
+		is_inside_first = CheckProjection(vtx_first.x, vtx_first.y);
 
-		bInitialInside = (-1.0f <= f3InitialProject.x) && (f3InitialProject.x <= 1.0f) && (-1.0f <= f3InitialProject.y) && (f3InitialProject.y <= 1.0f);
-		bPreviousInside = bInitialInside;
-		
-		for (auto& vertex : vertices)
+		XMFLOAT3 vtx_last = vtx_first;
+		is_inside_last = is_inside_first;
+
+		for (UINT i = 1; i < sz; ++i)
 		{
-			auto f3CurrentProject = GamePipeline::Project(vertex.Position);
+			const auto& vertex = vertices.at(i);
+			const auto vtx_it = GamePipeline::Project(vertex.Position);
+			is_inside_it = CheckProjection(vtx_it.x, vtx_it.y);
+			//vertex.TranformedPosition = vtx_it;
 
-			vertex.TranformedPosition = f3CurrentProject;
-
-			bCurrentInside = (-1.0f <= f3CurrentProject.x) && (f3CurrentProject.x <= 1.0f) && (-1.0f <= f3CurrentProject.y) && (f3CurrentProject.y <= 1.0f);
-
-			if (((0.0f <= f3CurrentProject.z) && (f3CurrentProject.z <= 1.0f)) && ((bCurrentInside || bPreviousInside)))
+			if (CheckDepth(vtx_it.z) && (is_inside_it || is_inside_last))
 			{
-				::Draw2DLine(hDCFrameBuffer, f3PreviousProject, f3CurrentProject);
+				DrawSide(surface, vtx_last, vtx_it);
 			}
 
-			f3PreviousProject = f3CurrentProject;
-			bPreviousInside = bCurrentInside;
+			vtx_last = vtx_it;
+			is_inside_last = is_inside_it;
 		}
 
-		if (0.0f <= f3InitialProject.z && f3InitialProject.z <= 1.0f
-			&& (bInitialInside || bPreviousInside))
+		if (CheckDepth(vtx_first.z) && (is_inside_first || is_inside_last))
 		{
-
-			::Draw2DLine(hDCFrameBuffer, f3PreviousProject, f3InitialProject);
+			DrawSide(surface, vtx_last, vtx_first);
 		}
 	}
 }
 
 CPolygon::CPolygon()
 	: Vertices()
-{}
+{
+	Vertices.clear();
+}
 
 CPolygon::CPolygon(const UINT number_vertices)
 	: Vertices(number_vertices)
-{}
+{
+	Vertices.reserve(number_vertices);
+	Vertices.clear();
+}
 
 CPolygon::~CPolygon()
 {}
@@ -189,7 +216,7 @@ void CPolygon::Push(const CVertex& vertex)
 
 void CPolygon::Push(CVertex&& vertex)
 {
-	Vertices.push_back(std::move(vertex));
+	Vertices.emplace_back(vertex);
 }
 
 CVertex::CVertex()

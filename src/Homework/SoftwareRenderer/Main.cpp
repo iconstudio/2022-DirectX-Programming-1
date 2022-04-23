@@ -14,12 +14,11 @@ GameFramework gGameFramework;
 ATOM				MyRegisterClass(HINSTANCE instance);
 BOOL				InitInstance(HINSTANCE instance, int show);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
-int APIENTRY _tWinMain(HINSTANCE hInstance,
-	HINSTANCE hPrevInstance,
-	LPTSTR    lpCmdLine,
-	int       nCmdShow)
+int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
+	_In_opt_ HINSTANCE hPrevInstance,
+	_In_ LPWSTR    lpCmdLine,
+	_In_ int       nCmdShow)
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
@@ -43,8 +42,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-
-		gGameFramework.Update();
+		else
+		{
+			gGameFramework.Update();
+		}
 	}
 
 	return (int)msg.wParam;
@@ -184,6 +185,7 @@ BOOL InitInstance(HINSTANCE instance, int nCmdShow)
 	}
 
 	gGameFramework.Awake(instance, hMainWnd, std::move(rect));
+	gGameFramework.Start();
 
 	ShowWindow(hMainWnd, nCmdShow);
 	UpdateWindow(hMainWnd);
@@ -201,34 +203,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		case WM_CREATE:
 		{
-			gGameFramework.Start();
-
-			SetCapture(hwnd);
-			SetTimer(hwnd, timer_id, UINT(FPS_LIMIT * 1000), NULL);
-		}
-		break;
-
-		case WM_LBUTTONDOWN:
-		case WM_LBUTTONUP:
-		case WM_RBUTTONDOWN:
-		case WM_RBUTTONUP:
-		case WM_MOUSEMOVE:
-		{
-			gGameFramework.OnMouse(hwnd, msg, wparam, lparam);
-		}
-		break;
-
-		case WM_KEYDOWN:
-		case WM_KEYUP:
-		{
-			gGameFramework.OnKeyboard(hwnd, msg, wparam, lparam);
-		}
-		break;
-
-		case WM_ACTIVATE:
-		case WM_SIZE:
-		{
-			gGameFramework.OnHWND(hwnd, msg, wparam, lparam);
+			SetTimer(hwnd, timer_id, UINT(1000.0f / FPS_LIMIT), NULL);
 		}
 		break;
 
@@ -256,7 +231,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 		default:
 		{
-			return DefWindowProc(hwnd, msg, wparam, lparam);
+			return gGameFramework.OnWindows(hwnd, msg, wparam, lparam);
 		}
 	}
 

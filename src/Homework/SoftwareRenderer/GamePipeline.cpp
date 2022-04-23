@@ -16,7 +16,7 @@ void GamePipeline::SetViewOrthographicProjectTransform(XMFLOAT4X4* pxmf4x4Orthog
 	m_pxmf4x4ViewProject = pxmf4x4OrthographicProject;
 }
 
-XMFLOAT3 GamePipeline::Transform(XMFLOAT3& xmf3Model)
+XMFLOAT3 GamePipeline::Transform(const XMFLOAT3& xmf3Model)
 {
 	XMFLOAT3 xmf3Project = Project(xmf3Model);
 	XMFLOAT3 f3Screen = ScreenTransform(xmf3Project);
@@ -24,7 +24,7 @@ XMFLOAT3 GamePipeline::Transform(XMFLOAT3& xmf3Model)
 	return (f3Screen);
 }
 
-XMFLOAT3 GamePipeline::Project(XMFLOAT3& xmf3Model)
+XMFLOAT3 GamePipeline::Project(const XMFLOAT3& xmf3Model)
 {
 	XMFLOAT4X4 xmf4x4Transform = Matrix4x4::Multiply(*m_pxmf4x4World, *m_pxmf4x4ViewProject);
 	XMFLOAT3 xmf3Project = Vector3::TransformCoord(xmf3Model, xmf4x4Transform);
@@ -32,7 +32,7 @@ XMFLOAT3 GamePipeline::Project(XMFLOAT3& xmf3Model)
 	return (xmf3Project);
 }
 
-XMFLOAT3 GamePipeline::ScreenTransform(XMFLOAT3& xmf3Project)
+XMFLOAT3 GamePipeline::ScreenTransform(const XMFLOAT3& xmf3Project)
 {
 	XMFLOAT3 f3Screen = xmf3Project;
 

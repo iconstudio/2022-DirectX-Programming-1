@@ -6,17 +6,37 @@
 
 Player::Player(GameScene& scene)
 	: GameObject(scene)
-	, Cursor()
+	, Window(NULL), Cursor()
+	, m_xmf3CameraOffset(), m_xmf3Velocity()
 {}
 
 Player::~Player()
 {}
+
+void Player::SetHwnd(HWND hwnd)
+{
+	Window = hwnd;
+}
 
 void Player::SetPosition(float x, float y, float z)
 {
 	m_xmf3Position = XMFLOAT3(x, y, z);
 
 	GameObject::SetPosition(x, y, z);
+}
+
+void Player::SetPosition(const XMFLOAT3& xmf3Position)
+{
+	m_xmf3Position = xmf3Position;
+
+	GameObject::SetPosition(XMFLOAT3(xmf3Position));
+}
+
+void Player::SetPosition(XMFLOAT3&& xmf3Position)
+{
+	m_xmf3Position = xmf3Position;
+
+	GameObject::SetPosition(xmf3Position);
 }
 
 void Player::SetRotation(float x, float y, float z)
@@ -77,20 +97,22 @@ void Player::Move(float x, float y, float z)
 void Player::Rotate(float fPitch, float fYaw, float fRoll)
 {
 	Camera->Rotate(fPitch, fYaw, fRoll);
+	//GameObject::Rotate(fPitch, fYaw, fRoll);
 
-	if (fPitch != 0.0f)
+	//*
+	if (fPitch != 0.0f) // x
 	{
 		XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(fPitch));
 		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, mtxRotate);
 		m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, mtxRotate);
 	}
-	if (fYaw != 0.0f)
+	if (fYaw != 0.0f) // y
 	{
 		XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(fYaw));
 		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, mtxRotate);
 		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, mtxRotate);
 	}
-	if (fRoll != 0.0f)
+	if (fRoll != 0.0f) // z
 	{
 		XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Look), XMConvertToRadians(fRoll));
 		m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, mtxRotate);
@@ -100,6 +122,7 @@ void Player::Rotate(float fPitch, float fYaw, float fRoll)
 	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
 	m_xmf3Right = Vector3::Normalize(Vector3::CrossProduct(m_xmf3Up, m_xmf3Look));
 	m_xmf3Up = Vector3::Normalize(Vector3::CrossProduct(m_xmf3Look, m_xmf3Right));
+	//*/
 }
 
 void Player::LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up)
@@ -112,7 +135,25 @@ void Player::LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up)
 
 void Player::Update(float fTimeElapsed)
 {
-	GameObject::Update(fTimeElapsed);
+	if (NULL != Window && GetCapture() == Window)
+	{
+		POINT ptCursorPos;
+		GetCursorPos(&ptCursorPos);
+
+		float cxMouseDelta = (float)(ptCursorPos.x - Cursor.x) / 3.0f;
+		float cyMouseDelta = (float)(ptCursorPos.y - Cursor.y) / 3.0f;
+		SetCursorPos(Cursor.x, Cursor.y);
+		//Cursor = ptCursorPos;
+
+		if (cxMouseDelta || cyMouseDelta)
+		{
+			//if (pKeyBuffer[VK_RBUTTON] & 0xF0)
+			//Rotate(cyMouseDelta, 0.0f, -cxMouseDelta);
+			//else
+			//Rotate(0, cxMouseDelta, 0.0f);
+			Rotate(cyMouseDelta, cxMouseDelta, 0.0f);
+		}
+	}
 
 	Move(m_xmf3Velocity, false);
 
@@ -126,53 +167,84 @@ void Player::Update(float fTimeElapsed)
 
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Deceleration, fDeceleration);
 
+	GameObject::Update(fTimeElapsed);
+
 	OnUpdateTransform();
 }
 
 void Player::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	if (GetCapture() == hwnd)
+	switch (msg)
 	{
-		switch (msg)
+		case WM_LBUTTONDOWN:
+		break;
+
+		case WM_RBUTTONDOWN:
 		{
-			case WM_LBUTTONDOWN:
-			break;
-
-			case WM_RBUTTONDOWN:
-			break;
-
-			case WM_LBUTTONUP:
-			break;
-
-			case WM_RBUTTONUP:
-			break;
-
-			case WM_MOUSEMOVE:
-			{
-				POINT ptCursorPos;
-				GetCursorPos(&ptCursorPos);
-
-				float cxMouseDelta = (float)(ptCursorPos.x - Cursor.x) / 3.0f;
-				float cyMouseDelta = (float)(ptCursorPos.y - Cursor.y) / 3.0f;
-				SetCursorPos(Cursor.x, Cursor.y);
-
-				if (cxMouseDelta || cyMouseDelta)
-				{
-					//if (pKeyBuffer[VK_RBUTTON] & 0xF0)
-					//	myPlayer->Rotate(cyMouseDelta, 0.0f, -cxMouseDelta);
-					//else
-					Rotate(cyMouseDelta, cxMouseDelta, 0.0f);
-				}
-
-				Cursor = ptCursorPos;
-			}
-			break;
+			SetCapture(hwnd);
+			GetCursorPos(&Cursor);
 		}
+		break;
+
+		case WM_LBUTTONUP:
+		break;
+
+		case WM_RBUTTONUP:
+		{
+			ReleaseCapture();
+		}
+		break;
+
+		case WM_MOUSEMOVE:
+		break;
 	}
 }
 
 void Player::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
-{}
+{
+	DWORD dwDirection = 0;
+
+	switch (msg)
+	{
+		case WM_KEYDOWN:
+		{
+			switch (wp)
+			{
+				case 'A':
+				{
+					dwDirection |= DIR_LEFT;
+				}
+				break;
+				case 'D':
+				{
+					dwDirection |= DIR_RIGHT;
+				}
+				break;
+				case 'W':
+				{
+					dwDirection |= DIR_FORWARD;
+				}
+				break;
+				case 'S':
+				{
+					dwDirection |= DIR_BACKWARD;
+				}
+				break;
+			}
+		}
+		break;
+
+		case WM_KEYUP:
+		{
+		}
+		break;
+	}
+
+	if (dwDirection)
+	{
+		Move(dwDirection, 0.15f);
+	}
+}
 
 void Player::OnUpdateTransform()
 {

@@ -57,8 +57,29 @@ class GameCollsionGroup;
 class GameObject;
 class Player;
 
-float Distance(float x1, float y1, float z1, float x2, float y2, float z2);
-void Draw2DLine(HDC hDCFrameBuffer, XMFLOAT3& f3PreviousProject, XMFLOAT3& f3CurrentProject);
+inline float Clamp(float value, float min, float max)
+{
+	if (value < min)
+	{
+		return min;
+	}
+	else if (max < value)
+	{
+		return min;
+	}
+	return value;
+}
+
+inline float Distance(float x1, float y1, float z1, float x2, float y2, float z2)
+{
+	return float(std::pow(x1 - x2, 2) + std::pow(y1 - y2, 2) + std::pow(z1 - z2, 2));
+}
+
+inline void DrawLine(HDC surface, const int x1, const int y1, const int x2, const int y2)
+{
+	MoveToEx(surface, x1, y1, NULL);
+	LineTo(surface, x2, y2);
+}
 
 namespace Vector3
 {
@@ -128,10 +149,10 @@ namespace Matrix4x4
 	XMFLOAT4X4&& Multiply(const XMMATRIX& matrix1, const XMMATRIX& matrix2);
 	XMFLOAT4X4&& Multiply(XMMATRIX&& matrix1, XMMATRIX&& matrix2);
 
-	XMFLOAT4X4&& RotationYawPitchRoll(float fPitch, float fYaw, float fRoll);
-	XMFLOAT4X4&& RotationAxis(XMFLOAT3 xmf3Axis, float fAngle);
+	XMFLOAT4X4&& RotationYawPitchRoll(float pitch, float yaw, float roll);
+	XMFLOAT4X4&& RotationAxis(XMFLOAT3 axis, float angle);
 
-	XMFLOAT4X4&& PerspectiveFovLH(float fFovAngleY, float fAspectRatio, float fNearZ, float fFarZ);
+	XMFLOAT4X4&& PerspectiveFovLH(float fov, float aspect_ratio, float near, float far);
 
 	XMFLOAT4X4&& LookAtLH(const XMFLOAT3 eye_pos, const XMFLOAT3 look_pos, const XMFLOAT3 up_dir);
 	XMFLOAT4X4&& LookToLH(const XMFLOAT3 eye_pos, const XMFLOAT3 look_pos, const XMFLOAT3 up_dir);
@@ -139,16 +160,7 @@ namespace Matrix4x4
 
 namespace Triangle
 {
-	inline bool Intersect(XMFLOAT3 xmf3RayPosition, XMFLOAT3 xmf3RayDirection, XMFLOAT3 v0, XMFLOAT3 v1, XMFLOAT3 v2, FLOAT& fHitDistance)
-	{
-		auto ray = XMLoadFloat3(&xmf3RayPosition);
-		auto ray_dir = XMLoadFloat3(&xmf3RayDirection);
-		auto p0 = XMLoadFloat3(&v0);
-		auto p1 = XMLoadFloat3(&v1);
-		auto p2 = XMLoadFloat3(&v2);
-
-		return TriangleTests::Intersects(ray, ray_dir, p0, p1, p2, fHitDistance);
-	}
+	bool Intersect(XMFLOAT3 ray_pos, XMFLOAT3 ray_dir, XMFLOAT3 v0, XMFLOAT3 v1, XMFLOAT3 v2, FLOAT& out_distance);
 }
 
 namespace Plane

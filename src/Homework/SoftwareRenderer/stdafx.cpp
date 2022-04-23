@@ -1,19 +1,6 @@
 #include "stdafx.hpp"
 #include "GamePipeline.hpp"
 
-float Distance(float x1, float y1, float z1, float x2, float y2, float z2)
-{
-	return std::pow(x1 - x2, 2) + std::pow(y1 - y2, 2) + std::pow(z1 - z2, 2);
-}
-
-void Draw2DLine(HDC hDCFrameBuffer, XMFLOAT3& f3PreviousProject, XMFLOAT3& f3CurrentProject)
-{
-	XMFLOAT3 f3Previous = GamePipeline::ScreenTransform(f3PreviousProject);
-	XMFLOAT3 f3Current = GamePipeline::ScreenTransform(f3CurrentProject);
-	::MoveToEx(hDCFrameBuffer, (long)f3Previous.x, (long)f3Previous.y, NULL);
-	::LineTo(hDCFrameBuffer, (long)f3Current.x, (long)f3Current.y);
-}
-
 XMFLOAT3&& Vector3::XMVectorToFloat3(const XMVECTOR& vector)
 {
 	return XMVectorToFloat3(std::move(XMVECTOR(vector)));
@@ -356,6 +343,17 @@ XMFLOAT4X4&& Matrix4x4::LookToLH(const XMFLOAT3 eye_pos, const XMFLOAT3 look_pos
 	XMStoreFloat4x4(&xmmtx4x4Result, XMMatrixLookToLH(eye, look, up));
 
 	return std::move(xmmtx4x4Result);
+}
+
+bool Triangle::Intersect(XMFLOAT3 ray_pos, XMFLOAT3 ray_dir, XMFLOAT3 v0, XMFLOAT3 v1, XMFLOAT3 v2, FLOAT& out_distance)
+{
+	auto ray = XMLoadFloat3(&ray_pos);
+	auto dir = XMLoadFloat3(&ray_dir);
+	auto p0 = XMLoadFloat3(&v0);
+	auto p1 = XMLoadFloat3(&v1);
+	auto p2 = XMLoadFloat3(&v2);
+
+	return TriangleTests::Intersects(ray, dir, p0, p1, p2, out_distance);
 }
 
 XMFLOAT4&& Plane::Normalize(const XMFLOAT4& xmf4Plane)

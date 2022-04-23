@@ -1,11 +1,15 @@
 #include "stdafx.hpp"
 #include "GameScene.hpp"
+#include "GameFramework.hpp"
+#include "GamePipeline.hpp"
 #include "GameObject.hpp"
 #include "GameCamera.hpp"
 #include "Player.hpp"
+#include "CubeMesh.hpp"
 
-GameScene::GameScene(UINT sz_horizontal, UINT sz_vertical, UINT sz_up)
-	: worldSizeH(sz_horizontal), worldSizeV(sz_vertical), worldSizeU(sz_up), collisionAreaIndex(0)
+GameScene::GameScene(GameFramework& framework, UINT sz_horizontal, UINT sz_vertical, UINT sz_up)
+	: Framework(framework), Window(NULL)
+	, worldSizeH(sz_horizontal), worldSizeV(sz_vertical), worldSizeU(sz_up), collisionAreaIndex(0)
 	, Instances()
 	, myPlayer(nullptr), myCamera(nullptr)
 {}
@@ -13,12 +17,23 @@ GameScene::GameScene(UINT sz_horizontal, UINT sz_vertical, UINT sz_up)
 GameScene::~GameScene()
 {}
 
+void GameScene::SetHwnd(HWND hwnd)
+{
+	Window = hwnd;
+}
+
 void GameScene::SetCamera(std::shared_ptr<GameCamera> cam)
 {
 	myCamera = cam;
 }
 
 void GameScene::Start()
+{
+	BuildCollisionGroups();
+	BuildObjects();
+}
+
+void GameScene::BuildCollisionGroups()
 {
 	const auto cgrp_cnt_x = worldSizeH / COLLIDE_AREA_H;
 	const auto cgrp_cnt_y = worldSizeV / COLLIDE_AREA_V;
@@ -40,12 +55,30 @@ void GameScene::Start()
 			}
 		}
 	}
+}
 
-	auto player = CreateInstance<Player>(playerSpawnPoint);
+void GameScene::BuildObjects()
+{
+	auto player_mesh = std::make_shared<CubeMesh>(5, 5, 5);
+
+	myPlayer = std::make_shared<Player>(*this);
+	myPlayer->SetHwnd(Window);
+	myPlayer->SetMesh(player_mesh);
+	myPlayer->SetColor(RGB(0, 0, 255));
+	myPlayer->SetCamera(myCamera);
+	myPlayer->SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -10.0f));
+
+	auto cube = CreateInstance<GameObject>(XMFLOAT3(40.0f, 0.0f, 60.0f));
+	cube->SetMesh(player_mesh);
 }
 
 void GameScene::Update(float elapsed_time)
 {
+	if (myPlayer)
+	{
+		myPlayer->Update(elapsed_time);
+	}
+
 	for (auto& instance : Instances)
 	{
 		instance->Update(elapsed_time);
@@ -54,11 +87,58 @@ void GameScene::Update(float elapsed_time)
 
 void GameScene::Render(HDC surface)
 {
+	GamePipeline::SetViewport(&myCamera->m_Viewport);
+
+	GamePipeline::SetViewPerspectiveProjectTransform(&myCamera->m_xmf4x4ViewPerspectiveProject);
+
+	if (myPlayer)
+	{
+		myPlayer->Render(surface);
+	}
+
 	for (auto& instance : Instances)
 	{
 		instance->Render(surface);
 	}
 }
+
+void GameScene::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch (msg)
+	{
+		case WM_LBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+		case WM_LBUTTONUP:
+		case WM_RBUTTONUP:
+		case WM_MOUSEMOVE:
+		{
+			if (myPlayer)
+			{
+				myPlayer->OnMouse(hwnd, msg, wp, lp);
+			}
+		}
+		break;
+	}
+}
+
+void GameScene::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch (msg)
+	{
+		case WM_KEYDOWN:
+		case WM_KEYUP:
+		{
+			if (myPlayer)
+			{
+				myPlayer->OnKeyboard(hwnd, msg, wp, lp);
+			}
+		}
+		break;
+	}
+}
+
+void GameScene::OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{}
 
 CGroupPtr GameScene::CreateCollisionGroup()
 {
@@ -71,9 +151,9 @@ CGroupPtr GameScene::CreateCollisionGroup()
 
 CGroupPtr GameScene::FindProperGroup(const XMFLOAT3& position)
 {
-	auto cx = std::clamp(position.x, -worldSizeH * 0.5f, worldSizeH * 0.5f);
-	auto cy = std::clamp(position.y, -worldSizeV * 0.5f, worldSizeV * 0.5f);
-	auto cz = std::clamp(position.z, -worldSizeU * 0.5f, worldSizeU * 0.5f);
+	auto cx = Clamp(position.x, -worldSizeH * 0.5f, worldSizeH * 0.5f);
+	auto cy = Clamp(position.y, -worldSizeV * 0.5f, worldSizeV * 0.5f);
+	auto cz = Clamp(position.z, -worldSizeU * 0.5f, worldSizeU * 0.5f);
 
 	for (auto& group : collisionAreas)
 	{
@@ -87,27 +167,29 @@ CGroupPtr GameScene::FindProperGroup(const XMFLOAT3& position)
 }
 
 template<class Type>
-ObjectPtr GameScene::CreateInstance(float x, float y, float z)
+Type* GameScene::CreateInstance(float x, float y, float z)
 {
 	return CreateInstance<Type>(std::move(XMFLOAT3(x, y, z)));
 }
 
 template<class Type>
-ObjectPtr GameScene::CreateInstance(const XMFLOAT3& position)
+Type* GameScene::CreateInstance(const XMFLOAT3& position)
 {
 	return CreateInstance<Type>(std::move(XMFLOAT3(position)));
 }
 
 template<class Type>
-ObjectPtr GameScene::CreateInstance(XMFLOAT3&& position)
+Type* GameScene::CreateInstance(XMFLOAT3&& position)
 {
-	auto group = FindProperGroup(position);
-	auto&& inst = std::make_shared<GameObject>(*this, position);
+	auto inst = new Type(*this);
+	inst->SetPosition(position);
 	inst->SetCamera(myCamera);
 
-	group->AddInstance(inst);
+	auto ptr = ObjectPtr(inst);
+	Instances.push_back(ptr);
 
-	Instances.push_back(inst);
+	auto group = FindProperGroup(position);
+	group->AddInstance(ptr);
 
 	return inst;
 }

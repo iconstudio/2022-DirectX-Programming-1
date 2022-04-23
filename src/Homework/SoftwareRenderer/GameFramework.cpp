@@ -6,12 +6,10 @@
 #include "Player.hpp"
 
 GameFramework::GameFramework()
-	: process(NULL), window(NULL)
+	: process(NULL), Window(NULL)
 	, myFrame(), mySurface(NULL), myFrameBuffer(NULL)
-	, Cursor()
 	, myTimer(std::make_unique<GameTimer>()), myScene(nullptr)
 	, myCamera(nullptr)
-	, myPlayer(nullptr)
 {
 }
 
@@ -24,7 +22,7 @@ GameFramework::~GameFramework()
 void GameFramework::Awake(HINSTANCE instance, HWND hwnd, RECT&& rect)
 {
 	process = instance;
-	window = hwnd;
+	SetHwnd(hwnd);
 	myFrame = rect;
 
 	HDC hDC = GetDC(hwnd);
@@ -43,8 +41,13 @@ void GameFramework::Awake(HINSTANCE instance, HWND hwnd, RECT&& rect)
 void GameFramework::Start()
 {
 	myCamera = std::make_shared<GameCamera>();
+	myCamera->SetViewport(0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+	myCamera->GeneratePerspectiveProjectionMatrix(1.01f, 500.0f, 60.0f);
+	myCamera->SetFOVAngle(60.0f);
+	myCamera->GenerateOrthographicProjectionMatrix(1.01f, 50.0f, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
 
-	myScene = std::make_unique<GameScene>(WORLD_H, WORLD_V, WORLD_U);
+	myScene = std::make_unique<GameScene>(*this, WORLD_H, WORLD_V, WORLD_U);
+	myScene->SetHwnd(Window);
 	myScene->SetCamera(myCamera);
 
 	myScene->Start();
@@ -71,6 +74,11 @@ void GameFramework::Render(HDC surface)
 	}
 
 	PresentFrameBuffer(surface);
+}
+
+void GameFramework::SetHwnd(HWND hwnd)
+{
+	Window = hwnd;
 }
 
 void GameFramework::ClearFrameBuffer(COLORREF color)
@@ -101,44 +109,27 @@ void GameFramework::PresentFrameBuffer(HDC surface)
 
 void GameFramework::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	switch (msg)
+	if (myScene)
 	{
-		case WM_LBUTTONDOWN:
-		case WM_RBUTTONDOWN:
-		case WM_LBUTTONUP:
-		case WM_RBUTTONUP:
-		case WM_MOUSEMOVE:
-		{
-			if (myPlayer)
-			{
-				myPlayer->OnMouse(hwnd, msg, wp, lp);
-			}
-
-			SetCursor(NULL);
-			GetCursorPos(&Cursor);
-		}
-		break;
+		myScene->OnMouse(hwnd, msg, wp, lp);
 	}
 }
 
 void GameFramework::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	switch (msg)
+	if (myScene)
 	{
-		case WM_KEYDOWN:
-		case WM_KEYUP:
-		{
-			if (myPlayer)
-			{
-				myPlayer->OnKeyboard(hwnd, msg, wp, lp);
-			}
-		}
-		break;
+		myScene->OnKeyboard(hwnd, msg, wp, lp);
 	}
 }
 
 void GameFramework::OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
+	if (myScene)
+	{
+		myScene->OnHWND(hwnd, msg, wp, lp);
+	}
+
 	switch (msg)
 	{
 		case WM_ACTIVATE:
@@ -147,12 +138,10 @@ void GameFramework::OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
 			if (WA_INACTIVE == act)
 			{
-				ReleaseCapture();
 				myTimer->Stop();
 			}
 			else
 			{
-				SetCapture(hwnd);
 				myTimer->Start();
 			}
 		}
@@ -163,4 +152,43 @@ void GameFramework::OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 		}
 		break;
 	}
+}
+
+LRESULT GameFramework::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch (msg)
+	{
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONUP:
+		case WM_RBUTTONDOWN:
+		case WM_RBUTTONUP:
+		case WM_MOUSEMOVE:
+		{
+			OnMouse(hwnd, msg, wp, lp);
+
+		}
+		break;
+
+		case WM_KEYDOWN:
+		case WM_KEYUP:
+		{
+			OnKeyboard(hwnd, msg, wp, lp);
+		}
+		break;
+
+		case WM_ACTIVATE:
+		case WM_SIZE:
+		{
+			OnHWND(hwnd, msg, wp, lp);
+		}
+		break;
+		
+		default:
+		{
+			return DefWindowProc(hwnd, msg, wp, lp);
+		}
+		break;
+	}
+
+	return 0;
 }

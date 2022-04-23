@@ -5,6 +5,8 @@
 class GameObject
 {
 public:
+	GameObject(const GameObject&) = default;
+	GameObject(GameObject&&) = default;
 	GameObject(GameScene& scene);
 	GameObject(GameScene& scene, float x, float y, float z);
 	GameObject(GameScene& scene, const XMFLOAT3& position);
@@ -16,11 +18,11 @@ public:
 	void SetColor(DWORD dwColor);
 	void SetCamera(std::shared_ptr<GameCamera>& cam);
 
-	void SetPosition(float x, float y, float z);
-	void SetPosition(const XMFLOAT3& xmf3Position);
-	void SetPosition(XMFLOAT3&& xmf3Position);
-	void SetRotationTransform(XMFLOAT4X4* pmxf4x4Transform);
-	void AddPosition(XMFLOAT3&& xmf3Position);
+	virtual void SetPosition(float x, float y, float z);
+	virtual void SetPosition(const XMFLOAT3& xmf3Position);
+	virtual void SetPosition(XMFLOAT3&& xmf3Position);
+	virtual void SetRotationTransform(XMFLOAT4X4* pmxf4x4Transform);
+	virtual void AddPosition(XMFLOAT3&& xmf3Position);
 
 	XMFLOAT3&& GetPosition();
 	XMFLOAT3&& GetLook();
@@ -41,8 +43,8 @@ public:
 	void SetRotationAxis(XMFLOAT3&& xmf3RotationAxis);
 	void SetRotationSpeed(float fSpeed);
 
-	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
-	void Rotate(XMFLOAT3& xmf3Axis, float fAngle);
+	virtual void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
+	virtual void Rotate(XMFLOAT3& xmf3Axis, float fAngle);
 
 	void LookTo(XMFLOAT3& xmf3LookTo, XMFLOAT3& xmf3Up);
 	void LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up);

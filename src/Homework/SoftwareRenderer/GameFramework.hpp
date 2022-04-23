@@ -14,6 +14,11 @@ public:
 	void Update();
 	void Render(HDC surface);
 
+	LRESULT CALLBACK OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+
+private:
+	void SetHwnd(HWND hwnd);
+
 	void ClearFrameBuffer(COLORREF color);
 	void PresentFrameBuffer(HDC surface);
 
@@ -21,19 +26,15 @@ public:
 	void OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	void OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
-private:
 	HINSTANCE process;
-	HWND window;
+	HWND Window;
 
 	RECT myFrame;
 	HDC mySurface;
 	HBITMAP myFrameBuffer;
 
-	POINT Cursor;
-
 	std::unique_ptr<GameTimer> myTimer;
 	std::unique_ptr<GameScene> myScene;
 	std::shared_ptr<GameCamera> myCamera;
-	std::shared_ptr<Player> myPlayer;
 };
 

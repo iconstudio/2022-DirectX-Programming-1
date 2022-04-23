@@ -15,14 +15,17 @@ public:
 	void Set(const UINT index, CPolygon&& poly);
 	void Push(const CPolygon& poly);
 	void Push(CPolygon&& poly);
+
+	void DrawSide(HDC surface, const XMFLOAT3& pos1, const XMFLOAT3& pos2);
 	virtual void Render(HDC hDCFrameBuffer);
 
-	BOOL RayIntersectionByTriangle(XMVECTOR& ray, XMVECTOR& ray_dir, XMVECTOR v0, XMVECTOR v1, XMVECTOR v2, float* out_near);
-	int CheckRayIntersection(XMVECTOR& ray, XMVECTOR& ray_dir, float* out_near);
+	bool CheckProjection(const float prj_x, const float prj_y) const;
+	bool CheckDepth(const float prj_z) const;
+	BOOL RayIntersectionByTriangle(XMVECTOR& ray, XMVECTOR& ray_dir, XMVECTOR v0, XMVECTOR v1, XMVECTOR v2, float* out_distance) const;
+	int CheckRayIntersection(XMVECTOR& ray, XMVECTOR& ray_dir, float* out_distance) const;
 
 	BoundingOrientedBox Collider;
 
-protected:
 	std::vector<CPolygon> Polygons;
 
 private:
@@ -48,6 +51,7 @@ class CVertex
 {
 public:
 	CVertex();
+	CVertex(const CVertex&) = default;
 	CVertex(const float x, const float y, const float z);
 	CVertex(XMFLOAT3 position);
 	virtual ~CVertex();
