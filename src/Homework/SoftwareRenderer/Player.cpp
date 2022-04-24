@@ -6,9 +6,10 @@
 
 Player::Player(GameScene& scene)
 	: GameObject(scene)
-	, Window(NULL), Cursor()
-	, m_xmf3CameraOffset(), m_xmf3Velocity()
+	, Window(NULL), Cursor(), Orientation(0)
+	, m_xmf3CameraOffset()
 {
+	Friction = 30.0f;
 }
 
 Player::~Player()
@@ -35,96 +36,41 @@ void Player::SetCameraOffset(XMFLOAT3&& xmf3CameraOffset)
 	Camera->GenerateViewMatrix();
 }
 
-void Player::Move(DWORD dwDirection, float fDistance)
+void Player::Crawl(DWORD dwdir, float accel)
 {
-	if (dwDirection)
-	{
-		XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
+	XMFLOAT3 dir = XMFLOAT3(0, 0, 0);
 
-		auto pos = XMFLOAT3(Transform.GetPosition());
-		auto right = XMFLOAT3(Transform.GetRight());
-		auto up = XMFLOAT3(Transform.GetUp());
-		auto look = XMFLOAT3(Transform.GetLook());
+	auto pos = XMFLOAT3(Transform.GetPosition());
+	auto right = XMFLOAT3(Transform.GetRight());
+	auto up = XMFLOAT3(Transform.GetUp());
+	auto look = XMFLOAT3(Transform.GetLook());
 
-		if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, up, fDistance);
-		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, up, -fDistance);
+	if (dwdir & DIR_UP) dir = Vector3::Add(dir, up, 1.0f);
+	if (dwdir & DIR_DOWN) dir = Vector3::Add(dir, up, -1.0f);
 
-		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, right, fDistance);
-		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, right, -fDistance);
+	if (dwdir & DIR_RIGHT) dir = Vector3::Add(dir, right, 1.0f);
+	if (dwdir & DIR_LEFT) dir = Vector3::Add(dir, right, -1.0f);
 
-		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, look, fDistance);
-		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, look, -fDistance);
+	if (dwdir & DIR_FORWARD) dir = Vector3::Add(dir, look, 1.0f);
+	if (dwdir & DIR_BACKWARD) dir = Vector3::Add(dir, look, -1.0f);
 
-		Move(std::move(xmf3Shift), true);
-	}
+	SetDirection(dir);
+	AddSpeed(accel, 0.1f);
 }
 
-void Player::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
+void Player::Move(const XMFLOAT3& vDirection, float distance)
 {
-	Move(std::move(XMFLOAT3(xmf3Shift)), bUpdateVelocity);
-}
-
-void Player::Move(XMFLOAT3&& xmf3Shift, bool bUpdateVelocity)
-{
-	if (bUpdateVelocity)
-	{
-		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);
-	}
-	else
-	{
-		Camera->Move(xmf3Shift);
-		Transform.Translate(std::forward<XMFLOAT3>(xmf3Shift));
-	}
-}
-
-void Player::Move(float x, float y, float z)
-{
-	Move(XMFLOAT3(x, y, z), false);
+	Camera->Move(vDirection, distance);
+	GameObject::Move(vDirection, distance);
 }
 
 void Player::Rotate(float pitch, float yaw, float roll)
 {
 	Camera->Rotate(pitch, yaw, roll);
 	Transform.Rotate(pitch, yaw, roll);
-	
-	
-	/*
-	if (pitch != 0.0f) // x
-	{
-		auto mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(pitch));
-		Transform.myLook = Vector3::TransformNormal(m_xmf3Look, mtxRotate);
-		m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, mtxRotate);
-	}
-	if (yaw != 0.0f) // y
-	{
-		auto mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(yaw));
-		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, mtxRotate);
-		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, mtxRotate);
-	}
-	if (roll != 0.0f) // z
-	{
-		auto mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Look), XMConvertToRadians(roll));
-		m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, mtxRotate);
-		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, mtxRotate);
-	}
-
-	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
-	m_xmf3Right = Vector3::Normalize(Vector3::CrossProduct(m_xmf3Up, m_xmf3Look));
-	m_xmf3Up = Vector3::Normalize(Vector3::CrossProduct(m_xmf3Look, m_xmf3Right));
-	//*/
 }
 
-void Player::LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up)
-{
-	Transform.LookAt(xmf3LookAt, xmf3Up);
-
-	//XMFLOAT4X4 xmf4x4View = Matrix4x4::LookAtLH(m_xmf3Position, xmf3LookAt, xmf3Up);
-	//m_xmf3Right = Vector3::Normalize(XMFLOAT3(xmf4x4View._11, xmf4x4View._21, xmf4x4View._31));
-	//m_xmf3Up = Vector3::Normalize(XMFLOAT3(xmf4x4View._12, xmf4x4View._22, xmf4x4View._32));
-	//m_xmf3Look = Vector3::Normalize(XMFLOAT3(xmf4x4View._13, xmf4x4View._23, xmf4x4View._33));
-}
-
-void Player::Update(float fTimeElapsed)
+void Player::Update(float elapsed_time)
 {
 	if (NULL != Window && GetCapture() == Window)
 	{
@@ -141,26 +87,21 @@ void Player::Update(float fTimeElapsed)
 			//if (pKeyBuffer[VK_RBUTTON] & 0xF0)
 			//Rotate(cyMouseDelta, 0.0f, -cxMouseDelta);
 			//else
-			Rotate(0, cxMouseDelta, 0.0f);
-			//Rotate(cyMouseDelta, cxMouseDelta, 0.0f);
+			//Rotate(0, cxMouseDelta, 0.0f);
+			Rotate(cyMouseDelta, cxMouseDelta, 0.0f);
 		}
 	}
 
-	Move(m_xmf3Velocity, false);
+	if (Orientation)
+	{
+		Crawl(Orientation, 10.0f * elapsed_time);
+	}
 
-	Camera->Update(m_xmf3CameraOffset, fTimeElapsed);
+	GameObject::Update(elapsed_time);
+	Camera->Update(m_xmf3CameraOffset, elapsed_time);
 	Camera->GenerateViewMatrix();
 
-	XMFLOAT3 xmf3Deceleration = Vector3::Normalize(Vector3::ScalarProduct(m_xmf3Velocity, -1.0f));
-	float fLength = Vector3::Length(m_xmf3Velocity);
-	float fDeceleration = m_fFriction * fTimeElapsed;
-	if (fDeceleration > fLength) fDeceleration = fLength;
-
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Deceleration, fDeceleration);
-
 	OnUpdateTransform();
-
-	GameObject::Update(fTimeElapsed);
 }
 
 void Player::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -193,8 +134,6 @@ void Player::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
 void Player::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	DWORD dwDirection = 0;
-
 	switch (msg)
 	{
 		case WM_KEYDOWN:
@@ -203,22 +142,22 @@ void Player::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			{
 				case 'A':
 				{
-					dwDirection |= DIR_LEFT;
+					Orientation |= DIR_LEFT;
 				}
 				break;
 				case 'D':
 				{
-					dwDirection |= DIR_RIGHT;
+					Orientation |= DIR_RIGHT;
 				}
 				break;
 				case 'W':
 				{
-					dwDirection |= DIR_FORWARD;
+					Orientation |= DIR_FORWARD;
 				}
 				break;
 				case 'S':
 				{
-					dwDirection |= DIR_BACKWARD;
+					Orientation |= DIR_BACKWARD;
 				}
 				break;
 			}
@@ -227,13 +166,31 @@ void Player::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
 		case WM_KEYUP:
 		{
+			switch (wp)
+			{
+				case 'A':
+				{
+					Orientation &= 0xff & ~DIR_LEFT;
+				}
+				break;
+				case 'D':
+				{
+					Orientation &= 0xff & ~DIR_RIGHT;
+				}
+				break;
+				case 'W':
+				{
+					Orientation &= 0xff & ~DIR_FORWARD;
+				}
+				break;
+				case 'S':
+				{
+					Orientation &= 0xff & ~DIR_BACKWARD;
+				}
+				break;
+			}
 		}
 		break;
-	}
-
-	if (dwDirection)
-	{
-		Move(dwDirection, 0.15f);
 	}
 }
 

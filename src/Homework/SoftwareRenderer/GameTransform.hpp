@@ -18,8 +18,8 @@ public:
 	void SetRotation(const XMFLOAT4X4& tfrm);
 
 	void Translate(float x, float y, float z);
-	void Translate(const XMFLOAT3& pos);
-	void Translate(XMFLOAT3&& pos);
+	void Translate(const XMFLOAT3& shift);
+	void Translate(XMFLOAT3&& shift);
 	void Move(const XMFLOAT3& dir, float distance);
 	void Move(XMFLOAT3&& dir, float distance);
 	void MoveStrafe(float distance);

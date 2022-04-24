@@ -7,9 +7,9 @@
 
 GameObject::GameObject(GameScene& scene)
 	: Scene(scene), Camera(nullptr)
-	, MeshPtr(nullptr), m_dwColor(RGB(255, 0, 0)), m_Pen(CreatePen(PS_SOLID, 0, m_dwColor))
+	, MeshPtr(nullptr), myColour(RGB(255, 0, 0)), myPen(CreatePen(PS_SOLID, 0, myColour))
 	, Collider()
-	, Speed(0.0f), Direction(XMFLOAT3(0.0f, 0.0f, 1.0f))
+	, Direction(XMFLOAT3(0.0f, 0.0f, 0.0f)), Speed(0.0f), Friction(0.0f)
 {}
 
 GameObject::GameObject(GameScene & scene, float x, float y, float z)
@@ -38,7 +38,7 @@ GameObject::~GameObject()
 
 void GameObject::SetActive(bool bActive)
 {
-	m_bActive = bActive;
+	isActivated = bActive;
 }
 
 void GameObject::SetMesh(std::shared_ptr<CMesh> pMesh)
@@ -48,11 +48,11 @@ void GameObject::SetMesh(std::shared_ptr<CMesh> pMesh)
 
 void GameObject::SetColor(DWORD dwColor)
 {
-	if (m_dwColor != dwColor)
+	if (myColour != dwColor)
 	{
-		DeleteObject(m_Pen);
-		m_Pen = CreatePen(PS_SOLID, 0, dwColor);
-		m_dwColor = dwColor;
+		DeleteObject(myPen);
+		myPen = CreatePen(PS_SOLID, 0, dwColor);
+		myColour = dwColor;
 	}
 }
 
@@ -88,7 +88,7 @@ void GameObject::AddPosition(XMFLOAT3&& vector)
 
 XMFLOAT3&& GameObject::GetPosition()
 {
-	return XMFLOAT3(Transform.GetPosition());
+	return std::move(XMFLOAT3(Transform.GetPosition()));
 }
 
 XMFLOAT3&& GameObject::GetRight()
@@ -106,24 +106,24 @@ XMFLOAT3&& GameObject::GetLook()
 	return Vector3::Normalize(XMFLOAT3(Transform.GetLook()));
 }
 
-void GameObject::Move(const XMFLOAT3& vDirection, float fSpeed)
+void GameObject::Move(const XMFLOAT3& vDirection, float distance)
 {
-	Transform.Move(vDirection, fSpeed);
+	Transform.Move(vDirection, distance);
 }
 
-void GameObject::MoveStrafe(float fDistance)
+void GameObject::MoveStrafe(float distance)
 {
-	Transform.MoveStrafe(fDistance);
+	Transform.MoveStrafe(distance);
 }
 
-void GameObject::MoveUp(float fDistance)
+void GameObject::MoveUp(float distance)
 {
-	Transform.MoveUp(fDistance);
+	Transform.MoveUp(distance);
 }
 
-void GameObject::MoveForward(float fDistance)
+void GameObject::MoveForward(float distance)
 {
-	Transform.MoveForward(fDistance);
+	Transform.MoveForward(distance);
 }
 
 void GameObject::Rotate(float fPitch, float fYaw, float fRoll)
@@ -146,19 +146,49 @@ void GameObject::LookAt(XMFLOAT3& from, XMFLOAT3& up)
 	Transform.LookAt(from, up);
 }
 
-void GameObject::SetDirection(const XMFLOAT3& xmf3MovingDirection)
+void GameObject::SetVelocity(const XMFLOAT3& vector)
 {
-	SetDirection(std::move(XMFLOAT3(xmf3MovingDirection)));
+	SetVelocity(std::move(XMFLOAT3(vector)));
 }
 
-void GameObject::SetDirection(XMFLOAT3&& xmf3MovingDirection)
+void GameObject::SetVelocity(XMFLOAT3&& vector)
 {
-	Direction = Vector3::Normalize(std::forward<XMFLOAT3>(xmf3MovingDirection));
+	auto&& vel = std::forward<XMFLOAT3>(vector);
+	Direction = Vector3::Normalize(vel);
+	Speed = Vector3::Length(vel);
 }
 
-void GameObject::SetSpeed(float fSpeed)
+void GameObject::SetDirection(const XMFLOAT3& direction)
 {
-	Speed = fSpeed;
+	SetDirection(std::move(XMFLOAT3(direction)));
+}
+
+void GameObject::SetDirection(XMFLOAT3&& direction)
+{
+	Direction = Vector3::Normalize(std::forward<XMFLOAT3>(direction));
+}
+
+void GameObject::SetSpeed(const float value)
+{
+	Speed = value;
+}
+
+void GameObject::AddSpeed(const float value, const float max)
+{
+	auto speed = GetSpeed() + value;
+	if (max < speed) speed = max;
+
+	SetSpeed(speed);
+}
+
+void GameObject::AddSpeed(const float value)
+{
+	SetSpeed(GetSpeed() + value);
+}
+
+float GameObject::GetSpeed() const
+{
+	return Speed;
 }
 
 void GameObject::SetRotationAxis(const XMFLOAT3& xmf3RotationAxis)
@@ -176,42 +206,66 @@ void GameObject::SetRotationSpeed(float fSpeed)
 	m_fRotationSpeed = fSpeed;
 }
 
-void GameObject::Update(float fElapsedTime)
+void GameObject::Update(float elapsed_time)
 {
 	if (m_fRotationSpeed != 0.0f)
 	{
-		Rotate(m_xmf3RotationAxis, m_fRotationSpeed * fElapsedTime);
+		Rotate(m_xmf3RotationAxis, m_fRotationSpeed * elapsed_time);
 	}
 
-	if (Speed != 0.0f)
+	Transform.Move(Direction, Speed);
+
+	if (0.0f != Friction)
 	{
-		Move(Direction, Speed * fElapsedTime);
+		//XMFLOAT3 xmf3Deceleration = Vector3::Normalize(Vector3::ScalarProduct(Direction, -1.0f));
+		
+		float deceleration = Friction * elapsed_time;
+		if (Speed < deceleration)
+		{
+			//deceleration = speed;
+			Speed = 0.0f;
+		}
+		else
+		{
+			Speed -= deceleration;
+		}
+
+		//SetVelocity(Vector3::Add(Velocity, xmf3Deceleration, deceleration));
 	}
 
 	UpdateBoundingBox();
 }
 
-void GameObject::Render(HDC surface, const XMFLOAT4X4& world, CMesh* mesh)
+void GameObject::Render(HDC surface, const XMFLOAT4X4& world, const std::shared_ptr<CMesh>& mesh)
 {
 	if (mesh)
 	{
 		GamePipeline::SetWorldTransform(world);
 
-		HPEN hOldPen = (HPEN)::SelectObject(surface, m_Pen);
+		auto hOldPen = HPEN(SelectObject(surface, myPen));
 		mesh->Render(surface);
-		::SelectObject(surface, hOldPen);
+		SelectObject(surface, hOldPen);
 	}
 }
 
 void GameObject::Render(HDC surface)
 {
+	if (CheckCameraBounds())
+	{
+		Render(surface, Transform.GetWorldMatrix(), MeshPtr);
+	}
+}
+
+bool GameObject::CheckCameraBounds() const
+{
 	if (Camera)
 	{
 		if (Camera->IsInFrustum(Collider))
 		{
-			GameObject::Render(surface, Transform.GetWorldMatrix(), MeshPtr.get());
+			return true;
 		}
 	}
+	return false;
 }
 
 void GameObject::UpdateBoundingBox()

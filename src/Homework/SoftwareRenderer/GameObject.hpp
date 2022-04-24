@@ -30,46 +30,54 @@ public:
 	XMFLOAT3&& GetUp();
 	XMFLOAT3&& GetRight();
 
-	void Move(const XMFLOAT3& vDirection, float fSpeed);
-	void MoveStrafe(float fDistance = 1.0f);
-	void MoveUp(float fDistance = 1.0f);
-	void MoveForward(float fDistance = 1.0f);
-
-	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
-	void Rotate(const XMFLOAT3& axis, float angle);
+	virtual void Move(const XMFLOAT3& vDirection, float distance);
+	virtual void MoveStrafe(float distance);
+	virtual void MoveUp(float distance);
+	virtual void MoveForward(float distance);
+	virtual void Rotate(float fPitch, float fYaw, float fRoll);
+	virtual void Rotate(const XMFLOAT3& axis, float angle);
 
 	void LookTo(XMFLOAT3& to, XMFLOAT3& up);
 	void LookAt(XMFLOAT3& from, XMFLOAT3& up);
 
-	void SetDirection(const XMFLOAT3& xmf3MovingDirection);
-	void SetDirection(XMFLOAT3&& xmf3MovingDirection);
-	void SetSpeed(float fSpeed);
+	void SetVelocity(const XMFLOAT3& vector);
+	void SetVelocity(XMFLOAT3&& vector);
+	void SetDirection(const XMFLOAT3& direction);
+	void SetDirection(XMFLOAT3&& direction);
+	void SetSpeed(const float value);
+	void AddSpeed(const float value, const float max);
+	void AddSpeed(const float value);
+
+	float GetSpeed() const;
 
 	void SetRotationAxis(const XMFLOAT3& xmf3RotationAxis);
 	void SetRotationAxis(XMFLOAT3&& xmf3RotationAxis);
 	void SetRotationSpeed(float fSpeed);
 
-	virtual void Update(float fElapsedTime);
-	virtual void Render(HDC surface, const XMFLOAT4X4& world, CMesh* mesh);
+	virtual void Update(float elapsed_time);
+	virtual void Render(HDC surface, const XMFLOAT4X4& world, const std::shared_ptr<CMesh>& mesh);
 	virtual void Render(HDC surface);
 
-	void UpdateBoundingBox();
-	void GenerateRayForPicking(XMVECTOR& pick_pos, XMMATRIX& view, XMVECTOR& ray_pos, XMVECTOR& xmvPickRayDirection);
+	virtual bool CheckCameraBounds() const;
+	virtual void UpdateBoundingBox();
+
+	void GenerateRayForPicking(XMVECTOR& pick_pos, XMMATRIX& view, XMVECTOR& ray_pos, XMVECTOR& ray_dir);
 	int PickObjectByRayIntersection(XMVECTOR& pick_pos, XMMATRIX& view, float* max_distance);
 
-	bool m_bActive = true;
+	bool isActivated = true;
 	GameScene& Scene;
 	std::shared_ptr<GameCamera> Camera;
 
 	std::shared_ptr<CMesh> MeshPtr;
-	DWORD m_dwColor;
-	HPEN m_Pen;
+	DWORD myColour;
+	HPEN myPen;
 
 	GameTransform Transform;
 	BoundingOrientedBox Collider;
 
 	XMFLOAT3 Direction;
 	float Speed;
+	float Friction;
 
 	XMFLOAT3 m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
 	float m_fRotationSpeed = 0.0f;

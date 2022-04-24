@@ -134,14 +134,14 @@ int CMesh::CheckRayIntersection(XMVECTOR& ray_pos, XMVECTOR& ray_dir, float* out
 	return nIntersections;
 }
 
-void CMesh::DrawSide(HDC surface, const XMFLOAT3& pos1, const XMFLOAT3& pos2)
+void CMesh::DrawSide(HDC surface, const XMFLOAT3& pos1, const XMFLOAT3& pos2) const
 {
 	auto from = GamePipeline::ScreenTransform(pos1);
 	auto to = GamePipeline::ScreenTransform(pos2);
 	DrawLine(surface, int(from.x), int(from.y), int(to.x), int(to.y));
 }
 
-void CMesh::Render(HDC surface)
+void CMesh::Render(HDC surface) const
 {
 	bool is_inside_first = false;
 	bool is_inside_it = false;

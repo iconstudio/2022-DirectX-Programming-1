@@ -55,28 +55,28 @@ void GameTransform::Translate(float x, float y, float z)
 	myPosition.Z += z;
 }
 
-void GameTransform::Translate(const XMFLOAT3& pos)
+void GameTransform::Translate(const XMFLOAT3& shift)
 {
-	myPosition.X += pos.x;
-	myPosition.Y += pos.y;
-	myPosition.Z += pos.z;
+	myPosition.X += shift.x;
+	myPosition.Y += shift.y;
+	myPosition.Z += shift.z;
 }
 
-void GameTransform::Translate(XMFLOAT3&& pos)
+void GameTransform::Translate(XMFLOAT3&& shift)
 {
-	myPosition.X += pos.x;
-	myPosition.Y += pos.y;
-	myPosition.Z += pos.z;
+	myPosition.X += shift.x;
+	myPosition.Y += shift.y;
+	myPosition.Z += shift.z;
 }
 
 void GameTransform::Move(const XMFLOAT3& dir, float distance)
 {
-	Translate(Vector3::ScalarProduct(dir, distance));
+	Translate(Vector3::ScalarProduct(Vector3::Normalize(dir), distance));
 }
 
 void GameTransform::Move(XMFLOAT3&& dir, float distance)
 {
-	Translate(Vector3::ScalarProduct(std::forward<XMFLOAT3>(dir), distance));
+	Translate(Vector3::ScalarProduct(Vector3::Normalize(std::forward<XMFLOAT3>(dir)), distance));
 }
 
 void GameTransform::MoveStrafe(float distance)

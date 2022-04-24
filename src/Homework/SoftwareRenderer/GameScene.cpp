@@ -93,15 +93,16 @@ void GameScene::Render(HDC surface)
 
 	GamePipeline::SetViewPerspectiveProjectTransform(myCamera->m_xmf4x4ViewPerspectiveProject);
 
+	for (auto& instance : Instances)
+	{
+		instance->Render(surface);
+	}
+
 	if (myPlayer)
 	{
 		myPlayer->Render(surface);
 	}
 
-	for (auto& instance : Instances)
-	{
-		instance->Render(surface);
-	}
 }
 
 void GameScene::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)

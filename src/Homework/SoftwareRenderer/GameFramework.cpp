@@ -10,8 +10,7 @@ GameFramework::GameFramework()
 	, myFrame(), mySurface(NULL), myFrameBuffer(NULL)
 	, myTimer(std::make_unique<GameTimer>()), myScene(nullptr)
 	, myCamera(nullptr)
-{
-}
+{}
 
 GameFramework::~GameFramework()
 {
@@ -40,31 +39,17 @@ void GameFramework::Awake(HINSTANCE instance, HWND hwnd, RECT&& rect)
 
 void GameFramework::Start()
 {
-	try
-	{
-		myCamera = std::make_shared<GameCamera>();
-		myCamera->SetViewport(0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
-		myCamera->GeneratePerspectiveProjectionMatrix(1.01f, 500.0f, 60.0f);
-		myCamera->SetFOVAngle(60.0f);
-		myCamera->GenerateOrthographicProjectionMatrix(1.01f, 50.0f, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
-	}
-	catch (std::exception& e)
-	{
-		throw ("카메라 오류!");
-	}
+	myCamera = std::make_shared<GameCamera>();
+	myCamera->SetViewport(0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+	myCamera->GeneratePerspectiveProjectionMatrix(1.01f, 500.0f, 60.0f);
+	myCamera->SetFOVAngle(60.0f);
+	myCamera->GenerateOrthographicProjectionMatrix(1.01f, 50.0f, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
 
-	try
-	{
-		myScene = std::make_unique<GameScene>(*this, WORLD_H, WORLD_V, WORLD_U);
-		myScene->SetHwnd(Window);
-		myScene->SetCamera(myCamera);
+	myScene = std::make_unique<GameScene>(*this, WORLD_H, WORLD_V, WORLD_U);
+	myScene->SetHwnd(Window);
+	myScene->SetCamera(myCamera);
 
-		myScene->Start();
-	}
-	catch (std::exception& e)
-	{
-		throw ("씬 오류!");
-	}
+	myScene->Start();
 }
 
 void GameFramework::Update()
@@ -196,7 +181,7 @@ LRESULT GameFramework::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			OnHWND(hwnd, msg, wp, lp);
 		}
 		break;
-		
+
 		default:
 		{
 			return DefWindowProc(hwnd, msg, wp, lp);

@@ -13,6 +13,18 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="헤더 파일\System">
+      <UniqueIdentifier>{ad63f769-dde4-487e-993b-4d5da9f52541}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Components">
+      <UniqueIdentifier>{c2043736-a304-4375-9013-0859903a8c13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\System">
+      <UniqueIdentifier>{d2860d19-4c17-4ed1-89ac-f0909828dac2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Components">
+      <UniqueIdentifier>{aed7912a-2768-4880-846d-e19555e273a4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.hpp">
@@ -21,38 +33,41 @@
     <ClInclude Include="Main.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Player.hpp">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="GameObject.hpp">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="GameFramework.hpp">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Resource.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.hpp">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="GameCamera.hpp">
-      <Filter>헤더 파일</Filter>
+      <Filter>헤더 파일\System</Filter>
+    </ClInclude>
+    <ClInclude Include="GameFramework.hpp">
+      <Filter>헤더 파일\System</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.hpp">
+      <Filter>헤더 파일\System</Filter>
     </ClInclude>
     <ClInclude Include="GamePipeline.hpp">
-      <Filter>헤더 파일</Filter>
+      <Filter>헤더 파일\System</Filter>
     </ClInclude>
     <ClInclude Include="GameScene.hpp">
-      <Filter>헤더 파일</Filter>
+      <Filter>헤더 파일\System</Filter>
     </ClInclude>
     <ClInclude Include="GameTimer.hpp">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="CubeMesh.hpp">
-      <Filter>헤더 파일</Filter>
+      <Filter>헤더 파일\System</Filter>
     </ClInclude>
     <ClInclude Include="GameTransform.hpp">
-      <Filter>헤더 파일</Filter>
+      <Filter>헤더 파일\System</Filter>
+    </ClInclude>
+    <ClInclude Include="CubeMesh.hpp">
+      <Filter>헤더 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.hpp">
+      <Filter>헤더 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.hpp">
+      <Filter>헤더 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="RidingPlayer.hpp">
+      <Filter>헤더 파일\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -62,35 +77,38 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="GameCamera.cpp">
+      <Filter>소스 파일\System</Filter>
     </ClCompile>
     <ClCompile Include="GameFramework.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\System</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="GameCamera.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>소스 파일\System</Filter>
     </ClCompile>
     <ClCompile Include="GamePipeline.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\System</Filter>
     </ClCompile>
     <ClCompile Include="GameScene.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\System</Filter>
     </ClCompile>
     <ClCompile Include="GameTimer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="CubeMesh.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\System</Filter>
     </ClCompile>
     <ClCompile Include="GameTransform.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\System</Filter>
+    </ClCompile>
+    <ClCompile Include="CubeMesh.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="RidingPlayer.cpp">
+      <Filter>소스 파일\Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

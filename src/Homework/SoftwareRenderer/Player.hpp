@@ -14,16 +14,12 @@ public:
 	void SetCameraOffset(const XMFLOAT3& xmf3CameraOffset);
 	void SetCameraOffset(XMFLOAT3&& xmf3CameraOffset);
 
-	void Move(DWORD dwDirection, float fDistance);
-	void Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity);
-	void Move(XMFLOAT3&& xmf3Shift, bool bUpdateVelocity);
-	void Move(float x, float y, float z);
+	void Crawl(DWORD dwdir, float accel);
 
-	void Rotate(float pitch, float yaw, float roll);
+	virtual void Move(const XMFLOAT3& vDirection, float distance);
+	virtual void Rotate(float pitch, float yaw, float roll);
 
-	void LookAt(XMFLOAT3& xmf3LookAt, XMFLOAT3& xmf3Up);
-
-	virtual void Update(float fTimeElapsed);
+	virtual void Update(float elapsed_time);
 
 	void OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	void OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -33,13 +29,8 @@ public:
 
 private:
 	XMFLOAT3 m_xmf3CameraOffset;
-	XMFLOAT3 m_xmf3Velocity;
-	float m_fFriction = 125.0f;
-
-	float m_fPitch = 0.0f;
-	float m_fYaw = 0.0f;
-	float m_fRoll = 0.0f;
 
 	HWND Window;
 	POINT Cursor;
+	DWORD Orientation;
 };

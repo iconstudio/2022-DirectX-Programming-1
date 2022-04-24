@@ -81,7 +81,7 @@ void AirplanePlayer::Animate(float fElapsedTime)
 
 	for (int i = 0; i < BULLETS; i++)
 	{
-		if (m_ppBullets[i]->m_bActive) m_ppBullets[i]->Animate(fElapsedTime);
+		if (m_ppBullets[i]->isActivated) m_ppBullets[i]->Animate(fElapsedTime);
 	}
 }
 
@@ -98,7 +98,7 @@ void AirplanePlayer::Render(HDC hDCFrameBuffer, GameCamera* pCamera)
 
 	for (int i = 0; i < BULLETS; i++)
 	{
-		if (m_ppBullets[i]->m_bActive)
+		if (m_ppBullets[i]->isActivated)
 		{
 			m_ppBullets[i]->Render(hDCFrameBuffer, pCamera);
 		}
@@ -116,7 +116,7 @@ void AirplanePlayer::FireBullet(GameObject* pLockedObject)
 	CBulletObject* pBulletObject = NULL;
 	for (int i = 0; i < BULLETS; i++)
 	{
-		if (!m_ppBullets[i]->m_bActive)
+		if (!m_ppBullets[i]->isActivated)
 		{
 			pBulletObject = m_ppBullets[i];
 			break;
