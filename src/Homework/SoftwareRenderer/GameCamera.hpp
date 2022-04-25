@@ -34,11 +34,11 @@ public:
 	void SetLookAt(const XMFLOAT3 xmf3LookAt, const XMFLOAT3 xmf3Up);
 	void SetLookAt(const XMFLOAT3 vPosition, const XMFLOAT3 xmf3LookAt, const XMFLOAT3 xmf3Up);
 
+	void Translate(float x, float y, float z);
 	void Translate(const XMFLOAT3& shift);
 	void Translate(XMFLOAT3&& shift);
 	void Move(const XMFLOAT3& dir, float distance);
 	void Move(XMFLOAT3&& dir, float distance);
-	void Move(float x, float y, float z);
 	void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
 
 	void Update(const XMFLOAT3& offset, float fTimeElapsed = 0.016f);

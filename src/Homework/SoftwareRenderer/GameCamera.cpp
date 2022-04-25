@@ -161,6 +161,11 @@ bool GameCamera::IsInFrustum(const BoundingSphere& collider) const
 	return (Collider.Intersects(collider));
 }
 
+void GameCamera::Translate(float x, float y, float z)
+{
+	Transform.Translate(x, y, z);
+}
+
 void GameCamera::Translate(const XMFLOAT3& shift)
 {
 	Transform.Translate(shift);
@@ -181,13 +186,9 @@ void GameCamera::Move(XMFLOAT3&& dir, float distance)
 	Transform.Move(std::forward<XMFLOAT3>(dir), distance);
 }
 
-void GameCamera::Move(float x, float y, float z)
+void GameCamera::Rotate(float pitch, float yaw, float roll)
 {
-	Transform.Translate(XMFLOAT3(x, y, z));
-}
-
-void GameCamera::Rotate(float fPitch, float fYaw, float fRoll)
-{
+	Transform.Rotate(pitch, yaw, roll);
 	/*
 	if (fPitch != 0.0f)
 	{
@@ -214,52 +215,51 @@ void GameCamera::Update(const XMFLOAT3& offset, float fTimeElapsed)
 	if (Follower)
 	{
 		auto& transform = Follower->Transform;
-		auto& myRight = Transform.myRight;
-		auto& myUp = Transform.myUp;
-		auto& myLook = Transform.myLook;
-		auto& myPosition = Transform.myPosition;
+		auto& fwlWorld = transform.GetWorldMatrix();
+		auto& fwlRight = Transform.myRight;
+		auto& fwlUp = Transform.myUp;
+		auto& fwlLook = Transform.myLook;
+		auto& fwlPosition = Transform.myPosition;
 
-		auto xright = XMFLOAT3(myRight);
-		auto xup = XMFLOAT3(myUp);
-		auto xlook = XMFLOAT3(myLook);
-		auto xpos = XMFLOAT3(myPosition);
+		auto xright = XMFLOAT3(fwlRight);
+		auto xup = XMFLOAT3(fwlUp);
+		auto xlook = XMFLOAT3(fwlLook);
+		auto xpos = XMFLOAT3(fwlPosition);
 
-		XMFLOAT4X4 mtxRotate = Matrix4x4::Identity();
-		mtxRotate._11 = myRight.X;
-		mtxRotate._21 = myUp.X;
-		mtxRotate._31 = myLook.X;
+		auto mtxRotate = XMFLOAT4X4();
+		mtxRotate._11 = fwlRight.X;
+		mtxRotate._12 = fwlRight.Y;
+		mtxRotate._13 = fwlRight.Z;
 
-		mtxRotate._12 = myRight.Y;
-		mtxRotate._22 = myUp.Y;
-		mtxRotate._32 = myLook.Y;
+		mtxRotate._21 = fwlUp.X;
+		mtxRotate._22 = fwlUp.Y;
+		mtxRotate._23 = fwlUp.Z;
 
-		mtxRotate._13 = myRight.Z;
-		mtxRotate._23 = myUp.Z;
-		mtxRotate._33 = myLook.Z;
+		mtxRotate._31 = fwlLook.X;
+		mtxRotate._32 = fwlLook.Y;
+		mtxRotate._33 = fwlLook.Z;
 
 		// 팔로워 기준으로 변환된 유격 좌표
 		XMFLOAT3 xmf3Offset = Vector3::TransformCoord(offset, mtxRotate);
 
 		// 팔로워 기준으로 세워진 고정 좌표
-		XMFLOAT3 pos = Vector3::Add(xpos, xmf3Offset);
+		XMFLOAT3 follow_pos = Vector3::Add(xpos, xmf3Offset);
 		
 		// 현재 카메라 위치에서 고정 좌표로 향하는 벡터
-		XMFLOAT3 move_dir = Vector3::Subtract(pos, xpos);
-		float fLength = Vector3::Length(move_dir);
-		move_dir = Vector3::Normalize(move_dir);
+		auto&& move_dir = Vector3::Subtract(follow_pos, xpos);
+		float move_far = Vector3::Length(move_dir);
 
 		float fTimeLagScale = fTimeElapsed * (1.0f / 0.1f);
-		float fDistance = fLength * fTimeLagScale;
+		float move_distane = move_far * fTimeLagScale;
 
-		if (fDistance > fLength) fDistance = fLength;
-		if (fLength < 0.01f) fDistance = fLength;
+		if (move_far < move_distane) move_distane = move_far;
+		if (move_far < 0.01f) move_distane = move_far;
 
 		// 천천히 카메라 이동
-		if (0.0f < fDistance)
+		if (0.0f < move_distane)
 		{
-			myPosition = Vector3::Add(xpos, move_dir, fDistance);
-
 			SetLookAt(xpos, xup);
+			Transform.Translate(Vector3::ScalarProduct(Vector3::Normalize(move_dir), move_distane));
 		}
 	}
 }

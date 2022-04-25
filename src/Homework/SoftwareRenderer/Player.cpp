@@ -6,7 +6,7 @@
 
 Player::Player(GameScene& scene)
 	: GameObject(scene)
-	, Window(NULL), Cursor(), Orientation(0)
+	, Window(NULL), Cursor(), Orientation(0), focused(false)
 	, m_xmf3CameraOffset()
 {
 	Friction = 30.0f;
@@ -67,12 +67,12 @@ void Player::Move(const XMFLOAT3& vDirection, float distance)
 void Player::Rotate(float pitch, float yaw, float roll)
 {
 	Camera->Rotate(pitch, yaw, roll);
-	Transform.Rotate(pitch, yaw, roll);
+	GameObject::Rotate(pitch, yaw, roll);
 }
 
 void Player::Update(float elapsed_time)
 {
-	if (NULL != Window && focused && GetCapture() == Window)
+	if (NULL != Window && focused)
 	{
 		POINT ptCursorPos;
 		GetCursorPos(&ptCursorPos);
@@ -95,8 +95,8 @@ void Player::Update(float elapsed_time)
 	}
 
 	GameObject::Update(elapsed_time);
-	//Camera->Update(m_xmf3CameraOffset, elapsed_time);
-	//Camera->GenerateViewMatrix();
+	Camera->Update(m_xmf3CameraOffset, elapsed_time);
+	Camera->GenerateViewMatrix();
 
 	OnUpdateTransform();
 }
@@ -203,12 +203,12 @@ void Player::OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			if (WA_INACTIVE == act)
 			{
 				focused = false;
-				ReleaseCapture();
+				//ReleaseCapture();
 			}
 			else
 			{
 				focused = true;
-				SetCapture(hwnd);
+				//SetCapture(hwnd);
 				GetCursorPos(&Cursor);
 			}
 		}

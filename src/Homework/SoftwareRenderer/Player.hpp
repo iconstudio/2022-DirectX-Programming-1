@@ -34,5 +34,5 @@ private:
 	HWND Window;
 	POINT Cursor;
 	DWORD Orientation;
-	bool focused = false;
+	bool focused;
 };
