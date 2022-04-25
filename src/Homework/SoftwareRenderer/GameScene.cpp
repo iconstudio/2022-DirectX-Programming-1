@@ -30,7 +30,9 @@ void GameScene::SetCamera(std::shared_ptr<GameCamera> cam)
 void GameScene::Start()
 {
 	BuildCollisionGroups();
+	BuildWorld();
 	BuildObjects();
+	BuildEnemies();
 }
 
 void GameScene::BuildCollisionGroups()
@@ -57,6 +59,11 @@ void GameScene::BuildCollisionGroups()
 	}
 }
 
+void GameScene::BuildWorld()
+{
+
+}
+
 void GameScene::BuildObjects()
 {
 	auto player_mesh = std::make_shared<CubeMesh>(5, 5, 5);
@@ -67,12 +74,15 @@ void GameScene::BuildObjects()
 	myPlayer->SetMesh(player_mesh);
 	myPlayer->SetColor(RGB(0, 0, 255));
 	myPlayer->SetCamera(myCamera);
-	myPlayer->SetCameraOffset(XMFLOAT3(0.0f, 5.0f, -10.0f));
+	myPlayer->SetCameraOffset(XMFLOAT3(0.0f, 9.0f, -12.0f));
 	myCamera->SetFollower(myPlayer.get());
 
 	auto cube = CreateInstance<GameObject>(XMFLOAT3(40.0f, 0.0f, 60.0f));
 	cube->SetMesh(player_mesh);
 }
+
+void GameScene::BuildEnemies()
+{}
 
 void GameScene::Update(float elapsed_time)
 {
@@ -87,16 +97,21 @@ void GameScene::Update(float elapsed_time)
 	}
 }
 
-void GameScene::Render(HDC surface)
+void GameScene::Render(HDC surface) const
 {
 	GamePipeline::SetViewport(myCamera->m_Viewport);
 
-	GamePipeline::SetViewPerspectiveProjectTransform(myCamera->m_xmf4x4ViewPerspectiveProject);
+	GamePipeline::SetViewPerspectiveProjectTransform(myCamera->projectionPerspective);
 
-	for (auto& instance : Instances)
+	for (const auto& group : collisionAreas)
 	{
-		instance->Render(surface);
+		if (myCamera->IsInFrustum(group->Collider))
+		{
+			group->Render(surface);
+		}
 	}
+
+	auto aa = std::weak_ptr(myPlayer);
 
 	if (myPlayer)
 	{
@@ -104,44 +119,6 @@ void GameScene::Render(HDC surface)
 	}
 
 }
-
-void GameScene::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
-{
-	switch (msg)
-	{
-		case WM_LBUTTONDOWN:
-		case WM_RBUTTONDOWN:
-		case WM_LBUTTONUP:
-		case WM_RBUTTONUP:
-		case WM_MOUSEMOVE:
-		{
-			if (myPlayer)
-			{
-				myPlayer->OnMouse(hwnd, msg, wp, lp);
-			}
-		}
-		break;
-	}
-}
-
-void GameScene::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
-{
-	switch (msg)
-	{
-		case WM_KEYDOWN:
-		case WM_KEYUP:
-		{
-			if (myPlayer)
-			{
-				myPlayer->OnKeyboard(hwnd, msg, wp, lp);
-			}
-		}
-		break;
-	}
-}
-
-void GameScene::OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
-{}
 
 CGroupPtr GameScene::CreateCollisionGroup()
 {
@@ -197,6 +174,51 @@ Type* GameScene::CreateInstance(XMFLOAT3&& position)
 	return inst;
 }
 
+void GameScene::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	if (myPlayer)
+	{
+		myPlayer->OnMouse(hwnd, msg, wp, lp);
+	}
+
+	switch (msg)
+	{
+		case WM_LBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+		case WM_LBUTTONUP:
+		case WM_RBUTTONUP:
+		case WM_MOUSEMOVE:
+		{
+		}
+		break;
+	}
+}
+
+void GameScene::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	if (myPlayer)
+	{
+		myPlayer->OnKeyboard(hwnd, msg, wp, lp);
+	}
+
+	switch (msg)
+	{
+		case WM_KEYDOWN:
+		case WM_KEYUP:
+		{
+		}
+		break;
+	}
+}
+
+void GameScene::OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	if (myPlayer)
+	{
+		myPlayer->OnHWND(hwnd, msg, wp, lp);
+	}
+}
+
 GameCollsionGroup::GameCollsionGroup(const UINT index, UINT sz_horizontal, UINT sz_vertical, UINT sz_up)
 	: Index(index)
 	, Collider()
@@ -209,15 +231,23 @@ void GameCollsionGroup::SetPosition(XMFLOAT3&& position)
 	Collider.Center = position;
 }
 
+void GameCollsionGroup::AddInstance(ObjectPtr& ptr)
+{
+	Instances.push_back(ptr);
+}
+
+void GameCollsionGroup::Render(HDC surface) const
+{
+	for (const auto& instance : Instances)
+	{
+		instance->Render(surface);
+	}
+}
+
 bool GameCollsionGroup::Contains(const XMFLOAT3& point)
 {
 	auto vector = XMLoadFloat3(&point);
 	auto result = Collider.Contains(vector);
 
 	return ContainmentType::DISJOINT != result;
-}
-
-void GameCollsionGroup::AddInstance(ObjectPtr& ptr)
-{
-	Instances.push_back(ptr);
 }
