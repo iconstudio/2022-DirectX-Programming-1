@@ -233,10 +233,13 @@ void GameObject::Update(float elapsed_time)
 		//SetVelocity(Vector3::Add(Velocity, xmf3Deceleration, deceleration));
 	}
 
-	UpdateBoundingBox();
+	if (0.0f != elapsed_time)
+	{
+		UpdateBoundingBox();
+	}
 }
 
-void GameObject::Render(HDC surface, const XMFLOAT4X4& world, const std::shared_ptr<CMesh>& mesh)
+void GameObject::Render(HDC surface, const XMFLOAT4X4& world, const std::shared_ptr<CMesh>& mesh) const
 {
 	if (mesh)
 	{
@@ -248,7 +251,7 @@ void GameObject::Render(HDC surface, const XMFLOAT4X4& world, const std::shared_
 	}
 }
 
-void GameObject::Render(HDC surface)
+void GameObject::Render(HDC surface) const
 {
 	if (CheckCameraBounds())
 	{

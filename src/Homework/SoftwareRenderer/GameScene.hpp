@@ -18,7 +18,7 @@ public:
 
 	void Start();
 	void Update(float elapsed_time);
-	void Render(HDC surface);
+	void Render(HDC surface) const;
 
 	void OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	void OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -34,7 +34,9 @@ public:
 
 private:
 	void BuildCollisionGroups();
+	void BuildWorld();
 	void BuildObjects();
+	void BuildEnemies();
 
 	CGroupPtr CreateCollisionGroup();
 	CGroupPtr FindProperGroup(const XMFLOAT3& position);
@@ -79,7 +81,11 @@ public:
 
 	void AddInstance(ObjectPtr& ptr);
 
+	void Render(HDC surface) const;
+
 	bool Contains(const XMFLOAT3& point);
+
+	friend class GameScene;
 
 private:
 	const UINT Index;

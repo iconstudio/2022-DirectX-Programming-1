@@ -7,6 +7,7 @@ public:
 	GameTransform();
 
 	XMFLOAT4X4& GetWorldMatrix();
+	const XMFLOAT4X4& GetWorldMatrix() const;
 	XYZWrapper& GetRight();
 	XYZWrapper& GetUp();
 	XYZWrapper& GetLook();

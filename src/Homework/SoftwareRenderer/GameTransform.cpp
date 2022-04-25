@@ -146,6 +146,11 @@ XMFLOAT4X4& GameTransform::GetWorldMatrix()
 	return World;
 }
 
+const XMFLOAT4X4& GameTransform::GetWorldMatrix() const
+{
+	return World;
+}
+
 XYZWrapper& GameTransform::GetRight()
 {
 	return myRight;

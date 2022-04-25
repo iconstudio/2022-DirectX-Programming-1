@@ -55,8 +55,8 @@ public:
 	void SetRotationSpeed(float fSpeed);
 
 	virtual void Update(float elapsed_time);
-	virtual void Render(HDC surface, const XMFLOAT4X4& world, const std::shared_ptr<CMesh>& mesh);
-	virtual void Render(HDC surface);
+	virtual void Render(HDC surface, const XMFLOAT4X4& world, const std::shared_ptr<CMesh>& mesh) const;
+	virtual void Render(HDC surface) const;
 
 	virtual bool CheckCameraBounds() const;
 	virtual void UpdateBoundingBox();
