@@ -43,27 +43,29 @@ public:
 
 	void Update(const XMFLOAT3& offset, float fTimeElapsed = 0.016f);
 
-	bool IsInFrustum(const BoundingOrientedBox& xmBoundingBox) const;
+	bool IsInFrustum(const BoundingBox& collider) const;
+	bool IsInFrustum(const BoundingOrientedBox& collider) const;
+	bool IsInFrustum(const BoundingSphere& collider) const;
 
-	XMFLOAT4X4		m_xmf4x4View = Matrix4x4::Identity();
+	XMFLOAT4X4		projectionView = Matrix4x4::Identity();
 	XMFLOAT4X4		m_xmf4x4PerspectiveProject = Matrix4x4::Identity();
-	XMFLOAT4X4		m_xmf4x4ViewPerspectiveProject = Matrix4x4::Identity();
+	XMFLOAT4X4		projectionPerspective = Matrix4x4::Identity();
 
-	XMFLOAT4X4		m_xmf4x4OrthographicProject = Matrix4x4::Identity();
+	XMFLOAT4X4		projectionOrthographic = Matrix4x4::Identity();
 	XMFLOAT4X4		m_xmf4x4ViewOrthographicProject = Matrix4x4::Identity();
 
-	GameViewport		m_Viewport;
+	GameTransform Transform;
+	GameViewport m_Viewport;
 
 private:
-	GameTransform Transform;
 	BoundingFrustum	StaticCollider;
 	BoundingFrustum	Collider;
 
 	XMFLOAT4X4 m_xmf4x4InverseView = Matrix4x4::Identity();
-	XMFLOAT3 myPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	XMFLOAT3 myRight = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	XMFLOAT3 myUp = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	XMFLOAT3 myLook = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	//XMFLOAT3 myPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	//XMFLOAT3 myRight = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	//XMFLOAT3 myUp = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	//XMFLOAT3 myLook = XMFLOAT3(0.0f, 0.0f, 1.0f);
 
 	float m_fFOVAngle = 90.0f;
 	float m_fProjectRectDistance = 1.0f;
