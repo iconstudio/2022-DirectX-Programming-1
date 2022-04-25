@@ -55,7 +55,7 @@ void Player::Crawl(DWORD dwdir, float accel)
 	if (dwdir & DIR_BACKWARD) dir = Vector3::Add(dir, look, -1.0f);
 
 	SetDirection(dir);
-	AddSpeed(accel, 0.1f);
+	AddSpeed(accel, 0.1f); // 10m/s
 }
 
 void Player::Move(const XMFLOAT3& vDirection, float distance)
@@ -72,29 +72,26 @@ void Player::Rotate(float pitch, float yaw, float roll)
 
 void Player::Update(float elapsed_time)
 {
-	if (NULL != Window && GetCapture() == Window)
+	if (NULL != Window && focused)
 	{
 		POINT ptCursorPos;
 		GetCursorPos(&ptCursorPos);
 
-		float cxMouseDelta = (float)(ptCursorPos.x - Cursor.x) / 3.0f;
-		float cyMouseDelta = (float)(ptCursorPos.y - Cursor.y) / 3.0f;
-		SetCursorPos(Cursor.x, Cursor.y);
-		//Cursor = ptCursorPos;
+		float cxMouseDelta = (float)(ptCursorPos.x - Cursor.x) / 4.0f;
+		float cyMouseDelta = (float)(ptCursorPos.y - Cursor.y) / 4.0f;
+		//SetCursorPos(Cursor.x, Cursor.y);
+		Cursor = ptCursorPos;
 
 		if (cxMouseDelta || cyMouseDelta)
 		{
-			//if (pKeyBuffer[VK_RBUTTON] & 0xF0)
-			//Rotate(cyMouseDelta, 0.0f, -cxMouseDelta);
-			//else
-			//Rotate(0, cxMouseDelta, 0.0f);
-			Rotate(cyMouseDelta, cxMouseDelta, 0.0f);
+			Rotate(0, cxMouseDelta, 0.0f);
+			//Rotate(cyMouseDelta, cxMouseDelta, 0.0f);
 		}
 	}
 
 	if (Orientation)
 	{
-		Crawl(Orientation, 10.0f * elapsed_time);
+		Crawl(Orientation, 10.0f * elapsed_time); // 1000m/s^2
 	}
 
 	GameObject::Update(elapsed_time);
@@ -109,21 +106,22 @@ void Player::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	switch (msg)
 	{
 		case WM_LBUTTONDOWN:
+		{
+		}
 		break;
 
 		case WM_RBUTTONDOWN:
 		{
-			SetCapture(hwnd);
-			GetCursorPos(&Cursor);
 		}
 		break;
 
 		case WM_LBUTTONUP:
+		{
+		}
 		break;
 
 		case WM_RBUTTONUP:
 		{
-			ReleaseCapture();
 		}
 		break;
 
@@ -189,6 +187,35 @@ void Player::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				}
 				break;
 			}
+		}
+		break;
+	}
+}
+
+void Player::OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch (msg)
+	{
+		case WM_ACTIVATE:
+		{
+			const auto act = LOWORD(wp);
+
+			if (WA_INACTIVE == act)
+			{
+				focused = false;
+				//ReleaseCapture();
+			}
+			else
+			{
+				focused = true;
+				//SetCapture(hwnd);
+				GetCursorPos(&Cursor);
+			}
+		}
+		break;
+
+		case WM_SIZE:
+		{
 		}
 		break;
 	}
