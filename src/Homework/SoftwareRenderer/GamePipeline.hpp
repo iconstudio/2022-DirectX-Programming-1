@@ -19,3 +19,9 @@ private:
 	static GameViewport m_pViewport;
 };
 
+inline void DrawSide(HDC surface, const XMFLOAT3& pos1, const XMFLOAT3& pos2)
+{
+	auto from = GamePipeline::ScreenTransform(pos1);
+	auto to = GamePipeline::ScreenTransform(pos2);
+	DrawLine(surface, int(from.x), int(from.y), int(to.x), int(to.y));
+}
