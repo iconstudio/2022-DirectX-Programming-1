@@ -24,11 +24,11 @@ public:
 	virtual ~GameCamera();
 
 	void SetFollower(GameObject* target);
-	void SetFOVAngle(float fFOVAngle);
+	void SetFOVAngle(float angle);
 
 	void GenerateViewMatrix();
-	void GeneratePerspectiveProjectionMatrix(float plane_near, float plane_far, float angle);
-	void GenerateOrthographicProjectionMatrix(float plane_near, float plane_far, float width, float height);
+	void GeneratePerspectiveProjectionMatrix(float znear, float zfar, float fov);
+	void GenerateOrthographicProjectionMatrix(float znear, float zfar, float width, float height);
 	void SetViewport(int left, int top, int width, int height);
 
 	void SetLookAt(const XMFLOAT3 xmf3LookAt, const XMFLOAT3 xmf3Up);

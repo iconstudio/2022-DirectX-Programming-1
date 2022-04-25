@@ -69,7 +69,7 @@ private:
 	std::shared_ptr<GameCamera> myCamera;
 
 	// 플레이어 생성 위치
-	XMFLOAT3 playerSpawnPoint = XMFLOAT3{ 50.0f, 0.0f, 50.0f };
+	XMFLOAT3 playerSpawnPoint = XMFLOAT3{ 5.0f, 0.0f, 1.0f };
 };
 
 class GameCollsionGroup

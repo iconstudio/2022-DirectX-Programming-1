@@ -72,7 +72,7 @@ void Player::Rotate(float pitch, float yaw, float roll)
 
 void Player::Update(float elapsed_time)
 {
-	if (NULL != Window && focused)
+	if (NULL != Window && focused && GetCapture() == Window)
 	{
 		POINT ptCursorPos;
 		GetCursorPos(&ptCursorPos);
@@ -95,8 +95,8 @@ void Player::Update(float elapsed_time)
 	}
 
 	GameObject::Update(elapsed_time);
-	Camera->Update(m_xmf3CameraOffset, elapsed_time);
-	Camera->GenerateViewMatrix();
+	//Camera->Update(m_xmf3CameraOffset, elapsed_time);
+	//Camera->GenerateViewMatrix();
 
 	OnUpdateTransform();
 }
@@ -203,12 +203,12 @@ void Player::OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			if (WA_INACTIVE == act)
 			{
 				focused = false;
-				//ReleaseCapture();
+				ReleaseCapture();
 			}
 			else
 			{
 				focused = true;
-				//SetCapture(hwnd);
+				SetCapture(hwnd);
 				GetCursorPos(&Cursor);
 			}
 		}

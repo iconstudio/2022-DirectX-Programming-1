@@ -31,8 +31,8 @@ public:
 	void Rotate(float pitch, float yaw, float roll);
 	void Rotate(const XMFLOAT3& axis, float angle);
 
-	void LookTo(XMFLOAT3& look, XMFLOAT3& up);
-	void LookAt(XMFLOAT3& look, XMFLOAT3& up);
+	void LookTo(const XMFLOAT3& look, const XMFLOAT3& up);
+	void LookAt(const XMFLOAT3& look, const XMFLOAT3& up);
 
 	XMFLOAT4X4 World;
 	XYZWrapper myRight;

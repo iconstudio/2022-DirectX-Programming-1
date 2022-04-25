@@ -123,7 +123,7 @@ void GameTransform::Rotate(const XMFLOAT3& axis, float angle)
 	World = Matrix4x4::Multiply(mtxRotate, World);
 }
 
-void GameTransform::LookTo(XMFLOAT3& look, XMFLOAT3& up)
+void GameTransform::LookTo(const XMFLOAT3& look, const XMFLOAT3& up)
 {
 	auto&& view = Matrix4x4::LookToLH(XMFLOAT3(GetPosition()), look, up);
 
@@ -132,7 +132,7 @@ void GameTransform::LookTo(XMFLOAT3& look, XMFLOAT3& up)
 	World._31 = view._13; World._32 = view._23; World._33 = view._33;
 }
 
-void GameTransform::LookAt(XMFLOAT3& look, XMFLOAT3& up)
+void GameTransform::LookAt(const XMFLOAT3& look, const XMFLOAT3& up)
 {
 	auto&& view = Matrix4x4::LookAtLH(XMFLOAT3(GetPosition()), look, up);
 

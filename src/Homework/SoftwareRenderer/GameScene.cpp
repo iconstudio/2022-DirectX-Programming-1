@@ -61,7 +61,22 @@ void GameScene::BuildCollisionGroups()
 
 void GameScene::BuildWorld()
 {
+	auto pillar_mesh = std::make_shared<CubeMesh>(2, 10, 2);
 
+	constexpr UINT pillar_count = 40;
+	constexpr float pillar_place_z_gap = (WORLD_U * 0.8f) / pillar_count;
+	XMFLOAT3 place{};
+
+	for (UINT i = 0; i < pillar_count; ++i)
+	{
+		place.x = 0.5 * WORLD_H + std::cos(1 + i / 3.141592);
+		place.y = 0;
+		place.z = i * pillar_place_z_gap;
+
+		auto pillar = CreateInstance<GameObject>(place);
+		pillar->SetMesh(pillar_mesh);
+		pillar->SetColor(RGB(110, 30, 30));
+	}
 }
 
 void GameScene::BuildObjects()
