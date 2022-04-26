@@ -2,6 +2,7 @@
 #include "stdafx.hpp"
 #include "GameObject.hpp"
 #include "GameCamera.hpp"
+#include "Fragment.hpp"
 #include "Player.hpp"
 
 using ObjectPtr = std::shared_ptr<GameObject>;
@@ -18,7 +19,8 @@ public:
 
 	void Start();
 	void Update(float elapsed_time);
-	void Render(HDC surface) const;
+	void PrepareRendering();
+	void Render(HDC surface);
 
 	void OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	void OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -62,6 +64,9 @@ private:
 	// 씬 내의 충돌 영역
 	std::vector<CGroupPtr> collisionAreas;
 
+	// 렌더링 할 충돌 영역
+	std::vector<CGroupPtr> preparedCollisionAreas;
+
 	// 플레이어 객체 (Instances 안에도 있음)
 	std::shared_ptr<Player> myPlayer;
 
@@ -81,6 +86,8 @@ public:
 
 	void AddInstance(ObjectPtr& ptr);
 
+	void PrepareRendering();
+	void AddFragment(const CFragment& fragment);
 	void Render(HDC surface) const;
 
 	bool Contains(const XMFLOAT3& point);
@@ -92,4 +99,5 @@ private:
 	BoundingBox Collider;
 
 	std::vector<ObjectPtr> Instances;
+	std::vector<CFragment> Fragments;
 };

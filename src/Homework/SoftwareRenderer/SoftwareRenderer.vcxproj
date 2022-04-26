@@ -148,6 +148,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Fragment.hpp" />
     <ClInclude Include="CubeMesh.hpp" />
     <ClInclude Include="GameCamera.hpp" />
     <ClInclude Include="GameFramework.hpp" />
@@ -164,6 +165,7 @@
     <ClInclude Include="stdafx.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Fragment.cpp" />
     <ClCompile Include="CubeMesh.cpp" />
     <ClCompile Include="GameCamera.cpp" />
     <ClCompile Include="GameFramework.cpp" />

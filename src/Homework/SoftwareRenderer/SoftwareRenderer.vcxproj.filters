@@ -60,14 +60,17 @@
     <ClInclude Include="CubeMesh.hpp">
       <Filter>헤더 파일\Components</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.hpp">
-      <Filter>헤더 파일\Components</Filter>
-    </ClInclude>
     <ClInclude Include="Player.hpp">
       <Filter>헤더 파일\Components</Filter>
     </ClInclude>
     <ClInclude Include="RidingPlayer.hpp">
       <Filter>헤더 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Fragment.hpp">
+      <Filter>헤더 파일\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.hpp">
+      <Filter>헤더 파일\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -101,14 +104,17 @@
     <ClCompile Include="CubeMesh.cpp">
       <Filter>소스 파일\Components</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>소스 파일\Components</Filter>
-    </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>소스 파일\Components</Filter>
     </ClCompile>
     <ClCompile Include="RidingPlayer.cpp">
       <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Fragment.cpp">
+      <Filter>소스 파일\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>소스 파일\System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

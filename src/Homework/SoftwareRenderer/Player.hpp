@@ -29,7 +29,7 @@ public:
 	friend class GameCamera;
 
 private:
-	XMFLOAT3 m_xmf3CameraOffset;
+	XMFLOAT3 cameraOffset;
 
 	HWND Window;
 	POINT Cursor;

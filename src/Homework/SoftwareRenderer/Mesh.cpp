@@ -147,7 +147,7 @@ void CMesh::Render(HDC surface) const
 
 		if (0 == sz) continue;
 
-		const XMFLOAT3 vtx_first = GamePipeline::Project(vertices.at(0).Position);
+		const XMFLOAT3 vtx_first = GamePipeline::ProjectTransform(vertices.at(0).Position);
 		is_inside_first = CheckProjection(vtx_first.x, vtx_first.y);
 
 		XMFLOAT3 vtx_last = vtx_first;
@@ -156,9 +156,8 @@ void CMesh::Render(HDC surface) const
 		for (UINT i = 1; i < sz; ++i)
 		{
 			const auto& vertex = vertices.at(i);
-			const auto vtx_it = GamePipeline::Project(vertex.Position);
+			const auto vtx_it = GamePipeline::ProjectTransform(vertex.Position);
 			is_inside_it = CheckProjection(vtx_it.x, vtx_it.y);
-			//vertex.TranformedPosition = vtx_it;
 
 			if (CheckDepth(vtx_it.z) && (is_inside_it || is_inside_last))
 			{
@@ -199,7 +198,7 @@ void CPolygon::Set(const UINT index, const CVertex& vertex)
 
 void CPolygon::Set(const UINT index, CVertex&& vertex)
 {
-	Vertices[index] = std::move(vertex);
+	Vertices[index] = std::forward<CVertex>(vertex);
 }
 
 void CPolygon::Push(const CVertex& vertex)

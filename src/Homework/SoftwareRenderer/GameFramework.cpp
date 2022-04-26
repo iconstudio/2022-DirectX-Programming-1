@@ -63,6 +63,14 @@ void GameFramework::Update()
 	}
 }
 
+void GameFramework::PrepareRendering()
+{
+	if (myScene)
+	{
+		myScene->PrepareRendering();
+	}
+}
+
 void GameFramework::Render(HDC surface)
 {
 	ClearFrameBuffer(FRAMEBUFFER_CLS_COLOR);

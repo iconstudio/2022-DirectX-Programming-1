@@ -5,18 +5,20 @@ class GamePipeline
 {
 public:
 	static void SetWorldTransform(const XMFLOAT4X4& world);
-	static void SetViewPerspectiveProjectTransform(const XMFLOAT4X4& projection);
-	static void SetViewOrthographicProjectTransform(const XMFLOAT4X4& projection);
+	static void SetProjection(const XMFLOAT4X4& projection);
 	static void SetViewport(const GameViewport& pViewport);
 
+	static void PrepareRendering();
+
 	static XMFLOAT3 ScreenTransform(const XMFLOAT3& xmf3Project);
-	static XMFLOAT3 Project(const XMFLOAT3& xmf3Model);
+	static XMFLOAT3 ProjectTransform(const XMFLOAT3& xmf3Model);
 	static XMFLOAT3 Transform(const XMFLOAT3& xmf3Model);
 
 private:
-	static XMFLOAT4X4 m_pxmf4x4World;
-	static XMFLOAT4X4 m_pxmf4x4ViewProject;
-	static GameViewport m_pViewport;
+	static XMFLOAT4X4 matrixWorld;
+	static XMFLOAT4X4 matrixProjection;
+	static XMFLOAT4X4 matrixView;
+	static GameViewport Viewport;
 };
 
 inline void DrawSide(HDC surface, const XMFLOAT3& pos1, const XMFLOAT3& pos2)

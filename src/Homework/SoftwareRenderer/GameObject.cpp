@@ -1,8 +1,10 @@
 #include "stdafx.hpp"
+#include "GameObject.hpp"
+#include "GameScene.hpp"
 #include "GamePipeline.hpp"
 #include "GameCamera.hpp"
-#include "GameObject.hpp"
 #include "GameTransform.hpp"
+#include "Fragment.hpp"
 #include "Mesh.hpp"
 
 GameObject::GameObject(GameScene& scene)
@@ -237,6 +239,21 @@ void GameObject::Update(float elapsed_time)
 	{
 		UpdateBoundingBox();
 	}
+}
+
+void GameObject::PrepareRendering(GameCollsionGroup& group)
+{
+	if (mesh)
+	{
+		GamePipeline::SetWorldTransform(world);
+
+		auto hOldPen = HPEN(SelectObject(surface, myPen));
+		mesh->Render(surface);
+		SelectObject(surface, hOldPen);
+	}
+	CFragment fragment{};
+
+
 }
 
 void GameObject::Render(HDC surface, const XMFLOAT4X4& world, const std::shared_ptr<CMesh>& mesh) const

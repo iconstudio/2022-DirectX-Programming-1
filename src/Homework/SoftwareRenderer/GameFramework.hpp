@@ -12,6 +12,7 @@ public:
 	void Awake(HINSTANCE instance, HWND hwnd, RECT&& rect);
 	void Start();
 	void Update();
+	void PrepareRendering();
 	void Render(HDC surface);
 
 	LRESULT CALLBACK OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);

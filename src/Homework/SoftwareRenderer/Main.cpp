@@ -209,6 +209,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 		case WM_TIMER:
 		{
+			gGameFramework.PrepareRendering();
+
 			InvalidateRect(hwnd, NULL, FALSE);
 		}
 		break;

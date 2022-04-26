@@ -128,7 +128,9 @@ void GameTransform::LookTo(const XMFLOAT3& look, const XMFLOAT3& up)
 	auto&& view = Matrix4x4::LookToLH(XMFLOAT3(GetPosition()), look, up);
 
 	World._11 = view._11; World._12 = view._21; World._13 = view._31;
+
 	World._21 = view._12; World._22 = view._22; World._23 = view._32;
+
 	World._31 = view._13; World._32 = view._23; World._33 = view._33;
 }
 
@@ -137,7 +139,9 @@ void GameTransform::LookAt(const XMFLOAT3& look, const XMFLOAT3& up)
 	auto&& view = Matrix4x4::LookAtLH(XMFLOAT3(GetPosition()), look, up);
 
 	World._11 = view._11; World._12 = view._21; World._13 = view._31;
+
 	World._21 = view._12; World._22 = view._22; World._23 = view._32;
+
 	World._31 = view._13; World._32 = view._23; World._33 = view._33;
 }
 

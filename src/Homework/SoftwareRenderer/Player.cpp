@@ -7,7 +7,7 @@
 Player::Player(GameScene& scene)
 	: GameObject(scene)
 	, Window(NULL), Cursor(), Orientation(0), focused(false)
-	, m_xmf3CameraOffset()
+	, cameraOffset()
 {
 	Friction = 30.0f;
 }
@@ -27,12 +27,12 @@ void Player::SetCameraOffset(const XMFLOAT3& xmf3CameraOffset)
 
 void Player::SetCameraOffset(XMFLOAT3&& xmf3CameraOffset)
 {
-	m_xmf3CameraOffset = xmf3CameraOffset;
+	cameraOffset = xmf3CameraOffset;
 
 	auto pos = XMFLOAT3(Transform.GetPosition());
 	auto up = XMFLOAT3(Transform.GetUp());
 
-	Camera->SetLookAt(Vector3::Add(pos, m_xmf3CameraOffset), pos, up);
+	Camera->SetLookAt(Vector3::Add(pos, cameraOffset), pos, up);
 	Camera->GenerateViewMatrix();
 }
 
@@ -79,13 +79,11 @@ void Player::Update(float elapsed_time)
 
 		float cxMouseDelta = (float)(ptCursorPos.x - Cursor.x) / 4.0f;
 		float cyMouseDelta = (float)(ptCursorPos.y - Cursor.y) / 4.0f;
-		//SetCursorPos(Cursor.x, Cursor.y);
 		Cursor = ptCursorPos;
 
 		if (cxMouseDelta || cyMouseDelta)
 		{
 			Rotate(0, cxMouseDelta, 0.0f);
-			//Rotate(cyMouseDelta, cxMouseDelta, 0.0f);
 		}
 	}
 
@@ -95,7 +93,7 @@ void Player::Update(float elapsed_time)
 	}
 
 	GameObject::Update(elapsed_time);
-	Camera->Update(m_xmf3CameraOffset, elapsed_time);
+	Camera->Update(cameraOffset, elapsed_time);
 	Camera->GenerateViewMatrix();
 
 	OnUpdateTransform();

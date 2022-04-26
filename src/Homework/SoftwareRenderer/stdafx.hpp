@@ -48,6 +48,7 @@ constexpr UINT COLLIDE_AREA_H = 40, COLLIDE_AREA_V = 10, COLLIDE_AREA_U = 20;
 class CMesh;
 class CPolygon;
 class CVertex;
+class CFragment;
 class GameFramework;
 class GamePipeline;
 class GameTransform;

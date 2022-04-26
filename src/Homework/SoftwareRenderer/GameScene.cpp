@@ -112,21 +112,29 @@ void GameScene::Update(float elapsed_time)
 	}
 }
 
-void GameScene::Render(HDC surface) const
+void GameScene::PrepareRendering()
 {
-	GamePipeline::SetViewport(myCamera->m_Viewport);
-
-	GamePipeline::SetViewPerspectiveProjectTransform(myCamera->projectionPerspective);
+	GamePipeline::SetProjection(myCamera->projectionPerspective);
+	GamePipeline::PrepareRendering();
 
 	for (const auto& group : collisionAreas)
 	{
 		if (myCamera->IsInFrustum(group->Collider))
 		{
-			group->Render(surface);
+			preparedCollisionAreas.push_back(group);
+			group->PrepareRendering();
 		}
 	}
+}
 
-	auto aa = std::weak_ptr(myPlayer);
+void GameScene::Render(HDC surface)
+{
+	for (const auto& group : preparedCollisionAreas)
+	{
+		group->Render(surface);
+	}
+
+	preparedCollisionAreas.clear();
 
 	if (myPlayer)
 	{
@@ -249,6 +257,28 @@ void GameCollsionGroup::SetPosition(XMFLOAT3&& position)
 void GameCollsionGroup::AddInstance(ObjectPtr& ptr)
 {
 	Instances.push_back(ptr);
+}
+
+void GameCollsionGroup::PrepareRendering()
+{
+	for (const auto& instance : Instances)
+	{
+		instance->PrepareRendering(*this);
+	}
+
+	// 하나의 조각은 두 정점의 깊이의 평균으로 정렬
+	std::sort(Fragments.begin(), Fragments.end()
+		, [](const CFragment& a, const CFragment& b) -> int {
+		float mid_a = (a.w1 + a.w2) * 0.5f;
+		float mid_b = (b.w1 + b.w2) * 0.5f;
+
+		return static_cast<int>(mid_a - mid_b);
+	});
+}
+
+void GameCollsionGroup::AddFragment(const CFragment& fragment)
+{
+	Fragments.push_back(fragment);
 }
 
 void GameCollsionGroup::Render(HDC surface) const
