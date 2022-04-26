@@ -55,6 +55,7 @@ public:
 	XMFLOAT4X4		m_xmf4x4ViewOrthographicProject = Matrix4x4::Identity();
 
 	GameTransform Transform;
+
 	GameViewport m_Viewport;
 
 private:
@@ -63,9 +64,9 @@ private:
 
 	XMFLOAT4X4 m_xmf4x4InverseView = Matrix4x4::Identity();
 	//XMFLOAT3 myPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	//XMFLOAT3 myRight = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	//XMFLOAT3 myUp = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	//XMFLOAT3 myLook = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	//XMFLOAT3 myRight;
+	//XMFLOAT3 myUp;
+	//XMFLOAT3 myLook;
 
 	float m_fFOVAngle = 90.0f;
 	float m_fProjectRectDistance = 1.0f;

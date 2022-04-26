@@ -13,9 +13,12 @@ void GameViewport::SetViewport(int nLeft, int nTop, int nWidth, int nHeight)
 }
 
 GameCamera::GameCamera()
-	: Transform(), Follower(nullptr)
+	: Transform()
+	, Follower(nullptr)
 {
+	Transform.myRight = GameTransform::Right;
 	Transform.myUp = GameTransform::Up;
+	Transform.myLook = GameTransform::Forward;
 }
 
 GameCamera::~GameCamera()
@@ -23,40 +26,37 @@ GameCamera::~GameCamera()
 
 void GameCamera::GenerateViewMatrix()
 {
-	auto& myRight = Transform.myRight;
-	auto& myUp = Transform.myUp;
-	auto& myLook = Transform.myLook;
-	auto& myPosition = Transform.myPosition;
+	auto&& myRight = XMFLOAT3(Transform.GetRight());
+	auto&& myUp = XMFLOAT3(Transform.GetUp());
+	auto&& myLook = XMFLOAT3(Transform.GetLook());
 
-	auto xright = XMFLOAT3(myRight);
-	auto xup = XMFLOAT3(myUp);
-	auto xlook = XMFLOAT3(myLook);
-	auto xpos = XMFLOAT3(myPosition);
+	myLook = Vector3::Normalize(myLook);
+	myRight = Vector3::Normalize(Vector3::CrossProduct(myUp, myLook));
+	myUp = Vector3::Normalize(Vector3::CrossProduct(myLook, myRight));
+	Transform.myLook = myLook;
 
-	//myLook = Vector3::Normalize(xlook);
-	//myRight = Vector3::Normalize(Vector3::CrossProduct(xup, xlook));
-	//myUp = Vector3::Normalize(Vector3::CrossProduct(myLook, myRight));
+	auto myPosition = XMFLOAT3(Transform.GetPosition());
 
 	// 카메라를 위한 카메라 변환 행렬
 	// 1행
-	projectionView._11 = myRight.X;
-	projectionView._12 = myUp.X;
-	projectionView._13 = myLook.X;
+	projectionView._11 = myRight.x;
+	projectionView._12 = myUp.x;
+	projectionView._13 = myLook.x;
 
 	// 2행
-	projectionView._21 = myRight.Y;
-	projectionView._22 = myUp.Y;
-	projectionView._23 = myLook.Y;
+	projectionView._21 = myRight.y;
+	projectionView._22 = myUp.y;
+	projectionView._23 = myLook.y;
 
 	// 3행
-	projectionView._31 = myRight.Z;
-	projectionView._32 = myUp.Z;
-	projectionView._33 = myLook.Z;
+	projectionView._31 = myRight.z;
+	projectionView._32 = myUp.z;
+	projectionView._33 = myLook.z;
 
 	// 4행
-	projectionView._41 = -Vector3::DotProduct(xpos, xright);
-	projectionView._42 = -Vector3::DotProduct(xpos, xup);
-	projectionView._43 = -Vector3::DotProduct(xpos, xlook);
+	projectionView._41 = -Vector3::DotProduct(myPosition, myRight);
+	projectionView._42 = -Vector3::DotProduct(myPosition, myUp);
+	projectionView._43 = -Vector3::DotProduct(myPosition, myLook);
 
 	// 원근 투영 행렬
 	projectionPerspective = Matrix4x4::Multiply(projectionView, m_xmf4x4PerspectiveProject);
@@ -67,32 +67,33 @@ void GameCamera::GenerateViewMatrix()
 	// 카메라를 위한 월드 변환 행렬
 	// 카메라를 월드 위치로 옮긴다.
 	// 1행
-	m_xmf4x4InverseView._11 = myRight.X;
-	m_xmf4x4InverseView._12 = myRight.Y;
-	m_xmf4x4InverseView._13 = myRight.Z;
+	m_xmf4x4InverseView._11 = myRight.x;
+	m_xmf4x4InverseView._12 = myRight.y;
+	m_xmf4x4InverseView._13 = myRight.z;
 
-	m_xmf4x4InverseView._21 = myUp.X;
-	m_xmf4x4InverseView._22 = myUp.Y;
-	m_xmf4x4InverseView._23 = myUp.Z;
+	m_xmf4x4InverseView._21 = myUp.x;
+	m_xmf4x4InverseView._22 = myUp.y;
+	m_xmf4x4InverseView._23 = myUp.z;
 
-	m_xmf4x4InverseView._31 = myLook.X;
-	m_xmf4x4InverseView._32 = myLook.Y;
-	m_xmf4x4InverseView._33 = myLook.Z;
+	m_xmf4x4InverseView._31 = myLook.x;
+	m_xmf4x4InverseView._32 = myLook.y;
+	m_xmf4x4InverseView._33 = myLook.z;
 
-	m_xmf4x4InverseView._41 = myPosition.X;
-	m_xmf4x4InverseView._42 = myPosition.Y;
-	m_xmf4x4InverseView._43 = myPosition.Z;
+	m_xmf4x4InverseView._41 = myPosition.x;
+	m_xmf4x4InverseView._42 = myPosition.y;
+	m_xmf4x4InverseView._43 = myPosition.z;
 
 	StaticCollider.Transform(Collider, XMLoadFloat4x4(&m_xmf4x4InverseView));
 }
 
-void GameCamera::SetLookAt(const XMFLOAT3 xmf3Position, const XMFLOAT3 xmf3LookAt, const XMFLOAT3 xmf3Up)
+void GameCamera::SetLookAt(const XMFLOAT3 pos, const XMFLOAT3 look, const XMFLOAT3 up)
 {
-	Transform.SetPosition(xmf3Position);
-	Transform.LookAt(xmf3LookAt, xmf3Up);
+	Transform.SetPosition(pos);
+	Transform.LookAt(look, up);
 	projectionView = Transform.GetWorldMatrix();
 
-	//projectionView = Matrix4x4::LookAtLH(myPosition, xmf3LookAt, xmf3Up);
+	//myPosition = pos;
+	//projectionView = Matrix4x4::LookAtLH(myPosition, look, up);
 
 	//myRight = Vector3::Normalize(XMFLOAT3(projectionView._11, projectionView._21, projectionView._31));
 
@@ -101,12 +102,12 @@ void GameCamera::SetLookAt(const XMFLOAT3 xmf3Position, const XMFLOAT3 xmf3LookA
 	//myLook = Vector3::Normalize(XMFLOAT3(projectionView._13, projectionView._23, projectionView._33));
 }
 
-void GameCamera::SetLookAt(const XMFLOAT3 xmf3LookAt, const XMFLOAT3 xmf3Up)
+void GameCamera::SetLookAt(const XMFLOAT3 look, const XMFLOAT3 xmf3Up)
 {
-	Transform.LookAt(xmf3LookAt, xmf3Up);
+	Transform.LookAt(look, xmf3Up);
 	projectionView = Transform.GetWorldMatrix();
-
-	//XMFLOAT4X4 xmf4x4View = Matrix4x4::LookAtLH(myPosition, xmf3LookAt, xmf3Up);
+	//SetLookAt(myPosition, look, xmf3Up);
+	//XMFLOAT4X4 xmf4x4View = Matrix4x4::LookAtLH(myPosition, look, xmf3Up);
 	//myRight = Vector3::Normalize(XMFLOAT3(xmf4x4View._11, xmf4x4View._21, xmf4x4View._31));
 	//myUp = Vector3::Normalize(XMFLOAT3(xmf4x4View._12, xmf4x4View._22, xmf4x4View._32));
 	//myLook = Vector3::Normalize(XMFLOAT3(xmf4x4View._13, xmf4x4View._23, xmf4x4View._33));
@@ -216,10 +217,10 @@ void GameCamera::Update(const XMFLOAT3& offset, float fTimeElapsed)
 	{
 		auto& transform = Follower->Transform;
 		auto& fwlWorld = transform.GetWorldMatrix();
-		auto& fwlRight = Transform.myRight;
-		auto& fwlUp = Transform.myUp;
-		auto& fwlLook = Transform.myLook;
-		auto& fwlPosition = Transform.myPosition;
+		auto& fwlRight = transform.myRight;
+		auto& fwlUp = transform.myUp;
+		auto& fwlLook = transform.myLook;
+		auto& fwlPosition = transform.myPosition;
 
 		auto xright = XMFLOAT3(fwlRight);
 		auto xup = XMFLOAT3(fwlUp);
