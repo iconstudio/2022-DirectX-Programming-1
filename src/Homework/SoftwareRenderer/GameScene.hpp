@@ -15,7 +15,7 @@ public:
 	~GameScene();
 
 	void SetHwnd(HWND hwnd);
-	void SetCamera(std::shared_ptr<GameCamera> cam);
+	void SetCamera(std::shared_ptr<GameCamera>& cam);
 
 	void Start();
 	void Update(float elapsed_time);
@@ -33,6 +33,9 @@ public:
 
 	// 기준 충돌 영역
 	UINT collisionAreaIndex;
+
+	// 플레이어가 위치한 선로의 번호
+	UINT worldPlayerPositionIndex;
 
 private:
 	void BuildCollisionGroups();

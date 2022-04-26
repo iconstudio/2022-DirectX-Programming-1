@@ -47,14 +47,14 @@ public:
 	bool IsInFrustum(const BoundingOrientedBox& collider) const;
 	bool IsInFrustum(const BoundingSphere& collider) const;
 
-	XMFLOAT4X4		projectionView = Matrix4x4::Identity();
-	XMFLOAT4X4		m_xmf4x4PerspectiveProject = Matrix4x4::Identity();
-	XMFLOAT4X4		projectionPerspective = Matrix4x4::Identity();
-
-	XMFLOAT4X4		projectionOrthographic = Matrix4x4::Identity();
-	XMFLOAT4X4		m_xmf4x4ViewOrthographicProject = Matrix4x4::Identity();
-
 	GameTransform Transform;
+	XMFLOAT4X4 projectionView = Matrix4x4::Identity();
+
+	XMFLOAT4X4 m_xmf4x4PerspectiveProject = Matrix4x4::Identity();
+	XMFLOAT4X4 projectionPerspective = Matrix4x4::Identity();
+
+	XMFLOAT4X4 projectionOrthographic = Matrix4x4::Identity();
+	XMFLOAT4X4 m_xmf4x4ViewOrthographicProject = Matrix4x4::Identity();
 
 	GameViewport m_Viewport;
 

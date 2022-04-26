@@ -22,7 +22,7 @@ void GameScene::SetHwnd(HWND hwnd)
 	Window = hwnd;
 }
 
-void GameScene::SetCamera(std::shared_ptr<GameCamera> cam)
+void GameScene::SetCamera(std::shared_ptr<GameCamera>& cam)
 {
 	myCamera = cam;
 }
