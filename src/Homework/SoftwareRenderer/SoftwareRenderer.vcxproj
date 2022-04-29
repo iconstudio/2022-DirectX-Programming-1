@@ -152,6 +152,7 @@
     <ClInclude Include="CubeMesh.hpp" />
     <ClInclude Include="GameCamera.hpp" />
     <ClInclude Include="GameFramework.hpp" />
+    <ClInclude Include="GameMesh.hpp" />
     <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="GamePipeline.hpp" />
     <ClInclude Include="GameTimer.hpp" />
@@ -169,6 +170,7 @@
     <ClCompile Include="CubeMesh.cpp" />
     <ClCompile Include="GameCamera.cpp" />
     <ClCompile Include="GameFramework.cpp" />
+    <ClCompile Include="GameMesh.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GamePipeline.cpp" />
     <ClCompile Include="GameTimer.cpp" />

@@ -72,6 +72,9 @@
     <ClInclude Include="Mesh.hpp">
       <Filter>헤더 파일\System</Filter>
     </ClInclude>
+    <ClInclude Include="GameMesh.hpp">
+      <Filter>헤더 파일\System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -114,6 +117,9 @@
       <Filter>소스 파일\System</Filter>
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
+      <Filter>소스 파일\System</Filter>
+    </ClCompile>
+    <ClCompile Include="GameMesh.cpp">
       <Filter>소스 파일\System</Filter>
     </ClCompile>
   </ItemGroup>

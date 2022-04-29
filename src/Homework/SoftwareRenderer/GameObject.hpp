@@ -63,13 +63,14 @@ public:
 	void GenerateRayForPicking(XMVECTOR& pick_pos, XMMATRIX& view, XMVECTOR& ray_pos, XMVECTOR& ray_dir);
 	int PickObjectByRayIntersection(XMVECTOR& pick_pos, XMMATRIX& view, float* max_distance);
 
-	bool isActivated = true;
 	GameScene& Scene;
 	std::shared_ptr<GameCamera> Camera;
 
-	std::shared_ptr<CMesh> MeshPtr;
+	GameMesh myMesh;
 	DWORD myColour;
 	HPEN myPen;
+
+	bool isActivated = true;
 
 	GameTransform Transform;
 	BoundingOrientedBox Collider;

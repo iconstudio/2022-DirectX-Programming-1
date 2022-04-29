@@ -4,6 +4,7 @@
 #include "GamePipeline.hpp"
 #include "GameCamera.hpp"
 #include "GameTransform.hpp"
+#include "GameMesh.hpp"
 #include "Fragment.hpp"
 #include "Mesh.hpp"
 
