@@ -28,11 +28,14 @@ GameMesh::GameMesh()
 void GameMesh::SetMesh(std::shared_ptr<CMesh>& pMesh)
 {
 	myMeshPtr = pMesh;
+	myFragments.reserve(GetPolygonsNumber());
+
+	std::vector<CLocalFragment> smallfrags{};
+	smallfrags.reserve(GetPolygonsNumber() * 3);
 
 	std::vector<XMFLOAT3> indexer{};
-	std::vector<int> result{};
-	int last_index = 0;
-
+	std::vector<size_t> result{};
+	
 	const auto& polygons = pMesh->Polygons;
 	for (const auto& polygon : polygons)
 	{
@@ -42,25 +45,26 @@ void GameMesh::SetMesh(std::shared_ptr<CMesh>& pMesh)
 		{
 			const auto& pos = vertex.Position;
 			const auto& seek = std::find(indexer.cbegin(), indexer.cend(), pos);
+			const auto index = indexer.size();
 
-			if (indexer.end() == seek)
+			if (indexer.cend() == seek)
 			{
-				result.push_back(last_index);
+				result.push_back(index);
 
 				indexer.push_back(pos);
 			}
 			else
 			{
-				const auto index = std::distance(indexer.cbegin(), seek);
+				const auto place = std::distance(indexer.cbegin(), seek);
 				//const auto& pair = *seek;
 				//const auto index = pair.second;
 
-				result.push_back(index);
+				result.push_back(static_cast<size_t>(place));
 			}
 		}
 	}
 
-
+	
 }
 
 void GameMesh::SetColor(DWORD dwColor)
@@ -76,6 +80,11 @@ void GameMesh::SetColor(DWORD dwColor)
 bool GameMesh::Available() const noexcept
 {
 	return bool(myMeshPtr);
+}
+
+std::size_t GameMesh::GetPolygonsNumber() const
+{
+	return myMeshPtr ? myMeshPtr->Polygons.size() : 0;
 }
 
 void GameMesh::PrepareRendering(GameScene& scene)

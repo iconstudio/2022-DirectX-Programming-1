@@ -11,6 +11,7 @@ public:
 	void SetColor(DWORD dwColor);
 
 	bool Available() const noexcept;
+	std::size_t GetPolygonsNumber() const;
 
 	void PrepareRendering(GameScene& scene);
 	void Render(HDC surface) const;
@@ -20,4 +21,10 @@ public:
 
 	DWORD myColour;
 	HPEN myPen;
+
+private:
+	struct CLocalFragment
+	{
+		std::vector<std::size_t> smallFragments;
+	};
 };
