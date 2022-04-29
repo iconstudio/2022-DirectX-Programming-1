@@ -6,6 +6,18 @@
 class GameMesh
 {
 public:
-	std::shared_ptr<CMesh> MeshPtr;
-	std::vector<CFragment> Fragments;
+	GameMesh();
+
+	void SetMesh(std::shared_ptr<CMesh>& pMesh);
+	void SetColor(DWORD dwColor);
+
+	bool Available() const noexcept;
+
+	void PrepareRendering(GameScene& scene);
+
+	std::shared_ptr<CMesh> myMeshPtr;
+	std::vector<CFragment> myFragments;
+
+	DWORD myColour;
+	HPEN myPen;
 };
