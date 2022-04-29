@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.hpp"
 #include "GameTransform.hpp"
+#include "GameMesh.hpp"
 
 class GameObject
 {

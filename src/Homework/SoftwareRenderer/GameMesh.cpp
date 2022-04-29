@@ -32,3 +32,10 @@ void GameMesh::PrepareRendering(GameScene& scene)
 {
 
 }
+
+void GameMesh::Render(HDC surface) const
+{
+	auto hOldPen = HPEN(SelectObject(surface, myPen));
+	myMeshPtr->Render(surface);
+	SelectObject(surface, hOldPen);
+}

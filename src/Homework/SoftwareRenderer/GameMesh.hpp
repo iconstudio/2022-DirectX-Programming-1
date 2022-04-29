@@ -1,7 +1,6 @@
 #pragma once
 #include "stdafx.hpp"
 #include "Mesh.hpp"
-#include "Fragment.hpp"
 
 class GameMesh
 {
@@ -14,6 +13,7 @@ public:
 	bool Available() const noexcept;
 
 	void PrepareRendering(GameScene& scene);
+	void Render(HDC surface) const;
 
 	std::shared_ptr<CMesh> myMeshPtr;
 	std::vector<CFragment> myFragments;
