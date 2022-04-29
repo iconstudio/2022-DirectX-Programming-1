@@ -1,6 +1,16 @@
 #include "stdafx.hpp"
 #include "GamePipeline.hpp"
 
+bool operator==(const XMFLOAT3& lhs, const XMFLOAT3& rhs)
+{
+	return (lhs.x == rhs.x) && (lhs.y == rhs.y) && (lhs.z == rhs.z);
+}
+
+bool operator<(const XMFLOAT3& lhs, const XMFLOAT3& rhs)
+{
+	return Vector3::Length(lhs) < Vector3::Length(rhs);
+}
+
 XMFLOAT3&& Vector3::XMVectorToFloat3(const XMVECTOR& vector)
 {
 	return XMVectorToFloat3(std::move(XMVECTOR(vector)));

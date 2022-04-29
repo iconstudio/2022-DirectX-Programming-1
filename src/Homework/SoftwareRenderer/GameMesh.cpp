@@ -5,21 +5,6 @@
 #include <map>
 #include <set>
 
-bool operator==(const XMFLOAT3& lhs, const XMFLOAT3& rhs)
-{
-	return (lhs.x == rhs.x) && (lhs.y == rhs.y) && (lhs.z == rhs.z);
-}
-
-bool operator<(const XMFLOAT3& lhs, const XMFLOAT3& rhs)
-{
-	return Vector3::Length(lhs) < Vector3::Length(rhs);
-}
-
-bool operator<=(const XMFLOAT3& lhs, const XMFLOAT3& rhs)
-{
-	return (lhs < rhs) || (lhs != rhs);
-}
-
 GameMesh::GameMesh()
 	: myMeshPtr(nullptr), myFragments()
 	, myColour(RGB(255, 0, 0)), myPen(CreatePen(PS_SOLID, 0, myColour))
@@ -44,22 +29,22 @@ void GameMesh::SetMesh(std::shared_ptr<CMesh>& pMesh)
 		for (const auto& vertex : Vertices)
 		{
 			const auto& pos = vertex.Position;
-			const auto& seek = std::find(indexer.cbegin(), indexer.cend(), pos);
+			//const auto& seek = std::find(indexer.cbegin(), indexer.cend(), pos);
 			const auto index = indexer.size();
 
-			if (indexer.cend() == seek)
+			//if (indexer.cend() == seek)
 			{
 				result.push_back(index);
 
 				indexer.push_back(pos);
 			}
-			else
+			//else
 			{
-				const auto place = std::distance(indexer.cbegin(), seek);
+				//const auto place = std::distance(indexer.cbegin(), seek);
 				//const auto& pair = *seek;
 				//const auto index = pair.second;
 
-				result.push_back(static_cast<size_t>(place));
+				//result.push_back(static_cast<size_t>(place));
 			}
 		}
 	}

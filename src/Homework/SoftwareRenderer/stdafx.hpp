@@ -15,6 +15,8 @@
 #include <vector>
 #include <algorithm>
 #include <memory>
+#include <set>
+#include <map>
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;
@@ -75,6 +77,9 @@ class Player;
 class Pillar;
 class Rail;
 class RailBorder;
+
+bool operator==(const XMFLOAT3& lhs, const XMFLOAT3& rhs);
+bool operator<(const XMFLOAT3& lhs, const XMFLOAT3& rhs);
 
 class XYZWrapper
 {
