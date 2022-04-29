@@ -3,16 +3,24 @@
 
 class CMesh
 {
+private:
+	struct CLocalFragment
+	{
+		size_t from = 0, to = 0;
+	};
+
 public:
 	CMesh();
-	CMesh(int number_polygons);
+	CMesh(const size_t number_polygons);
 	virtual ~CMesh();
 
 	void AddRef();
 	void Release();
 
-	void Set(const UINT index, const CPolygon& poly);
-	void Set(const UINT index, CPolygon&& poly);
+	void Assign(const CPolygon& poly);
+
+	void Set(const size_t index, const CPolygon& poly);
+	void Set(const size_t index, CPolygon&& poly);
 	void Push(const CPolygon& poly);
 	void Push(CPolygon&& poly);
 
@@ -26,6 +34,12 @@ public:
 	BoundingOrientedBox Collider;
 
 	std::vector<CPolygon> Polygons;
+
+	std::map<size_t, XMFLOAT3> Dictionary;
+	std::map<XMFLOAT3, size_t> Indexer;
+	size_t lastIndex;
+
+	std::vector<CLocalFragment> indexedFragments;
 
 private:
 	int m_nReferences = 1;

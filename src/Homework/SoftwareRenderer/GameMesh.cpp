@@ -6,50 +6,13 @@
 #include <set>
 
 GameMesh::GameMesh()
-	: myMeshPtr(nullptr), myFragments()
+	: myMeshPtr(nullptr)
 	, myColour(RGB(255, 0, 0)), myPen(CreatePen(PS_SOLID, 0, myColour))
 {}
 
 void GameMesh::SetMesh(std::shared_ptr<CMesh>& pMesh)
 {
 	myMeshPtr = pMesh;
-	myFragments.reserve(GetPolygonsNumber());
-
-	std::vector<CLocalFragment> smallfrags{};
-	smallfrags.reserve(GetPolygonsNumber() * 3);
-
-	std::vector<XMFLOAT3> indexer{};
-	std::vector<size_t> result{};
-	
-	const auto& polygons = pMesh->Polygons;
-	for (const auto& polygon : polygons)
-	{
-		const auto& Vertices = polygon.Vertices;
-
-		for (const auto& vertex : Vertices)
-		{
-			const auto& pos = vertex.Position;
-			//const auto& seek = std::find(indexer.cbegin(), indexer.cend(), pos);
-			const auto index = indexer.size();
-
-			//if (indexer.cend() == seek)
-			{
-				result.push_back(index);
-
-				indexer.push_back(pos);
-			}
-			//else
-			{
-				//const auto place = std::distance(indexer.cbegin(), seek);
-				//const auto& pair = *seek;
-				//const auto index = pair.second;
-
-				//result.push_back(static_cast<size_t>(place));
-			}
-		}
-	}
-
-	
 }
 
 void GameMesh::SetColor(DWORD dwColor)

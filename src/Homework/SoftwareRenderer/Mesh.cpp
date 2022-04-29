@@ -3,13 +3,16 @@
 #include "GamePipeline.hpp"
 
 CMesh::CMesh()
-	: Collider()
+	: CMesh(0)
 {
 	Polygons.clear();
 }
 
-CMesh::CMesh(int number_polygons)
-	: Collider(), Polygons(number_polygons)
+CMesh::CMesh(const size_t number_polygons)
+	: Collider()
+	, Polygons(number_polygons)
+	, Dictionary(), Indexer(), lastIndex(0)
+	, indexedFragments()
 {
 	Polygons.reserve(number_polygons);
 	Polygons.clear();
@@ -32,12 +35,39 @@ void CMesh::Release()
 	}
 }
 
-void CMesh::Set(const UINT index, const CPolygon& poly)
+void CMesh::Assign(const CPolygon& poly)
+{
+	const auto& Vertices = poly.Vertices;
+
+	for (const auto& vertex : Vertices)
+	{
+		const auto& pos = vertex.Position;
+		const auto& seek = Indexer.find(pos);
+
+		if (Indexer.end() == seek)
+		{
+			Indexer.try_emplace(pos, lastIndex);
+			Dictionary.try_emplace(lastIndex, pos);
+			lastIndex++;
+		}
+		else
+		{
+			//const auto place = std::distance(indexer.cbegin(), seek);
+			//const auto& pair = *seek;
+			//const auto index = pair.second;
+
+			//result.push_back(static_cast<size_t>(place));
+		}
+	}
+
+}
+
+void CMesh::Set(const size_t index, const CPolygon& poly)
 {
 	Polygons[index] = poly;
 }
 
-void CMesh::Set(const UINT index, CPolygon&& poly)
+void CMesh::Set(const size_t index, CPolygon&& poly)
 {
 	Polygons[index] = std::move(poly);
 }
@@ -156,7 +186,7 @@ void CMesh::Render(HDC surface) const
 		for (UINT i = 1; i < sz; ++i)
 		{
 			const auto& vertex = vertices.at(i);
-			const auto vtx_it = GamePipeline::ProjectTransform(vertex.Position);
+			const XMFLOAT3 vtx_it = GamePipeline::ProjectTransform(vertex.Position);
 			is_inside_it = CheckProjection(vtx_it.x, vtx_it.y);
 
 			if (CheckDepth(vtx_it.z) && (is_inside_it || is_inside_last))

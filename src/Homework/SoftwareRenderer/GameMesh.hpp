@@ -17,14 +17,7 @@ public:
 	void Render(HDC surface) const;
 
 	std::shared_ptr<CMesh> myMeshPtr;
-	std::vector<CFragment> myFragments;
 
 	DWORD myColour;
 	HPEN myPen;
-
-private:
-	struct CLocalFragment
-	{
-		std::vector<std::size_t> smallFragments;
-	};
 };
