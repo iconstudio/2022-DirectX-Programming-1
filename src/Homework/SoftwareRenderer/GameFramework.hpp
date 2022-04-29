@@ -38,4 +38,3 @@ private:
 	std::unique_ptr<GameScene> myScene;
 	std::shared_ptr<GameCamera> myCamera;
 };
-

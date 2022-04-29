@@ -242,7 +242,16 @@ void GameObject::Update(float elapsed_time)
 }
 
 void GameObject::PrepareRendering(GameScene& scene)
-{}
+{
+	if (MeshPtr)
+	{
+		auto&& world = Transform.GetWorldMatrix();
+		GamePipeline::SetWorldTransform(world);
+		GamePipeline::PrepareRendering();
+
+		MeshPtr->Render(surface);
+	}
+}
 
 void GameObject::Render(HDC surface) const
 {
