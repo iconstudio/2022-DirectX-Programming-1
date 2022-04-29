@@ -215,24 +215,19 @@ void GameObject::Update(float elapsed_time)
 		Rotate(m_xmf3RotationAxis, m_fRotationSpeed * elapsed_time);
 	}
 
-	Transform.Move(Direction, Speed);
+	Move(Direction, Speed);
 
 	if (0.0f != Friction)
 	{
-		//XMFLOAT3 xmf3Deceleration = Vector3::Normalize(Vector3::ScalarProduct(Direction, -1.0f));
-		
 		float deceleration = Friction * elapsed_time;
 		if (Speed < deceleration)
 		{
-			//deceleration = speed;
 			Speed = 0.0f;
 		}
 		else
 		{
 			Speed -= deceleration;
 		}
-
-		//SetVelocity(Vector3::Add(Velocity, xmf3Deceleration, deceleration));
 	}
 
 	if (0.0f != elapsed_time)

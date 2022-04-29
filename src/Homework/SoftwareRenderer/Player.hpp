@@ -9,12 +9,12 @@ public:
 	virtual ~Player();
 
 	void SetHwnd(HWND hwnd);
-	void SetCameraOffset(const XMFLOAT3& xmf3CameraOffset);
-	void SetCameraOffset(XMFLOAT3&& xmf3CameraOffset);
+	void SetCameraOffset(const XMFLOAT3& offset);
+	void SetCameraOffset(XMFLOAT3&& offset);
 
 	void Crawl(DWORD dwdir, float accel);
 
-	virtual void Move(const XMFLOAT3& vDirection, float distance);
+	virtual void Move(const XMFLOAT3& dit, float distance);
 	virtual void Rotate(float pitch, float yaw, float roll);
 
 	virtual void Update(float elapsed_time);
@@ -28,7 +28,7 @@ public:
 
 private:
 	XMFLOAT3 cameraOffset, cameraLookAtOffset;
-	float cameraLookDistance;
+	const float cameraLookDistance;
 
 	HWND Window;
 	POINT Cursor;
