@@ -34,6 +34,9 @@ public:
 	// 기준 충돌 영역
 	UINT collisionAreaIndex;
 
+	// 플레이어가 위치한 선로의 번호
+	UINT worldPlayerPositionIndex;
+
 private:
 	void BuildCollisionGroups();
 	void BuildWorld();
