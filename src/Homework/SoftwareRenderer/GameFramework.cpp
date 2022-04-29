@@ -41,7 +41,7 @@ void GameFramework::Start()
 {
 	myCamera = std::make_shared<GameCamera>();
 	myCamera->SetViewport(0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
-	myCamera->GeneratePerspectiveProjectionMatrix(1.01f, 500.0f, 60.0f);
+	myCamera->GeneratePerspectiveProjectionMatrix(1.01f, 300.0f, 60.0f);
 	myCamera->SetFOVAngle(60.0f);
 	myCamera->GenerateOrthographicProjectionMatrix(1.01f, 50.0f, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
 

@@ -50,7 +50,7 @@ constexpr size_t COLLIDE_AREA_U = 20;
 
 #define EXPLOSION_DEBRISES		100
 #define RANDOM_COLOR			(0xFF000000 | ((rand() * 0xFFFFFF) / RAND_MAX))
-#define EPSILON					1.0e-6f
+#define EPSILON					1.0e-7f
 template<typename T>
 constexpr auto DegreeToRadian(T x)
 {

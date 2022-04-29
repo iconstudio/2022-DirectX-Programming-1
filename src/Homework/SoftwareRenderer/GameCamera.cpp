@@ -28,9 +28,9 @@ GameCamera::~GameCamera()
 
 void GameCamera::GenerateViewMatrix()
 {
-	auto&& myRight = XMFLOAT3(Transform.GetRight());
-	auto&& myUp = XMFLOAT3(Transform.GetUp());
-	auto&& myLook = XMFLOAT3(Transform.GetLook());
+	const auto myRight = XMFLOAT3(Transform.GetRight());
+	const auto myUp = XMFLOAT3(Transform.GetUp());
+	const auto myLook = XMFLOAT3(Transform.GetLook());
 
 	//myLook = Vector3::Normalize(myLook);
 	//myRight = Vector3::Normalize(Vector3::CrossProduct(myUp, myLook));
@@ -251,7 +251,8 @@ void GameCamera::Update(float fTimeElapsed)
 		const auto fwlPosition = XMFLOAT3(transform.myPosition);
 
 		// 팔로워 기준으로 회전만 시키는 행렬
-		auto fwlRot = Matrix4x4::Identity();
+		XMFLOAT4X4 fwlRot = Matrix4x4::Identity();
+
 		// 1열
 		fwlRot._11 = fwlRight.x; fwlRot._12 = fwlRight.y; fwlRot._13 = fwlRight.z;
 		// 2열
@@ -259,36 +260,38 @@ void GameCamera::Update(float fTimeElapsed)
 		// 3열
 		fwlRot._31 = fwlLook.x; fwlRot._32 = fwlLook.y; fwlRot._33 = fwlLook.z;
 
-		const auto myPosition = XMFLOAT3(Transform.GetPosition());
+		const auto&& myPosition = XMFLOAT3(Transform.GetPosition());
 
 		// 팔로워 기준으로 변환된 유격 좌표
 		const auto&& offset_from = Vector3::TransformCoord(localPosition, fwlRot);
 
 		// 팔로워 기준으로 세워진 고정 좌표
-		const auto look_from = Vector3::Add(fwlPosition, offset_from);
+		const XMFLOAT3 look_from = Vector3::Add(fwlPosition, offset_from);
 
 		// 팔로워 기준으로 변환된 바라보는 유격 좌표
 		const auto&& offset_at = Vector3::TransformCoord(lookOffset, fwlRot);
 
 		// 팔로워 기준으로 변환된 바라보는 좌표
-		const auto look_at = Vector3::Add(fwlPosition, offset_at);
+		const XMFLOAT3 look_at = Vector3::Add(fwlPosition, offset_at);
 
 		// 현재 카메라 위치에서 고정 좌표로 향하는 벡터
-		const auto move_vector = Vector3::Subtract(look_from, myPosition);
+		const XMFLOAT3 move_vector = Vector3::Subtract(look_from, myPosition);
 		float move_far = Vector3::Length(move_vector);
 
-		float fTimeLagScale = fTimeElapsed * (1.0f / 0.1f);
-		float move_distane = move_far * fTimeLagScale;
-
-		if (move_far < move_distane) move_distane = move_far;
-		if (move_far < 0.01f) move_distane = move_far;
-
-		// 천천히 카메라 이동
-		if (0.0f < move_distane)
+		if (0 < move_far)
 		{
-			Transform.Translate(Vector3::ScalarProduct(Vector3::Normalize(move_vector), move_distane));
+			float time_lag_scale = fTimeElapsed * (1.0f / 0.1f);
+			float move_distane = move_far * time_lag_scale;
 
-			LookAt(look_at, fwlUp);
+			move_distane = std::clamp(move_distane, EPSILON, move_far);
+
+			// 천천히 카메라 이동
+			if (0.0f < move_distane)
+			{
+				Transform.Translate(Vector3::ScalarProduct(Vector3::Normalize(move_vector), move_distane));
+			}
 		}
+
+		LookAt(look_at, fwlUp);
 	}
 }

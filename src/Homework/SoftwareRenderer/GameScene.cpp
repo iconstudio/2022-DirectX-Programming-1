@@ -7,9 +7,10 @@
 #include "Player.hpp"
 #include "CubeMesh.hpp"
 
-GameScene::GameScene(GameFramework& framework, UINT sz_horizontal, UINT sz_vertical, UINT sz_up)
+GameScene::GameScene(GameFramework& framework, size_t sz_x, size_t height, size_t sz_y)
 	: Framework(framework), Window(NULL)
-	, worldSizeH(sz_horizontal), worldSizeV(sz_vertical), worldSizeU(sz_up), collisionAreaIndex(0), worldPlayerPositionIndex(0)
+	, worldSizeH(sz_x), worldSizeV(height), worldSizeU(sz_y)
+	, collisionAreaIndex(0), worldPlayerPositionIndex(0)
 	, Instances()
 	, myPlayer(nullptr), myCamera(nullptr)
 {}
@@ -132,8 +133,6 @@ void GameScene::PrepareRendering()
 
 void GameScene::Render(HDC surface)
 {
-	GamePipeline::SetProjection(myCamera->projectionPerspective);
-
 	for (const auto& group : preparedCollisionAreas)
 	{
 		group->Render(surface);

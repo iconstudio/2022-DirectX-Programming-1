@@ -11,7 +11,7 @@ using CGroupPtr = std::shared_ptr<GameCollsionGroup>;
 class GameScene
 {
 public:
-	GameScene(GameFramework& framework, UINT sz_horizontal, UINT sz_vertical, UINT sz_up);
+	GameScene(GameFramework& framework, size_t sz_x, size_t height, size_t sz_y);
 	~GameScene();
 
 	void SetHwnd(HWND hwnd);
