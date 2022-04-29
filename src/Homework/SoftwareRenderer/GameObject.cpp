@@ -241,38 +241,28 @@ void GameObject::Update(float elapsed_time)
 	}
 }
 
-void GameObject::PrepareRendering(GameCollsionGroup& group)
+void GameObject::PrepareRendering(GameScene& group)
 {
-	if (mesh)
+	if (MeshPtr)
 	{
-		GamePipeline::SetWorldTransform(world);
+		GamePipeline::SetWorldTransform(Transform.GetWorldMatrix());
 
-		auto hOldPen = HPEN(SelectObject(surface, myPen));
-		mesh->Render(surface);
-		SelectObject(surface, hOldPen);
-	}
-	CFragment fragment{};
-
-
-}
-
-void GameObject::Render(HDC surface, const XMFLOAT4X4& world, const std::shared_ptr<CMesh>& mesh) const
-{
-	if (mesh)
-	{
-		GamePipeline::SetWorldTransform(world);
-
-		auto hOldPen = HPEN(SelectObject(surface, myPen));
-		mesh->Render(surface);
-		SelectObject(surface, hOldPen);
+		//auto hOldPen = HPEN(SelectObject(surface, myPen));
+		//MeshPtr->Render(surface);
+		//SelectObject(surface, hOldPen);
 	}
 }
 
 void GameObject::Render(HDC surface) const
 {
-	if (CheckCameraBounds())
+	if (MeshPtr)
 	{
-		Render(surface, Transform.GetWorldMatrix(), MeshPtr);
+		const auto& world = Transform.GetWorldMatrix();
+		GamePipeline::SetWorldTransform(world);
+
+		auto hOldPen = HPEN(SelectObject(surface, myPen));
+		MeshPtr->Render(surface);
+		SelectObject(surface, hOldPen);
 	}
 }
 
