@@ -1,7 +1,5 @@
 #pragma once
 #include "stdafx.hpp"
-#include "GameScene.hpp"
-#include "GameCamera.hpp"
 #include "GameObject.hpp"
 
 class Player : public GameObject
@@ -29,7 +27,8 @@ public:
 	friend class GameCamera;
 
 private:
-	XMFLOAT3 cameraOffset;
+	XMFLOAT3 cameraOffset, cameraLookAtOffset;
+	float cameraLookDistance;
 
 	HWND Window;
 	POINT Cursor;

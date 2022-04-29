@@ -7,7 +7,7 @@
 Player::Player(GameScene& scene)
 	: GameObject(scene)
 	, Window(NULL), Cursor(), Orientation(0), focused(false)
-	, cameraOffset()
+	, cameraOffset(), cameraLookAtOffset(), cameraLookDistance(60.0f)
 {
 	Friction = 30.0f;
 }
@@ -29,10 +29,13 @@ void Player::SetCameraOffset(XMFLOAT3&& xmf3CameraOffset)
 {
 	cameraOffset = xmf3CameraOffset;
 
-	auto pos = XMFLOAT3(Transform.GetPosition());
-	auto up = XMFLOAT3(Transform.GetUp());
+	const auto pos = XMFLOAT3(Transform.GetPosition());
+	const auto up = XMFLOAT3(Transform.GetUp());
+	const auto look = XMFLOAT3(Transform.GetLook());
 
-	Camera->SetLookAt(Vector3::Add(pos, cameraOffset), pos, up);
+	const auto&& look_at = Vector3::Add(pos, Vector3::ScalarProduct(look, cameraLookDistance));
+
+	Camera->SetLookAt(Vector3::Add(pos, cameraOffset), look_at, up);
 	Camera->GenerateViewMatrix();
 }
 
