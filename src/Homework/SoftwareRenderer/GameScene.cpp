@@ -61,7 +61,8 @@ void GameScene::BuildCollisionGroups()
 
 void GameScene::BuildWorld()
 {
-	auto pillar_mesh = std::make_shared<CubeMesh>(2.0f, 10.0f, 2.0f);
+	auto pillar_mesh_ptr = new CubeMesh(2.0f, 4.0f, 2.0f);
+	auto pillar_mesh = std::shared_ptr<CMesh>(pillar_mesh_ptr);
 
 	constexpr UINT pillar_count = 40;
 	constexpr float pillar_place_z_gap = (WORLD_U * 0.8f) / pillar_count;
@@ -69,9 +70,9 @@ void GameScene::BuildWorld()
 
 	for (UINT i = 0; i < pillar_count; ++i)
 	{
-		place.x = 0.5f * WORLD_H + std::sin(1.0f + i / 3.141592f) * 3.5f;
-		place.y = 0;
-		place.z = i * pillar_place_z_gap;
+		place.x = 0.5f * WORLD_H + std::cos(1.0f + i / 3.141592f) * 5.0f;
+		place.y = 0.0f;
+		place.z = WORLD_U * 0.1f + i * pillar_place_z_gap;
 
 		auto pillar = CreateInstance<GameObject>(place);
 		pillar->SetMesh(pillar_mesh);
@@ -81,7 +82,8 @@ void GameScene::BuildWorld()
 
 void GameScene::BuildObjects()
 {
-	auto player_mesh = std::make_shared<CubeMesh>(5.0f, 5.0f, 5.0f);
+	auto player_mesh_ptr = new CubeMesh(5.0f, 5.0f, 5.0f);
+	auto player_mesh = std::shared_ptr<CMesh>(player_mesh_ptr);
 
 	myPlayer = std::make_shared<Player>(*this);
 	myPlayer->SetHwnd(Window);
@@ -128,6 +130,8 @@ void GameScene::PrepareRendering()
 
 void GameScene::Render(HDC surface)
 {
+	GamePipeline::SetProjection(myCamera->projectionPerspective);
+
 	for (const auto& group : preparedCollisionAreas)
 	{
 		group->Render(surface);
@@ -139,12 +143,11 @@ void GameScene::Render(HDC surface)
 	{
 		myPlayer->Render(surface);
 	}
-
 }
 
 CGroupPtr GameScene::CreateCollisionGroup()
 {
-	auto index = collisionAreas.size();
+	const size_t index = collisionAreas.size();
 	auto&& ptr = std::make_shared<GameCollsionGroup>(*this, index, COLLIDE_AREA_H, COLLIDE_AREA_V, COLLIDE_AREA_U);
 	collisionAreas.push_back(ptr);
 
@@ -241,11 +244,11 @@ void GameScene::OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	}
 }
 
-GameCollsionGroup::GameCollsionGroup(GameScene& scene, const size_t index, UINT sz_horizontal, UINT sz_vertical, UINT sz_up)
+GameCollsionGroup::GameCollsionGroup(GameScene& scene, const size_t index, UINT sz_h, UINT sz_v, UINT sz_up)
 	: Scene(scene), Index(index)
 	, Collider()
 {
-	Collider.Extents = XMFLOAT3(0.5f * sz_horizontal, 0.5f * sz_vertical, 0.5f * sz_up);
+	Collider.Extents = XMFLOAT3(0.5f * sz_h, 0.5f * sz_v, 0.5f * sz_up);
 }
 
 void GameCollsionGroup::SetPosition(XMFLOAT3&& position)

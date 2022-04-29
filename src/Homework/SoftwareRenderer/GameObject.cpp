@@ -43,7 +43,7 @@ void GameObject::SetActive(bool bActive)
 	isActivated = bActive;
 }
 
-void GameObject::SetMesh(std::shared_ptr<CMesh> pMesh)
+void GameObject::SetMesh(std::shared_ptr<CMesh>& pMesh)
 {
 	MeshPtr = pMesh;
 }

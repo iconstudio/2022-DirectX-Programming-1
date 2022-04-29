@@ -47,21 +47,23 @@ public:
 	bool IsInFrustum(const BoundingSphere& collider) const;
 
 	GameTransform Transform;
+	
+	// 뷰 포트
+	GameViewport m_Viewport;
+
+	// 카메라를 위한 카메라 변환 행렬
 	XMFLOAT4X4 projectionView = Matrix4x4::Identity();
+	XMFLOAT4X4 m_xmf4x4InverseView = Matrix4x4::Identity();
 
 	XMFLOAT4X4 m_xmf4x4PerspectiveProject = Matrix4x4::Identity();
 	XMFLOAT4X4 projectionPerspective = Matrix4x4::Identity();
 
-	XMFLOAT4X4 projectionOrthographic = Matrix4x4::Identity();
 	XMFLOAT4X4 m_xmf4x4ViewOrthographicProject = Matrix4x4::Identity();
-
-	GameViewport m_Viewport;
+	XMFLOAT4X4 projectionOrthographic = Matrix4x4::Identity();
 
 private:
 	BoundingFrustum	StaticCollider;
 	BoundingFrustum	Collider;
-
-	XMFLOAT4X4 m_xmf4x4InverseView = Matrix4x4::Identity();
 
 	float m_fFOVAngle = 90.0f;
 	float m_fProjectRectDistance = 1.0f;
