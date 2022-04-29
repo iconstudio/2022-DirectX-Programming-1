@@ -1,7 +1,6 @@
 #pragma once
 #include "stdafx.hpp"
 #include "GameTransform.hpp"
-#include "GameObject.hpp"
 
 class GameViewport
 {
