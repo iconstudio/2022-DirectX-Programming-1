@@ -50,6 +50,55 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	return (int)msg.wParam;
 }
+
+
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	PAINTSTRUCT ps;
+	HDC hdc;
+	const UINT timer_id = 0;
+
+	switch (msg)
+	{
+		case WM_CREATE:
+		{
+			SetTimer(hwnd, timer_id, UINT(1000.0f / FPS_LIMIT), NULL);
+		}
+		break;
+
+		case WM_TIMER:
+		{
+			gGameFramework.PrepareRendering();
+
+			InvalidateRect(hwnd, NULL, FALSE);
+		}
+		break;
+
+		case WM_PAINT:
+		{
+			hdc = BeginPaint(hwnd, &ps);
+
+			gGameFramework.Render(hdc);
+
+			EndPaint(hwnd, &ps);
+		}
+		break;
+
+		case WM_DESTROY:
+		{
+			PostQuitMessage(0);
+		}
+		break;
+
+		default:
+		{
+			return gGameFramework.OnWindows(hwnd, msg, wparam, lparam);
+		}
+	}
+
+	return 0;
+}
+
 /*
 AirplanePlayer::AirplanePlayer()
 {
@@ -191,51 +240,4 @@ BOOL InitInstance(HINSTANCE instance, int nCmdShow)
 	UpdateWindow(hMainWnd);
 
 	return TRUE;
-}
-
-LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
-{
-	PAINTSTRUCT ps;
-	HDC hdc;
-	const UINT timer_id = 0;
-
-	switch (msg)
-	{
-		case WM_CREATE:
-		{
-			SetTimer(hwnd, timer_id, UINT(1000.0f / FPS_LIMIT), NULL);
-		}
-		break;
-
-		case WM_TIMER:
-		{
-			gGameFramework.PrepareRendering();
-
-			InvalidateRect(hwnd, NULL, FALSE);
-		}
-		break;
-
-		case WM_PAINT:
-		{
-			hdc = BeginPaint(hwnd, &ps);
-
-			gGameFramework.Render(hdc);
-
-			EndPaint(hwnd, &ps);
-		}
-		break;
-
-		case WM_DESTROY:
-		{
-			PostQuitMessage(0);
-		}
-		break;
-
-		default:
-		{
-			return gGameFramework.OnWindows(hwnd, msg, wparam, lparam);
-		}
-	}
-
-	return 0;
 }

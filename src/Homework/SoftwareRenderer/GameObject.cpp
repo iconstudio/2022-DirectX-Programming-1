@@ -43,7 +43,7 @@ void GameObject::SetActive(bool bActive)
 	isActivated = bActive;
 }
 
-void GameObject::SetMesh(std::shared_ptr<CMesh> pMesh)
+void GameObject::SetMesh(std::shared_ptr<CMesh>& pMesh)
 {
 	MeshPtr = pMesh;
 }
@@ -241,30 +241,15 @@ void GameObject::Update(float elapsed_time)
 	}
 }
 
-void GameObject::PrepareRendering(GameCollsionGroup& group)
+void GameObject::PrepareRendering(GameScene& scene)
 {
-	if (mesh)
+	if (MeshPtr)
 	{
+		auto&& world = Transform.GetWorldMatrix();
 		GamePipeline::SetWorldTransform(world);
+		GamePipeline::PrepareRendering();
 
-		auto hOldPen = HPEN(SelectObject(surface, myPen));
-		mesh->Render(surface);
-		SelectObject(surface, hOldPen);
-	}
-	CFragment fragment{};
-
-
-}
-
-void GameObject::Render(HDC surface, const XMFLOAT4X4& world, const std::shared_ptr<CMesh>& mesh) const
-{
-	if (mesh)
-	{
-		GamePipeline::SetWorldTransform(world);
-
-		auto hOldPen = HPEN(SelectObject(surface, myPen));
-		mesh->Render(surface);
-		SelectObject(surface, hOldPen);
+		MeshPtr->Render(surface);
 	}
 }
 
@@ -272,7 +257,16 @@ void GameObject::Render(HDC surface) const
 {
 	if (CheckCameraBounds())
 	{
-		Render(surface, Transform.GetWorldMatrix(), MeshPtr);
+		if (MeshPtr)
+		{
+			auto&& world = Transform.GetWorldMatrix();
+			GamePipeline::SetWorldTransform(world);
+			GamePipeline::PrepareRendering();
+
+			auto hOldPen = HPEN(SelectObject(surface, myPen));
+			MeshPtr->Render(surface);
+			SelectObject(surface, hOldPen);
+		}
 	}
 }
 
