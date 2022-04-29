@@ -1,6 +1,5 @@
 #pragma once
 #include "stdafx.hpp"
-#include "GameScene.hpp"
 #include "GameTransform.hpp"
 #include "Mesh.hpp"
 
@@ -16,7 +15,7 @@ public:
 	virtual ~GameObject();
 
 	void SetActive(bool bActive);
-	void SetMesh(std::shared_ptr<CMesh> pMesh);
+	void SetMesh(std::shared_ptr<CMesh>& pMesh);
 	void SetColor(DWORD dwColor);
 	void SetCamera(std::shared_ptr<GameCamera>& cam);
 
@@ -56,8 +55,7 @@ public:
 	void SetRotationSpeed(float fSpeed);
 
 	virtual void Update(float elapsed_time);
-	virtual void PrepareRendering(GameCollsionGroup& group);
-	virtual void Render(HDC surface, const XMFLOAT4X4& world, const std::shared_ptr<CMesh>& mesh) const;
+	virtual void PrepareRendering(GameScene& scene);
 	virtual void Render(HDC surface) const;
 
 	virtual bool CheckCameraBounds() const;

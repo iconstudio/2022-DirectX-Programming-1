@@ -1,7 +1,5 @@
 #pragma once
 #include "stdafx.hpp"
-#include "GameScene.hpp"
-#include "GameCamera.hpp"
 #include "GameObject.hpp"
 
 class Player : public GameObject

@@ -65,7 +65,7 @@ void GameCamera::GenerateViewMatrix()
 	projectionPerspective = Matrix4x4::Multiply(projectionView, m_xmf4x4PerspectiveProject);
 
 	// 직교 투영 행렬
-	projectionOrthographic = Matrix4x4::Multiply(projectionView, projectionOrthographic);
+	projectionOrthographic = Matrix4x4::Multiply(projectionView, m_xmf4x4ViewOrthographicProject);
 
 	// 카메라를 위한 월드 변환 행렬
 	// 카메라를 월드 위치로 옮긴다.
@@ -146,10 +146,10 @@ void GameCamera::GeneratePerspectiveProjectionMatrix(float znear, float zfar, fl
 	BoundingFrustum::CreateFromMatrix(StaticCollider, xmmtxProjection);
 }
 
-void GameCamera::GenerateOrthographicProjectionMatrix(float fNearPlaneDistance, float fFarPlaneDistance, float fWidth, float hHeight)
+void GameCamera::GenerateOrthographicProjectionMatrix(float znear, float zfar, float w, float h)
 {
-	XMMATRIX xmmtxProjection = XMMatrixOrthographicLH(fWidth, hHeight, fNearPlaneDistance, fFarPlaneDistance);
-	XMStoreFloat4x4(&projectionOrthographic, xmmtxProjection);
+	XMMATRIX xmmtxProjection = XMMatrixOrthographicLH(w, h, znear, zfar);
+	XMStoreFloat4x4(&m_xmf4x4ViewOrthographicProject, xmmtxProjection);
 }
 
 bool GameCamera::IsInFrustum(const BoundingBox& collider) const

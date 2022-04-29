@@ -22,7 +22,7 @@ void GameScene::SetHwnd(HWND hwnd)
 	Window = hwnd;
 }
 
-void GameScene::SetCamera(std::shared_ptr<GameCamera> cam)
+void GameScene::SetCamera(std::shared_ptr<GameCamera>& cam)
 {
 	myCamera = cam;
 }
@@ -69,7 +69,7 @@ void GameScene::BuildWorld()
 
 	for (UINT i = 0; i < pillar_count; ++i)
 	{
-		place.x = 0.5 * WORLD_H + std::cos(1 + i / 3.141592);
+		place.x = 0.5f * WORLD_H + std::cos(1 + i / 3.141592f);
 		place.y = 0;
 		place.z = i * pillar_place_z_gap;
 
@@ -115,7 +115,6 @@ void GameScene::Update(float elapsed_time)
 void GameScene::PrepareRendering()
 {
 	GamePipeline::SetProjection(myCamera->projectionPerspective);
-	GamePipeline::PrepareRendering();
 
 	for (const auto& group : collisionAreas)
 	{
@@ -129,6 +128,8 @@ void GameScene::PrepareRendering()
 
 void GameScene::Render(HDC surface)
 {
+	GamePipeline::SetProjection(myCamera->projectionPerspective);
+
 	for (const auto& group : preparedCollisionAreas)
 	{
 		group->Render(surface);
@@ -140,12 +141,11 @@ void GameScene::Render(HDC surface)
 	{
 		myPlayer->Render(surface);
 	}
-
 }
 
 CGroupPtr GameScene::CreateCollisionGroup()
 {
-	auto index = collisionAreas.size();
+	const std::size_t index = collisionAreas.size();
 	auto&& ptr = std::make_shared<GameCollsionGroup>(index, COLLIDE_AREA_H, COLLIDE_AREA_V, COLLIDE_AREA_U);
 	collisionAreas.push_back(ptr);
 
@@ -263,17 +263,8 @@ void GameCollsionGroup::PrepareRendering()
 {
 	for (const auto& instance : Instances)
 	{
-		instance->PrepareRendering(*this);
+		instance->PrepareRendering(scene);
 	}
-
-	// 하나의 조각은 두 정점의 깊이의 평균으로 정렬
-	std::sort(Fragments.begin(), Fragments.end()
-		, [](const CFragment& a, const CFragment& b) -> int {
-		float mid_a = (a.w1 + a.w2) * 0.5f;
-		float mid_b = (b.w1 + b.w2) * 0.5f;
-
-		return static_cast<int>(mid_a - mid_b);
-	});
 }
 
 void GameCollsionGroup::AddFragment(const CFragment& fragment)

@@ -15,7 +15,7 @@ public:
 	~GameScene();
 
 	void SetHwnd(HWND hwnd);
-	void SetCamera(std::shared_ptr<GameCamera> cam);
+	void SetCamera(std::shared_ptr<GameCamera>& cam);
 
 	void Start();
 	void Update(float elapsed_time);
