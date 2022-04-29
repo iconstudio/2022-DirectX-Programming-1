@@ -1,5 +1,4 @@
 #include "stdafx.hpp"
-#include "GamePipeline.hpp"
 
 bool operator==(const XMFLOAT3& lhs, const XMFLOAT3& rhs)
 {

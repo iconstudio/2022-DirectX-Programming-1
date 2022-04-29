@@ -53,10 +53,10 @@ constexpr size_t COLLIDE_AREA_U = 20;
 #define EXPLOSION_DEBRISES		100
 #define RANDOM_COLOR			(0xFF000000 | ((rand() * 0xFFFFFF) / RAND_MAX))
 #define EPSILON					1.0e-7f
-template<typename T>
-constexpr auto DegreeToRadian(T x)
+constexpr auto PI = 3.141592654f;
+template <typename T> constexpr auto DegreeToRadian(T x)
 {
-	return float((x) * 3.141592654f / 180.0f);
+	return float(x * PI / 180.0f);
 }
 
 class CMesh;
@@ -80,6 +80,15 @@ class RailBorder;
 
 bool operator==(const XMFLOAT3& lhs, const XMFLOAT3& rhs);
 bool operator<(const XMFLOAT3& lhs, const XMFLOAT3& rhs);
+
+template <>
+struct std::less<XMFLOAT3>
+{
+	_NODISCARD bool operator()(const XMFLOAT3& _Left, const XMFLOAT3& _Right) const
+	{
+		return ::operator<(_Left, _Right);
+	}
+};
 
 class XYZWrapper
 {
