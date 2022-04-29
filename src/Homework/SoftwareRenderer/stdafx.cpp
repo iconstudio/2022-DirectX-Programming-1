@@ -202,7 +202,8 @@ XMFLOAT4&& Vector4::Add(XMFLOAT4&& vector1, XMFLOAT4&& vector2)
 
 XMFLOAT4X4&& Matrix4x4::Identity()
 {
-	XMFLOAT4X4 xmmtx4x4Result;
+	XMFLOAT4X4 xmmtx4x4Result{};
+
 	XMStoreFloat4x4(&xmmtx4x4Result, XMMatrixIdentity());
 
 	return std::move(xmmtx4x4Result);
@@ -210,7 +211,8 @@ XMFLOAT4X4&& Matrix4x4::Identity()
 
 XMFLOAT4X4&& Matrix4x4::Translate(float x, float y, float z)
 {
-	XMFLOAT4X4 xmmtx4x4Result;
+	XMFLOAT4X4 xmmtx4x4Result{};
+
 	XMStoreFloat4x4(&xmmtx4x4Result, XMMatrixTranslation(x, y, z));
 
 	return std::move(xmmtx4x4Result);
@@ -223,7 +225,8 @@ XMFLOAT4X4&& Matrix4x4::Inverse(const XMFLOAT4X4& matrix)
 
 XMFLOAT4X4&& Matrix4x4::Inverse(XMFLOAT4X4&& matrix)
 {
-	XMFLOAT4X4 xmmtx4x4Result;
+	XMFLOAT4X4 xmmtx4x4Result{};
+
 	XMStoreFloat4x4(&xmmtx4x4Result, XMMatrixInverse(NULL, XMLoadFloat4x4(&matrix)));
 
 	return std::move(xmmtx4x4Result);
@@ -236,7 +239,8 @@ XMFLOAT4X4&& Matrix4x4::Transpose(const XMFLOAT4X4& matrix)
 
 XMFLOAT4X4&& Matrix4x4::Transpose(XMFLOAT4X4&& matrix)
 {
-	XMFLOAT4X4 xmmtx4x4Result;
+	XMFLOAT4X4 xmmtx4x4Result{};
+
 	XMStoreFloat4x4(&xmmtx4x4Result, XMMatrixTranspose(XMLoadFloat4x4(&matrix)));
 
 	return std::move(xmmtx4x4Result);
@@ -249,7 +253,8 @@ XMFLOAT4X4&& Matrix4x4::Multiply(const XMFLOAT4X4& matrix1, const XMFLOAT4X4& ma
 
 XMFLOAT4X4&& Matrix4x4::Multiply(XMFLOAT4X4&& matrix1, XMFLOAT4X4&& matrix2)
 {
-	XMFLOAT4X4 xmmtx4x4Result;
+	XMFLOAT4X4 xmmtx4x4Result{};
+
 	XMStoreFloat4x4(&xmmtx4x4Result, XMLoadFloat4x4(&matrix1) * XMLoadFloat4x4(&matrix2));
 
 	return std::move(xmmtx4x4Result);
@@ -262,7 +267,8 @@ XMFLOAT4X4&& Matrix4x4::Multiply(const XMFLOAT4X4& matrix1, const XMMATRIX& matr
 
 XMFLOAT4X4&& Matrix4x4::Multiply(XMFLOAT4X4&& matrix1, XMMATRIX&& matrix2)
 {
-	XMFLOAT4X4 xmmtx4x4Result;
+	XMFLOAT4X4 xmmtx4x4Result{};
+
 	XMStoreFloat4x4(&xmmtx4x4Result, XMLoadFloat4x4(&matrix1) * matrix2);
 
 	return std::move(xmmtx4x4Result);
@@ -275,7 +281,8 @@ XMFLOAT4X4&& Matrix4x4::Multiply(const XMMATRIX& matrix1, const XMFLOAT4X4& matr
 
 XMFLOAT4X4&& Matrix4x4::Multiply(XMMATRIX&& matrix1, XMFLOAT4X4&& matrix2)
 {
-	XMFLOAT4X4 xmmtx4x4Result;
+	XMFLOAT4X4 xmmtx4x4Result{};
+
 	XMStoreFloat4x4(&xmmtx4x4Result, matrix1 * XMLoadFloat4x4(&matrix2));
 
 	return std::move(xmmtx4x4Result);
@@ -288,7 +295,8 @@ XMFLOAT4X4&& Matrix4x4::Multiply(const XMMATRIX& matrix1, const XMMATRIX& matrix
 
 XMFLOAT4X4&& Matrix4x4::Multiply(XMMATRIX&& matrix1, XMMATRIX&& matrix2)
 {
-	XMFLOAT4X4 xmmtx4x4Result;
+	XMFLOAT4X4 xmmtx4x4Result{};
+
 	XMStoreFloat4x4(&xmmtx4x4Result, matrix1 * matrix2);
 
 	return std::move(xmmtx4x4Result);
@@ -296,7 +304,8 @@ XMFLOAT4X4&& Matrix4x4::Multiply(XMMATRIX&& matrix1, XMMATRIX&& matrix2)
 
 XMFLOAT4X4&& Matrix4x4::RotationYawPitchRoll(float fPitch, float fYaw, float fRoll)
 {
-	XMFLOAT4X4 xmmtx4x4Result;
+	XMFLOAT4X4 xmmtx4x4Result{};
+
 	auto rad_pitch = XMConvertToRadians(fPitch);
 	auto rad_yaw = XMConvertToRadians(fYaw);
 	auto rad_roll = XMConvertToRadians(fRoll);
@@ -308,7 +317,8 @@ XMFLOAT4X4&& Matrix4x4::RotationYawPitchRoll(float fPitch, float fYaw, float fRo
 
 XMFLOAT4X4&& Matrix4x4::RotationAxis(XMFLOAT3 xmf3Axis, float fAngle)
 {
-	XMFLOAT4X4 xmmtx4x4Result;
+	XMFLOAT4X4 xmmtx4x4Result{};
+
 	XMStoreFloat4x4(&xmmtx4x4Result, XMMatrixRotationAxis(XMLoadFloat3(&xmf3Axis), XMConvertToRadians(fAngle)));
 
 	return std::move(xmmtx4x4Result);
@@ -316,7 +326,8 @@ XMFLOAT4X4&& Matrix4x4::RotationAxis(XMFLOAT3 xmf3Axis, float fAngle)
 
 XMFLOAT4X4&& Matrix4x4::PerspectiveFovLH(float fFovAngleY, float fAspectRatio, float fNearZ, float fFarZ)
 {
-	XMFLOAT4X4 xmmtx4x4Result;
+	XMFLOAT4X4 xmmtx4x4Result{};
+
 	XMStoreFloat4x4(&xmmtx4x4Result, XMMatrixPerspectiveFovLH(XMConvertToRadians(fFovAngleY), fAspectRatio, fNearZ, fFarZ));
 
 	return std::move(xmmtx4x4Result);
@@ -324,7 +335,7 @@ XMFLOAT4X4&& Matrix4x4::PerspectiveFovLH(float fFovAngleY, float fAspectRatio, f
 
 XMFLOAT4X4&& Matrix4x4::LookAtLH(const XMFLOAT3 eye_pos, const XMFLOAT3 look_pos, const XMFLOAT3 up_dir)
 {
-	XMFLOAT4X4 xmmtx4x4Result;
+	XMFLOAT4X4 xmmtx4x4Result{};
 
 	auto eye = XMLoadFloat3(&eye_pos);
 	auto look = XMLoadFloat3(&look_pos);
@@ -363,7 +374,8 @@ XMFLOAT4&& Plane::Normalize(const XMFLOAT4& xmf4Plane)
 
 XMFLOAT4&& Plane::Normalize(XMFLOAT4&& xmf4Plane)
 {
-	XMFLOAT4 xmf4Result;
+	XMFLOAT4 xmf4Result{};
+
 	XMStoreFloat4(&xmf4Result, XMPlaneNormalize(XMLoadFloat4(&xmf4Plane)));
 
 	return std::move(xmf4Result);
