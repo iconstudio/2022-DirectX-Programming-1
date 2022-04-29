@@ -105,9 +105,9 @@ void GameCamera::SetLookAt(const XMFLOAT3 pos, const XMFLOAT3 look, const XMFLOA
 	//myLook = Vector3::Normalize(XMFLOAT3(projectionView._13, projectionView._23, projectionView._33));
 }
 
-void GameCamera::SetLookAt(const XMFLOAT3 look, const XMFLOAT3 xmf3Up)
+void GameCamera::SetLookAt(const XMFLOAT3 look, const XMFLOAT3 up)
 {
-	Transform.LookAt(look, xmf3Up);
+	Transform.LookAt(look, up);
 	projectionView = Transform.GetWorldMatrix();
 	//SetLookAt(myPosition, look, xmf3Up);
 	//XMFLOAT4X4 xmf4x4View = Matrix4x4::LookAtLH(myPosition, look, xmf3Up);
@@ -116,10 +116,10 @@ void GameCamera::SetLookAt(const XMFLOAT3 look, const XMFLOAT3 xmf3Up)
 	//myLook = Vector3::Normalize(XMFLOAT3(xmf4x4View._13, xmf4x4View._23, xmf4x4View._33));
 }
 
-void GameCamera::SetViewport(int nLeft, int nTop, int nWidth, int nHeight)
+void GameCamera::SetViewport(int left, int top, int w, int h)
 {
-	m_Viewport.Set(nLeft, nTop, nWidth, nHeight);
-	m_fAspectRatio = float(m_Viewport.m_nWidth) / float(m_Viewport.m_nHeight);
+	m_Viewport.Set(left, top, w, h);
+	m_fAspectRatio = float(w) / float(h);
 
 	GamePipeline::SetViewport(m_Viewport);
 }
