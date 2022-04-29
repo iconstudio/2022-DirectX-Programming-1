@@ -145,6 +145,11 @@ void GameScene::Render(HDC surface)
 	}
 }
 
+void GameScene::AddFragment(const CFragment& fragment)
+{
+	Fragments.push_back(fragment);
+}
+
 CGroupPtr GameScene::CreateCollisionGroup()
 {
 	const size_t index = collisionAreas.size();
@@ -244,11 +249,11 @@ void GameScene::OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	}
 }
 
-GameCollsionGroup::GameCollsionGroup(GameScene& scene, const size_t index, UINT sz_h, UINT sz_v, UINT sz_up)
+GameCollsionGroup::GameCollsionGroup(GameScene& scene, const size_t index, size_t sz_x, size_t height, size_t sz_y)
 	: Scene(scene), Index(index)
 	, Collider()
 {
-	Collider.Extents = XMFLOAT3(0.5f * sz_h, 0.5f * sz_v, 0.5f * sz_up);
+	Collider.Extents = XMFLOAT3(0.5f * sz_x, 0.5f * height, 0.5f * sz_y);
 }
 
 void GameCollsionGroup::SetPosition(XMFLOAT3&& position)
@@ -267,11 +272,6 @@ void GameCollsionGroup::PrepareRendering()
 	{
 		instance->PrepareRendering(Scene);
 	}
-}
-
-void GameCollsionGroup::AddFragment(const CFragment& fragment)
-{
-	Fragments.push_back(fragment);
 }
 
 void GameCollsionGroup::Render(HDC surface) const

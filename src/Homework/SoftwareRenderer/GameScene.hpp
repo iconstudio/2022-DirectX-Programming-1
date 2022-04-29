@@ -20,6 +20,7 @@ public:
 	void Start();
 	void Update(float elapsed_time);
 	void PrepareRendering();
+	void AddFragment(const CFragment& fragment);
 	void Render(HDC surface);
 
 	void OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -64,11 +65,16 @@ private:
 	// 씬 내의 모든 인스턴스
 	std::vector<ObjectPtr> Instances;
 
+	//std::vector<Pillar> Pillars;
+
 	// 씬 내의 충돌 영역
 	std::vector<CGroupPtr> collisionAreas;
 
 	// 렌더링 할 충돌 영역
 	std::vector<CGroupPtr> preparedCollisionAreas;
+
+	// 렌더링 할 조각
+	std::vector<CFragment> Fragments;
 
 	// 플레이어 객체 (Instances 안에도 있음)
 	std::shared_ptr<Player> myPlayer;
@@ -83,14 +89,13 @@ private:
 class GameCollsionGroup
 {
 public:
-	GameCollsionGroup(GameScene& scene, const size_t index, UINT sz_horizontal, UINT sz_vertical, UINT sz_up);
+	GameCollsionGroup(GameScene& scene, const size_t index, size_t sz_x, size_t height, size_t sz_z);
 
 	void SetPosition(XMFLOAT3&& position);
 
 	void AddInstance(ObjectPtr& ptr);
 
 	void PrepareRendering();
-	void AddFragment(const CFragment& fragment);
 	void Render(HDC surface) const;
 
 	bool Contains(const XMFLOAT3& point);
@@ -104,5 +109,4 @@ private:
 	BoundingBox Collider;
 
 	std::vector<ObjectPtr> Instances;
-	std::vector<CFragment> Fragments;
 };
