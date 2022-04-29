@@ -83,7 +83,7 @@ private:
 class GameCollsionGroup
 {
 public:
-	GameCollsionGroup(const UINT index, UINT sz_horizontal, UINT sz_vertical, UINT sz_up);
+	GameCollsionGroup(GameScene& scene, const size_t index, UINT sz_horizontal, UINT sz_vertical, UINT sz_up);
 
 	void SetPosition(XMFLOAT3&& position);
 
@@ -98,7 +98,9 @@ public:
 	friend class GameScene;
 
 private:
-	const UINT Index;
+	GameScene& Scene;
+	const size_t Index;
+
 	BoundingBox Collider;
 
 	std::vector<ObjectPtr> Instances;

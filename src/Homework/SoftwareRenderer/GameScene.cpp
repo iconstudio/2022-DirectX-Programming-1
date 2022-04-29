@@ -9,7 +9,7 @@
 
 GameScene::GameScene(GameFramework& framework, UINT sz_horizontal, UINT sz_vertical, UINT sz_up)
 	: Framework(framework), Window(NULL)
-	, worldSizeH(sz_horizontal), worldSizeV(sz_vertical), worldSizeU(sz_up), collisionAreaIndex(0)
+	, worldSizeH(sz_horizontal), worldSizeV(sz_vertical), worldSizeU(sz_up), collisionAreaIndex(0), worldPlayerPositionIndex(0)
 	, Instances()
 	, myPlayer(nullptr), myCamera(nullptr)
 {}
@@ -61,7 +61,7 @@ void GameScene::BuildCollisionGroups()
 
 void GameScene::BuildWorld()
 {
-	auto pillar_mesh = std::make_shared<CubeMesh>(2, 10, 2);
+	auto pillar_mesh = std::make_shared<CubeMesh>(2.0f, 10.0f, 2.0f);
 
 	constexpr UINT pillar_count = 40;
 	constexpr float pillar_place_z_gap = (WORLD_U * 0.8f) / pillar_count;
@@ -69,7 +69,7 @@ void GameScene::BuildWorld()
 
 	for (UINT i = 0; i < pillar_count; ++i)
 	{
-		place.x = 0.5 * WORLD_H + std::cos(1 + i / 3.141592);
+		place.x = 0.5f * WORLD_H + std::sin(1.0f + i / 3.141592f) * 3.5f;
 		place.y = 0;
 		place.z = i * pillar_place_z_gap;
 
@@ -81,7 +81,7 @@ void GameScene::BuildWorld()
 
 void GameScene::BuildObjects()
 {
-	auto player_mesh = std::make_shared<CubeMesh>(5, 5, 5);
+	auto player_mesh = std::make_shared<CubeMesh>(5.0f, 5.0f, 5.0f);
 
 	myPlayer = std::make_shared<Player>(*this);
 	myPlayer->SetHwnd(Window);
@@ -89,7 +89,7 @@ void GameScene::BuildObjects()
 	myPlayer->SetMesh(player_mesh);
 	myPlayer->SetColor(RGB(0, 0, 255));
 	myPlayer->SetCamera(myCamera);
-	myPlayer->SetCameraOffset(XMFLOAT3(0.0f, 9.0f, -12.0f));
+	myPlayer->SetCameraOffset(XMFLOAT3(0.0f, 9.0f, -7.0f));
 	myCamera->SetFollower(myPlayer.get());
 
 	auto cube = CreateInstance<GameObject>(XMFLOAT3(40.0f, 0.0f, 60.0f));
@@ -115,7 +115,6 @@ void GameScene::Update(float elapsed_time)
 void GameScene::PrepareRendering()
 {
 	GamePipeline::SetProjection(myCamera->projectionPerspective);
-	GamePipeline::PrepareRendering();
 
 	for (const auto& group : collisionAreas)
 	{
@@ -146,7 +145,7 @@ void GameScene::Render(HDC surface)
 CGroupPtr GameScene::CreateCollisionGroup()
 {
 	auto index = collisionAreas.size();
-	auto&& ptr = std::make_shared<GameCollsionGroup>(index, COLLIDE_AREA_H, COLLIDE_AREA_V, COLLIDE_AREA_U);
+	auto&& ptr = std::make_shared<GameCollsionGroup>(*this, index, COLLIDE_AREA_H, COLLIDE_AREA_V, COLLIDE_AREA_U);
 	collisionAreas.push_back(ptr);
 
 	return ptr;
@@ -242,8 +241,8 @@ void GameScene::OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	}
 }
 
-GameCollsionGroup::GameCollsionGroup(const UINT index, UINT sz_horizontal, UINT sz_vertical, UINT sz_up)
-	: Index(index)
+GameCollsionGroup::GameCollsionGroup(GameScene& scene, const size_t index, UINT sz_horizontal, UINT sz_vertical, UINT sz_up)
+	: Scene(scene), Index(index)
 	, Collider()
 {
 	Collider.Extents = XMFLOAT3(0.5f * sz_horizontal, 0.5f * sz_vertical, 0.5f * sz_up);
@@ -263,17 +262,8 @@ void GameCollsionGroup::PrepareRendering()
 {
 	for (const auto& instance : Instances)
 	{
-		instance->PrepareRendering(*this);
+		instance->PrepareRendering(Scene);
 	}
-
-	// 하나의 조각은 두 정점의 깊이의 평균으로 정렬
-	std::sort(Fragments.begin(), Fragments.end()
-		, [](const CFragment& a, const CFragment& b) -> int {
-		float mid_a = (a.w1 + a.w2) * 0.5f;
-		float mid_b = (b.w1 + b.w2) * 0.5f;
-
-		return static_cast<int>(mid_a - mid_b);
-	});
 }
 
 void GameCollsionGroup::AddFragment(const CFragment& fragment)
