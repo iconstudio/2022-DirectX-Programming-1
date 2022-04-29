@@ -67,8 +67,6 @@ public:
 	std::shared_ptr<GameCamera> Camera;
 
 	GameMesh myMesh;
-	DWORD myColour;
-	HPEN myPen;
 
 	bool isActivated = true;
 

@@ -10,7 +10,7 @@
 
 GameObject::GameObject(GameScene& scene)
 	: Scene(scene), Camera(nullptr)
-	, MeshPtr(nullptr), myColour(RGB(255, 0, 0)), myPen(CreatePen(PS_SOLID, 0, myColour))
+	, myMesh()
 	, Collider()
 	, Direction(XMFLOAT3(0.0f, 0.0f, 0.0f)), Speed(0.0f), Friction(0.0f)
 {}
@@ -46,17 +46,12 @@ void GameObject::SetActive(bool bActive)
 
 void GameObject::SetMesh(std::shared_ptr<CMesh>& pMesh)
 {
-	MeshPtr = pMesh;
+	myMesh.SetMesh(pMesh);
 }
 
 void GameObject::SetColor(DWORD dwColor)
 {
-	if (myColour != dwColor)
-	{
-		DeleteObject(myPen);
-		myPen = CreatePen(PS_SOLID, 0, dwColor);
-		myColour = dwColor;
-	}
+
 }
 
 void GameObject::SetCamera(std::shared_ptr<GameCamera>& cam)
@@ -239,19 +234,16 @@ void GameObject::Update(float elapsed_time)
 
 void GameObject::PrepareRendering(GameScene& group)
 {
-	if (MeshPtr)
+	if (myMesh.Available())
 	{
 		GamePipeline::SetWorldTransform(Transform.GetWorldMatrix());
-
-		//auto hOldPen = HPEN(SelectObject(surface, myPen));
-		//MeshPtr->Render(surface);
-		//SelectObject(surface, hOldPen);
+		myMesh.PrepareRendering(Scene);
 	}
 }
 
 void GameObject::Render(HDC surface) const
 {
-	if (MeshPtr)
+	if (myMesh.Available())
 	{
 		const auto& world = Transform.GetWorldMatrix();
 		GamePipeline::SetWorldTransform(world);
