@@ -91,8 +91,10 @@ void GameScene::BuildObjects()
 	myPlayer->SetMesh(player_mesh);
 	myPlayer->SetColor(RGB(0, 0, 255));
 	myPlayer->SetCamera(myCamera);
-	myPlayer->SetCameraOffset(XMFLOAT3(0.0f, 9.0f, -7.0f));
+
 	myCamera->SetFollower(myPlayer.get());
+	myCamera->SetLocalPosition(XMFLOAT3(0.0f, 9.0f, -7.0f));
+	myCamera->SetLookOffset(XMFLOAT3(0.0f, 0.0f, 10.0f));
 
 	auto cube = CreateInstance<GameObject>(XMFLOAT3(40.0f, 0.0f, 60.0f));
 	cube->SetMesh(player_mesh);

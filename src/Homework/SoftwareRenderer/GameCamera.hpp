@@ -26,23 +26,25 @@ public:
 	void SetFOVAngle(float angle);
 	void SetLocalPosition(const XMFLOAT3& pos);
 	void SetLocalPosition(XMFLOAT3&& pos);
+	void SetLookOffset(const XMFLOAT3& vector);
+	void SetLookOffset(XMFLOAT3&& vector);
 
 	void GenerateViewMatrix();
 	void GeneratePerspectiveProjectionMatrix(float znear, float zfar, float fov);
 	void GenerateOrthographicProjectionMatrix(float znear, float zfar, float width, float height);
 	void SetViewport(int left, int top, int width, int height);
 
-	void SetLookAt(const XMFLOAT3 look, const XMFLOAT3 up);
-	void SetLookAt(const XMFLOAT3 pos, const XMFLOAT3 look, const XMFLOAT3 up);
+	void LookAt(const XMFLOAT3 look, const XMFLOAT3 up);
+	void LookAt(const XMFLOAT3 pos, const XMFLOAT3 look, const XMFLOAT3 up);
 
 	void Translate(float x, float y, float z);
 	void Translate(const XMFLOAT3& shift);
 	void Translate(XMFLOAT3&& shift);
 	void Move(const XMFLOAT3& dir, float distance);
 	void Move(XMFLOAT3&& dir, float distance);
-	void Rotate(float pitch = 0.0f, float yaw = 0.0f, float roll = 0.0f);
+	void Rotate(float pitch, float yaw, float roll);
 
-	void Update(const XMFLOAT3& offset, float elapsed_time = 0.016f);
+	void Update(float elapsed_time);
 
 	bool IsInFrustum(const BoundingBox& collider) const;
 	bool IsInFrustum(const BoundingOrientedBox& collider) const;
@@ -50,6 +52,7 @@ public:
 
 	GameTransform Transform;
 	XMFLOAT3 localPosition;
+	XMFLOAT3 lookOffset;
 	
 	// ºä Æ÷Æ®
 	GameViewport m_Viewport;

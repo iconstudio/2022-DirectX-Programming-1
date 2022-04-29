@@ -7,7 +7,6 @@
 Player::Player(GameScene& scene)
 	: GameObject(scene)
 	, Window(NULL), Cursor(), Orientation(0), focused(false)
-	, cameraOffset(), cameraLookAtOffset(), cameraLookDistance(600.0f)
 {
 	Friction = 30.0f;
 }
@@ -18,30 +17,6 @@ Player::~Player()
 void Player::SetHwnd(HWND hwnd)
 {
 	Window = hwnd;
-}
-
-void Player::SetCameraOffset(const XMFLOAT3& xmf3CameraOffset)
-{
-	SetCameraOffset(std::move(XMFLOAT3(xmf3CameraOffset)));
-}
-
-void Player::SetCameraOffset(XMFLOAT3&& xmf3CameraOffset)
-{
-	cameraOffset = xmf3CameraOffset;
-
-	const auto pos = XMFLOAT3(Transform.GetPosition());
-	const auto right = XMFLOAT3(Transform.GetRight());
-	const auto up = XMFLOAT3(Transform.GetUp());
-	const auto look = XMFLOAT3(Transform.GetLook());
-
-	const XMFLOAT3 look_from = Vector3::Add(pos, cameraOffset);
-	const XMFLOAT3 look_at = Vector3::Add(pos, look, cameraLookDistance);
-
-	const XMFLOAT3 dir = Vector3::Subtract(look_at, look_from);
-	const XMFLOAT3 cam_up = Vector3::CrossProduct(dir, right);
-
-	Camera->SetLookAt(look_from, look_at, up);
-	Camera->GenerateViewMatrix();
 }
 
 void Player::Crawl(DWORD dwdir, float accel)
@@ -101,7 +76,7 @@ void Player::Update(float elapsed_time)
 	}
 
 	GameObject::Update(elapsed_time);
-	Camera->Update(cameraOffset, elapsed_time);
+	Camera->Update(elapsed_time);
 	Camera->GenerateViewMatrix();
 
 	OnUpdateTransform();

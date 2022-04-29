@@ -9,8 +9,6 @@ public:
 	virtual ~Player();
 
 	void SetHwnd(HWND hwnd);
-	void SetCameraOffset(const XMFLOAT3& offset);
-	void SetCameraOffset(XMFLOAT3&& offset);
 
 	void Crawl(DWORD dwdir, float accel);
 
@@ -27,9 +25,6 @@ public:
 	friend class GameCamera;
 
 private:
-	XMFLOAT3 cameraOffset, cameraLookAtOffset;
-	const float cameraLookDistance;
-
 	HWND Window;
 	POINT Cursor;
 	DWORD Orientation;
