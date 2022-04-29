@@ -16,7 +16,7 @@ public:
 	void Push(const CPolygon& poly);
 	void Push(CPolygon&& poly);
 
-	void Render(HDC hDCFrameBuffer) const;
+	void Render(HDC surface) const;
 
 	bool CheckProjection(const float prj_x, const float prj_y) const;
 	bool CheckDepth(const float prj_z) const;

@@ -39,19 +39,19 @@ GameObject::GameObject(GameScene& scene, XMFLOAT3&& position)
 GameObject::~GameObject()
 {}
 
-void GameObject::SetActive(bool bActive)
+void GameObject::SetActive(bool flag)
 {
-	isActivated = bActive;
+	isActivated = flag;
 }
 
-void GameObject::SetMesh(std::shared_ptr<CMesh>& pMesh)
+void GameObject::SetMesh(std::shared_ptr<CMesh>& mesh)
 {
-	myMesh.SetMesh(pMesh);
+	myMesh.SetMesh(mesh);
 }
 
-void GameObject::SetColor(DWORD dwColor)
+void GameObject::SetColor(DWORD color)
 {
-
+	myMesh.SetColor(color);
 }
 
 void GameObject::SetCamera(std::shared_ptr<GameCamera>& cam)
@@ -104,9 +104,9 @@ XMFLOAT3&& GameObject::GetLook()
 	return Vector3::Normalize(XMFLOAT3(Transform.GetLook()));
 }
 
-void GameObject::Move(const XMFLOAT3& vDirection, float distance)
+void GameObject::Move(const XMFLOAT3& dir, float distance)
 {
-	Transform.Move(vDirection, distance);
+	Transform.Move(dir, distance);
 }
 
 void GameObject::MoveStrafe(float distance)
@@ -124,9 +124,9 @@ void GameObject::MoveForward(float distance)
 	Transform.MoveForward(distance);
 }
 
-void GameObject::Rotate(float fPitch, float fYaw, float fRoll)
+void GameObject::Rotate(float pitch, float yaw, float roll)
 {
-	Transform.Rotate(fPitch, fYaw, fRoll);
+	Transform.Rotate(pitch, yaw, roll);
 }
 
 void GameObject::Rotate(const XMFLOAT3& axis, float angle)
@@ -189,19 +189,19 @@ float GameObject::GetSpeed() const
 	return Speed;
 }
 
-void GameObject::SetRotationAxis(const XMFLOAT3& xmf3RotationAxis)
+void GameObject::SetRotationAxis(const XMFLOAT3& axis)
 {
-	SetRotationAxis(std::move(XMFLOAT3(xmf3RotationAxis)));
+	SetRotationAxis(std::move(XMFLOAT3(axis)));
 }
 
-void GameObject::SetRotationAxis(XMFLOAT3&& xmf3RotationAxis)
+void GameObject::SetRotationAxis(XMFLOAT3&& axis)
 {
-	m_xmf3RotationAxis = Vector3::Normalize(std::forward<XMFLOAT3>(xmf3RotationAxis));
+	m_xmf3RotationAxis = Vector3::Normalize(std::forward<XMFLOAT3>(axis));
 }
 
-void GameObject::SetRotationSpeed(float fSpeed)
+void GameObject::SetRotationSpeed(float speed)
 {
-	m_fRotationSpeed = fSpeed;
+	m_fRotationSpeed = speed;
 }
 
 void GameObject::Update(float elapsed_time)
@@ -237,6 +237,7 @@ void GameObject::PrepareRendering(GameScene& group)
 	if (myMesh.Available())
 	{
 		GamePipeline::SetWorldTransform(Transform.GetWorldMatrix());
+
 		myMesh.PrepareRendering(Scene);
 	}
 }
@@ -245,12 +246,9 @@ void GameObject::Render(HDC surface) const
 {
 	if (myMesh.Available())
 	{
-		const auto& world = Transform.GetWorldMatrix();
-		GamePipeline::SetWorldTransform(world);
+		GamePipeline::SetWorldTransform(Transform.GetWorldMatrix());
 
-		auto hOldPen = HPEN(SelectObject(surface, myPen));
-		MeshPtr->Render(surface);
-		SelectObject(surface, hOldPen);
+		myMesh.Render(surface);
 	}
 }
 
@@ -268,11 +266,11 @@ bool GameObject::CheckCameraBounds() const
 
 void GameObject::UpdateBoundingBox()
 {
-	if (MeshPtr)
+	if (myMesh.Available())
 	{
 		const auto& mat = Transform.GetWorldMatrix();
 		const auto float4x4 = XMLoadFloat4x4(&mat);
-		MeshPtr->Collider.Transform(Collider, float4x4);
+		myMesh.myMeshPtr->Collider.Transform(Collider, float4x4);
 
 		auto quaternion = XMQuaternionNormalize(XMLoadFloat4(&Collider.Orientation));
 		XMStoreFloat4(&Collider.Orientation, quaternion);
@@ -294,12 +292,12 @@ void GameObject::GenerateRayForPicking(XMVECTOR& pick_pos, XMMATRIX& view, XMVEC
 int GameObject::PickObjectByRayIntersection(XMVECTOR& pick_pos, XMMATRIX& view, float* max_distance)
 {
 	int nIntersected = 0;
-	if (MeshPtr)
+	if (myMesh.Available())
 	{
 		XMVECTOR ray_pos, ray_dir;
 		GenerateRayForPicking(pick_pos, view, ray_pos, ray_dir);
 
-		nIntersected = MeshPtr->CheckRayIntersection(ray_pos, ray_dir, max_distance);
+		nIntersected = myMesh.myMeshPtr->CheckRayIntersection(ray_pos, ray_dir, max_distance);
 	}
 
 	return (nIntersected);

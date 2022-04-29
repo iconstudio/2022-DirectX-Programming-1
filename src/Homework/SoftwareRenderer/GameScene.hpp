@@ -30,7 +30,7 @@ public:
 	friend class GameCollsionGroup;
 
 	// 게임 월드의 크기
-	const INT worldSizeH, worldSizeV, worldSizeU;
+	const size_t worldSizeH, worldSizeV, worldSizeU;
 
 	// 기준 충돌 영역
 	UINT collisionAreaIndex;
