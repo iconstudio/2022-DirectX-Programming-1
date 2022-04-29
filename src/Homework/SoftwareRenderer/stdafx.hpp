@@ -24,11 +24,19 @@ constexpr COLORREF C_WHITE = RGB(0xff, 0xff, 0xff);
 constexpr COLORREF C_GREEN = RGB(0x00, 0x80, 0x00);
 constexpr COLORREF FRAMEBUFFER_CLS_COLOR = C_GREEN;
 
-// 게임 월드의 크기
-constexpr UINT WORLD_H = 40, WORLD_V = 10, WORLD_U = 200;
+// 게임 월드의 가로 너비 (x)
+constexpr size_t WORLD_H = 40;
+// 게임 월드의 높이 (y)
+constexpr size_t WORLD_V = 10;
+// 게임 월드의 세로 너비 (z)
+constexpr size_t WORLD_U = 200;
 
-// 충돌 영역의 크기
-constexpr UINT COLLIDE_AREA_H = 40, COLLIDE_AREA_V = 10, COLLIDE_AREA_U = 20;
+// 충돌 영역의 가로 너비 (x)
+constexpr size_t COLLIDE_AREA_H = 40;
+// 충돌 영역의 높이 (y)
+constexpr size_t COLLIDE_AREA_V = 10;
+// 충돌 영역의 세로 너비 (z)
+constexpr size_t COLLIDE_AREA_U = 20;
 
 #define FRAMEBUFFER_WIDTH		800
 #define FRAMEBUFFER_HEIGHT		600
@@ -42,13 +50,18 @@ constexpr UINT COLLIDE_AREA_H = 40, COLLIDE_AREA_V = 10, COLLIDE_AREA_U = 20;
 
 #define EXPLOSION_DEBRISES		100
 #define RANDOM_COLOR			(0xFF000000 | ((rand() * 0xFFFFFF) / RAND_MAX))
-#define DegreeToRadian(x)		float((x)*3.141592654f/180.0f)
 #define EPSILON					1.0e-6f
+template<typename T>
+constexpr auto DegreeToRadian(T x)
+{
+	return float((x) * 3.141592654f / 180.0f);
+}
 
 class CMesh;
 class CPolygon;
 class CVertex;
 class CFragment;
+
 class GameFramework;
 class GamePipeline;
 class GameTransform;
@@ -57,7 +70,11 @@ class GameViewport;
 class GameScene;
 class GameCollsionGroup;
 class GameObject;
+
 class Player;
+class Pillar;
+class Rail;
+class RailBorder;
 
 class XYZWrapper
 {
