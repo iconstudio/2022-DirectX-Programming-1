@@ -10,6 +10,7 @@ GameViewport GamePipeline::Viewport = GameViewport();
 void GamePipeline::SetWorldTransform(const XMFLOAT4X4& pxmf4x4World)
 {
 	matrixWorld = pxmf4x4World;
+	matrixView = Matrix4x4::Multiply(matrixWorld, matrixProjection);
 }
 
 void GamePipeline::SetProjection(const XMFLOAT4X4& projection)
@@ -20,11 +21,6 @@ void GamePipeline::SetProjection(const XMFLOAT4X4& projection)
 void GamePipeline::SetViewport(const GameViewport& pViewport)
 {
 	Viewport = pViewport;
-}
-
-void GamePipeline::PrepareRendering()
-{
-	matrixView = Matrix4x4::Multiply(matrixWorld, matrixProjection);
 }
 
 XMFLOAT3 GamePipeline::Transform(const XMFLOAT3& xmf3Model)

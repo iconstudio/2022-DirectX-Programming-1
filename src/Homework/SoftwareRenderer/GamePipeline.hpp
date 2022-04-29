@@ -8,8 +8,6 @@ public:
 	static void SetProjection(const XMFLOAT4X4& projection);
 	static void SetViewport(const GameViewport& pViewport);
 
-	static void PrepareRendering();
-
 	static XMFLOAT3 ScreenTransform(const XMFLOAT3& xmf3Project);
 	static XMFLOAT3 ProjectTransform(const XMFLOAT3& xmf3Model);
 	static XMFLOAT3 Transform(const XMFLOAT3& xmf3Model);
