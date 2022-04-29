@@ -33,10 +33,10 @@ public:
 	const long worldSizeH, worldSizeV, worldSizeU;
 
 	// 기준 충돌 영역
-	UINT collisionAreaIndex;
+	size_t collisionAreaIndex;
 
 	// 플레이어가 위치한 선로의 번호
-	UINT worldPlayerPositionIndex;
+	size_t worldPlayerPositionIndex;
 
 private:
 	void BuildCollisionGroups();

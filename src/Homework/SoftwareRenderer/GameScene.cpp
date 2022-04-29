@@ -9,7 +9,7 @@
 
 GameScene::GameScene(GameFramework& framework, size_t sz_x, size_t height, size_t sz_y)
 	: Framework(framework), Window(NULL)
-	, worldSizeH(sz_x), worldSizeV(height), worldSizeU(sz_y)
+	, worldSizeH(long(sz_x)), worldSizeV(long(height)), worldSizeU(long(sz_y))
 	, collisionAreaIndex(0), worldPlayerPositionIndex(0)
 	, Instances()
 	, myPlayer(nullptr), myCamera(nullptr)
@@ -138,12 +138,12 @@ void GameScene::Render(HDC surface)
 		group->Render(surface);
 	}
 
-	preparedCollisionAreas.clear();
-
 	if (myPlayer)
 	{
 		myPlayer->Render(surface);
 	}
+
+	preparedCollisionAreas.clear();
 }
 
 void GameScene::AddFragment(const CFragment& fragment)
