@@ -7,7 +7,7 @@
 Player::Player(GameScene& scene)
 	: GameObject(scene)
 	, Window(NULL), Cursor(), Orientation(0), focused(false)
-	, cameraOffset(), cameraLookAtOffset(), cameraLookDistance(60.0f)
+	, cameraOffset(), cameraLookAtOffset(), cameraLookDistance(600.0f)
 {
 	Friction = 30.0f;
 }
@@ -30,12 +30,17 @@ void Player::SetCameraOffset(XMFLOAT3&& xmf3CameraOffset)
 	cameraOffset = xmf3CameraOffset;
 
 	const auto pos = XMFLOAT3(Transform.GetPosition());
+	const auto right = XMFLOAT3(Transform.GetRight());
 	const auto up = XMFLOAT3(Transform.GetUp());
 	const auto look = XMFLOAT3(Transform.GetLook());
 
-	const auto&& look_at = Vector3::Add(pos, Vector3::ScalarProduct(look, cameraLookDistance));
+	const XMFLOAT3 look_from = Vector3::Add(pos, cameraOffset);
+	const XMFLOAT3 look_at = Vector3::Add(pos, look, cameraLookDistance);
 
-	Camera->SetLookAt(Vector3::Add(pos, cameraOffset), look_at, up);
+	const XMFLOAT3 dir = Vector3::Subtract(look_at, look_from);
+	const XMFLOAT3 cam_up = Vector3::CrossProduct(dir, right);
+
+	Camera->SetLookAt(look_from, look_at, up);
 	Camera->GenerateViewMatrix();
 }
 
@@ -86,7 +91,7 @@ void Player::Update(float elapsed_time)
 
 		if (cxMouseDelta || cyMouseDelta)
 		{
-			Rotate(0, cxMouseDelta, 0.0f);
+			Rotate(0.0f, cxMouseDelta, 0.0f);
 		}
 	}
 

@@ -24,6 +24,8 @@ public:
 
 	void SetFollower(GameObject* target);
 	void SetFOVAngle(float angle);
+	void SetLocalPosition(const XMFLOAT3& pos);
+	void SetLocalPosition(XMFLOAT3&& pos);
 
 	void GenerateViewMatrix();
 	void GeneratePerspectiveProjectionMatrix(float znear, float zfar, float fov);
@@ -47,6 +49,7 @@ public:
 	bool IsInFrustum(const BoundingSphere& collider) const;
 
 	GameTransform Transform;
+	XMFLOAT3 localPosition;
 	
 	// ºä Æ÷Æ®
 	GameViewport m_Viewport;
