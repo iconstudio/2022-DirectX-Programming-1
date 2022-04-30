@@ -18,6 +18,7 @@ public:
 	void Release();
 
 	void Assign(const CPolygon& poly);
+	void TryAddFragment(const size_t vertex_id);
 
 	void Set(const size_t index, const CPolygon& poly);
 	void Set(const size_t index, CPolygon&& poly);
@@ -37,6 +38,9 @@ public:
 
 	std::map<size_t, XMFLOAT3> Dictionary;
 	std::map<XMFLOAT3, size_t> Indexer;
+	size_t lastFound;
+
+	size_t indexedValues[2];
 	size_t lastIndex;
 
 	std::vector<CLocalFragment> indexedFragments;

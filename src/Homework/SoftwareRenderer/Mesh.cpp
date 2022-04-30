@@ -11,7 +11,8 @@ CMesh::CMesh()
 CMesh::CMesh(const size_t number_polygons)
 	: Collider()
 	, Polygons(number_polygons)
-	, Dictionary(), Indexer(), lastIndex(0)
+	, Dictionary(), Indexer(), lastFound(0)
+	, indexedValues(), lastIndex(0)
 	, indexedFragments()
 {
 	Polygons.reserve(number_polygons);
@@ -44,22 +45,34 @@ void CMesh::Assign(const CPolygon& poly)
 		const auto& pos = vertex.Position;
 		const auto& seek = Indexer.find(pos);
 
+		size_t index = 0;
+
 		if (Indexer.end() == seek)
 		{
-			Indexer.try_emplace(pos, lastIndex);
-			Dictionary.try_emplace(lastIndex, pos);
-			lastIndex++;
+			index = lastFound;
+
+			Indexer.try_emplace(pos, lastFound);
+			Dictionary.try_emplace(lastFound, pos);
+			lastFound++;
 		}
 		else
 		{
-			//const auto place = std::distance(indexer.cbegin(), seek);
-			//const auto& pair = *seek;
-			//const auto index = pair.second;
-
-			//result.push_back(static_cast<size_t>(place));
+			const auto& pair = *seek;
+			index = pair.second;
 		}
-	}
 
+		TryAddFragment(index);
+	}
+	TryAddFragment(0);
+}
+
+void CMesh::TryAddFragment(const size_t vertex_id)
+{
+	indexedValues[lastIndex] = vertex_id;
+	if (2 <= ++lastIndex)
+	{
+		lastIndex = 0;
+	}
 }
 
 void CMesh::Set(const size_t index, const CPolygon& poly)
@@ -69,6 +82,8 @@ void CMesh::Set(const size_t index, const CPolygon& poly)
 
 void CMesh::Set(const size_t index, CPolygon&& poly)
 {
+	Assign(poly);
+
 	Polygons[index] = std::move(poly);
 }
 
@@ -79,6 +94,8 @@ void CMesh::Push(const CPolygon& poly)
 
 void CMesh::Push(CPolygon&& poly)
 {
+	Assign(poly);
+
 	Polygons.push_back(std::move(poly));
 }
 
