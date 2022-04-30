@@ -15,8 +15,11 @@ CMesh::CMesh(const size_t number_polygons)
 	, indexedValues(), lastIndex(0)
 	, indexedFragments()
 {
+	ZeroMemory(indexedValues, sizeof(indexedValues));
 	Polygons.reserve(number_polygons);
 	Polygons.clear();
+	indexedFragments.reserve(number_polygons);
+	indexedFragments.clear();
 }
 
 CMesh::~CMesh()
@@ -42,17 +45,17 @@ void CMesh::Assign(const CPolygon& poly)
 
 	for (const auto& vertex : Vertices)
 	{
-		const auto& pos = vertex.Position;
-		const auto& seek = Indexer.find(pos);
+		const auto& coord = vertex.Position;
+		const auto& seek = Indexer.find(coord);
 
-		size_t index = 0;
+		size_t index = -1;
 
 		if (Indexer.end() == seek)
 		{
 			index = lastFound;
 
-			Indexer.try_emplace(pos, lastFound);
-			Dictionary.try_emplace(lastFound, pos);
+			Indexer.emplace(coord, lastFound);
+			Dictionary.push_back(coord);
 			lastFound++;
 		}
 		else
@@ -69,10 +72,18 @@ void CMesh::Assign(const CPolygon& poly)
 void CMesh::TryAddFragment(const size_t vertex_id)
 {
 	indexedValues[lastIndex] = vertex_id;
+
 	if (2 <= ++lastIndex)
 	{
+		CLocalFragment frag = { indexedValues[0], indexedValues[1] };
+		indexedFragments.push_back(frag);
+
 		lastIndex = 0;
+		ZeroMemory(indexedValues, sizeof(indexedValues));
 	}
+
+	// TODO:
+	std::unique(indexedFragments.begin(), indexedFragments.end());
 }
 
 void CMesh::Set(const size_t index, const CPolygon& poly)
@@ -218,6 +229,29 @@ void CMesh::Render(HDC surface) const
 		if (CheckDepth(vtx_first.z) && (is_inside_first || is_inside_last))
 		{
 			DrawSide(surface, vtx_last, vtx_first);
+		}
+	}
+}
+
+void CMesh::RenderFragments(HDC surface) const
+{
+	for (const auto& frag : indexedFragments)
+	{
+		const auto from = frag.from;
+		const auto to = frag.to;
+
+		const auto& pos_from = Dictionary.at(from);
+		const auto& pos_to = Dictionary.at(to);
+
+		const auto vtx_from = GamePipeline::ProjectTransform(pos_from);
+		const auto vtx_to = GamePipeline::ProjectTransform(pos_to);
+
+		const auto inside_from = CheckProjection(vtx_from.x, vtx_from.y);
+		const auto inside_to = CheckProjection(vtx_to.x, vtx_to.y);
+
+		if (CheckDepth(vtx_to.z) && (inside_from || inside_to))
+		{
+			DrawSide(surface, vtx_from, vtx_to);
 		}
 	}
 }

@@ -3,12 +3,6 @@
 
 class CMesh
 {
-private:
-	struct CLocalFragment
-	{
-		size_t from = 0, to = 0;
-	};
-
 public:
 	CMesh();
 	CMesh(const size_t number_polygons);
@@ -26,6 +20,7 @@ public:
 	void Push(CPolygon&& poly);
 
 	void Render(HDC surface) const;
+	void RenderFragments(HDC surface) const;
 
 	bool CheckProjection(const float prj_x, const float prj_y) const;
 	bool CheckDepth(const float prj_z) const;
@@ -36,8 +31,8 @@ public:
 
 	std::vector<CPolygon> Polygons;
 
-	std::map<size_t, XMFLOAT3> Dictionary;
-	std::map<XMFLOAT3, size_t> Indexer;
+	std::vector<XMFLOAT3> Dictionary;
+	std::unordered_map<XMFLOAT3, size_t> Indexer;
 	size_t lastFound;
 
 	size_t indexedValues[2];
