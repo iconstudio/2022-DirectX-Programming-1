@@ -65,8 +65,6 @@ private:
 	// 씬 내의 모든 인스턴스
 	std::vector<ObjectPtr> Instances;
 
-	//std::vector<Pillar> Pillars;
-
 	// 씬 내의 충돌 영역
 	std::vector<CGroupPtr> collisionAreas;
 
@@ -84,6 +82,8 @@ private:
 
 	// 플레이어 생성 위치
 	XMFLOAT3 playerSpawnPoint = XMFLOAT3{ 5.0f, 0.0f, 1.0f };
+
+	//std::vector<Pillar> Pillars;
 };
 
 class GameCollsionGroup

@@ -11,9 +11,11 @@ GameScene::GameScene(GameFramework& framework, size_t sz_x, size_t height, size_
 	: Framework(framework), Window(NULL)
 	, worldSizeH(long(sz_x)), worldSizeV(long(height)), worldSizeU(long(sz_y))
 	, collisionAreaIndex(0), worldPlayerPositionIndex(0)
-	, Instances()
+	, Instances(), collisionAreas(), preparedCollisionAreas(), Fragments()
 	, myPlayer(nullptr), myCamera(nullptr)
-{}
+{
+	Fragments.reserve(300);
+}
 
 GameScene::~GameScene()
 {}
