@@ -65,9 +65,6 @@ void CMesh::Assign(const CPolygon& poly)
 		else
 		{
 			index = Indexer.at(coord);
-			//index = std::distance(Dictionary.begin(), seek);
-			//const auto& pair = *seek;
-			//index = pair.second;
 		}
 		if (-1 == first_id) first_id = index;
 
@@ -77,7 +74,8 @@ void CMesh::Assign(const CPolygon& poly)
 
 	auto my_end = std::unique(indexedFragments.begin(), indexedFragments.end()
 		, [](const CLocalFragment& a, const CLocalFragment& b) -> bool {
-		return (a == b);
+		return (a.from == b.from && a.to == b.to)
+			|| (a.to == b.from && a.from == b.to);
 	});
 	volatile auto test_sz1 = indexedFragments.size();
 

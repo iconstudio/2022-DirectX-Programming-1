@@ -82,7 +82,6 @@ struct CLocalFragment
 {
 	size_t from = -1, to = -1;
 };
-bool operator==(const CLocalFragment& lhs, const CLocalFragment& rhs) noexcept;
 
 bool operator==(const XMFLOAT3& lhs, const XMFLOAT3& rhs);
 bool operator<(const XMFLOAT3& lhs, const XMFLOAT3& rhs);

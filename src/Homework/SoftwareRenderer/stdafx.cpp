@@ -2,12 +2,6 @@
 
 std::hash<XMFLOAT3> xm3f_hasher{};
 
-bool operator==(const CLocalFragment& lhs, const CLocalFragment& rhs) noexcept
-{
-	return (lhs.from == rhs.from && lhs.to == rhs.to)
-		|| (lhs.to == rhs.from && lhs.from == rhs.to);
-}
-
 bool operator==(const XMFLOAT3& lhs, const XMFLOAT3& rhs)
 {
 	return (lhs.x == rhs.x) && (lhs.y == rhs.y) && (lhs.z == rhs.z);
