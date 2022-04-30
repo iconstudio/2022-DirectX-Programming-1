@@ -15,7 +15,7 @@
 #include <vector>
 #include <algorithm>
 #include <memory>
-#include <unordered_set>
+#include <queue>
 #include <unordered_map>
 
 using namespace DirectX;
@@ -78,28 +78,19 @@ class Pillar;
 class Rail;
 class RailBorder;
 
-bool operator==(const XMFLOAT3& lhs, const XMFLOAT3& rhs);
-bool operator<(const XMFLOAT3& lhs, const XMFLOAT3& rhs);
-
 struct CLocalFragment
 {
 	size_t from = -1, to = -1;
 };
+bool operator==(const CLocalFragment& lhs, const CLocalFragment& rhs) noexcept;
 
-template <>
-struct std::equal_to<CLocalFragment>
-{
-	bool operator()(const CLocalFragment& lhs, const CLocalFragment& rhs) const noexcept
-	{
-		return (lhs.from == rhs.from && lhs.to == rhs.to)
-			|| (lhs.to == rhs.from && lhs.from == rhs.to);
-	}
-};
+bool operator==(const XMFLOAT3& lhs, const XMFLOAT3& rhs);
+bool operator<(const XMFLOAT3& lhs, const XMFLOAT3& rhs);
 
 template <>
 struct std::hash<XMFLOAT3>
 {
-	_NODISCARD size_t operator()(const XMFLOAT3& xmf3) const noexcept
+	size_t operator()(const XMFLOAT3& xmf3) const noexcept
 	{
 		auto key = xmf3.x + abs(xmf3.y * 1000.0f) + xmf3.y * 10000.0f + xmf3.z * 100000000.0f;
 		return _Hash_representation<float>(key);
@@ -109,19 +100,13 @@ struct std::hash<XMFLOAT3>
 template <>
 struct std::equal_to<XMFLOAT3>
 {
-	_NODISCARD bool operator()(const XMFLOAT3& _Left, const XMFLOAT3& _Right) const
-	{
-		return ::operator==(_Left, _Right);
-	}
+	bool operator()(const XMFLOAT3& lhs, const XMFLOAT3& rhs) const;
 };
 
 template <>
 struct std::less<XMFLOAT3>
 {
-	_NODISCARD bool operator()(const XMFLOAT3& _Left, const XMFLOAT3& _Right) const
-	{
-		return ::operator<(_Left, _Right);
-	}
+	bool operator()(const XMFLOAT3& lhs, const XMFLOAT3& rhs) const;
 };
 
 class XYZWrapper

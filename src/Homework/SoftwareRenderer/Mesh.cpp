@@ -15,7 +15,6 @@ CMesh::CMesh(const size_t number_polygons)
 	, indexedValues(), lastIndex(0)
 	, indexedFragments()
 {
-	ZeroMemory(indexedValues, sizeof(indexedValues));
 	Polygons.reserve(number_polygons);
 	Polygons.clear();
 	indexedFragments.reserve(number_polygons);
@@ -42,48 +41,68 @@ void CMesh::Release()
 void CMesh::Assign(const CPolygon& poly)
 {
 	const auto& Vertices = poly.Vertices;
+	size_t first_id = -1;
 
 	for (const auto& vertex : Vertices)
 	{
 		const auto& coord = vertex.Position;
-		const auto& seek = Indexer.find(coord);
+		const auto& it = Indexer.find(coord);
+		const auto& seek = std::find_if(Dictionary.cbegin(), Dictionary.cend()
+			, [&coord](const XMFLOAT3& other) -> bool {
+			return (other == coord);
+		});
 
 		size_t index = -1;
 
-		if (Indexer.end() == seek)
+		if (Indexer.cend() == it)
 		{
 			index = lastFound;
 
-			Indexer.emplace(coord, lastFound);
+			Indexer.try_emplace(coord, lastFound);
 			Dictionary.push_back(coord);
 			lastFound++;
 		}
 		else
 		{
-			const auto& pair = *seek;
-			index = pair.second;
+			index = Indexer.at(coord);
+			//index = std::distance(Dictionary.begin(), seek);
+			//const auto& pair = *seek;
+			//index = pair.second;
 		}
+		if (-1 == first_id) first_id = index;
 
 		TryAddFragment(index);
 	}
-	TryAddFragment(0);
+	TryAddFragment(first_id);
+
+	auto my_end = std::unique(indexedFragments.begin(), indexedFragments.end()
+		, [](const CLocalFragment& a, const CLocalFragment& b) -> bool {
+		return (a == b);
+	});
+	volatile auto test_sz1 = indexedFragments.size();
+
+	indexedFragments.erase(my_end, indexedFragments.end());
+	volatile auto test_sz2 = indexedFragments.size();
+
+	while (!indexedValues.empty())
+	{
+		indexedValues.pop();
+	}
 }
 
 void CMesh::TryAddFragment(const size_t vertex_id)
 {
-	indexedValues[lastIndex] = vertex_id;
+	indexedValues.push(vertex_id);
 
-	if (2 <= ++lastIndex)
+	if (2 <= indexedValues.size())
 	{
-		CLocalFragment frag = { indexedValues[0], indexedValues[1] };
+		const auto id_from = indexedValues.front();
+		indexedValues.pop();
+		const auto id_to = indexedValues.front();
+
+		CLocalFragment frag = { id_from, id_to };
 		indexedFragments.push_back(frag);
-
-		lastIndex = 0;
-		ZeroMemory(indexedValues, sizeof(indexedValues));
 	}
-
-	// TODO:
-	std::unique(indexedFragments.begin(), indexedFragments.end());
 }
 
 void CMesh::Set(const size_t index, const CPolygon& poly)

@@ -35,7 +35,7 @@ public:
 	std::unordered_map<XMFLOAT3, size_t> Indexer;
 	size_t lastFound;
 
-	size_t indexedValues[2];
+	std::queue<size_t> indexedValues;
 	size_t lastIndex;
 
 	std::vector<CLocalFragment> indexedFragments;
