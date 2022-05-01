@@ -144,7 +144,7 @@ void GameScene::PrepareRendering()
 
 	std::sort(Fragments.begin(), Fragments.end()
 		, [](const CFragment& lhs, const CFragment& rhs) {
-		return (lhs.start.z + lhs.dest.z) > (rhs.start.z + rhs.dest.z);
+		return (rhs.start.z < lhs.start.z) && (rhs.dest.z < lhs.dest.z);
 	});
 }
 
