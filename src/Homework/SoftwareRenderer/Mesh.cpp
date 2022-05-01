@@ -72,15 +72,27 @@ void CMesh::Assign(const CPolygon& poly)
 	}
 	TryAddFragment(first_id);
 
+	std::set<CLocalFragment> refinery{ indexedFragments.cbegin(), indexedFragments.cend() };
+	volatile auto test_sz1 = indexedFragments.size();
+
+	/*
 	auto my_end = std::unique(indexedFragments.begin(), indexedFragments.end()
 		, [](const CLocalFragment& a, const CLocalFragment& b) -> bool {
 		return (a.from == b.from && a.to == b.to)
 			|| (a.to == b.from && a.from == b.to);
 	});
-	volatile auto test_sz1 = indexedFragments.size();
 
 	indexedFragments.erase(my_end, indexedFragments.end());
+	*/
+
+	indexedFragments.clear();
+	indexedFragments.assign(refinery.cbegin(), refinery.cend());
+
 	volatile auto test_sz2 = indexedFragments.size();
+	if (test_sz1 == test_sz2)
+	{
+		assert("색인 오류!");
+	}
 
 	while (!indexedValues.empty())
 	{
@@ -98,8 +110,10 @@ void CMesh::TryAddFragment(const size_t vertex_id)
 		indexedValues.pop();
 		const auto id_to = indexedValues.front();
 
-		CLocalFragment frag = { id_from, id_to };
-		indexedFragments.push_back(frag);
+		if (id_from < id_to)
+			indexedFragments.push_back(CLocalFragment{ id_from, id_to });
+		else
+			indexedFragments.push_back(CLocalFragment{ id_to, id_from });
 	}
 }
 
@@ -266,7 +280,7 @@ void CMesh::RenderFragments(HDC surface) const
 		const auto inside_from = CheckProjection(vtx_from.x, vtx_from.y);
 		const auto inside_to = CheckProjection(vtx_to.x, vtx_to.y);
 
-		if (CheckDepth(vtx_to.z) && (inside_from || inside_to))
+		if (CheckDepth(vtx_from.z) && CheckDepth(vtx_to.z) && (inside_from || inside_to))
 		{
 			DrawSide(surface, vtx_from, vtx_to);
 		}
