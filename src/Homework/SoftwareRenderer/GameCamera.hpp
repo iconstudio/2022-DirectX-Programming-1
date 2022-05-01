@@ -23,16 +23,18 @@ public:
 	virtual ~GameCamera();
 
 	void SetFollower(GameObject* target);
+	void SetViewport(int left, int top, int width, int height);
 	void SetFOVAngle(float angle);
 	void SetLocalPosition(const XMFLOAT3& pos);
 	void SetLocalPosition(XMFLOAT3&& pos);
 	void SetLookOffset(const XMFLOAT3& vector);
 	void SetLookOffset(XMFLOAT3&& vector);
 
-	void GenerateViewMatrix();
 	void GeneratePerspectiveProjectionMatrix(float znear, float zfar, float fov);
 	void GenerateOrthographicProjectionMatrix(float znear, float zfar, float width, float height);
-	void SetViewport(int left, int top, int width, int height);
+
+	void GenerateViewMatrix();
+	void Update(float elapsed_time);
 
 	void LookAt(const XMFLOAT3 look, const XMFLOAT3 up);
 	void LookAt(const XMFLOAT3 pos, const XMFLOAT3 look, const XMFLOAT3 up);
@@ -43,8 +45,6 @@ public:
 	void Move(const XMFLOAT3& dir, float distance);
 	void Move(XMFLOAT3&& dir, float distance);
 	void Rotate(float pitch, float yaw, float roll);
-
-	void Update(float elapsed_time);
 
 	bool IsInFrustum(const BoundingBox& collider) const;
 	bool IsInFrustum(const BoundingOrientedBox& collider) const;
