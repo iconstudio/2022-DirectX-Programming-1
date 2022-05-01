@@ -17,6 +17,7 @@
 #include <memory>
 #include <queue>
 #include <unordered_map>
+#include <set>
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;
@@ -78,11 +79,6 @@ class Pillar;
 class Rail;
 class RailBorder;
 
-struct CLocalFragment
-{
-	size_t from = -1, to = -1;
-};
-
 bool operator==(const XMFLOAT3& lhs, const XMFLOAT3& rhs);
 bool operator<(const XMFLOAT3& lhs, const XMFLOAT3& rhs);
 
@@ -106,6 +102,23 @@ template <>
 struct std::less<XMFLOAT3>
 {
 	bool operator()(const XMFLOAT3& lhs, const XMFLOAT3& rhs) const;
+};
+
+struct CLocalFragment
+{
+	size_t from = -1, to = -1;
+};
+
+template <>
+struct std::equal_to<CLocalFragment>
+{
+	bool operator()(const CLocalFragment& lhs, const CLocalFragment& rhs) const;
+};
+
+template <>
+struct std::less<CLocalFragment>
+{
+	bool operator()(const CLocalFragment& lhs, const CLocalFragment& rhs) const;
 };
 
 class XYZWrapper

@@ -1,6 +1,8 @@
 #include "stdafx.hpp"
 
 std::hash<XMFLOAT3> xm3f_hasher{};
+std::equal_to<CLocalFragment> lfrag_eq{};
+std::less<CLocalFragment> lfrag_less{};
 
 bool operator==(const XMFLOAT3& lhs, const XMFLOAT3& rhs)
 {
@@ -20,6 +22,17 @@ bool std::equal_to<XMFLOAT3>::operator()(const XMFLOAT3& lhs, const XMFLOAT3& rh
 bool std::less<XMFLOAT3>::operator()(const XMFLOAT3& lhs, const XMFLOAT3& rhs) const
 {
 	return xm3f_hasher(lhs) < xm3f_hasher(rhs);
+}
+
+bool std::equal_to<CLocalFragment>::operator()(const CLocalFragment& lhs, const CLocalFragment& rhs) const
+{
+	return (lhs.from == rhs.from && lhs.to == rhs.to)
+		|| (lhs.to == rhs.from && lhs.from == rhs.to);
+}
+
+bool std::less<CLocalFragment>::operator()(const CLocalFragment& lhs, const CLocalFragment& rhs) const
+{
+	return !lfrag_eq(lhs, rhs) && (&lhs < &rhs);
 }
 
 XMFLOAT3&& Vector3::XMVectorToFloat3(const XMVECTOR& vector)
