@@ -240,7 +240,7 @@ int CMesh::Raycast(XMVECTOR& ray_pos, XMVECTOR& ray_dir, float* out_distance) co
 	return nIntersections;
 }
 
-void CMesh::PrepareRendering(GameScene& scene)
+void CMesh::PrepareRendering(GameScene& scene, COLORREF color)
 {
 	for (const auto& frag : myFragments)
 	{
@@ -255,7 +255,7 @@ void CMesh::PrepareRendering(GameScene& scene)
 
 		if (CheckDepth(vtx_from.z) && CheckDepth(vtx_to.z) && (inside_from || inside_to))
 		{
-			scene.AddFragment(CFragment{ vtx_from, vtx_to });
+			scene.AddFragment(CFragment{ vtx_from, vtx_to, color });
 		}
 	}
 }

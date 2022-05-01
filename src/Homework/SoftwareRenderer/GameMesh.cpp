@@ -5,7 +5,7 @@
 
 GameMesh::GameMesh()
 	: myMeshPtr(nullptr)
-	, myColour(RGB(255, 0, 0)), myPen(CreatePen(PS_SOLID, 0, myColour))
+	, myPen(NULL), myColour(RGB(255, 0, 0))
 {}
 
 GameMesh::~GameMesh()
@@ -25,8 +25,6 @@ void GameMesh::SetColor(DWORD dwColor)
 {
 	if (myColour != dwColor)
 	{
-		DeleteObject(myPen);
-		myPen = CreatePen(PS_SOLID, 0, dwColor);
 		myColour = dwColor;
 	}
 }
@@ -50,7 +48,7 @@ void GameMesh::PrepareRendering(GameScene& scene)
 {
 	if (myMeshPtr)
 	{
-		myMeshPtr->PrepareRendering(scene);
+		myMeshPtr->PrepareRendering(scene, myColour);
 	}
 }
 

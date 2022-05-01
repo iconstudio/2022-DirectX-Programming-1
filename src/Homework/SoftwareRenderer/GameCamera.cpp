@@ -128,7 +128,11 @@ void GameCamera::Update(float fTimeElapsed)
 			float time_lag_scale = fTimeElapsed * (1.0f / 0.1f);
 			float move_distane = move_far * time_lag_scale;
 
-			move_distane = std::clamp(move_distane, EPSILON, move_far);
+			// 문제 발생!
+			if (move_distane < EPSILON)
+				move_distane = 0.0f;
+			else if (move_far < move_distane)
+				move_distane = move_far;
 
 			// 천천히 카메라 이동
 			if (0.0f < move_distane)

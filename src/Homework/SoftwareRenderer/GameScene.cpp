@@ -18,7 +18,12 @@ GameScene::GameScene(GameFramework& framework, size_t sz_x, size_t height, size_
 }
 
 GameScene::~GameScene()
-{}
+{
+	for (auto& pair : Pens)
+	{
+		DeleteObject(pair.second);
+	}
+}
 
 void GameScene::SetHwnd(HWND hwnd)
 {
@@ -127,7 +132,7 @@ void GameScene::PrepareRendering()
 	{
 		if (myCamera->IsInFrustum(group->Collider))
 		{
-			preparedCollisionAreas.push_back(group);
+			//preparedCollisionAreas.push_back(group);
 			group->PrepareRendering();
 		}
 	}
@@ -136,28 +141,45 @@ void GameScene::PrepareRendering()
 	{
 		myPlayer->PrepareRendering(*this);
 	}
+
+	std::sort(Fragments.begin(), Fragments.end()
+		, [](const CFragment& lhs, const CFragment& rhs) {
+		return (lhs.start.z + lhs.dest.z) > (rhs.start.z + rhs.dest.z);
+	});
 }
 
 void GameScene::Render(HDC surface)
 {
-	HPEN pen = CreatePen(PS_SOLID, 0, RGB(0, 0, 0));
-	HPEN old_pen = HPEN(SelectObject(surface, pen));
+	HPEN pen = NULL;
+	HPEN old_pen = NULL;
 
 	for (const auto& frag : Fragments)
 	{
+		auto colorpen = Pens.find(frag.Colour);
+		if (Pens.end() == colorpen)
+		{
+			pen = CreatePen(PS_SOLID, 0, frag.Colour);
+			Pens.try_emplace(frag.Colour, pen);
+		}
+		else
+		{
+			pen = HPEN(colorpen->second);
+		}
+		old_pen = HPEN(SelectObject(surface, pen));
+
 		DrawSide(surface, frag.start, frag.dest);
+		SelectObject(surface, old_pen);
 	}
 
 	Fragments.clear();
-	SelectObject(surface, old_pen);
 
-	for (const auto& group : preparedCollisionAreas)
+	//for (const auto& group : preparedCollisionAreas)
 	{
 		//group->Render(surface);
 	}
-	preparedCollisionAreas.clear();
+	//preparedCollisionAreas.clear();
 
-	if (myPlayer)
+	//if (myPlayer)
 	{
 		//myPlayer->Render(surface);
 	}
@@ -166,11 +188,6 @@ void GameScene::Render(HDC surface)
 void GameScene::AddFragment(const CFragment& fragment)
 {
 	Fragments.push_back(fragment);
-
-	//std::sort(Fragments.begin(), Fragments.end()
-	//	, [](const CFragment& lhs, const CFragment& rhs) {
-	//	return (lhs.start.z + lhs.dest.z) < (rhs.start.z + rhs.dest.z);
-	//});
 }
 
 CGroupPtr GameScene::CreateCollisionGroup()

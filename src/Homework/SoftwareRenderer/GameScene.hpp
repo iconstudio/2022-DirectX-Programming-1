@@ -74,6 +74,9 @@ private:
 	// 렌더링 할 조각
 	std::vector<CFragment> Fragments;
 
+	// 렌더링 용 펜 모음
+	std::unordered_map<COLORREF, HPEN> Pens;
+
 	// 플레이어 객체 (Instances 안에도 있음)
 	std::shared_ptr<Player> myPlayer;
 
