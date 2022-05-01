@@ -1,6 +1,7 @@
 #include "stdafx.hpp"
 #include "Mesh.hpp"
 #include "GamePipeline.hpp"
+#include "Fragment.hpp"
 
 CMesh::CMesh()
 	: CMesh(0)
@@ -11,14 +12,14 @@ CMesh::CMesh()
 CMesh::CMesh(const size_t number_polygons)
 	: Collider()
 	, Polygons(number_polygons)
-	, Indexes(), lastFound(0), Dictionary()
-	, indexedValues()
-	, myFragments()
+	, localIndex(), lastFound(0), Dictionary()
+	, localIndexed()
+	, localFragments()
 {
 	Polygons.reserve(number_polygons);
 	Polygons.clear();
-	myFragments.reserve(number_polygons);
-	myFragments.clear();
+	localFragments.reserve(number_polygons);
+	localFragments.clear();
 }
 
 CMesh::~CMesh()
@@ -38,7 +39,7 @@ void CMesh::Release()
 	}
 }
 
-void CMesh::Assign(const CPolygon& poly)
+void CMesh::BuildLocalFragment(const CPolygon& poly)
 {
 	const auto& Vertices = poly.Vertices;
 	size_t first_id = -1;
@@ -47,7 +48,7 @@ void CMesh::Assign(const CPolygon& poly)
 	{
 		const auto& coord = vertex.Position;
 		const auto& it = Dictionary.find(coord);
-		const auto& seek = std::find_if(Indexes.cbegin(), Indexes.cend()
+		const auto& seek = std::find_if(localIndex.cbegin(), localIndex.cend()
 			, [&coord](const XMFLOAT3& other) -> bool {
 			return (other == coord);
 		});
@@ -59,7 +60,7 @@ void CMesh::Assign(const CPolygon& poly)
 			index = lastFound;
 
 			Dictionary.try_emplace(coord, lastFound);
-			Indexes.push_back(coord);
+			localIndex.push_back(coord);
 			lastFound++;
 		}
 		else
@@ -72,38 +73,48 @@ void CMesh::Assign(const CPolygon& poly)
 	}
 	TryAddFragment(first_id);
 
-	std::set<CLocalFragment> refinery{ myFragments.cbegin(), myFragments.cend() };
-	volatile auto test_sz1 = myFragments.size();
+	std::set<CLocalFragment> refinery{ localFragments.cbegin(), localFragments.cend() };
+	volatile auto test_sz1 = localFragments.size();
 
-	myFragments.clear();
-	myFragments.assign(refinery.cbegin(), refinery.cend());
+	localFragments.clear();
+	localFragments.assign(refinery.cbegin(), refinery.cend());
 
-	volatile auto test_sz2 = myFragments.size();
+	volatile auto test_sz2 = localFragments.size();
 	if (test_sz1 == test_sz2)
 	{
 		assert("색인 오류!");
 	}
 
-	while (!indexedValues.empty())
+	while (!localIndexed.empty())
 	{
-		indexedValues.pop();
+		localIndexed.pop();
 	}
+}
+
+void CMesh::BuildFragments()
+{
+	auto inserter = std::back_inserter(myFragments);
+	std::transform(localFragments.begin(), localFragments.end(), inserter
+		, [&](const CLocalFragment& it) {
+
+		return CFragment{ localIndex.at(it.from), localIndex.at(it.to) };
+	});
 }
 
 void CMesh::TryAddFragment(const size_t vertex_id)
 {
-	indexedValues.push(vertex_id);
+	localIndexed.push(vertex_id);
 
-	if (2 <= indexedValues.size())
+	if (2 <= localIndexed.size())
 	{
-		const auto id_from = indexedValues.front();
-		indexedValues.pop();
-		const auto id_to = indexedValues.front();
+		const auto id_from = localIndexed.front();
+		localIndexed.pop();
+		const auto id_to = localIndexed.front();
 
 		if (id_from < id_to)
-			myFragments.push_back(CLocalFragment{ id_from, id_to });
+			localFragments.push_back(CLocalFragment{ id_from, id_to });
 		else
-			myFragments.push_back(CLocalFragment{ id_to, id_from });
+			localFragments.push_back(CLocalFragment{ id_to, id_from });
 	}
 }
 
@@ -114,7 +125,7 @@ void CMesh::Set(const size_t index, const CPolygon& poly)
 
 void CMesh::Set(const size_t index, CPolygon&& poly)
 {
-	Assign(poly);
+	BuildLocalFragment(poly);
 
 	Polygons[index] = std::move(poly);
 }
@@ -126,7 +137,7 @@ void CMesh::Push(const CPolygon& poly)
 
 void CMesh::Push(CPolygon&& poly)
 {
-	Assign(poly);
+	BuildLocalFragment(poly);
 
 	Polygons.push_back(std::move(poly));
 }
@@ -230,7 +241,10 @@ int CMesh::Raycast(XMVECTOR& ray_pos, XMVECTOR& ray_dir, float* out_distance) co
 
 void CMesh::PrepareRendering(GameScene& scene)
 {
+	for (const auto& frag : myFragments)
+	{
 
+	}
 }
 
 void CMesh::Render(HDC surface) const
@@ -278,14 +292,8 @@ void CMesh::RenderByFragments(HDC surface) const
 {
 	for (const auto& frag : myFragments)
 	{
-		const auto from = frag.from;
-		const auto to = frag.to;
-
-		const auto& pos_from = Indexes.at(from);
-		const auto& pos_to = Indexes.at(to);
-
-		const auto vtx_from = GamePipeline::ProjectTransform(pos_from);
-		const auto vtx_to = GamePipeline::ProjectTransform(pos_to);
+		const auto vtx_from = GamePipeline::ProjectTransform(frag.start);
+		const auto vtx_to = GamePipeline::ProjectTransform(frag.dest);
 
 		const auto inside_from = CheckProjection(vtx_from.x, vtx_from.y);
 		const auto inside_to = CheckProjection(vtx_to.x, vtx_to.y);

@@ -27,7 +27,8 @@ public:
 	friend GameObject;
 
 protected:
-	void Assign(const CPolygon& poly);
+	void BuildLocalFragment(const CPolygon& poly);
+	void BuildFragments();
 	void TryAddFragment(const size_t vertex_id);
 
 	bool CheckProjection(const float prj_x, const float prj_y) const;
@@ -40,13 +41,16 @@ protected:
 	std::vector<CPolygon> Polygons;
 
 	// 색인된 인덱스 목록
-	std::vector<XMFLOAT3> Indexes;
+	std::vector<XMFLOAT3> localIndex;
 	size_t lastFound;
 	std::unordered_map<XMFLOAT3, size_t> Dictionary;
 
 	// 조각에 추가할 인덱스 큐
-	std::queue<size_t> indexedValues;
-	std::vector<CLocalFragment> myFragments;
+	std::queue<size_t> localIndexed;
+	std::vector<CLocalFragment> localFragments;
+
+	// 렌더링 용 조각
+	std::vector<CFragment> myFragments;
 
 private:
 	int m_nReferences = 1;

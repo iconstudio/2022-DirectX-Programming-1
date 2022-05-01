@@ -4,13 +4,10 @@
 class CFragment
 {
 public:
-	// ¿ùµå ÁÂÇ¥
-	float x1, y1, z1, x2, y2, z2;
-
-	// Åõ¿µ º¯È¯µÈ ½ÃÀÛ x, y, z ÁÂÇ¥
+	// ½ÃÀÛ x, y, z ÁÂÇ¥
 	XMFLOAT3 start;
 
-	// Åõ¿µ º¯È¯µÈ ¸ñÇ¥ x, y, z ÁÂÇ¥
+	// ¸ñÇ¥ x, y, z ÁÂÇ¥
 	XMFLOAT3 dest;
 
 	COLORREF Colour;

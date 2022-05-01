@@ -11,13 +11,14 @@
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
 
+#include <memory>
 #include <cmath>
 #include <vector>
-#include <algorithm>
-#include <memory>
 #include <queue>
 #include <unordered_map>
 #include <set>
+#include <algorithm>
+#include <iterator>
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;

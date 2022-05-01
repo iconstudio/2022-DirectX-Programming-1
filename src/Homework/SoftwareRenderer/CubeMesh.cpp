@@ -56,5 +56,7 @@ CubeMesh::CubeMesh(float w, float h, float d)
 	Push(std::move(pRightFace));
 	//Set(5, std::move(pRightFace));
 
+	BuildFragments();
+
 	Collider = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fHalfWidth, fHalfHeight, fHalfDepth), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 }
