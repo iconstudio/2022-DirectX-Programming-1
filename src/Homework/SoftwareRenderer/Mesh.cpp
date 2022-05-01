@@ -11,14 +11,14 @@ CMesh::CMesh()
 CMesh::CMesh(const size_t number_polygons)
 	: Collider()
 	, Polygons(number_polygons)
-	, Dictionary(), Indexer(), lastFound(0)
-	, indexedValues(), lastIndex(0)
-	, indexedFragments()
+	, Indexes(), lastFound(0), Dictionary()
+	, indexedValues()
+	, myFragments()
 {
 	Polygons.reserve(number_polygons);
 	Polygons.clear();
-	indexedFragments.reserve(number_polygons);
-	indexedFragments.clear();
+	myFragments.reserve(number_polygons);
+	myFragments.clear();
 }
 
 CMesh::~CMesh()
@@ -46,25 +46,25 @@ void CMesh::Assign(const CPolygon& poly)
 	for (const auto& vertex : Vertices)
 	{
 		const auto& coord = vertex.Position;
-		const auto& it = Indexer.find(coord);
-		const auto& seek = std::find_if(Dictionary.cbegin(), Dictionary.cend()
+		const auto& it = Dictionary.find(coord);
+		const auto& seek = std::find_if(Indexes.cbegin(), Indexes.cend()
 			, [&coord](const XMFLOAT3& other) -> bool {
 			return (other == coord);
 		});
 
 		size_t index = -1;
 
-		if (Indexer.cend() == it)
+		if (Dictionary.cend() == it)
 		{
 			index = lastFound;
 
-			Indexer.try_emplace(coord, lastFound);
-			Dictionary.push_back(coord);
+			Dictionary.try_emplace(coord, lastFound);
+			Indexes.push_back(coord);
 			lastFound++;
 		}
 		else
 		{
-			index = Indexer.at(coord);
+			index = Dictionary.at(coord);
 		}
 		if (-1 == first_id) first_id = index;
 
@@ -72,23 +72,13 @@ void CMesh::Assign(const CPolygon& poly)
 	}
 	TryAddFragment(first_id);
 
-	std::set<CLocalFragment> refinery{ indexedFragments.cbegin(), indexedFragments.cend() };
-	volatile auto test_sz1 = indexedFragments.size();
+	std::set<CLocalFragment> refinery{ myFragments.cbegin(), myFragments.cend() };
+	volatile auto test_sz1 = myFragments.size();
 
-	/*
-	auto my_end = std::unique(indexedFragments.begin(), indexedFragments.end()
-		, [](const CLocalFragment& a, const CLocalFragment& b) -> bool {
-		return (a.from == b.from && a.to == b.to)
-			|| (a.to == b.from && a.from == b.to);
-	});
+	myFragments.clear();
+	myFragments.assign(refinery.cbegin(), refinery.cend());
 
-	indexedFragments.erase(my_end, indexedFragments.end());
-	*/
-
-	indexedFragments.clear();
-	indexedFragments.assign(refinery.cbegin(), refinery.cend());
-
-	volatile auto test_sz2 = indexedFragments.size();
+	volatile auto test_sz2 = myFragments.size();
 	if (test_sz1 == test_sz2)
 	{
 		assert("색인 오류!");
@@ -111,9 +101,9 @@ void CMesh::TryAddFragment(const size_t vertex_id)
 		const auto id_to = indexedValues.front();
 
 		if (id_from < id_to)
-			indexedFragments.push_back(CLocalFragment{ id_from, id_to });
+			myFragments.push_back(CLocalFragment{ id_from, id_to });
 		else
-			indexedFragments.push_back(CLocalFragment{ id_to, id_from });
+			myFragments.push_back(CLocalFragment{ id_to, id_from });
 	}
 }
 
@@ -141,6 +131,21 @@ void CMesh::Push(CPolygon&& poly)
 	Polygons.push_back(std::move(poly));
 }
 
+std::size_t CMesh::GetPolygonsNumber() const
+{
+	return Polygons.size();
+}
+
+const BoundingOrientedBox& CMesh::GetCollider() const
+{
+	return Collider;
+}
+
+BoundingOrientedBox& CMesh::GetCollider()
+{
+	return Collider;
+}
+
 bool CMesh::CheckProjection(const float prj_x, const float prj_y) const
 {
 	return -1.0f <= prj_x && prj_x <= 1.0f && -1.0f <= prj_y && prj_y <= 1.0f;
@@ -164,7 +169,7 @@ BOOL CMesh::RayIntersectionByTriangle(XMVECTOR& ray_pos, XMVECTOR& ray_dir, XMVE
 	return bIntersected;
 }
 
-int CMesh::CheckRayIntersection(XMVECTOR& ray_pos, XMVECTOR& ray_dir, float* out_distance) const
+int CMesh::Raycast(XMVECTOR& ray_pos, XMVECTOR& ray_dir, float* out_distance) const
 {
 	int nIntersections = 0;
 	bool bIntersected = Collider.Intersects(ray_pos, ray_dir, *out_distance);
@@ -176,9 +181,9 @@ int CMesh::CheckRayIntersection(XMVECTOR& ray_pos, XMVECTOR& ray_dir, float* out
 			auto& vertices = polygon.Vertices;
 			auto vertex_number = vertices.size();
 
-			const auto& vertex_0 = vertices[0].TranformedPosition;
-			const auto& vertex_1 = vertices[1].TranformedPosition;
-			const auto& vertex_2 = vertices[2].TranformedPosition;
+			const auto& vertex_0 = vertices[0].Position;
+			const auto& vertex_1 = vertices[1].Position;
+			const auto& vertex_2 = vertices[2].Position;
 
 			auto v0 = XMLoadFloat3(&vertex_0);
 			auto v1 = XMLoadFloat3(&vertex_1);
@@ -206,8 +211,8 @@ int CMesh::CheckRayIntersection(XMVECTOR& ray_pos, XMVECTOR& ray_dir, float* out
 						nIntersections++;
 					}
 
-					const auto& vertex_3 = vertices[3].TranformedPosition;
-					auto v3 = XMLoadFloat3(&(vertices[3].TranformedPosition));
+					const auto& vertex_3 = vertices[3].Position;
+					auto v3 = XMLoadFloat3(&(vertices[3].Position));
 
 					bIntersected = RayIntersectionByTriangle(ray_pos, ray_dir, v0, v2, v3, out_distance);
 
@@ -264,15 +269,15 @@ void CMesh::Render(HDC surface) const
 	}
 }
 
-void CMesh::RenderFragments(HDC surface) const
+void CMesh::RenderByFragments(HDC surface) const
 {
-	for (const auto& frag : indexedFragments)
+	for (const auto& frag : myFragments)
 	{
 		const auto from = frag.from;
 		const auto to = frag.to;
 
-		const auto& pos_from = Dictionary.at(from);
-		const auto& pos_to = Dictionary.at(to);
+		const auto& pos_from = Indexes.at(from);
+		const auto& pos_to = Indexes.at(to);
 
 		const auto vtx_from = GamePipeline::ProjectTransform(pos_from);
 		const auto vtx_to = GamePipeline::ProjectTransform(pos_to);
@@ -293,7 +298,7 @@ CPolygon::CPolygon()
 	Vertices.clear();
 }
 
-CPolygon::CPolygon(const UINT number_vertices)
+CPolygon::CPolygon(const size_t number_vertices)
 	: Vertices(number_vertices)
 {
 	Vertices.reserve(number_vertices);
@@ -324,15 +329,15 @@ void CPolygon::Push(CVertex&& vertex)
 }
 
 CVertex::CVertex()
-	: Position(), TranformedPosition()
+	: Position()
 {}
 
 CVertex::CVertex(const float x, const float y, const float z)
-	: Position(x, y, z), TranformedPosition(x, y, z)
+	: Position(x, y, z)
 {}
 
 CVertex::CVertex(XMFLOAT3 position)
-	: Position(position), TranformedPosition(position)
+	: Position(position)
 {}
 
 CVertex::~CVertex()

@@ -248,7 +248,7 @@ void GameObject::Render(HDC surface) const
 	{
 		GamePipeline::SetWorldTransform(Transform.GetWorldMatrix());
 
-		myMesh.Render(surface);
+		myMesh.RenderByFragments(surface);
 	}
 }
 
@@ -270,14 +270,15 @@ void GameObject::UpdateBoundingBox()
 	{
 		const auto& mat = Transform.GetWorldMatrix();
 		const auto float4x4 = XMLoadFloat4x4(&mat);
-		myMesh.myMeshPtr->Collider.Transform(Collider, float4x4);
+		auto& collider = myMesh.GetCollider();
+		collider.Transform(collider, float4x4);
 
 		auto quaternion = XMQuaternionNormalize(XMLoadFloat4(&Collider.Orientation));
 		XMStoreFloat4(&Collider.Orientation, quaternion);
 	}
 }
 
-void GameObject::GenerateRayForPicking(XMVECTOR& pick_pos, XMMATRIX& view, XMVECTOR& ray_pos, XMVECTOR& ray_dir)
+void GameObject::CreateRay(XMVECTOR& pick_pos, XMMATRIX& view, XMVECTOR& ray_pos, XMVECTOR& ray_dir)
 {
 	const auto& mat = Transform.GetWorldMatrix();
 	const auto float4x4 = XMLoadFloat4x4(&mat);
@@ -289,15 +290,15 @@ void GameObject::GenerateRayForPicking(XMVECTOR& pick_pos, XMMATRIX& view, XMVEC
 	ray_dir = XMVector3Normalize(ray_dir - ray_pos);
 }
 
-int GameObject::PickObjectByRayIntersection(XMVECTOR& pick_pos, XMMATRIX& view, float* max_distance)
+int GameObject::Raycast(XMVECTOR& pick_pos, XMMATRIX& view, float* max_distance)
 {
 	int nIntersected = 0;
 	if (myMesh.Available())
 	{
 		XMVECTOR ray_pos, ray_dir;
-		GenerateRayForPicking(pick_pos, view, ray_pos, ray_dir);
+		CreateRay(pick_pos, view, ray_pos, ray_dir);
 
-		nIntersected = myMesh.myMeshPtr->CheckRayIntersection(ray_pos, ray_dir, max_distance);
+		nIntersected = myMesh.myMeshPtr->Raycast(ray_pos, ray_dir, max_distance);
 	}
 
 	return (nIntersected);

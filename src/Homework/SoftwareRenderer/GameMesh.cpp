@@ -10,6 +10,14 @@ GameMesh::GameMesh()
 	, myColour(RGB(255, 0, 0)), myPen(CreatePen(PS_SOLID, 0, myColour))
 {}
 
+GameMesh::~GameMesh()
+{
+	if (myPen)
+	{
+		DeleteObject(myPen);
+	}
+}
+
 void GameMesh::SetMesh(std::shared_ptr<CMesh>& pMesh)
 {
 	myMeshPtr = pMesh;
@@ -32,7 +40,12 @@ bool GameMesh::Available() const noexcept
 
 std::size_t GameMesh::GetPolygonsNumber() const
 {
-	return myMeshPtr ? myMeshPtr->Polygons.size() : 0;
+	return myMeshPtr ? myMeshPtr->GetPolygonsNumber() : 0;
+}
+
+BoundingOrientedBox& GameMesh::GetCollider()
+{
+	return myMeshPtr->GetCollider();
 }
 
 void GameMesh::PrepareRendering(GameScene& scene)
@@ -43,7 +56,13 @@ void GameMesh::PrepareRendering(GameScene& scene)
 void GameMesh::Render(HDC surface) const
 {
 	auto hOldPen = HPEN(SelectObject(surface, myPen));
-	//myMeshPtr->Render(surface);
-	myMeshPtr->RenderFragments(surface);
+	myMeshPtr->Render(surface);
+	SelectObject(surface, hOldPen);
+}
+
+void GameMesh::RenderByFragments(HDC surface) const
+{
+	auto hOldPen = HPEN(SelectObject(surface, myPen));
+	myMeshPtr->RenderByFragments(surface);
 	SelectObject(surface, hOldPen);
 }

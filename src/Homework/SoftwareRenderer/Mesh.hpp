@@ -6,39 +6,46 @@ class CMesh
 public:
 	CMesh();
 	CMesh(const size_t number_polygons);
-	virtual ~CMesh();
+	~CMesh();
 
 	void AddRef();
 	void Release();
-
-	void Assign(const CPolygon& poly);
-	void TryAddFragment(const size_t vertex_id);
 
 	void Set(const size_t index, const CPolygon& poly);
 	void Set(const size_t index, CPolygon&& poly);
 	void Push(const CPolygon& poly);
 	void Push(CPolygon&& poly);
 
+	std::size_t GetPolygonsNumber() const;
+	const BoundingOrientedBox& GetCollider() const;
+	BoundingOrientedBox& GetCollider();
+
 	void Render(HDC surface) const;
-	void RenderFragments(HDC surface) const;
+	void RenderByFragments(HDC surface) const;
+
+	friend GameObject;
+
+protected:
+	void Assign(const CPolygon& poly);
+	void TryAddFragment(const size_t vertex_id);
 
 	bool CheckProjection(const float prj_x, const float prj_y) const;
 	bool CheckDepth(const float prj_z) const;
 	BOOL RayIntersectionByTriangle(XMVECTOR& ray, XMVECTOR& ray_dir, XMVECTOR v0, XMVECTOR v1, XMVECTOR v2, float* out_distance) const;
-	int CheckRayIntersection(XMVECTOR& ray, XMVECTOR& ray_dir, float* out_distance) const;
+	int Raycast(XMVECTOR& ray, XMVECTOR& ray_dir, float* out_distance) const;
 
 	BoundingOrientedBox Collider;
 
 	std::vector<CPolygon> Polygons;
 
-	std::vector<XMFLOAT3> Dictionary;
-	std::unordered_map<XMFLOAT3, size_t> Indexer;
+	// 색인된 인덱스 목록
+	std::vector<XMFLOAT3> Indexes;
 	size_t lastFound;
+	std::unordered_map<XMFLOAT3, size_t> Dictionary;
 
+	// 조각에 추가할 인덱스 큐
 	std::queue<size_t> indexedValues;
-	size_t lastIndex;
-
-	std::vector<CLocalFragment> indexedFragments;
+	std::vector<CLocalFragment> myFragments;
 
 private:
 	int m_nReferences = 1;
@@ -48,7 +55,7 @@ class CPolygon
 {
 public:
 	CPolygon();
-	CPolygon(const UINT number_vertices);
+	CPolygon(const size_t number_vertices);
 	virtual ~CPolygon();
 
 	void Set(const UINT index, const CVertex& vertex);
@@ -69,5 +76,4 @@ public:
 	virtual ~CVertex();
 
 	XMFLOAT3 Position;
-	XMFLOAT3 TranformedPosition;
 };

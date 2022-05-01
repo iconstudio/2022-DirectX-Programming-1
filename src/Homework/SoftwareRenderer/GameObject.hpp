@@ -61,8 +61,8 @@ public:
 	virtual bool CheckCameraBounds() const;
 	virtual void UpdateBoundingBox();
 
-	void GenerateRayForPicking(XMVECTOR& pick_pos, XMMATRIX& view, XMVECTOR& ray_pos, XMVECTOR& ray_dir);
-	int PickObjectByRayIntersection(XMVECTOR& pick_pos, XMMATRIX& view, float* max_distance);
+	void CreateRay(XMVECTOR& pick_pos, XMMATRIX& view, XMVECTOR& ray_pos, XMVECTOR& ray_dir);
+	int Raycast(XMVECTOR& pick_pos, XMMATRIX& view, float* max_distance);
 
 	GameScene& Scene;
 	std::shared_ptr<GameCamera> Camera;
