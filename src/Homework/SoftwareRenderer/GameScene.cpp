@@ -131,6 +131,11 @@ void GameScene::PrepareRendering()
 			group->PrepareRendering();
 		}
 	}
+
+	if (myPlayer)
+	{
+		myPlayer->PrepareRendering(*this);
+	}
 }
 
 void GameScene::Render(HDC surface)

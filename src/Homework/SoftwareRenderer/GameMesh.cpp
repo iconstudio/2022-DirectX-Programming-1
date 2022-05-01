@@ -2,8 +2,6 @@
 #include "GameMesh.hpp"
 #include "Mesh.hpp"
 #include "Fragment.hpp"
-#include <map>
-#include <set>
 
 GameMesh::GameMesh()
 	: myMeshPtr(nullptr)
@@ -52,7 +50,7 @@ void GameMesh::PrepareRendering(GameScene& scene)
 {
 	if (myMeshPtr)
 	{
-
+		myMeshPtr->PrepareRendering(scene);
 	}
 }
 

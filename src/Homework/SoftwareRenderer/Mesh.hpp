@@ -20,6 +20,7 @@ public:
 	const BoundingOrientedBox& GetCollider() const;
 	BoundingOrientedBox& GetCollider();
 
+	void PrepareRendering(GameScene& scene);
 	void Render(HDC surface) const;
 	void RenderByFragments(HDC surface) const;
 

@@ -228,6 +228,11 @@ int CMesh::Raycast(XMVECTOR& ray_pos, XMVECTOR& ray_dir, float* out_distance) co
 	return nIntersections;
 }
 
+void CMesh::PrepareRendering(GameScene& scene)
+{
+
+}
+
 void CMesh::Render(HDC surface) const
 {
 	bool is_inside_first = false;
