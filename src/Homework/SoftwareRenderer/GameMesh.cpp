@@ -40,7 +40,7 @@ bool GameMesh::Available() const noexcept
 
 std::size_t GameMesh::GetPolygonsNumber() const
 {
-	return myMeshPtr ? myMeshPtr->GetPolygonsNumber() : 0;
+	return myMeshPtr->GetPolygonsNumber();
 }
 
 BoundingOrientedBox& GameMesh::GetCollider()
@@ -50,19 +50,28 @@ BoundingOrientedBox& GameMesh::GetCollider()
 
 void GameMesh::PrepareRendering(GameScene& scene)
 {
+	if (myMeshPtr)
+	{
 
+	}
 }
 
 void GameMesh::Render(HDC surface) const
 {
-	auto hOldPen = HPEN(SelectObject(surface, myPen));
-	myMeshPtr->Render(surface);
-	SelectObject(surface, hOldPen);
+	if (myMeshPtr)
+	{
+		auto hOldPen = HPEN(SelectObject(surface, myPen));
+		myMeshPtr->Render(surface);
+		SelectObject(surface, hOldPen);
+	}
 }
 
 void GameMesh::RenderByFragments(HDC surface) const
 {
-	auto hOldPen = HPEN(SelectObject(surface, myPen));
-	myMeshPtr->RenderByFragments(surface);
-	SelectObject(surface, hOldPen);
+	if (myMeshPtr)
+	{
+		auto hOldPen = HPEN(SelectObject(surface, myPen));
+		myMeshPtr->RenderByFragments(surface);
+		SelectObject(surface, hOldPen);
+	}
 }
