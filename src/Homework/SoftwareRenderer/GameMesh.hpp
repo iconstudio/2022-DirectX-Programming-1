@@ -16,7 +16,7 @@ public:
 	void PrepareRendering(GameScene& scene);
 	void Render(HDC surface) const;
 
-	std::shared_ptr<CMesh> myMeshPtr;
+	std::shared_ptr<const CMesh> myMeshPtr;
 
 	DWORD myColour;
 	HPEN myPen;
