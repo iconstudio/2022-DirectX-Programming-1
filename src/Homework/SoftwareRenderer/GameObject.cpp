@@ -232,13 +232,13 @@ void GameObject::Update(float elapsed_time)
 	}
 }
 
-void GameObject::PrepareRendering(GameScene& group)
+void GameObject::PrepareRendering(GameScene& scene)
 {
 	if (myMesh.Available())
 	{
 		GamePipeline::SetWorldTransform(Transform.GetWorldMatrix());
 
-		myMesh.PrepareRendering(Scene);
+		myMesh.PrepareRendering(scene);
 	}
 }
 

@@ -1,5 +1,6 @@
 #include "stdafx.hpp"
 #include "Mesh.hpp"
+#include "GameScene.hpp"
 #include "GamePipeline.hpp"
 #include "Fragment.hpp"
 
@@ -243,7 +244,19 @@ void CMesh::PrepareRendering(GameScene& scene)
 {
 	for (const auto& frag : myFragments)
 	{
+		const auto& start = frag.start;
+		const auto& dest = frag.dest;
 
+		const auto vtx_from = GamePipeline::ProjectTransform(start);
+		const auto vtx_to = GamePipeline::ProjectTransform(dest);
+
+		const auto inside_from = CheckProjection(vtx_from.x, vtx_from.y);
+		const auto inside_to = CheckProjection(vtx_to.x, vtx_to.y);
+
+		if (CheckDepth(vtx_from.z) && CheckDepth(vtx_to.z) && (inside_from || inside_to))
+		{
+			scene.AddFragment(CFragment{ vtx_from, vtx_to });
+		}
 	}
 }
 

@@ -58,9 +58,9 @@ void GameMesh::Render(HDC surface) const
 {
 	if (myMeshPtr)
 	{
-		auto hOldPen = HPEN(SelectObject(surface, myPen));
+		auto old_pen = HPEN(SelectObject(surface, myPen));
 		myMeshPtr->Render(surface);
-		SelectObject(surface, hOldPen);
+		SelectObject(surface, old_pen);
 	}
 }
 
@@ -68,8 +68,8 @@ void GameMesh::RenderByFragments(HDC surface) const
 {
 	if (myMeshPtr)
 	{
-		auto hOldPen = HPEN(SelectObject(surface, myPen));
+		auto old_pen = HPEN(SelectObject(surface, myPen));
 		myMeshPtr->RenderByFragments(surface);
-		SelectObject(surface, hOldPen);
+		SelectObject(surface, old_pen);
 	}
 }
