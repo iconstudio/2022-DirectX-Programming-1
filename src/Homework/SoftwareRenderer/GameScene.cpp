@@ -5,6 +5,7 @@
 #include "GameObject.hpp"
 #include "GameCamera.hpp"
 #include "Player.hpp"
+#include "PlayerBullet.hpp"
 #include "Enemy.hpp"
 #include "EnemyCube.hpp"
 #include "EnemyManta.hpp"
@@ -12,13 +13,13 @@
 
 GameScene::GameScene(GameFramework& framework, size_t sz_x, size_t height, size_t sz_y)
 	: Framework(framework), Window(NULL)
-	, worldSizeH(long(sz_x)), worldSizeV(long(height)), worldSizeU(long(sz_y))
 	, collisionAreaIndex(0), worldPlayerPositionIndex(0)
 	, Instances(), collisionAreas(), preparedCollisionAreas(), Fragments()
 	, myPlayer(nullptr), myCamera(nullptr)
 	, meshEnemy{ nullptr, nullptr }
 {
 	Fragments.reserve(300);
+	Instances.reserve(300);
 }
 
 GameScene::~GameScene()
@@ -49,15 +50,15 @@ void GameScene::Start()
 
 void GameScene::BuildCollisionGroups()
 {
-	const auto cgrp_cnt_x = worldSizeH / COLLIDE_AREA_H;
-	const auto cgrp_cnt_y = worldSizeV / COLLIDE_AREA_V;
-	const auto cgrp_cnt_z = worldSizeU / COLLIDE_AREA_U;
+	const auto cgrp_cnt_x = WORLD_H / COLLIDE_AREA_H;
+	const auto cgrp_cnt_y = WORLD_V / COLLIDE_AREA_V;
+	const auto cgrp_cnt_z = WORLD_U / COLLIDE_AREA_U;
 
-	for (UINT i = 0; i < cgrp_cnt_x; ++i)
+	for (int i = 0; i < cgrp_cnt_x; ++i)
 	{
-		for (UINT j = 0; j < cgrp_cnt_y; ++j)
+		for (int j = 0; j < cgrp_cnt_y; ++j)
 		{
-			for (UINT k = 0; k < cgrp_cnt_z; ++k)
+			for (int k = 0; k < cgrp_cnt_z; ++k)
 			{
 				XMFLOAT3 position{};
 				position.x = i * COLLIDE_AREA_H + 0.5f * COLLIDE_AREA_H;
@@ -73,20 +74,23 @@ void GameScene::BuildCollisionGroups()
 
 void GameScene::BuildWorld()
 {
-	auto pillar_mesh_ptr = new CubeMesh(2.0f, 4.0f, 2.0f);
-	auto pillar_mesh = std::shared_ptr<CMesh>(pillar_mesh_ptr);
+	const auto pillar_mesh_ptr = new CubeMesh(2.0f, 4.0f, 2.0f);
+	const auto pillar_mesh = std::shared_ptr<CMesh>(pillar_mesh_ptr);
 
 	constexpr UINT pillar_count = 40;
-	constexpr float pillar_place_z_gap = (WORLD_U * 0.8f) / pillar_count;
+	constexpr float pillar_place_z_gap = (WORLD_U * 0.9f) / pillar_count;
 	XMFLOAT3 place{};
 
 	for (UINT i = 0; i < pillar_count; ++i)
 	{
 		place.x = 0.5f * WORLD_H + std::cos(1.0f + i / 3.141592f) * 5.0f;
 		place.y = 0.0f;
-		place.z = WORLD_U * 0.1f + i * pillar_place_z_gap;
+		place.z = WORLD_U * 0.05f + i * pillar_place_z_gap;
 
 		auto pillar = CreateInstance<GameObject>(place);
+		if (!pillar)
+			continue;
+
 		pillar->SetMesh(pillar_mesh);
 		pillar->SetColor(RGB(110, 30, 30));
 	}
@@ -127,11 +131,11 @@ void GameScene::Update(float elapsed_time)
 		myPlayer->Update(elapsed_time);
 	}
 
-	for (auto& instance : Instances)
+	for (auto& inst : Instances)
 	{
-		if (instance->isActivated)
+		if (inst->isActivated)
 		{
-			instance->Update(elapsed_time);
+			inst->Update(elapsed_time);
 		}
 	}
 }
@@ -140,14 +144,13 @@ void GameScene::PrepareRendering()
 {
 	GamePipeline::SetProjection(myCamera->projectionPerspective);
 
-	for (const auto& group : collisionAreas)
-	{
+	std::for_each(collisionAreas.cbegin(), collisionAreas.cend(), [&](const auto& group) {
 		if (myCamera->IsInFrustum(group->Collider))
 		{
 			//preparedCollisionAreas.push_back(group);
 			group->PrepareRendering();
 		}
-	}
+	});
 
 	if (myPlayer)
 	{
@@ -230,13 +233,14 @@ CGroupPtr GameScene::CreateCollisionGroup()
 
 CGroupPtr GameScene::FindProperGroup(const XMFLOAT3& position)
 {
-	auto cx = Clamp(position.x, -worldSizeH * 0.5f, worldSizeH * 0.5f);
-	auto cy = Clamp(position.y, -worldSizeV * 0.5f, worldSizeV * 0.5f);
-	auto cz = Clamp(position.z, -worldSizeU * 0.5f, worldSizeU * 0.5f);
+	auto cx = Clamp(position.x, -WORLD_H * 0.5f, WORLD_H * 0.5f);
+	auto cy = Clamp(position.y, -WORLD_V * 0.5f, WORLD_V * 0.5f);
+	auto cz = Clamp(position.z, -WORLD_U * 0.5f, WORLD_U * 0.5f);
+	XMFLOAT3 check_pos = XMFLOAT3(cx, cy, cz);
 
 	for (auto& group : collisionAreas)
 	{
-		if (group->Contains(position))
+		if (group->Contains(check_pos))
 		{
 			return group;
 		}
@@ -260,17 +264,25 @@ Type* GameScene::CreateInstance(const XMFLOAT3& position)
 template<class Type>
 Type* GameScene::CreateInstance(XMFLOAT3&& position)
 {
-	auto inst = new Type(*this);
-	inst->SetPosition(position);
-	inst->SetCamera(myCamera);
-
-	auto ptr = ObjectPtr(inst);
-	Instances.push_back(ptr);
-
 	auto group = FindProperGroup(position);
-	group->AddInstance(ptr);
+	if (group)
+	{
+		auto inst = new Type(*this);
+		inst->SetPosition(position);
+		inst->SetCamera(myCamera);
 
-	return inst;
+		auto ptr = ObjectPtr(inst);
+		Instances.push_back(ptr);
+
+		group->AddInstance(ptr);
+		return inst;
+	}
+	else
+	{
+		//throw ("그룹 찾기 오류!");
+	}
+
+	return nullptr;
 }
 
 void GameScene::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -320,9 +332,11 @@ void GameScene::OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
 GameCollsionGroup::GameCollsionGroup(GameScene& scene, const size_t index, size_t sz_x, size_t height, size_t sz_y)
 	: Scene(scene), Index(index)
-	, Collider()
+	, Collider(XMFLOAT3(0, 0, 0), XMFLOAT3(0.5f * sz_x, 0.5f * height, 0.5f * sz_y))
+	, myMesh(sz_x, height, sz_y)
+	, Instances()
 {
-	Collider.Extents = XMFLOAT3(0.5f * sz_x, 0.5f * height, 0.5f * sz_y);
+	Instances.reserve(100);
 }
 
 void GameCollsionGroup::SetPosition(XMFLOAT3&& position)
@@ -337,23 +351,24 @@ void GameCollsionGroup::AddInstance(ObjectPtr& ptr)
 
 void GameCollsionGroup::PrepareRendering()
 {
-	for (const auto& instance : Instances)
+	//myMesh.PrepareRendering(Scene, RGB(70, 70, 70));
+
+	for (auto& inst : Instances)
 	{
-		if (instance->isActivated)
+		if (inst->isActivated)
 		{
-			instance->PrepareRendering(Scene);
+			inst->PrepareRendering(Scene);
 		}
 	}
 }
 
 void GameCollsionGroup::Render(HDC surface) const
 {
-	for (const auto& instance : Instances)
+	for (const auto& inst : Instances)
 	{
-
-		if (instance->isActivated)
+		if (inst->isActivated)
 		{
-			instance->Render(surface);
+			inst->Render(surface);
 		}
 	}
 }
