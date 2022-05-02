@@ -44,7 +44,7 @@ void GameObject::SetActive(bool flag)
 	isActivated = flag;
 }
 
-void GameObject::SetMesh(std::shared_ptr<CMesh>& mesh)
+void GameObject::SetMesh(const std::shared_ptr<CMesh>& mesh)
 {
 	myMesh.SetMesh(mesh);
 }

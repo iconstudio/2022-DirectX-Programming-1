@@ -15,7 +15,7 @@ public:
 	virtual ~GameObject();
 
 	void SetActive(bool bActive);
-	void SetMesh(std::shared_ptr<CMesh>& pMesh);
+	void SetMesh(const std::shared_ptr<CMesh>& pMesh);
 	void SetColor(DWORD dwColor);
 	void SetCamera(std::shared_ptr<GameCamera>& cam);
 

@@ -8,7 +8,7 @@ public:
 	GameMesh();
 	~GameMesh();
 
-	void SetMesh(std::shared_ptr<CMesh>& pMesh);
+	void SetMesh(const std::shared_ptr<CMesh>& pMesh);
 	void SetColor(DWORD dwColor);
 
 	bool Available() const noexcept;

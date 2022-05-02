@@ -16,7 +16,7 @@ GameMesh::~GameMesh()
 	}
 }
 
-void GameMesh::SetMesh(std::shared_ptr<CMesh>& pMesh)
+void GameMesh::SetMesh(const std::shared_ptr<CMesh>& pMesh)
 {
 	myMeshPtr = pMesh;
 }
