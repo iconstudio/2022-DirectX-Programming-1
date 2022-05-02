@@ -193,6 +193,26 @@ void GameScene::Render(HDC surface)
 	}
 }
 
+Enemy* GameScene::SpawnEnemy(ENEMY_TYPES type, const XMFLOAT3& pos)
+{
+	switch (type)
+	{
+		case ENEMY_TYPES::CUBE:
+		{
+
+		}
+		break;
+
+		case ENEMY_TYPES::MANTA:
+		{
+
+		}
+		break;
+	}
+
+	return nullptr;
+}
+
 void GameScene::AddFragment(const CFragment& fragment)
 {
 	Fragments.push_back(fragment);

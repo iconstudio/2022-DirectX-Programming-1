@@ -76,9 +76,19 @@ class GameCollsionGroup;
 class GameObject;
 
 class Player;
+class Enemy;
+class EnemyCube;
+class EnemyManta;
+
 class Pillar;
 class Rail;
 class RailBorder;
+
+enum class ENEMY_TYPES
+{
+	CUBE = 0,
+	MANTA
+};
 
 bool operator==(const XMFLOAT3& lhs, const XMFLOAT3& rhs);
 bool operator<(const XMFLOAT3& lhs, const XMFLOAT3& rhs);

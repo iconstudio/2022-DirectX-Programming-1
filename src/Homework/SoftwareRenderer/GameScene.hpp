@@ -4,6 +4,7 @@
 #include "GameCamera.hpp"
 #include "Fragment.hpp"
 #include "Player.hpp"
+#include "Enemy.hpp"
 #include "CubeMesh.hpp"
 
 using ObjectPtr = std::shared_ptr<GameObject>;
@@ -24,7 +25,7 @@ public:
 	void AddFragment(const CFragment& fragment);
 	void Render(HDC surface);
 
-	Enemy* SpawnEnemy(int type, const XMFLOAT3& pos);
+	Enemy* SpawnEnemy(ENEMY_TYPES type, const XMFLOAT3& pos);
 
 	void OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	void OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
