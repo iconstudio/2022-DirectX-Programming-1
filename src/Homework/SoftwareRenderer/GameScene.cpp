@@ -6,6 +6,8 @@
 #include "GameCamera.hpp"
 #include "Player.hpp"
 #include "Enemy.hpp"
+#include "EnemyCube.hpp"
+#include "EnemyManta.hpp"
 #include "CubeMesh.hpp"
 
 GameScene::GameScene(GameFramework& framework, size_t sz_x, size_t height, size_t sz_y)
@@ -112,8 +114,7 @@ void GameScene::BuildObjects()
 	auto enemy1_mesh_ptr = new CubeMesh(4.0f, 3.0f, 8.0f);
 	meshEnemy[1] = std::shared_ptr<CMesh>(enemy1_mesh_ptr);
 
-	auto cube = CreateInstance<GameObject>(XMFLOAT3(40.0f, 0.0f, 60.0f));
-	cube->SetMesh(meshEnemy[1]);
+	auto cube = SpawnEnemy(ENEMY_TYPES::CUBE, XMFLOAT3(40.0f, 0.0f, 60.0f));
 }
 
 void GameScene::BuildEnemies()
@@ -199,13 +200,21 @@ Enemy* GameScene::SpawnEnemy(ENEMY_TYPES type, const XMFLOAT3& pos)
 	{
 		case ENEMY_TYPES::CUBE:
 		{
+			Enemy* instance_ptr = CreateInstance<EnemyCube>(pos);
+			instance_ptr->SetMesh(meshEnemy[0]);
+			instance_ptr->SetColor(RGB(255, 0, 0));
 
+			return instance_ptr;
 		}
 		break;
 
 		case ENEMY_TYPES::MANTA:
 		{
+			Enemy* instance_ptr = CreateInstance<EnemyManta>(pos);
+			instance_ptr->SetMesh(meshEnemy[1]);
+			instance_ptr->SetColor(RGB(255, 0, 0));
 
+			return instance_ptr;
 		}
 		break;
 	}

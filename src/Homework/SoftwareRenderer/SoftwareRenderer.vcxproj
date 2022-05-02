@@ -149,6 +149,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Enemy.hpp" />
+    <ClInclude Include="EnemyCube.hpp" />
+    <ClInclude Include="EnemyManta.hpp" />
     <ClInclude Include="Fragment.hpp" />
     <ClInclude Include="CubeMesh.hpp" />
     <ClInclude Include="GameCamera.hpp" />
@@ -169,6 +171,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="EnemyCube.cpp" />
+    <ClCompile Include="EnemyManta.cpp" />
     <ClCompile Include="Fragment.cpp" />
     <ClCompile Include="CubeMesh.cpp" />
     <ClCompile Include="GameCamera.cpp" />

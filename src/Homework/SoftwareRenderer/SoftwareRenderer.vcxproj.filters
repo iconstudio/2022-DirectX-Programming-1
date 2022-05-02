@@ -81,6 +81,12 @@
     <ClInclude Include="PlayerBullet.hpp">
       <Filter>헤더 파일\Components</Filter>
     </ClInclude>
+    <ClInclude Include="EnemyManta.hpp">
+      <Filter>헤더 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="EnemyCube.hpp">
+      <Filter>헤더 파일\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -132,6 +138,12 @@
       <Filter>소스 파일\Components</Filter>
     </ClCompile>
     <ClCompile Include="Enemy.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="EnemyCube.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="EnemyManta.cpp">
       <Filter>소스 파일\Components</Filter>
     </ClCompile>
   </ItemGroup>
