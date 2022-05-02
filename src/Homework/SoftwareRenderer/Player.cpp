@@ -3,6 +3,7 @@
 #include "GameScene.hpp"
 #include "GameCamera.hpp"
 #include "GameObject.hpp"
+#include "PlayerBullet.hpp"
 
 Player::Player(GameScene& scene)
 	: GameObject(scene)
@@ -88,6 +89,16 @@ void Player::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		case WM_LBUTTONDOWN:
 		{
+			auto bullet = Scene.CreateInstance<GameObject>(GetPosition());
+
+			auto&& mat = Transform.GetWorldMatrix();
+			mat._41 = 0;
+			mat._42 = 0;
+			mat._43 = 0;
+
+			bullet->SetMesh(myMesh.myMeshPtr);
+			//bullet->SetRotation(mat);
+			//bullet->SetSpeed(4.0f);
 		}
 		break;
 
