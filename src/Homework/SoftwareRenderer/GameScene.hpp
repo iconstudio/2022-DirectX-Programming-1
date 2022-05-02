@@ -4,6 +4,7 @@
 #include "GameCamera.hpp"
 #include "Fragment.hpp"
 #include "Player.hpp"
+#include "CubeMesh.hpp"
 
 using ObjectPtr = std::shared_ptr<GameObject>;
 using CGroupPtr = std::shared_ptr<GameCollsionGroup>;
@@ -22,6 +23,8 @@ public:
 	void PrepareRendering();
 	void AddFragment(const CFragment& fragment);
 	void Render(HDC surface);
+
+	Enemy* SpawnEnemy(int type, const XMFLOAT3& pos);
 
 	void OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	void OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -86,6 +89,7 @@ private:
 	// 플레이어 생성 위치
 	XMFLOAT3 playerSpawnPoint = XMFLOAT3{ 5.0f, 0.0f, 1.0f };
 
+	std::shared_ptr<CMesh> meshEnemy[2];
 	//std::vector<Pillar> Pillars;
 };
 

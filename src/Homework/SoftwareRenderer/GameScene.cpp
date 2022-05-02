@@ -5,6 +5,7 @@
 #include "GameObject.hpp"
 #include "GameCamera.hpp"
 #include "Player.hpp"
+#include "Enemy.hpp"
 #include "CubeMesh.hpp"
 
 GameScene::GameScene(GameFramework& framework, size_t sz_x, size_t height, size_t sz_y)
@@ -13,6 +14,7 @@ GameScene::GameScene(GameFramework& framework, size_t sz_x, size_t height, size_
 	, collisionAreaIndex(0), worldPlayerPositionIndex(0)
 	, Instances(), collisionAreas(), preparedCollisionAreas(), Fragments()
 	, myPlayer(nullptr), myCamera(nullptr)
+	, meshEnemy{ nullptr, nullptr }
 {
 	Fragments.reserve(300);
 }
@@ -104,8 +106,14 @@ void GameScene::BuildObjects()
 	myCamera->SetLocalPosition(XMFLOAT3(0.0f, 9.0f, -7.0f));
 	myCamera->SetLookOffset(XMFLOAT3(0.0f, 0.0f, 10.0f));
 
+	auto enemy0_mesh_ptr = new CubeMesh(3.0f, 3.0f, 3.0f);
+	meshEnemy[0] = std::shared_ptr<CMesh>(enemy0_mesh_ptr);
+
+	auto enemy1_mesh_ptr = new CubeMesh(4.0f, 3.0f, 8.0f);
+	meshEnemy[1] = std::shared_ptr<CMesh>(enemy1_mesh_ptr);
+
 	auto cube = CreateInstance<GameObject>(XMFLOAT3(40.0f, 0.0f, 60.0f));
-	cube->SetMesh(player_mesh);
+	cube->SetMesh(meshEnemy[1]);
 }
 
 void GameScene::BuildEnemies()
