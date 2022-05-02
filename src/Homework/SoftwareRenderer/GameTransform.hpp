@@ -12,6 +12,10 @@ public:
 	XYZWrapper& GetUp();
 	XYZWrapper& GetLook();
 	XYZWrapper& GetPosition();
+	const XYZWrapper& GetRight() const;
+	const XYZWrapper& GetUp() const;
+	const XYZWrapper& GetLook() const;
+	const XYZWrapper& GetPosition() const;
 
 	void SetPosition(float x, float y, float z);
 	void SetPosition(const XMFLOAT3& pos);

@@ -174,3 +174,23 @@ XYZWrapper& GameTransform::GetPosition()
 {
 	return myPosition;
 }
+
+const XYZWrapper& GameTransform::GetRight() const
+{
+	return myRight;
+}
+
+const XYZWrapper& GameTransform::GetUp() const
+{
+	return myUp;
+}
+
+const XYZWrapper& GameTransform::GetLook() const
+{
+	return myLook;
+}
+
+const XYZWrapper& GameTransform::GetPosition() const
+{
+	return myPosition;
+}
