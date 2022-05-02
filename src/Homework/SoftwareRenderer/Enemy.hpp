@@ -12,6 +12,9 @@ public:
 	void SetHealth(float value);
 	void AddHealth(float value);
 	void SetMaxHealth(float value);
+	void SetPlayer(Player* player);
+
+	virtual void Update(float elapsed_time) override;
 
 	float GetDistanceFromPlayer() const;
 

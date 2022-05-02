@@ -6,11 +6,13 @@
 #include "Player.hpp"
 
 Enemy::Enemy(GameScene& scene)
-	: GameObject(scene)
+	: Enemy(scene, XMFLOAT3(0, 0, 0))
 {}
 
-Enemy::Enemy(GameScene & scene, const XMFLOAT3 & pos)
+Enemy::Enemy(GameScene & scene, const XMFLOAT3& pos)
 	: GameObject(scene, pos)
+	, Human(nullptr)
+	, Waypoint(pos), patrolDistance(200.0f), isPatrolling(false)
 {}
 
 void Enemy::InitHealth(float max_health)
@@ -32,6 +34,16 @@ void Enemy::AddHealth(float value)
 void Enemy::SetMaxHealth(float value)
 {
 	maxHealth = value;
+}
+
+void Enemy::SetPlayer(Player* player)
+{
+	Human = player;
+}
+
+void Enemy::Update(float elapsed_time)
+{
+	GameObject::Update(elapsed_time);
 }
 
 float Enemy::GetDistanceFromPlayer() const
