@@ -129,7 +129,10 @@ void GameScene::Update(float elapsed_time)
 
 	for (auto& instance : Instances)
 	{
-		instance->Update(elapsed_time);
+		if (instance->isActivated)
+		{
+			instance->Update(elapsed_time);
+		}
 	}
 }
 
@@ -181,17 +184,6 @@ void GameScene::Render(HDC surface)
 	}
 
 	Fragments.clear();
-
-	//for (const auto& group : preparedCollisionAreas)
-	{
-		//group->Render(surface);
-	}
-	//preparedCollisionAreas.clear();
-
-	//if (myPlayer)
-	{
-		//myPlayer->Render(surface);
-	}
 }
 
 Enemy* GameScene::SpawnEnemy(ENEMY_TYPES type, const XMFLOAT3& pos)
@@ -347,7 +339,10 @@ void GameCollsionGroup::PrepareRendering()
 {
 	for (const auto& instance : Instances)
 	{
-		instance->PrepareRendering(Scene);
+		if (instance->isActivated)
+		{
+			instance->PrepareRendering(Scene);
+		}
 	}
 }
 
@@ -355,7 +350,11 @@ void GameCollsionGroup::Render(HDC surface) const
 {
 	for (const auto& instance : Instances)
 	{
-		instance->Render(surface);
+
+		if (instance->isActivated)
+		{
+			instance->Render(surface);
+		}
 	}
 }
 
