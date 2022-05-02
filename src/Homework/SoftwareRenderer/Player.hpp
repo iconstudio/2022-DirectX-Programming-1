@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.hpp"
 #include "GameObject.hpp"
+#include "PlayerBullet.hpp"
 
 class Player : public GameObject
 {
@@ -29,4 +30,6 @@ private:
 	POINT Cursor;
 	DWORD Orientation;
 	bool focused;
+
+	std::vector<std::shared_ptr<GameObject>> myBulletPool;
 };
