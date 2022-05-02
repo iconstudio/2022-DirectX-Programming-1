@@ -25,10 +25,13 @@ public:
 	void SetRotation(const XMFLOAT4X4& pmxf4x4Transform);
 	void AddPosition(XMFLOAT3&& xmf3Position);
 
-	XMFLOAT3&& GetPosition();
-	XMFLOAT3&& GetLook();
-	XMFLOAT3&& GetUp();
-	XMFLOAT3&& GetRight();
+	XMFLOAT3&& GetPosition() const;
+	XMFLOAT3&& GetLook() const;
+	XMFLOAT3&& GetUp() const;
+	XMFLOAT3&& GetRight() const;
+
+	void Activate();
+	void Diactivate();
 
 	virtual void Move(const XMFLOAT3& vDirection, float distance);
 	virtual void MoveStrafe(float distance);

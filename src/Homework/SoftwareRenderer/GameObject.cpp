@@ -84,22 +84,32 @@ void GameObject::AddPosition(XMFLOAT3&& vector)
 	Transform.Translate(vector);
 }
 
-XMFLOAT3&& GameObject::GetPosition()
+XMFLOAT3&& GameObject::GetPosition() const
 {
 	return std::move(XMFLOAT3(Transform.GetPosition()));
 }
 
-XMFLOAT3&& GameObject::GetRight()
+XMFLOAT3&& GameObject::GetRight() const
 {
 	return Vector3::Normalize(XMFLOAT3(Transform.GetRight()));
 }
 
-XMFLOAT3&& GameObject::GetUp()
+void GameObject::Activate()
+{
+	SetActive(true);
+}
+
+void GameObject::Diactivate()
+{
+	SetActive(false);
+}
+
+XMFLOAT3&& GameObject::GetUp() const
 {
 	return Vector3::Normalize(XMFLOAT3(Transform.GetUp()));
 }
 
-XMFLOAT3&& GameObject::GetLook()
+XMFLOAT3&& GameObject::GetLook() const
 {
 	return Vector3::Normalize(XMFLOAT3(Transform.GetLook()));
 }
