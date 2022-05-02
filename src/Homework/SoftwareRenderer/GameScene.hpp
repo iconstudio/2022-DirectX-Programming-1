@@ -32,9 +32,7 @@ public:
 	void OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
 	friend class GameCollsionGroup;
-
-	// 게임 월드의 크기
-	const long worldSizeH, worldSizeV, worldSizeU;
+	friend class Player;
 
 	// 기준 충돌 영역
 	size_t collisionAreaIndex;
@@ -90,6 +88,9 @@ private:
 	// 플레이어 생성 위치
 	XMFLOAT3 playerSpawnPoint = XMFLOAT3{ 5.0f, 0.0f, 1.0f };
 
+	std::shared_ptr<CMesh> meshPlayer;
+	std::shared_ptr<CMesh> meshPillar;
+	std::shared_ptr<CMesh> meshRail;
 	std::shared_ptr<CMesh> meshEnemy[2];
 	//std::vector<Pillar> Pillars;
 };
@@ -115,6 +116,7 @@ private:
 	const size_t Index;
 
 	BoundingBox Collider;
+	CubeMesh myMesh;
 
 	std::vector<ObjectPtr> Instances;
 };
