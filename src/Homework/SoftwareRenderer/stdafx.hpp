@@ -10,6 +10,8 @@
 #include <DirectXPackedVector.h>
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
+using namespace DirectX;
+using namespace DirectX::PackedVector;
 
 #include <memory>
 #include <cmath>
@@ -19,9 +21,11 @@
 #include <set>
 #include <algorithm>
 #include <iterator>
-
-using namespace DirectX;
-using namespace DirectX::PackedVector;
+using std::shared_ptr;
+using std::unique_ptr;
+using std::make_shared;
+using std::make_unique;
+using std::static_pointer_cast;
 
 constexpr FLOAT FPS_LIMIT = 100.0f;
 constexpr COLORREF C_WHITE = RGB(0xff, 0xff, 0xff);
