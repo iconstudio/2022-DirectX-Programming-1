@@ -89,7 +89,7 @@ void Player::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		case WM_LBUTTONDOWN:
 		{
-			auto bullet = Scene.CreateInstance<GameObject>(GetPosition());
+			auto bullet = Scene.CreateInstance<PlayerBullet>(GetPosition());
 
 			auto&& mat = Transform.GetWorldMatrix();
 			mat._41 = 0;
@@ -97,8 +97,8 @@ void Player::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			mat._43 = 0;
 
 			bullet->SetMesh(myMesh.myMeshPtr);
-			//bullet->SetRotation(mat);
-			//bullet->SetSpeed(4.0f);
+			bullet->SetRotation(mat);
+			bullet->SetSpeed(4.0f);
 		}
 		break;
 
