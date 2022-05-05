@@ -90,9 +90,9 @@ private:
 	XMFLOAT3 playerSpawnPoint = XMFLOAT3{ 5.0f, 0.0f, 1.0f };
 
 	std::shared_ptr<CMesh> meshPlayer;
+	std::shared_ptr<CMesh> meshEnemy[2];
 	std::shared_ptr<CMesh> meshPillar;
 	std::shared_ptr<CMesh> meshRail;
-	std::shared_ptr<CMesh> meshEnemy[2];
 	//std::vector<Pillar> Pillars;
 };
 
