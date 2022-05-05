@@ -136,6 +136,16 @@ void GameScene::Update(float elapsed_time)
 		myPlayer->Update(elapsed_time);
 	}
 
+	for (auto it = Instances.begin(); it != Instances.end(); ++it)
+	{
+		auto& instance = *it;
+
+		if (instance->Collider.Intersects(Collider))
+		{
+
+		}
+	}
+
 	for (auto& inst : Instances)
 	{
 		if (inst->isActivated)
@@ -353,6 +363,9 @@ void GameCollsionGroup::AddInstance(ObjectPtr& ptr)
 {
 	Instances.push_back(ptr);
 }
+
+void GameCollsionGroup::Update(float elapsed_time)
+{}
 
 void GameCollsionGroup::PrepareRendering()
 {
