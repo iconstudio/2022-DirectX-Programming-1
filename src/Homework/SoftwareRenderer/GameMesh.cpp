@@ -31,7 +31,7 @@ void GameMesh::SetColor(COLORREF color)
 
 bool GameMesh::IsAvailable() const noexcept
 {
-	return bool(myMeshPtr.expired());
+	return bool(!myMeshPtr.expired());
 }
 
 std::shared_ptr<CMesh> GameMesh::GetMesh() const

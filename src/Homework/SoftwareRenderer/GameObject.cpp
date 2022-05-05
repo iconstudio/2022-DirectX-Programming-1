@@ -289,23 +289,25 @@ void GameObject::UpdateBoundingBox()
 	if (myMesh.IsAvailable())
 	{
 		const auto& mat = Transform.GetWorldMatrix();
-		const auto float4x4 = XMLoadFloat4x4(&mat);
+		const auto float4x4 = DirectX::XMLoadFloat4x4(&mat);
 		auto& collider = myMesh.GetCollider();
 		collider.Transform(collider, float4x4);
 
-		auto quaternion = XMQuaternionNormalize(XMLoadFloat4(&Collider.Orientation));
-		XMStoreFloat4(&Collider.Orientation, quaternion);
+		const auto orientation = DirectX::XMLoadFloat4(&Collider.Orientation);
+		const auto quaternion = DirectX::XMQuaternionNormalize(orientation);
+		DirectX::XMStoreFloat4(&Collider.Orientation, quaternion);
 	}
 }
 
 void GameObject::CreateRay(XMVECTOR& pick_pos, XMMATRIX& view, XMVECTOR& ray_pos, XMVECTOR& ray_dir)
 {
 	const auto& mat = Transform.GetWorldMatrix();
-	const auto float4x4 = XMLoadFloat4x4(&mat);
+	const auto float4x4 = DirectX::XMLoadFloat4x4(&mat);
 	XMMATRIX xmmtxToModel = XMMatrixInverse(NULL, float4x4 * view);
 
 	XMFLOAT3 xmf3CameraOrigin(0.0f, 0.0f, 0.0f);
-	ray_pos = XMVector3TransformCoord(XMLoadFloat3(&xmf3CameraOrigin), xmmtxToModel);
+	const auto origin = DirectX::XMLoadFloat3(&xmf3CameraOrigin);
+	ray_pos = XMVector3TransformCoord(origin, xmmtxToModel);
 	ray_dir = XMVector3TransformCoord(pick_pos, xmmtxToModel);
 	ray_dir = XMVector3Normalize(ray_dir - ray_pos);
 }
