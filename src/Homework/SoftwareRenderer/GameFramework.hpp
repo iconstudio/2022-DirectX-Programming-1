@@ -34,7 +34,7 @@ private:
 	HDC mySurface;
 	HBITMAP myFrameBuffer;
 
-	std::unique_ptr<GameTimer> myTimer;
-	std::unique_ptr<GameScene> myScene;
-	std::shared_ptr<GameCamera> myCamera;
+	unique_ptr<GameTimer> myTimer;
+	unique_ptr<GameScene> myScene;
+	shared_ptr<GameCamera> myCamera;
 };
