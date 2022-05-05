@@ -31,5 +31,8 @@ private:
 	DWORD Orientation;
 	bool focused;
 
+	float shootDelay;
+	const float shootCooldown = 0.3f;
+
 	std::vector<std::shared_ptr<GameObject>> myBulletPool;
 };
