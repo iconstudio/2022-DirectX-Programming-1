@@ -192,6 +192,7 @@
     <ClInclude Include="GameScene.hpp" />
     <ClInclude Include="RidingPlayer.hpp" />
     <ClInclude Include="stdafx.hpp" />
+    <ClInclude Include="Terrains.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Enemy.cpp" />

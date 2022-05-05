@@ -87,6 +87,9 @@
     <ClInclude Include="EnemyCube.hpp">
       <Filter>헤더 파일\Components</Filter>
     </ClInclude>
+    <ClInclude Include="Terrains.hpp">
+      <Filter>헤더 파일\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
