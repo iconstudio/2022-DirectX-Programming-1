@@ -49,7 +49,7 @@ void GameObject::SetStatic(bool flag)
 	isStatic = flag;
 }
 
-void GameObject::SetMesh(const std::shared_ptr<CMesh>& mesh)
+void GameObject::SetMesh(std::shared_ptr<CMesh>& mesh)
 {
 	myMesh.SetMesh(mesh);
 }
@@ -254,7 +254,7 @@ void GameObject::Update(float elapsed_time)
 
 void GameObject::PrepareRendering(GameScene& scene)
 {
-	if (myMesh.Available())
+	if (myMesh.IsAvailable())
 	{
 		GamePipeline::SetWorldTransform(Transform.GetWorldMatrix());
 
@@ -264,7 +264,7 @@ void GameObject::PrepareRendering(GameScene& scene)
 
 void GameObject::Render(HDC surface) const
 {
-	if (myMesh.Available())
+	if (myMesh.IsAvailable())
 	{
 		GamePipeline::SetWorldTransform(Transform.GetWorldMatrix());
 
@@ -286,7 +286,7 @@ bool GameObject::CheckCameraBounds() const
 
 void GameObject::UpdateBoundingBox()
 {
-	if (myMesh.Available())
+	if (myMesh.IsAvailable())
 	{
 		const auto& mat = Transform.GetWorldMatrix();
 		const auto float4x4 = XMLoadFloat4x4(&mat);
@@ -313,12 +313,12 @@ void GameObject::CreateRay(XMVECTOR& pick_pos, XMMATRIX& view, XMVECTOR& ray_pos
 int GameObject::Raycast(XMVECTOR& pick_pos, XMMATRIX& view, float* max_distance)
 {
 	int nIntersected = 0;
-	if (myMesh.Available())
+	if (myMesh.IsAvailable())
 	{
 		XMVECTOR ray_pos, ray_dir;
 		CreateRay(pick_pos, view, ray_pos, ray_dir);
 
-		nIntersected = myMesh.myMeshPtr->Raycast(ray_pos, ray_dir, max_distance);
+		nIntersected = myMesh.GetMesh()->Raycast(ray_pos, ray_dir, max_distance);
 	}
 
 	return (nIntersected);

@@ -4,7 +4,7 @@
 #include "Fragment.hpp"
 
 GameMesh::GameMesh()
-	: myMeshPtr(nullptr)
+	: myMeshPtr()
 	, myPen(NULL), myColour(RGB(255, 0, 0))
 {}
 
@@ -16,58 +16,63 @@ GameMesh::~GameMesh()
 	}
 }
 
-void GameMesh::SetMesh(const std::shared_ptr<CMesh>& pMesh)
+void GameMesh::SetMesh(std::shared_ptr<CMesh>& mesh)
 {
-	myMeshPtr = pMesh;
+	myMeshPtr = std::weak_ptr(mesh);
 }
 
-void GameMesh::SetColor(DWORD dwColor)
+void GameMesh::SetColor(COLORREF color)
 {
-	if (myColour != dwColor)
+	if (myColour != color)
 	{
-		myColour = dwColor;
+		myColour = color;
 	}
 }
 
-bool GameMesh::Available() const noexcept
+bool GameMesh::IsAvailable() const noexcept
 {
-	return bool(myMeshPtr);
+	return bool(myMeshPtr.expired());
+}
+
+std::shared_ptr<CMesh> GameMesh::GetMesh() const
+{
+	return myMeshPtr.lock();
 }
 
 std::size_t GameMesh::GetPolygonsNumber() const
 {
-	return myMeshPtr->GetPolygonsNumber();
+	return GetMesh()->GetPolygonsNumber();
 }
 
 BoundingOrientedBox& GameMesh::GetCollider()
 {
-	return myMeshPtr->GetCollider();
+	return GetMesh()->GetCollider();
 }
 
 void GameMesh::PrepareRendering(GameScene& scene)
 {
-	if (myMeshPtr)
+	if (IsAvailable())
 	{
-		myMeshPtr->PrepareRendering(scene, myColour);
+		GetMesh()->PrepareRendering(scene, myColour);
 	}
 }
 
 void GameMesh::Render(HDC surface) const
 {
-	if (myMeshPtr)
+	if (IsAvailable())
 	{
 		auto old_pen = HPEN(SelectObject(surface, myPen));
-		myMeshPtr->Render(surface);
+		GetMesh()->Render(surface);
 		SelectObject(surface, old_pen);
 	}
 }
 
 void GameMesh::RenderByFragments(HDC surface) const
 {
-	if (myMeshPtr)
+	if (IsAvailable())
 	{
 		auto old_pen = HPEN(SelectObject(surface, myPen));
-		myMeshPtr->RenderByFragments(surface);
+		myMeshPtr.lock()->RenderByFragments(surface);
 		SelectObject(surface, old_pen);
 	}
 }

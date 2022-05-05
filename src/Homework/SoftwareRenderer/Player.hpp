@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.hpp"
 #include "GameObject.hpp"
+#include "PlayerBullet.hpp"
 
 class Player : public GameObject
 {

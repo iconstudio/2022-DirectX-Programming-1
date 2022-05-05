@@ -8,6 +8,7 @@
 Player::Player(GameScene& scene)
 	: GameObject(scene)
 	, Window(NULL), Cursor(), Orientation(0), focused(false)
+	, shootDelay(0.0f)
 {
 	Friction = 30.0f;
 }
@@ -89,16 +90,15 @@ void Player::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		case WM_LBUTTONDOWN:
 		{
-			auto bullet = Scene.CreateInstance<PlayerBullet>(GetPosition());
-
 			auto&& mat = Transform.GetWorldMatrix();
 			mat._41 = 0;
 			mat._42 = 0;
 			mat._43 = 0;
 
-			bullet->SetMesh(myMesh.myMeshPtr);
-			bullet->SetRotation(mat);
-			bullet->SetSpeed(4.0f);
+			//auto bullet = Scene.CreateInstance<PlayerBullet>(GetPosition());
+			//bullet->SetMesh(myMesh.myMeshPtr);
+			//bullet->SetRotation(mat);
+			//bullet->SetSpeed(4.0f);
 		}
 		break;
 

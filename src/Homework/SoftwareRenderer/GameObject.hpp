@@ -16,7 +16,7 @@ public:
 
 	void SetActive(bool flag);
 	void SetStatic(bool flag);
-	void SetMesh(const std::shared_ptr<CMesh>& mesh);
+	void SetMesh(std::shared_ptr<CMesh>& mesh);
 	void SetColor(COLORREF color);
 	void SetCamera(std::shared_ptr<GameCamera>& cam);
 
@@ -55,9 +55,9 @@ public:
 
 	float GetSpeed() const;
 
-	void SetRotationAxis(const XMFLOAT3& xmf3RotationAxis);
-	void SetRotationAxis(XMFLOAT3&& xmf3RotationAxis);
-	void SetRotationSpeed(float fSpeed);
+	void SetRotationAxis(const XMFLOAT3& axis);
+	void SetRotationAxis(XMFLOAT3&& axis);
+	void SetRotationSpeed(float speed);
 
 	virtual void Update(float elapsed_time);
 	virtual void PrepareRendering(GameScene& scene);

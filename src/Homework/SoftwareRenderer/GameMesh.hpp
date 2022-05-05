@@ -6,12 +6,16 @@ class GameMesh
 {
 public:
 	GameMesh();
+	GameMesh(const GameMesh&) = default;
+	GameMesh(GameMesh&&) = default;
 	~GameMesh();
 
-	void SetMesh(const std::shared_ptr<CMesh>& pMesh);
-	void SetColor(DWORD dwColor);
+	void SetMesh(std::shared_ptr<CMesh>& pMesh);
+	void SetColor(COLORREF dwColor);
 
-	bool Available() const noexcept;
+	bool IsAvailable() const noexcept;
+
+	std::shared_ptr<CMesh> GetMesh() const;
 	std::size_t GetPolygonsNumber() const;
 	BoundingOrientedBox& GetCollider();
 
@@ -19,8 +23,8 @@ public:
 	void Render(HDC surface) const;
 	void RenderByFragments(HDC surface) const;
 
-	std::shared_ptr<CMesh> myMeshPtr;
+	std::weak_ptr<CMesh> myMeshPtr;
 
-	DWORD myColour;
+	COLORREF myColour;
 	HPEN myPen;
 };

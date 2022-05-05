@@ -3,7 +3,10 @@
 #include "GameFramework.hpp"
 #include "GamePipeline.hpp"
 #include "GameObject.hpp"
+#include "GameMesh.hpp"
 #include "GameCamera.hpp"
+#include "Mesh.hpp"
+#include "Fragment.hpp"
 #include "Player.hpp"
 #include "PlayerBullet.hpp"
 #include "Enemy.hpp"
@@ -14,7 +17,8 @@
 GameScene::GameScene(GameFramework& framework, size_t sz_x, size_t height, size_t sz_y)
 	: Framework(framework), Window(NULL)
 	, collisionAreaIndex(0), worldPlayerPositionIndex(0)
-	, Instances(), collisionAreas(), preparedCollisionAreas(), Fragments()
+	, Instances(), staticStart()
+	, collisionAreas(), preparedCollisionAreas(), Fragments()
 	, myPlayer(nullptr), myCamera(nullptr)
 	, meshPlayer(nullptr), meshEnemy{ nullptr, nullptr }
 	, meshPillar(nullptr), meshRail(nullptr)
@@ -47,7 +51,7 @@ void GameScene::Start()
 	BuildCollisionGroups();
 	BuildWorld();
 	BuildObjects();
-	BuildEnemies();
+	CompleteBuilds();
 }
 
 void GameScene::BuildMeshes()
@@ -123,8 +127,44 @@ void GameScene::BuildObjects()
 	auto cube2 = SpawnEnemy(ENEMY_TYPES::MANTA, XMFLOAT3(50.0f, 0.0f, 70.0f));
 }
 
-void GameScene::BuildEnemies()
-{}
+void GameScene::CompleteBuilds()
+{
+	if (1 < Instances.size())
+	{
+		staticStart = std::stable_partition(Instances.begin(), Instances.end()
+			, [](const ObjectPtr& obj) -> bool {
+			return obj->IsStatic();
+		});
+	}
+}
+
+Enemy* GameScene::SpawnEnemy(ENEMY_TYPES type, const XMFLOAT3& pos)
+{
+	switch (type)
+	{
+		case ENEMY_TYPES::CUBE:
+		{
+			Enemy* instance_ptr = CreateInstance<EnemyCube>(pos);
+			instance_ptr->SetMesh(meshEnemy[0]);
+			instance_ptr->SetColor(RGB(255, 0, 0));
+
+			return instance_ptr;
+		}
+		break;
+
+		case ENEMY_TYPES::MANTA:
+		{
+			Enemy* instance_ptr = CreateInstance<EnemyManta>(pos);
+			instance_ptr->SetMesh(meshEnemy[1]);
+			instance_ptr->SetColor(RGB(255, 0, 0));
+
+			return instance_ptr;
+		}
+		break;
+	}
+
+	return nullptr;
+}
 
 void GameScene::Update(float elapsed_time)
 {
@@ -133,21 +173,14 @@ void GameScene::Update(float elapsed_time)
 		myPlayer->Update(elapsed_time);
 	}
 
-	for (auto it = Instances.begin(); it != Instances.end(); ++it)
+	for (auto it = staticStart; it != Instances.end(); ++it)
 	{
 		auto& instance = *it;
 
-		if (instance->Collider.Intersects(Collider))
+		instance->Update(elapsed_time);
+		//if (instance->Collider.Intersects(Collider))
 		{
 
-		}
-	}
-
-	for (auto& inst : Instances)
-	{
-		if (inst->isActivated)
-		{
-			inst->Update(elapsed_time);
 		}
 	}
 }
@@ -182,17 +215,7 @@ void GameScene::Render(HDC surface)
 
 	for (const auto& frag : Fragments)
 	{
-		auto colorpen = Pens.find(frag.Colour);
-		if (Pens.end() == colorpen)
-		{
-			pen = CreatePen(PS_SOLID, 0, frag.Colour);
-			Pens.try_emplace(frag.Colour, pen);
-		}
-		else
-		{
-			pen = HPEN(colorpen->second);
-		}
-		old_pen = HPEN(SelectObject(surface, pen));
+		old_pen = HPEN(SelectObject(surface, ReadyPen(frag.Colour)));
 
 		DrawSide(surface, frag.start, frag.dest);
 		SelectObject(surface, old_pen);
@@ -201,37 +224,23 @@ void GameScene::Render(HDC surface)
 	Fragments.clear();
 }
 
-Enemy* GameScene::SpawnEnemy(ENEMY_TYPES type, const XMFLOAT3& pos)
-{
-	switch (type)
-	{
-		case ENEMY_TYPES::CUBE:
-		{
-			Enemy* instance_ptr = CreateInstance<EnemyCube>(pos);
-			instance_ptr->SetMesh(meshEnemy[0]);
-			instance_ptr->SetColor(RGB(255, 0, 0));
-
-			return instance_ptr;
-		}
-		break;
-
-		case ENEMY_TYPES::MANTA:
-		{
-			Enemy* instance_ptr = CreateInstance<EnemyManta>(pos);
-			instance_ptr->SetMesh(meshEnemy[1]);
-			instance_ptr->SetColor(RGB(255, 0, 0));
-
-			return instance_ptr;
-		}
-		break;
-	}
-
-	return nullptr;
-}
-
 void GameScene::AddFragment(const CFragment& fragment)
 {
 	Fragments.push_back(fragment);
+}
+
+HPEN GameScene::ReadyPen(COLORREF color)
+{
+	auto it = Pens.find(color);
+	if (Pens.end() == it)
+	{
+		auto pen = CreatePen(PS_SOLID, 0, color);
+		return Pens.try_emplace(color, pen).first->second;
+	}
+	else
+	{
+		return it->second;
+	}
 }
 
 CGroupPtr GameScene::CreateCollisionGroup()
@@ -345,7 +354,6 @@ void GameScene::OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 GameCollsionGroup::GameCollsionGroup(GameScene& scene, const size_t index, size_t sz_x, size_t height, size_t sz_y)
 	: Scene(scene), Index(index)
 	, Collider(XMFLOAT3(0, 0, 0), XMFLOAT3(0.5f * sz_x, 0.5f * height, 0.5f * sz_y))
-	, myMesh(sz_x, height, sz_y)
 	, Instances()
 {
 	Instances.reserve(100);
@@ -362,7 +370,9 @@ void GameCollsionGroup::AddInstance(ObjectPtr& ptr)
 }
 
 void GameCollsionGroup::Update(float elapsed_time)
-{}
+{
+
+}
 
 void GameCollsionGroup::PrepareRendering()
 {

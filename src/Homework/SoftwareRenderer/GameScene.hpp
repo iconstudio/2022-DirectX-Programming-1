@@ -1,11 +1,12 @@
 #pragma once
 #include "stdafx.hpp"
-#include "GameObject.hpp"
 #include "GameCamera.hpp"
+#include "GameObject.hpp"
+#include "GameMesh.hpp"
+#include "Mesh.hpp"
 #include "Fragment.hpp"
 #include "Player.hpp"
-#include "Enemy.hpp"
-#include "CubeMesh.hpp"
+#include "PlayerBullet.hpp"
 
 using ObjectPtr = std::shared_ptr<GameObject>;
 using CGroupPtr = std::shared_ptr<GameCollsionGroup>;
@@ -23,6 +24,7 @@ public:
 	void Update(float elapsed_time);
 	void PrepareRendering();
 	void AddFragment(const CFragment& fragment);
+	HPEN ReadyPen(COLORREF color);
 	void Render(HDC surface);
 
 	Enemy* SpawnEnemy(ENEMY_TYPES type, const XMFLOAT3& pos);
@@ -45,7 +47,7 @@ private:
 	void BuildCollisionGroups();
 	void BuildWorld();
 	void BuildObjects();
-	void BuildEnemies();
+	void CompleteBuilds();
 
 	CGroupPtr CreateCollisionGroup();
 	CGroupPtr FindProperGroup(const XMFLOAT3& position);
@@ -67,6 +69,7 @@ private:
 
 	// 씬 내의 모든 인스턴스
 	std::vector<ObjectPtr> Instances;
+	std::vector<ObjectPtr>::iterator staticStart;
 
 	// 씬 내의 충돌 영역
 	std::vector<CGroupPtr> collisionAreas;
@@ -120,7 +123,6 @@ private:
 	const size_t Index;
 
 	BoundingBox Collider;
-	CubeMesh myMesh;
 
 	std::vector<ObjectPtr> Instances;
 	std::vector<ObjectPtr> Existers;
