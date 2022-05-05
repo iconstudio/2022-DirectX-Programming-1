@@ -50,9 +50,9 @@ void GameScene::Start()
 
 void GameScene::BuildCollisionGroups()
 {
-	const auto cgrp_cnt_x = WORLD_H / COLLIDE_AREA_H;
-	const auto cgrp_cnt_y = WORLD_V / COLLIDE_AREA_V;
-	const auto cgrp_cnt_z = WORLD_U / COLLIDE_AREA_U;
+	constexpr auto cgrp_cnt_x = WORLD_H / COLLIDE_AREA_H;
+	constexpr auto cgrp_cnt_y = WORLD_V / COLLIDE_AREA_V;
+	constexpr auto cgrp_cnt_z = WORLD_U / COLLIDE_AREA_U;
 
 	for (int i = 0; i < cgrp_cnt_x; ++i)
 	{
