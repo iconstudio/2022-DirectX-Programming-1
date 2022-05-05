@@ -8,8 +8,8 @@
 #include "Player.hpp"
 #include "PlayerBullet.hpp"
 
-using ObjectPtr = std::shared_ptr<GameObject>;
-using CGroupPtr = std::shared_ptr<GameCollsionGroup>;
+using ObjectPtr = shared_ptr<GameObject>;
+using CGroupPtr = shared_ptr<GameCollsionGroup>;
 
 class GameScene
 {
@@ -18,7 +18,7 @@ public:
 	~GameScene();
 
 	void SetHwnd(HWND hwnd);
-	void SetCamera(std::shared_ptr<GameCamera>& cam);
+	void SetCamera(shared_ptr<GameCamera>& cam);
 
 	void Start();
 	void Update(float elapsed_time);
@@ -84,20 +84,21 @@ private:
 	std::unordered_map<COLORREF, HPEN> Pens;
 
 	// 플레이어 객체 (Instances 안에도 있음)
-	std::shared_ptr<Player> myPlayer;
+	shared_ptr<Player> myPlayer;
 
 	// 프레임워크에서 받은 카메라
-	std::shared_ptr<GameCamera> myCamera;
+	shared_ptr<GameCamera> myCamera;
 
 	// 플레이어 생성 위치
 	XMFLOAT3 playerSpawnPoint = XMFLOAT3{ 5.0f, 0.0f, 1.0f };
 
-	std::shared_ptr<CMesh> meshPlayer;
-	std::shared_ptr<CMesh> meshPlayerBullet;
-	std::shared_ptr<CMesh> meshEnemy[2];
-	std::shared_ptr<CMesh> meshEnemyBullet;
-	std::shared_ptr<CMesh> meshPillar;
-	std::shared_ptr<CMesh> meshRail;
+	shared_ptr<CMesh> meshPlayer;
+	shared_ptr<CMesh> meshPlayerBullet;
+	shared_ptr<CMesh> meshEnemyCube;
+	shared_ptr<CMesh> meshEnemyManta;
+	shared_ptr<CMesh> meshEnemyBullet;
+	shared_ptr<CMesh> meshPillar;
+	shared_ptr<CMesh> meshRail;
 	//std::vector<Pillar> Pillars;
 };
 

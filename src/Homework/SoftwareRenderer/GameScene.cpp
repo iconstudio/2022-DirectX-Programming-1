@@ -20,7 +20,7 @@ GameScene::GameScene(GameFramework& framework, size_t sz_x, size_t height, size_
 	, Instances(), staticStart()
 	, collisionAreas(), preparedCollisionAreas(), Fragments()
 	, myPlayer(nullptr), myCamera(nullptr)
-	, meshPlayer(nullptr), meshEnemy{ nullptr, nullptr }
+	, meshPlayer(nullptr), meshEnemyCube(nullptr), meshEnemyManta(nullptr)
 	, meshPillar(nullptr), meshRail(nullptr)
 {
 	Fragments.reserve(300);
@@ -40,7 +40,7 @@ void GameScene::SetHwnd(HWND hwnd)
 	Window = hwnd;
 }
 
-void GameScene::SetCamera(std::shared_ptr<GameCamera>& cam)
+void GameScene::SetCamera(shared_ptr<GameCamera>& cam)
 {
 	myCamera = cam;
 }
@@ -56,12 +56,12 @@ void GameScene::Start()
 
 void GameScene::BuildMeshes()
 {
-	meshPlayer = std::shared_ptr<CMesh>(new CubeMesh(5.0f, 5.0f, 5.0f));
+	meshPlayer = static_pointer_cast<CMesh>(make_shared<CubeMesh>(5.0f, 5.0f, 5.0f));
 
-	meshEnemy[0] = std::shared_ptr<CMesh>(new CubeMesh(3.0f, 3.0f, 3.0f));
-	meshEnemy[1] = std::shared_ptr<CMesh>(new CubeMesh(4.0f, 3.0f, 8.0f));
+	meshEnemyCube = static_pointer_cast<CMesh>(make_shared<CubeMesh>(3.0f, 3.0f, 3.0f));
+	meshEnemyManta = static_pointer_cast<CMesh>(make_shared<CubeMesh>(4.0f, 3.0f, 8.0f));
 
-	meshPillar = std::shared_ptr<CMesh>(new CubeMesh(2.0f, 6.0f, 2.0f));
+	meshPillar = static_pointer_cast<CMesh>(make_shared<CubeMesh>(2.0f, 6.0f, 2.0f));
 }
 
 void GameScene::BuildCollisionGroups()
@@ -111,7 +111,7 @@ void GameScene::BuildWorld()
 
 void GameScene::BuildObjects()
 {
-	myPlayer = std::make_shared<Player>(*this);
+	myPlayer = make_shared<Player>(*this);
 	myPlayer->SetHwnd(Window);
 	myPlayer->SetPosition(playerSpawnPoint);
 	myPlayer->SetMesh(meshPlayer);
@@ -123,6 +123,8 @@ void GameScene::BuildObjects()
 	myCamera->SetLookOffset(XMFLOAT3(0.0f, 2.0f, 6.0f));
 
 	auto cube1 = SpawnEnemy(ENEMY_TYPES::CUBE, XMFLOAT3(40.0f, 0.0f, 60.0f));
+	auto cube3 = SpawnEnemy(ENEMY_TYPES::CUBE, XMFLOAT3(60.0f, 0.0f, 60.0f));
+
 
 	auto cube2 = SpawnEnemy(ENEMY_TYPES::MANTA, XMFLOAT3(50.0f, 0.0f, 70.0f));
 }
@@ -145,7 +147,7 @@ Enemy* GameScene::SpawnEnemy(ENEMY_TYPES type, const XMFLOAT3& pos)
 		case ENEMY_TYPES::CUBE:
 		{
 			Enemy* instance_ptr = CreateInstance<EnemyCube>(pos);
-			instance_ptr->SetMesh(meshEnemy[0]);
+			instance_ptr->SetMesh(meshEnemyCube);
 			instance_ptr->SetColor(RGB(255, 0, 0));
 
 			return instance_ptr;
@@ -155,7 +157,7 @@ Enemy* GameScene::SpawnEnemy(ENEMY_TYPES type, const XMFLOAT3& pos)
 		case ENEMY_TYPES::MANTA:
 		{
 			Enemy* instance_ptr = CreateInstance<EnemyManta>(pos);
-			instance_ptr->SetMesh(meshEnemy[1]);
+			instance_ptr->SetMesh(meshEnemyManta);
 			instance_ptr->SetColor(RGB(255, 0, 0));
 
 			return instance_ptr;
@@ -246,7 +248,7 @@ HPEN GameScene::ReadyPen(COLORREF color)
 CGroupPtr GameScene::CreateCollisionGroup()
 {
 	const size_t index = collisionAreas.size();
-	auto&& ptr = std::make_shared<GameCollsionGroup>(*this, index, COLLIDE_AREA_H, COLLIDE_AREA_V, COLLIDE_AREA_U);
+	auto&& ptr = make_shared<GameCollsionGroup>(*this, index, COLLIDE_AREA_H, COLLIDE_AREA_V, COLLIDE_AREA_U);
 	collisionAreas.push_back(ptr);
 
 	return ptr;
@@ -285,24 +287,17 @@ Type* GameScene::CreateInstance(const XMFLOAT3& position)
 template<class Type>
 Type* GameScene::CreateInstance(XMFLOAT3&& position)
 {
-	auto group = FindProperGroup(position);
-	if (group)
+	auto inst = new Type(*this);
+	if (inst)
 	{
-		auto inst = new Type(*this);
 		inst->SetPosition(position);
 		inst->SetCamera(myCamera);
 
 		auto ptr = ObjectPtr(inst);
 		Instances.push_back(ptr);
 
-		group->AddInstance(ptr);
 		return inst;
 	}
-	else
-	{
-		//throw ("그룹 찾기 오류!");
-	}
-
 	return nullptr;
 }
 
