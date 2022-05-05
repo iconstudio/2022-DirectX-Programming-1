@@ -78,9 +78,12 @@ class GameCollsionGroup;
 class GameObject;
 
 class Player;
+class RidingPlayer;
+class PlayerBullet;
 class Enemy;
 class EnemyCube;
 class EnemyManta;
+class EnemyBullet;
 
 class Pillar;
 class Rail;
