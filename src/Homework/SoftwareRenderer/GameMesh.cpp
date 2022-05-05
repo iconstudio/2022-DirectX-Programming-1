@@ -16,9 +16,9 @@ GameMesh::~GameMesh()
 	}
 }
 
-void GameMesh::SetMesh(std::shared_ptr<CMesh>& mesh)
+void GameMesh::SetMesh(const shared_ptr<CMesh>& mesh)
 {
-	myMeshPtr = std::weak_ptr(mesh);
+	myMeshPtr = mesh;
 }
 
 void GameMesh::SetColor(COLORREF color)
@@ -31,29 +31,34 @@ void GameMesh::SetColor(COLORREF color)
 
 bool GameMesh::IsAvailable() const noexcept
 {
-	return bool(!myMeshPtr.expired());
+	return bool(!myMeshPtr);
 }
 
-std::shared_ptr<CMesh> GameMesh::GetMesh() const
+const shared_ptr<CMesh>& GameMesh::GetMesh() const
 {
-	return myMeshPtr.lock();
+	return myMeshPtr;
+}
+
+shared_ptr<CMesh>& GameMesh::GetMesh()
+{
+	return myMeshPtr;
 }
 
 std::size_t GameMesh::GetPolygonsNumber() const
 {
-	return GetMesh()->GetPolygonsNumber();
+	return myMeshPtr->GetPolygonsNumber();
 }
 
 BoundingOrientedBox& GameMesh::GetCollider()
 {
-	return GetMesh()->GetCollider();
+	return myMeshPtr->GetCollider();
 }
 
 void GameMesh::PrepareRendering(GameScene& scene)
 {
 	if (IsAvailable())
 	{
-		GetMesh()->PrepareRendering(scene, myColour);
+		myMeshPtr->PrepareRendering(scene, myColour);
 	}
 }
 
@@ -62,7 +67,7 @@ void GameMesh::Render(HDC surface) const
 	if (IsAvailable())
 	{
 		auto old_pen = HPEN(SelectObject(surface, myPen));
-		GetMesh()->Render(surface);
+		myMeshPtr->Render(surface);
 		SelectObject(surface, old_pen);
 	}
 }
@@ -72,7 +77,7 @@ void GameMesh::RenderByFragments(HDC surface) const
 	if (IsAvailable())
 	{
 		auto old_pen = HPEN(SelectObject(surface, myPen));
-		myMeshPtr.lock()->RenderByFragments(surface);
+		myMeshPtr->RenderByFragments(surface);
 		SelectObject(surface, old_pen);
 	}
 }

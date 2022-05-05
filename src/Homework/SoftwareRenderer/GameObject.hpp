@@ -16,9 +16,9 @@ public:
 
 	void SetActive(bool flag);
 	void SetStatic(bool flag);
-	void SetMesh(std::shared_ptr<CMesh>& mesh);
+	void SetMesh(const shared_ptr<CMesh>& mesh);
 	void SetColor(COLORREF color);
-	void SetCamera(std::shared_ptr<GameCamera>& cam);
+	void SetCamera(shared_ptr<GameCamera>& cam);
 
 	void SetPosition(float x, float y, float z);
 	void SetPosition(const XMFLOAT3& pos);
@@ -70,7 +70,7 @@ public:
 	int Raycast(XMVECTOR& pick_pos, XMMATRIX& view, float* max_distance);
 
 	GameScene& Scene;
-	std::shared_ptr<GameCamera> Camera;
+	shared_ptr<GameCamera> Camera;
 
 	bool isActivated;
 	bool isStatic;

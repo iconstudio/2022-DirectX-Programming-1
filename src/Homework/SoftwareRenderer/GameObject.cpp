@@ -49,7 +49,7 @@ void GameObject::SetStatic(bool flag)
 	isStatic = flag;
 }
 
-void GameObject::SetMesh(std::shared_ptr<CMesh>& mesh)
+void GameObject::SetMesh(const shared_ptr<CMesh>& mesh)
 {
 	myMesh.SetMesh(mesh);
 }
@@ -59,7 +59,7 @@ void GameObject::SetColor(COLORREF color)
 	myMesh.SetColor(color);
 }
 
-void GameObject::SetCamera(std::shared_ptr<GameCamera>& cam)
+void GameObject::SetCamera(shared_ptr<GameCamera>& cam)
 {
 	Camera = cam;
 }
