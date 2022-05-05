@@ -10,8 +10,8 @@
 
 GameObject::GameObject(GameScene& scene)
 	: Scene(scene), Camera(nullptr)
-	, myMesh()
-	, Collider()
+	, isActivated(true), isStatic(false)
+	, myMesh(), Transform(), Collider()
 	, Direction(XMFLOAT3(0.0f, 0.0f, 0.0f)), Speed(0.0f), Friction(0.0f)
 {}
 
@@ -44,12 +44,17 @@ void GameObject::SetActive(bool flag)
 	isActivated = flag;
 }
 
+void GameObject::SetStatic(bool flag)
+{
+	isStatic = flag;
+}
+
 void GameObject::SetMesh(const std::shared_ptr<CMesh>& mesh)
 {
 	myMesh.SetMesh(mesh);
 }
 
-void GameObject::SetColor(DWORD color)
+void GameObject::SetColor(COLORREF color)
 {
 	myMesh.SetColor(color);
 }
@@ -82,6 +87,11 @@ void GameObject::SetRotation(const XMFLOAT4X4& tfrm)
 void GameObject::AddPosition(XMFLOAT3&& vector)
 {
 	Transform.Translate(vector);
+}
+
+bool GameObject::IsStatic() const
+{
+	return isStatic;
 }
 
 XMFLOAT3&& GameObject::GetPosition() const

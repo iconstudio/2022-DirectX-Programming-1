@@ -14,17 +14,19 @@ public:
 	GameObject(GameScene& scene, XMFLOAT3&& position);
 	virtual ~GameObject();
 
-	void SetActive(bool bActive);
-	void SetMesh(const std::shared_ptr<CMesh>& pMesh);
-	void SetColor(DWORD dwColor);
+	void SetActive(bool flag);
+	void SetStatic(bool flag);
+	void SetMesh(const std::shared_ptr<CMesh>& mesh);
+	void SetColor(COLORREF color);
 	void SetCamera(std::shared_ptr<GameCamera>& cam);
 
 	void SetPosition(float x, float y, float z);
-	void SetPosition(const XMFLOAT3& xmf3Position);
-	void SetPosition(XMFLOAT3&& xmf3Position);
-	void SetRotation(const XMFLOAT4X4& pmxf4x4Transform);
-	void AddPosition(XMFLOAT3&& xmf3Position);
+	void SetPosition(const XMFLOAT3& pos);
+	void SetPosition(XMFLOAT3&& pos);
+	void SetRotation(const XMFLOAT4X4& tfrm);
+	void AddPosition(XMFLOAT3&& vector);
 
+	bool IsStatic() const;
 	XMFLOAT3&& GetPosition() const;
 	XMFLOAT3&& GetLook() const;
 	XMFLOAT3&& GetUp() const;
@@ -70,10 +72,10 @@ public:
 	GameScene& Scene;
 	std::shared_ptr<GameCamera> Camera;
 
+	bool isActivated;
+	bool isStatic;
+
 	GameMesh myMesh;
-
-	bool isActivated = true;
-
 	GameTransform Transform;
 	BoundingOrientedBox Collider;
 
