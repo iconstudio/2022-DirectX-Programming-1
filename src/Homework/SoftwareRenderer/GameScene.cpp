@@ -16,7 +16,8 @@ GameScene::GameScene(GameFramework& framework, size_t sz_x, size_t height, size_
 	, collisionAreaIndex(0), worldPlayerPositionIndex(0)
 	, Instances(), collisionAreas(), preparedCollisionAreas(), Fragments()
 	, myPlayer(nullptr), myCamera(nullptr)
-	, meshEnemy{ nullptr, nullptr }
+	, meshPlayer(nullptr), meshEnemy{ nullptr, nullptr }
+	, meshPillar(nullptr), meshRail(nullptr)
 {
 	Fragments.reserve(300);
 	Instances.reserve(300);
@@ -42,6 +43,7 @@ void GameScene::SetCamera(std::shared_ptr<GameCamera>& cam)
 
 void GameScene::Start()
 {
+	BuildComponents();
 	BuildCollisionGroups();
 	BuildWorld();
 	BuildObjects();
@@ -50,23 +52,24 @@ void GameScene::Start()
 
 void GameScene::BuildComponents()
 {
-	auto player_mesh_ptr = new CubeMesh(5.0f, 5.0f, 5.0f);
-	meshPlayer = std::shared_ptr<CMesh>(player_mesh_ptr);
+	meshPlayer = std::shared_ptr<CMesh>(new CubeMesh(5.0f, 5.0f, 5.0f));
 
-	auto enemy0_mesh_ptr = new CubeMesh(3.0f, 3.0f, 3.0f);
-	meshEnemy[0] = std::shared_ptr<CMesh>(enemy0_mesh_ptr);
+	meshEnemy[0] = std::shared_ptr<CMesh>(new CubeMesh(3.0f, 3.0f, 3.0f));
 
-	auto enemy1_mesh_ptr = new CubeMesh(4.0f, 3.0f, 8.0f);
-	meshEnemy[1] = std::shared_ptr<CMesh>(enemy1_mesh_ptr);
+	meshEnemy[1] = std::shared_ptr<CMesh>(new CubeMesh(4.0f, 3.0f, 8.0f));
+
+	meshPillar = std::shared_ptr<CMesh>(new CubeMesh(2.0f, 6.0f, 2.0f));
 
 
+	myCamera->SetLocalPosition(XMFLOAT3(0.0f, 9.0f, -7.0f));
+	myCamera->SetLookOffset(XMFLOAT3(0.0f, 2.0f, 6.0f));
 }
 
 void GameScene::BuildCollisionGroups()
 {
-	const auto cgrp_cnt_x = WORLD_H / COLLIDE_AREA_H;
-	const auto cgrp_cnt_y = WORLD_V / COLLIDE_AREA_V;
-	const auto cgrp_cnt_z = WORLD_U / COLLIDE_AREA_U;
+	constexpr auto cgrp_cnt_x = WORLD_H / COLLIDE_AREA_H;
+	constexpr auto cgrp_cnt_y = WORLD_V / COLLIDE_AREA_V;
+	constexpr auto cgrp_cnt_z = WORLD_U / COLLIDE_AREA_U;
 
 	for (int i = 0; i < cgrp_cnt_x; ++i)
 	{
@@ -88,14 +91,11 @@ void GameScene::BuildCollisionGroups()
 
 void GameScene::BuildWorld()
 {
-	const auto pillar_mesh_ptr = new CubeMesh(2.0f, 4.0f, 2.0f);
-	const auto pillar_mesh = std::shared_ptr<CMesh>(pillar_mesh_ptr);
-
-	constexpr UINT pillar_count = 40;
+	constexpr float pillar_count = 40.0f; // 40U
 	constexpr float pillar_place_z_gap = (WORLD_U * 0.9f) / pillar_count;
 	XMFLOAT3 place{};
 
-	for (UINT i = 0; i < pillar_count; ++i)
+	for (float i = 0.0f; i < pillar_count; i++)
 	{
 		place.x = 0.5f * WORLD_H + std::cos(1.0f + i / 3.141592f) * 5.0f;
 		place.y = 0.0f;
