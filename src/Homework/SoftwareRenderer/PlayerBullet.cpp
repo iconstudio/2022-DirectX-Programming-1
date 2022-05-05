@@ -10,7 +10,13 @@ PlayerBullet::PlayerBullet(GameScene& scene)
 
 PlayerBullet::PlayerBullet(GameScene& scene, const XMFLOAT3& pos)
 	: GameObject(scene, pos)
+	, Damage(0.0f)
 {}
+
+void PlayerBullet::SetDamage(const float value)
+{
+	Damage = value;
+}
 
 void PlayerBullet::OnCollisionWall(const XMFLOAT3& reflection)
 {}
