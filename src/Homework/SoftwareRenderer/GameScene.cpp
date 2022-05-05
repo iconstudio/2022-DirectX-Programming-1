@@ -43,26 +43,21 @@ void GameScene::SetCamera(std::shared_ptr<GameCamera>& cam)
 
 void GameScene::Start()
 {
-	BuildComponents();
+	BuildMeshes();
 	BuildCollisionGroups();
 	BuildWorld();
 	BuildObjects();
 	BuildEnemies();
 }
 
-void GameScene::BuildComponents()
+void GameScene::BuildMeshes()
 {
 	meshPlayer = std::shared_ptr<CMesh>(new CubeMesh(5.0f, 5.0f, 5.0f));
 
 	meshEnemy[0] = std::shared_ptr<CMesh>(new CubeMesh(3.0f, 3.0f, 3.0f));
-
 	meshEnemy[1] = std::shared_ptr<CMesh>(new CubeMesh(4.0f, 3.0f, 8.0f));
 
 	meshPillar = std::shared_ptr<CMesh>(new CubeMesh(2.0f, 6.0f, 2.0f));
-
-
-	myCamera->SetLocalPosition(XMFLOAT3(0.0f, 9.0f, -7.0f));
-	myCamera->SetLookOffset(XMFLOAT3(0.0f, 2.0f, 6.0f));
 }
 
 void GameScene::BuildCollisionGroups()
@@ -105,7 +100,7 @@ void GameScene::BuildWorld()
 		if (!pillar)
 			continue;
 
-		pillar->SetMesh(pillar_mesh);
+		pillar->SetMesh(meshPillar);
 		pillar->SetColor(RGB(110, 30, 30));
 	}
 }
@@ -121,9 +116,11 @@ void GameScene::BuildObjects()
 
 	myCamera->SetFollower(myPlayer.get());
 	myCamera->SetLocalPosition(XMFLOAT3(0.0f, 9.0f, -7.0f));
-	myCamera->SetLookOffset(XMFLOAT3(0.0f, 0.0f, 10.0f));
+	myCamera->SetLookOffset(XMFLOAT3(0.0f, 2.0f, 6.0f));
 
-	auto cube = SpawnEnemy(ENEMY_TYPES::CUBE, XMFLOAT3(40.0f, 0.0f, 60.0f));
+	auto cube1 = SpawnEnemy(ENEMY_TYPES::CUBE, XMFLOAT3(40.0f, 0.0f, 60.0f));
+
+	auto cube2 = SpawnEnemy(ENEMY_TYPES::MANTA, XMFLOAT3(50.0f, 0.0f, 70.0f));
 }
 
 void GameScene::BuildEnemies()

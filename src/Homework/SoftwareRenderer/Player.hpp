@@ -1,7 +1,6 @@
 #pragma once
 #include "stdafx.hpp"
 #include "GameObject.hpp"
-#include "PlayerBullet.hpp"
 
 class Player : public GameObject
 {
@@ -34,5 +33,5 @@ private:
 	float shootDelay;
 	const float shootCooldown = 0.3f;
 
-	std::vector<std::shared_ptr<GameObject>> myBulletPool;
+	std::vector<PlayerBullet*> myBulletPool;
 };

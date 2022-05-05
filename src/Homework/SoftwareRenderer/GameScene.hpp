@@ -41,7 +41,7 @@ public:
 	size_t worldPlayerPositionIndex;
 
 private:
-	void BuildComponents();
+	void BuildMeshes();
 	void BuildCollisionGroups();
 	void BuildWorld();
 	void BuildObjects();

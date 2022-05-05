@@ -67,11 +67,13 @@ class CVertex;
 class CFragment;
 
 class GameFramework;
+class GameTimer;
 class GamePipeline;
 class GameTransform;
 class GameCamera;
 class GameViewport;
 class GameScene;
+class GameMesh;
 class GameCollsionGroup;
 class GameObject;
 
