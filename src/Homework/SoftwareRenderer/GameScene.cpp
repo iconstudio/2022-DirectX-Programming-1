@@ -48,6 +48,20 @@ void GameScene::Start()
 	BuildEnemies();
 }
 
+void GameScene::BuildComponents()
+{
+	auto player_mesh_ptr = new CubeMesh(5.0f, 5.0f, 5.0f);
+	meshPlayer = std::shared_ptr<CMesh>(player_mesh_ptr);
+
+	auto enemy0_mesh_ptr = new CubeMesh(3.0f, 3.0f, 3.0f);
+	meshEnemy[0] = std::shared_ptr<CMesh>(enemy0_mesh_ptr);
+
+	auto enemy1_mesh_ptr = new CubeMesh(4.0f, 3.0f, 8.0f);
+	meshEnemy[1] = std::shared_ptr<CMesh>(enemy1_mesh_ptr);
+
+
+}
+
 void GameScene::BuildCollisionGroups()
 {
 	const auto cgrp_cnt_x = WORLD_H / COLLIDE_AREA_H;
@@ -98,25 +112,16 @@ void GameScene::BuildWorld()
 
 void GameScene::BuildObjects()
 {
-	auto player_mesh_ptr = new CubeMesh(5.0f, 5.0f, 5.0f);
-	auto player_mesh = std::shared_ptr<CMesh>(player_mesh_ptr);
-
 	myPlayer = std::make_shared<Player>(*this);
 	myPlayer->SetHwnd(Window);
 	myPlayer->SetPosition(playerSpawnPoint);
-	myPlayer->SetMesh(player_mesh);
+	myPlayer->SetMesh(meshPlayer);
 	myPlayer->SetColor(RGB(0, 0, 255));
 	myPlayer->SetCamera(myCamera);
 
 	myCamera->SetFollower(myPlayer.get());
 	myCamera->SetLocalPosition(XMFLOAT3(0.0f, 9.0f, -7.0f));
 	myCamera->SetLookOffset(XMFLOAT3(0.0f, 0.0f, 10.0f));
-
-	auto enemy0_mesh_ptr = new CubeMesh(3.0f, 3.0f, 3.0f);
-	meshEnemy[0] = std::shared_ptr<CMesh>(enemy0_mesh_ptr);
-
-	auto enemy1_mesh_ptr = new CubeMesh(4.0f, 3.0f, 8.0f);
-	meshEnemy[1] = std::shared_ptr<CMesh>(enemy1_mesh_ptr);
 
 	auto cube = SpawnEnemy(ENEMY_TYPES::CUBE, XMFLOAT3(40.0f, 0.0f, 60.0f));
 }
