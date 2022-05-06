@@ -172,7 +172,6 @@ LRESULT GameFramework::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 		case WM_MOUSEMOVE:
 		{
 			OnMouse(hwnd, msg, wp, lp);
-
 		}
 		break;
 

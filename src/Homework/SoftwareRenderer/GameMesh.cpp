@@ -34,12 +34,12 @@ bool GameMesh::IsAvailable() const noexcept
 	return bool(myMeshPtr);
 }
 
-const shared_ptr<CMesh>& GameMesh::GetMesh() const
+const shared_ptr<const CMesh>& GameMesh::GetMesh() const
 {
 	return myMeshPtr;
 }
 
-shared_ptr<CMesh>& GameMesh::GetMesh()
+shared_ptr<const CMesh>& GameMesh::GetMesh()
 {
 	return myMeshPtr;
 }
@@ -49,12 +49,17 @@ std::size_t GameMesh::GetPolygonsNumber() const
 	return myMeshPtr->GetPolygonsNumber();
 }
 
-BoundingOrientedBox& GameMesh::GetCollider()
+const BoundingOrientedBox& GameMesh::GetCollider() const
 {
 	return myMeshPtr->GetCollider();
 }
 
-void GameMesh::PrepareRendering(GameScene& scene)
+BoundingOrientedBox& GameMesh::GetCollider()
+{
+	return const_cast<BoundingOrientedBox&>(myMeshPtr->GetCollider());
+}
+
+void GameMesh::PrepareRendering(GameScene& scene) const
 {
 	if (IsAvailable())
 	{

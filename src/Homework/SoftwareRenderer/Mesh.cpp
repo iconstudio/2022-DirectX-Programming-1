@@ -240,7 +240,7 @@ int CMesh::Raycast(XMVECTOR& ray_pos, XMVECTOR& ray_dir, float* out_distance) co
 	return nIntersections;
 }
 
-void CMesh::PrepareRendering(GameScene& scene, COLORREF color)
+void CMesh::PrepareRendering(GameScene& scene, COLORREF color) const
 {
 	for (const auto& frag : myFragments)
 	{

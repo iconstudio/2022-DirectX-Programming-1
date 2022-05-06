@@ -188,7 +188,7 @@ void GameScene::PrepareRendering()
 	GamePipeline::SetProjection(myCamera->projectionPerspective);
 
 	std::for_each(Instances.cbegin(), Instances.cend(), [&](const auto& inst) {
-		//if (myCamera->IsInFrustum(inst->Collider))
+		if (inst->CheckCameraBounds())
 		{
 			inst->PrepareRendering(*this);
 		}
