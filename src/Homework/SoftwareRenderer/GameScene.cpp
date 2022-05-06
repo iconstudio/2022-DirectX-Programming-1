@@ -20,8 +20,9 @@ GameScene::GameScene(GameFramework& framework, size_t sz_x, size_t height, size_
 	, Instances(), staticStart()
 	, collisionAreas(), preparedCollisionAreas(), Fragments()
 	, myPlayer(nullptr), myCamera(nullptr)
-	, meshPlayer(nullptr), meshEnemyCube(nullptr), meshEnemyManta(nullptr)
-	, meshPillar(nullptr), meshRail(nullptr)
+	, meshPlayer(nullptr), meshPlayerBullet(nullptr)
+	, meshEnemyCube(nullptr), meshEnemyManta(nullptr), meshEnemyBullet(nullptr)
+	, meshPillars(), meshRail(nullptr)
 {
 	Fragments.reserve(300);
 	Instances.reserve(300);
@@ -57,11 +58,17 @@ void GameScene::Start()
 void GameScene::BuildMeshes()
 {
 	meshPlayer = static_pointer_cast<CMesh>(make_shared<CubeMesh>(5.0f, 5.0f, 5.0f));
+	meshPlayerBullet = static_pointer_cast<CMesh>(make_shared<CubeMesh>(1.0f, 1.0f, 15.0f));
 
 	meshEnemyCube = static_pointer_cast<CMesh>(make_shared<CubeMesh>(3.0f, 3.0f, 3.0f));
-	meshEnemyManta = static_pointer_cast<CMesh>(make_shared<CubeMesh>(4.0f, 3.0f, 8.0f));
+	meshEnemyManta = static_pointer_cast<CMesh>(make_shared<CubeMesh>(6.0f, 2.0f, 9.0f));
+	meshEnemyBullet = static_pointer_cast<CMesh>(make_shared<CubeMesh>(1.0f, 1.0f, 15.0f));
 
-	meshPillar = static_pointer_cast<CMesh>(make_shared<CubeMesh>(2.0f, 6.0f, 2.0f));
+	for (int i = 0; i < 15; ++i)
+	{
+		meshPillars[i] = static_pointer_cast<CMesh>(make_shared<CubeMesh>(2.0f, 1.0f * i, 2.0f));
+	}
+	meshRail = static_pointer_cast<CMesh>(make_shared<CubeMesh>(1.0f, 1.5f, 10.0f));
 }
 
 void GameScene::BuildCollisionGroups()

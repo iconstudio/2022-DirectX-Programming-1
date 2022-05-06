@@ -35,12 +35,20 @@ public:
 
 	friend class GameCollsionGroup;
 	friend class Player;
+	friend class GameObject;
 
-	// 기준 충돌 영역
-	size_t collisionAreaIndex;
+	// 메쉬
+	shared_ptr<CMesh> meshPlayer;
+	shared_ptr<CMesh> meshPlayerBullet;
+	shared_ptr<CMesh> meshEnemyCube;
+	shared_ptr<CMesh> meshEnemyManta;
+	shared_ptr<CMesh> meshEnemyBullet;
 
-	// 플레이어가 위치한 선로의 번호
-	size_t worldPlayerPositionIndex;
+	// 높이 1부터 15까지의 선로 기둥
+	shared_ptr<CMesh> meshPillars[15];
+
+	// 선로 메쉬
+	shared_ptr<CMesh> meshRail;
 
 private:
 	void BuildMeshes();
@@ -74,6 +82,12 @@ private:
 	// 씬 내의 충돌 영역
 	std::vector<CGroupPtr> collisionAreas;
 
+	// 기준 충돌 영역
+	size_t collisionAreaIndex;
+
+	// 플레이어가 위치한 선로의 번호
+	size_t worldPlayerPositionIndex;
+
 	// 렌더링 할 충돌 영역
 	std::vector<CGroupPtr> preparedCollisionAreas;
 
@@ -83,7 +97,7 @@ private:
 	// 렌더링 용 펜 모음
 	std::unordered_map<COLORREF, HPEN> Pens;
 
-	// 플레이어 객체 (Instances 안에도 있음)
+	// 플레이어 객체
 	shared_ptr<Player> myPlayer;
 
 	// 프레임워크에서 받은 카메라
@@ -92,14 +106,6 @@ private:
 	// 플레이어 생성 위치
 	XMFLOAT3 playerSpawnPoint = XMFLOAT3{ 5.0f, 0.0f, 1.0f };
 
-	// 메쉬
-	shared_ptr<CMesh> meshPlayer;
-	shared_ptr<CMesh> meshPlayerBullet;
-	shared_ptr<CMesh> meshEnemyCube;
-	shared_ptr<CMesh> meshEnemyManta;
-	shared_ptr<CMesh> meshEnemyBullet;
-	shared_ptr<CMesh> meshPillar;
-	shared_ptr<CMesh> meshRail;
 	//std::vector<Pillar> Pillars;
 };
 
