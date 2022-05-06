@@ -11,7 +11,9 @@ PlayerBullet::PlayerBullet(GameScene& scene)
 PlayerBullet::PlayerBullet(GameScene& scene, const XMFLOAT3& pos)
 	: GameObject(scene, pos)
 	, Damage(0.0f)
-{}
+{
+	SetMesh(scene.meshPlayerBullet);
+}
 
 void PlayerBullet::SetDamage(const float value)
 {
