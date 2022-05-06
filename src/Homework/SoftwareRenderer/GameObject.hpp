@@ -32,6 +32,7 @@ public:
 	XMFLOAT3&& GetUp() const;
 	XMFLOAT3&& GetRight() const;
 
+	void Destroy();
 	void Activate();
 	void Diactivate();
 

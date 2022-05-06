@@ -11,6 +11,7 @@ Rail::Rail(GameScene& scene, const XMFLOAT3& pos)
 }
 
 Pillar::Pillar(GameScene& scene, const XMFLOAT3& pos)
+	: GameObject(scene, pos)
 {
 	SetMesh(scene.meshPlayer);
 }

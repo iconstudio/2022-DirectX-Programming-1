@@ -8,4 +8,5 @@ public:
 	EnemyManta(GameScene& scene);
 	EnemyManta(GameScene& scene, const XMFLOAT3& pos);
 
+
 };

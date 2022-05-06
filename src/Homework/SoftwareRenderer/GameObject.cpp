@@ -105,6 +105,9 @@ XMFLOAT3&& GameObject::GetRight() const
 	return Vector3::Normalize(XMFLOAT3(Transform.GetRight()));
 }
 
+void GameObject::Destroy()
+{}
+
 void GameObject::Activate()
 {
 	SetActive(true);

@@ -27,6 +27,8 @@ public:
 	HPEN ReadyPen(COLORREF color);
 	void Render(HDC surface);
 
+	void Kill(GameObject* obj);
+	void Kill(ObjectPtr& obj);
 	Enemy* SpawnEnemy(ENEMY_TYPES type, const XMFLOAT3& pos);
 
 	void OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
