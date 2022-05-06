@@ -90,10 +90,10 @@ void Player::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		case WM_LBUTTONDOWN:
 		{
-			auto&& mat = Transform.GetWorldMatrix();
-			mat._41 = 0;
-			mat._42 = 0;
-			mat._43 = 0;
+			//auto& mat = Transform.GetWorldMatrix();
+			//mat._41 = 0;
+			//mat._42 = 0;
+			//mat._43 = 0;
 
 			//auto bullet = Scene.CreateInstance<PlayerBullet>(GetPosition());
 			//bullet->SetMesh(myMesh.myMeshPtr);
