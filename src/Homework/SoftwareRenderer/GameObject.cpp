@@ -52,6 +52,7 @@ void GameObject::SetStatic(bool flag)
 void GameObject::SetMesh(const shared_ptr<CMesh>& mesh)
 {
 	myMesh.SetMesh(mesh);
+	UpdateBoundingBox();
 }
 
 void GameObject::SetColor(COLORREF color)
@@ -246,7 +247,7 @@ void GameObject::Update(float elapsed_time)
 		}
 	}
 
-	if (0.0f != elapsed_time)
+	if (0.0f != elapsed_time && !isStatic)
 	{
 		UpdateBoundingBox();
 	}
