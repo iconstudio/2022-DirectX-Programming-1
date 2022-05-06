@@ -214,6 +214,7 @@
     <ClCompile Include="PlayerBullet.cpp" />
     <ClCompile Include="RidingPlayer.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="Terrains.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="icon.ico" />

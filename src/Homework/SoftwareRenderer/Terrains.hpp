@@ -1,13 +1,15 @@
 #pragma once
 #include "stdafx.hpp"
+#include "GameObject.hpp"
 
-class Rail
+class Rail : public GameObject
 {
 public:
+	Rail(GameScene& scene, const XMFLOAT3& pos);
 };
 
-class Pillar
+class Pillar : public GameObject
 {
 public:
-	GameMesh myMesh;
+	Pillar(GameScene& scene, const XMFLOAT3& pos);
 };
