@@ -180,10 +180,6 @@ void GameScene::Update(float elapsed_time)
 		auto& instance = *it;
 
 		instance->Update(elapsed_time);
-		//if (instance->Collider.Intersects(Collider))
-		{
-
-		}
 	}
 }
 
@@ -191,11 +187,10 @@ void GameScene::PrepareRendering()
 {
 	GamePipeline::SetProjection(myCamera->projectionPerspective);
 
-	std::for_each(collisionAreas.cbegin(), collisionAreas.cend(), [&](const auto& group) {
-		if (myCamera->IsInFrustum(group->Collider))
+	std::for_each(Instances.cbegin(), Instances.cend(), [&](const auto& inst) {
+		//if (myCamera->IsInFrustum(inst->Collider))
 		{
-			//preparedCollisionAreas.push_back(group);
-			group->PrepareRendering();
+			inst->PrepareRendering(*this);
 		}
 	});
 
