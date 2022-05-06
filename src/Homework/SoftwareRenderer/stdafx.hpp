@@ -78,7 +78,6 @@ class GameCamera;
 class GameViewport;
 class GameScene;
 class GameMesh;
-class GameCollsionGroup;
 class GameObject;
 
 class Player;

@@ -9,7 +9,6 @@
 #include "PlayerBullet.hpp"
 
 using ObjectPtr = shared_ptr<GameObject>;
-using CGroupPtr = shared_ptr<GameCollsionGroup>;
 
 class GameScene
 {
@@ -54,13 +53,9 @@ public:
 
 private:
 	void BuildMeshes();
-	void BuildCollisionGroups();
 	void BuildWorld();
 	void BuildObjects();
 	void CompleteBuilds();
-
-	CGroupPtr CreateCollisionGroup();
-	CGroupPtr FindProperGroup(const XMFLOAT3& position);
 
 	template<class Type>
 	Type* CreateInstance(float x, float y, float z);
@@ -81,17 +76,11 @@ private:
 	std::vector<ObjectPtr> Instances;
 	std::vector<ObjectPtr>::iterator staticStart;
 
-	// 씬 내의 충돌 영역
-	std::vector<CGroupPtr> collisionAreas;
-
 	// 기준 충돌 영역
 	size_t collisionAreaIndex;
 
 	// 플레이어가 위치한 선로의 번호
 	size_t worldPlayerPositionIndex;
-
-	// 렌더링 할 충돌 영역
-	std::vector<CGroupPtr> preparedCollisionAreas;
 
 	// 렌더링 할 조각
 	std::vector<CFragment> Fragments;
@@ -109,31 +98,4 @@ private:
 	XMFLOAT3 playerSpawnPoint = XMFLOAT3{ 5.0f, 0.0f, 1.0f };
 
 	//std::vector<Pillar> Pillars;
-};
-
-class GameCollsionGroup
-{
-public:
-	GameCollsionGroup(GameScene& scene, const size_t index, size_t sz_x, size_t height, size_t sz_z);
-
-	void SetPosition(XMFLOAT3&& position);
-
-	void AddInstance(ObjectPtr& ptr);
-
-	void Update(float elapsed_time);
-	void PrepareRendering();
-	void Render(HDC surface) const;
-
-	bool Contains(const XMFLOAT3& point);
-
-	friend class GameScene;
-
-private:
-	GameScene& Scene;
-	const size_t Index;
-
-	BoundingBox Collider;
-
-	std::vector<ObjectPtr> Instances;
-	std::vector<ObjectPtr> Existers;
 };

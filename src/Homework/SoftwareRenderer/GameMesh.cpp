@@ -39,7 +39,7 @@ const shared_ptr<const CMesh>& GameMesh::GetMesh() const
 	return myMeshPtr;
 }
 
-shared_ptr<const CMesh>& GameMesh::GetMesh()
+shared_ptr<CMesh>& GameMesh::GetMesh()
 {
 	return myMeshPtr;
 }
@@ -56,7 +56,7 @@ const BoundingOrientedBox& GameMesh::GetCollider() const
 
 BoundingOrientedBox& GameMesh::GetCollider()
 {
-	return const_cast<BoundingOrientedBox&>(myMeshPtr->GetCollider());
+	return myMeshPtr->GetCollider();
 }
 
 void GameMesh::PrepareRendering(GameScene& scene) const

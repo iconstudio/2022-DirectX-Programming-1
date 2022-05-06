@@ -16,7 +16,7 @@ public:
 	bool IsAvailable() const noexcept;
 
 	const shared_ptr<const CMesh>& GetMesh() const;
-	shared_ptr<const CMesh>& GetMesh();
+	shared_ptr<CMesh>& GetMesh();
 	std::size_t GetPolygonsNumber() const;
 	const BoundingOrientedBox& GetCollider() const;
 	BoundingOrientedBox& GetCollider();
@@ -25,7 +25,7 @@ public:
 	void Render(HDC surface) const;
 	void RenderByFragments(HDC surface) const;
 
-	shared_ptr<const CMesh> myMeshPtr;
+	shared_ptr<CMesh> myMeshPtr;
 
 	COLORREF myColour;
 	HPEN myPen;
