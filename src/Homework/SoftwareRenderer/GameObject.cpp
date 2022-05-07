@@ -15,7 +15,7 @@ GameObject::GameObject(GameScene& scene)
 	, Direction(XMFLOAT3(0.0f, 0.0f, 0.0f)), Speed(0.0f), Friction(0.0f)
 {}
 
-GameObject::GameObject(GameScene & scene, float x, float y, float z)
+GameObject::GameObject(GameScene& scene, float x, float y, float z)
 	: GameObject(scene)
 {
 	SetPosition(x, y, z);
@@ -52,9 +52,6 @@ void GameObject::SetStatic(bool flag)
 void GameObject::SetMesh(const shared_ptr<CMesh>& mesh)
 {
 	myMesh.SetMesh(mesh);
-
-	Collider = mesh->GetCollider();
-	//UpdateBoundingBox();
 }
 
 void GameObject::SetColor(COLORREF color)
@@ -280,14 +277,7 @@ void GameObject::Render(HDC surface) const
 
 bool GameObject::CheckCameraBounds() const
 {
-	if (Camera)
-	{
-		if (Camera->IsInFrustum(Collider))
-		{
-			return true;
-		}
-	}
-	return false;
+	return Camera && Camera->IsInFrustum(Collider);
 }
 
 void GameObject::UpdateBoundingBox()
@@ -296,8 +286,9 @@ void GameObject::UpdateBoundingBox()
 	{
 		const auto& mat = Transform.GetWorldMatrix();
 		const auto float4x4 = DirectX::XMLoadFloat4x4(&mat);
-		auto& collider = myMesh.GetCollider();
-		collider.Transform(collider, float4x4);
+
+		const auto& original_collider = myMesh.GetCollider();
+		original_collider.Transform(Collider, float4x4);
 
 		const auto orientation = DirectX::XMLoadFloat4(&Collider.Orientation);
 		const auto quaternion = DirectX::XMQuaternionNormalize(orientation);
