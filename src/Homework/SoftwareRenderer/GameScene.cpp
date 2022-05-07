@@ -176,17 +176,17 @@ void GameScene::PrepareRendering()
 	GamePipeline::SetProjection(myCamera->projectionPerspective);
 
 	std::for_each(Instances.cbegin(), Instances.cend(), [&](const auto& inst) {
-		//if (inst->CheckCameraBounds())
+		if (inst->CheckCameraBounds())
 		{
 			inst->PrepareRendering(*this);
-			PrepareRenderingCollider(inst->Collider);
+			//PrepareRenderingCollider(inst->Collider);
 		}
 	});
 
 	if (myPlayer)
 	{
 		myPlayer->PrepareRendering(*this);
-		PrepareRenderingCollider(myCamera->StaticCollider);
+		//PrepareRenderingCollider(myCamera->StaticCollider);
 		//PrepareRenderingCollider(myCamera->Collider);
 	}
 
