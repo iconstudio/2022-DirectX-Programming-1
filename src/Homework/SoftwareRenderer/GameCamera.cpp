@@ -88,23 +88,19 @@ void GameCamera::Update(float fTimeElapsed)
 {
 	if (Follower)
 	{
-		auto& transform = Follower->Transform;
+		auto& fwlTransform = Follower->Transform;
 
-		const auto& fwlWorld = transform.GetWorldMatrix();
-		const auto fwlRight = XMFLOAT3(transform.myRight);
-		const auto fwlUp = XMFLOAT3(transform.myUp);
-		const auto fwlLook = XMFLOAT3(transform.myLook);
-		const auto fwlPosition = XMFLOAT3(transform.myPosition);
+		const auto& fwlWorld = fwlTransform.GetWorldMatrix();
+		const auto fwlRight = XMFLOAT3(fwlTransform.myRight);
+		const auto fwlUp = XMFLOAT3(fwlTransform.myUp);
+		const auto fwlLook = XMFLOAT3(fwlTransform.myLook);
+		const auto fwlPosition = XMFLOAT3(fwlTransform.myPosition);
 
 		// 팔로워 기준으로 회전만 시키는 행렬
-		XMFLOAT4X4 fwlRot = Matrix4x4::Identity();
-
-		// 1열
-		fwlRot._11 = fwlRight.x; fwlRot._12 = fwlRight.y; fwlRot._13 = fwlRight.z;
-		// 2열
-		fwlRot._21 = fwlUp.x; fwlRot._22 = fwlUp.y; fwlRot._23 = fwlUp.z;
-		// 3열
-		fwlRot._31 = fwlLook.x; fwlRot._32 = fwlLook.y; fwlRot._33 = fwlLook.z;
+		XMFLOAT4X4 fwlRot = fwlWorld;
+		fwlRot._41 = 0;
+		fwlRot._42 = 0;
+		fwlRot._43 = 0;
 
 		const auto&& myPosition = XMFLOAT3(Transform.GetPosition());
 
@@ -129,7 +125,6 @@ void GameCamera::Update(float fTimeElapsed)
 			float time_lag_scale = fTimeElapsed * (1.0f / 0.1f);
 			float move_distane = move_far * time_lag_scale;
 
-			// 문제 발생!
 			if (move_distane < EPSILON)
 				move_distane = 0.0f;
 			else if (move_far < move_distane)
@@ -148,15 +143,14 @@ void GameCamera::Update(float fTimeElapsed)
 
 void GameCamera::GenerateViewMatrix()
 {
-	const auto myRight = XMFLOAT3(Transform.GetRight());
-	const auto myUp = XMFLOAT3(Transform.GetUp());
-	const auto myLook = XMFLOAT3(Transform.GetLook());
-
-	Transform.myRight = Vector3::Normalize(myRight);
-	Transform.myUp = Vector3::Normalize(myUp);
-	Transform.myLook = Vector3::Normalize(myLook);
-
+	auto& myRight = Transform.GetRight();
+	auto& myUp = Transform.GetUp();
+	auto& myLook = Transform.GetLook();
 	auto myPosition = XMFLOAT3(Transform.GetPosition());
+
+	Transform.myRight = Vector3::Normalize(XMFLOAT3(myRight));
+	Transform.myUp = Vector3::Normalize(XMFLOAT3(myUp));
+	Transform.myLook = Vector3::Normalize(XMFLOAT3(myLook));
 
 	// 카메라를 위한 카메라 변환 행렬
 	// 1행
@@ -175,9 +169,9 @@ void GameCamera::GenerateViewMatrix()
 	projectionView._33 = myLook.z;
 
 	// 4행
-	projectionView._41 = -Vector3::DotProduct(myPosition, myRight);
-	projectionView._42 = -Vector3::DotProduct(myPosition, myUp);
-	projectionView._43 = -Vector3::DotProduct(myPosition, myLook);
+	projectionView._41 = -Vector3::DotProduct(myPosition, XMFLOAT3(myRight));
+	projectionView._42 = -Vector3::DotProduct(myPosition, XMFLOAT3(myUp));
+	projectionView._43 = -Vector3::DotProduct(myPosition, XMFLOAT3(myLook));
 
 	// 원근 투영 행렬
 	projectionPerspective = Matrix4x4::Multiply(projectionView, m_xmf4x4PerspectiveProject);

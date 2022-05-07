@@ -153,31 +153,31 @@ struct std::less<CLocalFragment>
 class XYZWrapper
 {
 public:
-	XYZWrapper(float& x, float& y, float& z) : X(x), Y(y), Z(z) {}
+	XYZWrapper(float& x, float& y, float& z) : x(x), y(y), z(z) {}
 
 	XYZWrapper& operator=(float list[3])
 	{
-		X = list[0];
-		Y = list[1];
-		Z = list[2];
+		x = list[0];
+		y = list[1];
+		z = list[2];
 		return *this;
 	}
 	XYZWrapper& operator=(const XMFLOAT3& vector)
 	{
-		X = vector.x;
-		Y = vector.y;
-		Z = vector.z;
+		x = vector.x;
+		y = vector.y;
+		z = vector.z;
 		return *this;
 	}
 
 	explicit operator XMFLOAT3() const noexcept
 	{
-		return std::move(XMFLOAT3(X, Y, Z));
+		return std::move(XMFLOAT3(x, y, z));
 	}
 
-	float& X;
-	float& Y;
-	float& Z;
+	float& x;
+	float& y;
+	float& z;
 };
 
 inline float Clamp(float value, float min, float max)

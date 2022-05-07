@@ -16,9 +16,9 @@ GameTransform::GameTransform()
 
 void GameTransform::SetPosition(float x, float y, float z)
 {
-	myPosition.X = x;
-	myPosition.Y = y;
-	myPosition.Z = z;
+	myPosition.x = x;
+	myPosition.y = y;
+	myPosition.z = z;
 }
 
 void GameTransform::SetPosition(const XMFLOAT3& pos)
@@ -28,45 +28,45 @@ void GameTransform::SetPosition(const XMFLOAT3& pos)
 
 void GameTransform::SetPosition(XMFLOAT3&& pos)
 {
-	myPosition.X = pos.x;
-	myPosition.Y = pos.y;
-	myPosition.Z = pos.z;
+	myPosition.x = pos.x;
+	myPosition.y = pos.y;
+	myPosition.z = pos.z;
 }
 
 void GameTransform::SetRotation(const XMFLOAT4X4& tfrm)
 {
-	myRight.X = tfrm._11;
-	myRight.Y = tfrm._12;
-	myRight.Z = tfrm._13;
+	myRight.x = tfrm._11;
+	myRight.y = tfrm._12;
+	myRight.z = tfrm._13;
 
-	myUp.X = tfrm._21;
-	myUp.Y = tfrm._22;
-	myUp.Z = tfrm._23;
+	myUp.x = tfrm._21;
+	myUp.y = tfrm._22;
+	myUp.z = tfrm._23;
 
-	myLook.X = tfrm._31;
-	myLook.Y = tfrm._32;
-	myLook.Z = tfrm._33;
+	myLook.x = tfrm._31;
+	myLook.y = tfrm._32;
+	myLook.z = tfrm._33;
 }
 
 void GameTransform::Translate(float x, float y, float z)
 {
-	myPosition.X += x;
-	myPosition.Y += y;
-	myPosition.Z += z;
+	myPosition.x += x;
+	myPosition.y += y;
+	myPosition.z += z;
 }
 
 void GameTransform::Translate(const XMFLOAT3& shift)
 {
-	myPosition.X += shift.x;
-	myPosition.Y += shift.y;
-	myPosition.Z += shift.z;
+	myPosition.x += shift.x;
+	myPosition.y += shift.y;
+	myPosition.z += shift.z;
 }
 
 void GameTransform::Translate(XMFLOAT3&& shift)
 {
-	myPosition.X += shift.x;
-	myPosition.Y += shift.y;
-	myPosition.Z += shift.z;
+	myPosition.x += shift.x;
+	myPosition.y += shift.y;
+	myPosition.z += shift.z;
 }
 
 void GameTransform::Move(const XMFLOAT3& dir, float distance)
@@ -96,17 +96,17 @@ void GameTransform::MoveForward(float distance)
 
 void GameTransform::Rotate(const XMFLOAT4X4& tfrm)
 {
-	myRight.X += tfrm._11;
-	myRight.Y += tfrm._12;
-	myRight.Z += tfrm._13;
+	myRight.x += tfrm._11;
+	myRight.y += tfrm._12;
+	myRight.z += tfrm._13;
 
-	myUp.X += tfrm._21;
-	myUp.Y += tfrm._22;
-	myUp.Z += tfrm._23;
+	myUp.x += tfrm._21;
+	myUp.y += tfrm._22;
+	myUp.z += tfrm._23;
 
-	myLook.X += tfrm._31;
-	myLook.Y += tfrm._32;
-	myLook.Z += tfrm._33;
+	myLook.x += tfrm._31;
+	myLook.y += tfrm._32;
+	myLook.z += tfrm._33;
 }
 
 void GameTransform::Rotate(float pitch, float yaw, float roll)
