@@ -237,8 +237,8 @@ void CMesh::PrepareRendering(GameScene& scene, COLORREF color) const
 		const auto& start = frag.start;
 		const auto& dest = frag.dest;
 
-		const auto vtx_from = GamePipeline::ProjectTransform(start);
-		const auto vtx_to = GamePipeline::ProjectTransform(dest);
+		const auto vtx_from = GamePipeline::WorldProjectTransform(start);
+		const auto vtx_to = GamePipeline::WorldProjectTransform(dest);
 
 		const auto inside_from = CheckProjection(vtx_from.x, vtx_from.y);
 		const auto inside_to = CheckProjection(vtx_to.x, vtx_to.y);
@@ -263,7 +263,7 @@ void CMesh::Render(HDC surface) const
 
 		if (0 == sz) continue;
 
-		const XMFLOAT3 vtx_first = GamePipeline::ProjectTransform(vertices.at(0).Position);
+		const XMFLOAT3 vtx_first = GamePipeline::WorldProjectTransform(vertices.at(0).Position);
 		is_inside_first = CheckProjection(vtx_first.x, vtx_first.y);
 
 		XMFLOAT3 vtx_last = vtx_first;
@@ -272,7 +272,7 @@ void CMesh::Render(HDC surface) const
 		for (UINT i = 1; i < sz; ++i)
 		{
 			const auto& vertex = vertices.at(i);
-			const XMFLOAT3 vtx_it = GamePipeline::ProjectTransform(vertex.Position);
+			const XMFLOAT3 vtx_it = GamePipeline::WorldProjectTransform(vertex.Position);
 			is_inside_it = CheckProjection(vtx_it.x, vtx_it.y);
 
 			if (CheckDepth(vtx_it.z) && (is_inside_it || is_inside_last))
@@ -295,8 +295,8 @@ void CMesh::RenderByFragments(HDC surface) const
 {
 	for (const auto& frag : myFragments)
 	{
-		const auto vtx_from = GamePipeline::ProjectTransform(frag.start);
-		const auto vtx_to = GamePipeline::ProjectTransform(frag.dest);
+		const auto vtx_from = GamePipeline::WorldProjectTransform(frag.start);
+		const auto vtx_to = GamePipeline::WorldProjectTransform(frag.dest);
 
 		const auto inside_from = CheckProjection(vtx_from.x, vtx_from.y);
 		const auto inside_to = CheckProjection(vtx_to.x, vtx_to.y);
