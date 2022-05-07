@@ -6,11 +6,12 @@ class GamePipeline
 public:
 	static void SetWorldTransform(const XMFLOAT4X4& world);
 	static void SetProjection(const XMFLOAT4X4& projection);
-	static void SetViewport(const GameViewport& pViewport);
+	static void SetViewport(const GameViewport& viewport);
 
-	static XMFLOAT3 ScreenTransform(const XMFLOAT3& xmf3Project);
-	static XMFLOAT3 ProjectTransform(const XMFLOAT3& xmf3Model);
-	static XMFLOAT3 Transform(const XMFLOAT3& xmf3Model);
+	static XMFLOAT3 ScreenTransform(const XMFLOAT3& pos_project);
+	static XMFLOAT3 ProjectTransform(const XMFLOAT3& pos_model);
+	static XMFLOAT3 WorldProjectTransform(const XMFLOAT3& pos_model);
+	static XMFLOAT3 Transform(const XMFLOAT3& pos_model);
 
 private:
 	static XMFLOAT4X4 matrixWorld;
