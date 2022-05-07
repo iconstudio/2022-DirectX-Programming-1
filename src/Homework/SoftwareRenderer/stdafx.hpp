@@ -65,6 +65,16 @@ template <typename T> constexpr auto DegreeToRadian(T x)
 	return float(x * PI / 180.0f);
 }
 
+inline bool CheckProjection(const float prj_x, const float prj_y)
+{
+	return -1.0f <= prj_x && prj_x <= 1.0f && -1.0f <= prj_y && prj_y <= 1.0f;
+}
+
+inline bool CheckDepth(const float prj_z)
+{
+	return 0.0f <= prj_z && prj_z <= 1.0f;
+}
+
 class CMesh;
 class CPolygon;
 class CVertex;

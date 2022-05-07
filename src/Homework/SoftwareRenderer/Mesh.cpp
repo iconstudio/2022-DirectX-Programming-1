@@ -158,16 +158,6 @@ BoundingOrientedBox& CMesh::GetCollider()
 	return Collider;
 }
 
-bool CMesh::CheckProjection(const float prj_x, const float prj_y) const
-{
-	return -1.0f <= prj_x && prj_x <= 1.0f && -1.0f <= prj_y && prj_y <= 1.0f;
-}
-
-bool CMesh::CheckDepth(const float prj_z) const
-{
-	return 0.0f <= prj_z && prj_z <= 1.0f;
-}
-
 BOOL CMesh::RayIntersectionByTriangle(XMVECTOR& ray_pos, XMVECTOR& ray_dir, XMVECTOR v0, XMVECTOR v1, XMVECTOR v2, float* out_distance) const
 {
 	float fHitDistance;

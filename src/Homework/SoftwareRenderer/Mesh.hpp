@@ -31,8 +31,6 @@ protected:
 	void BuildFragments();
 	void TryAddFragment(const size_t vertex_id);
 
-	bool CheckProjection(const float prj_x, const float prj_y) const;
-	bool CheckDepth(const float prj_z) const;
 	BOOL RayIntersectionByTriangle(XMVECTOR& ray, XMVECTOR& ray_dir, XMVECTOR v0, XMVECTOR v1, XMVECTOR v2, float* out_distance) const;
 	int Raycast(XMVECTOR& ray, XMVECTOR& ray_dir, float* out_distance) const;
 
