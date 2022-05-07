@@ -180,25 +180,10 @@ void GameCamera::GenerateViewMatrix()
 	projectionOrthographic = Matrix4x4::Multiply(projectionView, m_xmf4x4ViewOrthographicProject);
 
 	// 카메라를 위한 월드 변환 행렬
-	// 카메라를 월드 위치로 옮긴다.
-	// 1행
-	m_xmf4x4InverseView._11 = myRight.x;
-	m_xmf4x4InverseView._12 = myRight.y;
-	m_xmf4x4InverseView._13 = myRight.z;
+	// 충돌체를 월드 위치로 옮긴다.
+	const auto& world_mat = Transform.GetWorldMatrix();
 
-	m_xmf4x4InverseView._21 = myUp.x;
-	m_xmf4x4InverseView._22 = myUp.y;
-	m_xmf4x4InverseView._23 = myUp.z;
-
-	m_xmf4x4InverseView._31 = myLook.x;
-	m_xmf4x4InverseView._32 = myLook.y;
-	m_xmf4x4InverseView._33 = myLook.z;
-
-	m_xmf4x4InverseView._41 = myPosition.x;
-	m_xmf4x4InverseView._42 = myPosition.y;
-	m_xmf4x4InverseView._43 = myPosition.z;
-
-	StaticCollider.Transform(Collider, XMLoadFloat4x4(&m_xmf4x4InverseView));
+	StaticCollider.Transform(Collider, XMLoadFloat4x4(&world_mat));
 }
 
 void GameCamera::LookAt(const XMFLOAT3 pos, const XMFLOAT3 look, const XMFLOAT3 up)
