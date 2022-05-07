@@ -16,6 +16,7 @@ void GameViewport::Set(int nLeft, int nTop, int nWidth, int nHeight)
 GameCamera::GameCamera()
 	: Transform(), localPosition(), lookOffset()
 	, Follower(nullptr)
+	, StaticCollider(), Collider()
 	, m_Viewport()
 {
 	Transform.myRight = GameTransform::Right;

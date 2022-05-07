@@ -67,11 +67,11 @@ public:
 	XMFLOAT4X4 m_xmf4x4ViewOrthographicProject = Matrix4x4::Identity();
 	XMFLOAT4X4 projectionOrthographic = Matrix4x4::Identity();
 
-private:
 	BoundingFrustum	StaticCollider;
 	BoundingFrustum	Collider;
 
-	float m_fFOVAngle = 90.0f;
+private:
+	float m_fFOVAngle = 60.0f;
 	float m_fProjectRectDistance = 1.0f;
 	float m_fAspectRatio = float(FRAMEBUFFER_WIDTH) / float(FRAMEBUFFER_HEIGHT);
 

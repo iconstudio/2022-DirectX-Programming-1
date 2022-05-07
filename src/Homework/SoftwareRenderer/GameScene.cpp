@@ -187,6 +187,102 @@ void GameScene::PrepareRendering()
 		myPlayer->PrepareRendering(*this);
 	}
 
+	const auto& frustrum = myCamera->Collider;
+	XMFLOAT3* corners = new XMFLOAT3[frustrum.CORNER_COUNT + 1];
+	frustrum.GetCorners(corners);
+	corners[frustrum.CORNER_COUNT] = corners[0];
+
+	int j = 0;
+	for (int i = 0; i <= 4; ++i)
+	{
+		if (4 == i)
+			j = 0;
+		else
+			j = i;
+
+		const auto vtx_from = GamePipeline::ProjectTransform(corners[j]);
+		const auto vtx_to = GamePipeline::ProjectTransform(corners[j + 1]);
+
+		const auto inside_from = CheckProjection(vtx_from.x, vtx_from.y);
+		const auto inside_to = CheckProjection(vtx_to.x, vtx_to.y);
+
+		if ((CheckDepth(vtx_from.z) || CheckDepth(vtx_to.z))
+			&& (inside_from || inside_to))
+		{
+			AddFragment(CFragment{ vtx_from, vtx_to, RGB(128, 128, 128)});
+		}
+	}
+	
+	j = 0;
+	for (int i = 4; i <= 8; ++i)
+	{
+		if (8 == i)
+			j = 4;
+		else
+			j = i;
+
+		const auto vtx_from = GamePipeline::ProjectTransform(corners[j]);
+		const auto vtx_to = GamePipeline::ProjectTransform(corners[j + 1]);
+
+		const auto inside_from = CheckProjection(vtx_from.x, vtx_from.y);
+		const auto inside_to = CheckProjection(vtx_to.x, vtx_to.y);
+
+		if ((CheckDepth(vtx_from.z) || CheckDepth(vtx_to.z))
+			&& (inside_from || inside_to))
+		{
+			AddFragment(CFragment{ vtx_from, vtx_to, RGB(128, 128, 128) });
+		}
+	}
+	delete[] corners;
+
+	const auto& frustrum2 = myCamera->StaticCollider;
+	corners = new XMFLOAT3[frustrum2.CORNER_COUNT + 1];
+	frustrum2.GetCorners(corners);
+	corners[frustrum2.CORNER_COUNT] = corners[0];
+
+	j = 0;
+	for (int i = 0; i <= 4; ++i)
+	{
+		if (4 == i)
+			j = 0;
+		else
+			j = i;
+
+		const auto vtx_from = GamePipeline::ProjectTransform(corners[j]);
+		const auto vtx_to = GamePipeline::ProjectTransform(corners[j + 1]);
+
+		const auto inside_from = CheckProjection(vtx_from.x, vtx_from.y);
+		const auto inside_to = CheckProjection(vtx_to.x, vtx_to.y);
+
+		if ((CheckDepth(vtx_from.z) || CheckDepth(vtx_to.z))
+			&& (inside_from || inside_to))
+		{
+			AddFragment(CFragment{ vtx_from, vtx_to, RGB(128, 80, 80) });
+		}
+	}
+
+	j = 0;
+	for (int i = 4; i <= 8; ++i)
+	{
+		if (8 == i)
+			j = 4;
+		else
+			j = i;
+
+		const auto vtx_from = GamePipeline::ProjectTransform(corners[j]);
+		const auto vtx_to = GamePipeline::ProjectTransform(corners[j + 1]);
+
+		const auto inside_from = CheckProjection(vtx_from.x, vtx_from.y);
+		const auto inside_to = CheckProjection(vtx_to.x, vtx_to.y);
+
+		if ((CheckDepth(vtx_from.z) || CheckDepth(vtx_to.z))
+			&& (inside_from || inside_to))
+		{
+			AddFragment(CFragment{ vtx_from, vtx_to, RGB(128, 80, 80) });
+		}
+	}
+	delete[] corners;
+
 	std::sort(Fragments.begin(), Fragments.end()
 		, [](const CFragment& lhs, const CFragment& rhs) {
 		return (rhs.start.z < lhs.start.z) && (rhs.dest.z < lhs.dest.z);
