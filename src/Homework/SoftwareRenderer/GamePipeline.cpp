@@ -20,7 +20,7 @@ void GamePipeline::SetProjection(const XMFLOAT4X4& projection)
 
 void GamePipeline::SetViewport(const GameViewport& viewport)
 {
-	Viewport = pViewport;
+	Viewport = viewport;
 }
 
 XMFLOAT3 GamePipeline::Transform(const XMFLOAT3& pos_model)
