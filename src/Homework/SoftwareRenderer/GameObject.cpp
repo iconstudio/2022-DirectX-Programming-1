@@ -52,6 +52,8 @@ void GameObject::SetStatic(bool flag)
 void GameObject::SetMesh(const shared_ptr<CMesh>& mesh)
 {
 	myMesh.SetMesh(mesh);
+
+	Collider = mesh->GetCollider();
 	//UpdateBoundingBox();
 }
 
