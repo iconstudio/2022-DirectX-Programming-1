@@ -22,9 +22,13 @@ public:
 	void Start();
 	void Update(float elapsed_time);
 	void PrepareRendering();
+	void Render(HDC surface);
+
 	void AddFragment(const CFragment& fragment);
 	HPEN ReadyPen(COLORREF color);
-	void Render(HDC surface);
+	void PrepareRenderingCollider(const BoundingBox& collider);
+	void PrepareRenderingCollider(const BoundingOrientedBox& collider);
+	void PrepareRenderingCollider(const BoundingFrustum& collider);
 
 	void Kill(GameObject* obj);
 	void Kill(ObjectPtr& obj);

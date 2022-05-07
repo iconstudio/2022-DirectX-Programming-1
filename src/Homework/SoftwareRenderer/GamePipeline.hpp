@@ -25,3 +25,8 @@ inline void DrawSide(HDC surface, const XMFLOAT3& pos1, const XMFLOAT3& pos2)
 	auto to = GamePipeline::ScreenTransform(pos2);
 	DrawLine(surface, int(from.x), int(from.y), int(to.x), int(to.y));
 }
+
+inline void DrawSceenSide(HDC surface, const XMFLOAT3& from, const XMFLOAT3& to)
+{
+	DrawLine(surface, int(from.x), int(from.y), int(to.x), int(to.y));
+}
