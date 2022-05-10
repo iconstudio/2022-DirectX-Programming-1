@@ -96,6 +96,12 @@
     <ClInclude Include="PlaneMesh.hpp">
       <Filter>헤더 파일\Components</Filter>
     </ClInclude>
+    <ClInclude Include="GameStaticObject.hpp">
+      <Filter>헤더 파일\System</Filter>
+    </ClInclude>
+    <ClInclude Include="GameEntity.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -161,8 +167,14 @@
     <ClCompile Include="Terrains.cpp">
       <Filter>소스 파일\Components</Filter>
     </ClCompile>
+    <ClCompile Include="GameStaticObject.cpp">
+      <Filter>소스 파일\System</Filter>
+    </ClCompile>
+    <ClCompile Include="GameEntity.cpp">
+      <Filter>소스 파일\System</Filter>
+    </ClCompile>
     <ClCompile Include="PlaneMesh.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

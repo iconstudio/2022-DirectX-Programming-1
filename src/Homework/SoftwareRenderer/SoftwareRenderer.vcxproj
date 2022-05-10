@@ -178,10 +178,12 @@
     <ClInclude Include="Fragment.hpp" />
     <ClInclude Include="CubeMesh.hpp" />
     <ClInclude Include="GameCamera.hpp" />
+    <ClInclude Include="GameEntity.hpp" />
     <ClInclude Include="GameFramework.hpp" />
     <ClInclude Include="GameMesh.hpp" />
     <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="GamePipeline.hpp" />
+    <ClInclude Include="GameStaticObject.hpp" />
     <ClInclude Include="GameTimer.hpp" />
     <ClInclude Include="GameTransform.hpp" />
     <ClInclude Include="Main.hpp" />
@@ -203,10 +205,12 @@
     <ClCompile Include="Fragment.cpp" />
     <ClCompile Include="CubeMesh.cpp" />
     <ClCompile Include="GameCamera.cpp" />
+    <ClCompile Include="GameEntity.cpp" />
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="GameMesh.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GamePipeline.cpp" />
+    <ClCompile Include="GameStaticObject.cpp" />
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="GameTransform.cpp" />
     <ClCompile Include="Main.cpp" />

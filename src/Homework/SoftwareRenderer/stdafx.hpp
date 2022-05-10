@@ -49,14 +49,18 @@ class CPolygon;
 class CVertex;
 class CFragment;
 
-class GameFramework;
 class GameTimer;
+class GameFramework;
+class GameScene;
+
 class GamePipeline;
-class GameTransform;
 class GameCamera;
 class GameViewport;
-class GameScene;
+
+class GameTransform;
 class GameMesh;
+class GameEntity;
+class GameStaticObject;
 class GameObject;
 
 class Player;

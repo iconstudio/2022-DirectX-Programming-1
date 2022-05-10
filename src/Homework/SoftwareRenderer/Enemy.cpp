@@ -5,12 +5,12 @@
 #include "CubeMesh.hpp"
 #include "Player.hpp"
 
-Enemy::Enemy(GameScene& scene)
-	: Enemy(scene, XMFLOAT3(0, 0, 0))
+Enemy::Enemy()
+	: Enemy(XMFLOAT3(0, 0, 0))
 {}
 
-Enemy::Enemy(GameScene& scene, const XMFLOAT3& pos)
-	: GameObject(scene, pos)
+Enemy::Enemy(const XMFLOAT3& pos)
+	: GameObject(pos)
 	, Human(nullptr)
 	, myHealth(1), maxHealth(1), isDead(false)
 	, Waypoint(pos), patrolDistance(200.0f), isPatrolling(false)

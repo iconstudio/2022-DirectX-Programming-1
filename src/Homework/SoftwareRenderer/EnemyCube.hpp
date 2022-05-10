@@ -5,6 +5,6 @@
 class EnemyCube : public Enemy
 {
 public:
-	EnemyCube(GameScene& scene);
-	EnemyCube(GameScene& scene, const XMFLOAT3& pos);
+	EnemyCube();
+	EnemyCube(const XMFLOAT3& pos);
 };

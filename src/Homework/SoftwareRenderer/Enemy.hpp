@@ -5,8 +5,8 @@
 class Enemy : public GameObject
 {
 public:
-	Enemy(GameScene& scene);
-	Enemy(GameScene& scene, const XMFLOAT3& pos);
+	Enemy();
+	Enemy(const XMFLOAT3& pos);
 
 	void InitHealth(float max_health);
 	void SetHealth(float value);

@@ -1,10 +1,11 @@
 #include "stdafx.hpp"
 #include "GameScene.hpp"
 #include "GameFramework.hpp"
+#include "GameCamera.hpp"
 #include "GamePipeline.hpp"
+#include "GameEntity.hpp"
 #include "GameObject.hpp"
 #include "GameMesh.hpp"
-#include "GameCamera.hpp"
 #include "Mesh.hpp"
 #include "Fragment.hpp"
 #include "Player.hpp"
@@ -88,10 +89,10 @@ void GameScene::BuildWorld()
 	{
 		for (int k = 0; k < boundary_cnt_x; ++k)
 		{
-			cx = k * COLLIDE_AREA_H - COLLIDE_AREA_H * 0.5;
-			cz = i * COLLIDE_AREA_U - COLLIDE_AREA_U * 0.5;
+			cx = k * COLLIDE_AREA_H - COLLIDE_AREA_H * 0.5f;
+			cz = i * COLLIDE_AREA_U - COLLIDE_AREA_U * 0.5f;
 
-			auto floor = CreateInstance<GameObject>(k * 50, 0, i * 20);
+			auto floor = CreateInstance<GameObject>(k * 50.0f, 0.0f, i * 20.0f);
 			floor->isStatic = true;
 			floor->SetMesh(meshFloor);
 			floor->SetColor(0);
@@ -255,6 +256,11 @@ void GameScene::Render(HDC surface)
 	Fragments.clear();
 }
 
+bool GameScene::CheckView(const ObjectPtr& obj) const
+{
+	return myCamera->IsInFrustum(obj->Collider);
+}
+
 void GameScene::AddFragment(const CFragment& fragment)
 {
 	Fragments.push_back(fragment);
@@ -357,10 +363,10 @@ Type* GameScene::CreateInstance(const XMFLOAT3& position)
 template<class Type>
 Type* GameScene::CreateInstance(XMFLOAT3&& position)
 {
-	auto inst = new Type(*this);
+	auto inst = new Type();
 	if (inst)
 	{
-		inst->SetPosition(position);
+		inst->SetPosition(std::forward<XMFLOAT3>(position));
 		inst->SetCamera(myCamera);
 
 		Instances.push_back(ObjectPtr(inst));

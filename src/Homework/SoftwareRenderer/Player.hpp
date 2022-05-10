@@ -6,10 +6,11 @@
 class Player : public GameObject
 {
 public:
-	Player(GameScene& scene);
+	Player();
 	virtual ~Player();
 
 	void SetHwnd(HWND hwnd);
+	void SetCamera(shared_ptr<GameCamera>& cam);
 
 	void AddBullet(PlayerBullet* bullet);
 	void ReturnBullet(PlayerBullet* bullet);
@@ -36,6 +37,8 @@ private:
 	POINT Cursor;
 	DWORD Orientation;
 	bool focused;
+
+	shared_ptr<GameCamera> Camera;
 
 	float shootDelay;
 	const float shootCooldown;

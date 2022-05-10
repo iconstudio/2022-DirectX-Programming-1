@@ -4,14 +4,14 @@
 #include "GameScene.hpp"
 #include "GameMesh.hpp"
 
-Rail::Rail(GameScene& scene)
-	: GameObject(scene)
+Rail::Rail()
+	: GameObject()
 {
 	isStatic = true;
 }
 
-Pillar::Pillar(GameScene& scene)
-	: GameObject(scene)
+Pillar::Pillar()
+	: GameObject()
 	, myHeight(0.0f), myBottom(), myTop()
 	, nodeBefore(nullptr), nodeNext(nullptr)
 	, distBefore(0.0f), distNext(0.0f)

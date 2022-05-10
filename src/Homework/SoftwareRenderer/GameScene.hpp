@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.hpp"
 #include "GameCamera.hpp"
+#include "GameEntity.hpp"
 #include "GameObject.hpp"
 #include "GameMesh.hpp"
 #include "Mesh.hpp"
@@ -9,7 +10,6 @@
 #include "PlayerBullet.hpp"
 #include "CubeMesh.hpp"
 #include "Terrains.hpp"
-#include <array>
 
 using ObjectPtr = shared_ptr<GameObject>;
 
@@ -27,6 +27,7 @@ public:
 	void PrepareRendering();
 	void Render(HDC surface);
 
+	bool CheckView(const ObjectPtr& obj) const;
 	void AddFragment(const CFragment& fragment);
 	HPEN ReadyPen(COLORREF color);
 	void PrepareRenderingCollider(const BoundingOrientedBox& collider);
@@ -43,20 +44,6 @@ public:
 	friend class GameCollsionGroup;
 	friend class Player;
 	friend class GameObject;
-
-	// 메쉬
-	shared_ptr<CMesh> meshPlayer;
-	shared_ptr<CMesh> meshPlayerBullet;
-	shared_ptr<CMesh> meshEnemyCube;
-	shared_ptr<CMesh> meshEnemyManta;
-	shared_ptr<CMesh> meshEnemyBullet;
-
-	// 경계 메쉬
-	shared_ptr<CMesh> meshFloor, meshSide;
-	// 높이 1부터 15까지의 선로 기둥
-	shared_ptr<CMesh> meshPillars[15];
-	// 선로 메쉬
-	shared_ptr<CMesh> meshRail;
 
 private:
 	void BuildMeshes();
@@ -78,6 +65,20 @@ private:
 
 	// 프레임워크
 	GameFramework& Framework;
+
+	// 플레이어의 메쉬
+	shared_ptr<CMesh> meshPlayer;
+	shared_ptr<CMesh> meshPlayerBullet;
+	shared_ptr<CMesh> meshEnemyCube;
+	shared_ptr<CMesh> meshEnemyManta;
+	shared_ptr<CMesh> meshEnemyBullet;
+
+	// 경계 메쉬
+	shared_ptr<CMesh> meshFloor, meshSide;
+	// 높이 1부터 15까지의 선로 기둥
+	shared_ptr<CMesh> meshPillars[15];
+	// 선로 메쉬
+	shared_ptr<CMesh> meshRail;
 
 	// 씬 내의 모든 인스턴스
 	std::vector<ObjectPtr> Instances;

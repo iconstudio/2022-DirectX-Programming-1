@@ -1,34 +1,32 @@
 #include "stdafx.hpp"
 #include "GameObject.hpp"
-#include "GameScene.hpp"
-#include "GamePipeline.hpp"
-#include "GameCamera.hpp"
-#include "GameTransform.hpp"
-#include "GameMesh.hpp"
-#include "Fragment.hpp"
-#include "Mesh.hpp"
 
-GameObject::GameObject(GameScene& scene)
-	: Scene(scene), Camera(nullptr)
-	, isActivated(true), isStatic(false)
-	, myMesh(), Transform(), Collider(), transformModified(false)
+GameObject::GameObject()
+	: GameEntity()
+	, transformModified(false)
 	, Direction(XMFLOAT3(0.0f, 0.0f, 0.0f)), Speed(0.0f), Friction(0.0f)
 {}
 
-GameObject::GameObject(GameScene& scene, float x, float y, float z)
-	: GameObject(scene)
+GameObject::GameObject(float x, float y, float z)
+	: GameObject()
 {
 	SetPosition(x, y, z);
 }
 
-GameObject::GameObject(GameScene& scene, const XMFLOAT3& position)
-	: GameObject(scene)
+GameObject::GameObject(float list[3])
+	: GameObject()
+{
+	SetPosition(list[0], list[1], list[2]);
+}
+
+GameObject::GameObject(const XMFLOAT3& position)
+	: GameObject()
 {
 	SetPosition(position);
 }
 
-GameObject::GameObject(GameScene& scene, XMFLOAT3&& position)
-	: GameObject(scene)
+GameObject::GameObject(XMFLOAT3&& position)
+	: GameObject()
 {
 	SetPosition(position);
 }
@@ -36,50 +34,21 @@ GameObject::GameObject(GameScene& scene, XMFLOAT3&& position)
 GameObject::~GameObject()
 {}
 
-void GameObject::SetActive(bool flag)
-{
-	isActivated = flag;
-	if (flag)
-	{
-		UpdateBoundingBox();
-	}
-}
-
-void GameObject::SetStatic(bool flag)
-{
-	isStatic = flag;
-}
-
-void GameObject::SetMesh(const shared_ptr<CMesh>& mesh)
-{
-	myMesh.SetMesh(mesh);
-	OnUpdateTransform();
-}
-
-void GameObject::SetColor(COLORREF color)
-{
-	myMesh.SetColor(color);
-}
-
-void GameObject::SetCamera(shared_ptr<GameCamera>& cam)
-{
-	Camera = cam;
-}
-
 void GameObject::SetWorldMatrix(XMFLOAT4X4&& tfrm)
 {
-	Transform.SetWorldMatrix(std::forward<XMFLOAT4X4>(tfrm));
+	GameEntity::SetWorldMatrix(std::forward<XMFLOAT4X4>(tfrm));
+	OnUpdateTransform();
 }
 
 void GameObject::SetWorldMatrix(const XMFLOAT4X4& tfrm)
 {
-	Transform.SetWorldMatrix(tfrm);
+	GameEntity::SetWorldMatrix(tfrm);
 	OnUpdateTransform();
 }
 
 void GameObject::SetPosition(float x, float y, float z)
 {
-	Transform.SetPosition(x, y, z);
+	GameEntity::SetPosition(x, y, z);
 	OnUpdateTransform();
 }
 
@@ -90,110 +59,72 @@ void GameObject::SetPosition(const XMFLOAT3& pos)
 
 void GameObject::SetPosition(XMFLOAT3&& pos)
 {
-	Transform.SetPosition(std::forward<XMFLOAT3>(pos));
+	GameEntity::SetPosition(std::forward<XMFLOAT3>(pos));
 	OnUpdateTransform();
 }
 
 void GameObject::SetRotation(const XMFLOAT4X4& tfrm)
 {
-	Transform.SetRotation(tfrm);
+	GameEntity::SetRotation(tfrm);
 	OnUpdateTransform();
 }
 
 void GameObject::AddPosition(XMFLOAT3&& vector)
 {
-	Transform.Translate(vector);
+	GameEntity::AddPosition(std::forward<XMFLOAT3>(vector));
 	OnUpdateTransform();
 }
 
-bool GameObject::IsActivated() const
+constexpr bool GameObject::IsStatic() const
 {
-	return isActivated;
-}
-
-bool GameObject::IsStatic() const
-{
-	return isStatic;
-}
-
-XMFLOAT3&& GameObject::GetPosition() const
-{
-	return std::move(XMFLOAT3(Transform.GetPosition()));
-}
-
-XMFLOAT3&& GameObject::GetRight() const
-{
-	return Vector3::Normalize(XMFLOAT3(Transform.GetRight()));
-}
-
-void GameObject::Destroy()
-{}
-
-void GameObject::Activate()
-{
-	SetActive(true);
-}
-
-void GameObject::Deactivate()
-{
-	SetActive(false);
-}
-
-XMFLOAT3&& GameObject::GetUp() const
-{
-	return Vector3::Normalize(XMFLOAT3(Transform.GetUp()));
-}
-
-XMFLOAT3&& GameObject::GetLook() const
-{
-	return Vector3::Normalize(XMFLOAT3(Transform.GetLook()));
+	return true;
 }
 
 void GameObject::Move(const XMFLOAT3& dir, float distance)
 {
-	Transform.Move(dir, distance);
+	GameEntity::Move(dir, distance);
 	OnUpdateTransform();
 }
 
 void GameObject::MoveStrafe(float distance)
 {
-	Transform.MoveStrafe(distance);
+	GameEntity::MoveStrafe(distance);
 	OnUpdateTransform();
 }
 
 void GameObject::MoveUp(float distance)
 {
-	Transform.MoveUp(distance);
+	GameEntity::MoveUp(distance);
 	OnUpdateTransform();
 }
 
 void GameObject::MoveForward(float distance)
 {
-	Transform.MoveForward(distance);
+	GameEntity::MoveForward(distance);
 	OnUpdateTransform();
 }
 
 void GameObject::Rotate(float pitch, float yaw, float roll)
 {
-	Transform.Rotate(pitch, yaw, roll);
+	GameEntity::Rotate(pitch, yaw, roll);
 	OnUpdateTransform();
 }
 
 void GameObject::Rotate(const XMFLOAT3& axis, float angle)
 {
-	Transform.Rotate(axis, angle);
+	GameEntity::Rotate(axis, angle);
 	OnUpdateTransform();
 }
 
 void GameObject::LookTo(XMFLOAT3& to, XMFLOAT3& up)
 {
-	Transform.LookTo(to, up);
+	GameEntity::LookTo(to, up);
 	OnUpdateTransform();
 }
 
 void GameObject::LookAt(XMFLOAT3& from, XMFLOAT3& up)
 {
-	Transform.LookAt(from, up);
+	GameEntity::LookAt(from, up);
 	OnUpdateTransform();
 }
 
@@ -204,7 +135,7 @@ void GameObject::SetVelocity(const XMFLOAT3& vector)
 
 void GameObject::SetVelocity(XMFLOAT3&& vector)
 {
-	auto&& vel = std::forward<XMFLOAT3>(vector);
+	const XMFLOAT3 vel = std::forward<XMFLOAT3>(vector);
 	Direction = Vector3::Normalize(vel);
 	Speed = Vector3::Length(vel);
 }
@@ -286,47 +217,6 @@ void GameObject::Update(float elapsed_time)
 			UpdateBoundingBox();
 			transformModified = false;
 		}
-	}
-}
-
-void GameObject::PrepareRendering(GameScene& scene) const
-{
-	if (myMesh.IsAvailable())
-	{
-		GamePipeline::SetWorldTransform(Transform.GetWorldMatrix());
-
-		myMesh.PrepareRendering(scene);
-	}
-}
-
-void GameObject::Render(HDC surface) const
-{
-	if (myMesh.IsAvailable())
-	{
-		GamePipeline::SetWorldTransform(Transform.GetWorldMatrix());
-
-		myMesh.RenderByFragments(surface);
-	}
-}
-
-bool GameObject::CheckCameraBounds() const
-{
-	return Camera && Camera->IsInFrustum(Collider);
-}
-
-void GameObject::UpdateBoundingBox()
-{
-	if (myMesh.IsAvailable())
-	{
-		const auto& mat = Transform.GetWorldMatrix();
-		const auto float4x4 = DirectX::XMLoadFloat4x4(&mat);
-
-		const auto& original_collider = myMesh.GetCollider();
-		original_collider.Transform(Collider, float4x4);
-
-		const auto orientation = DirectX::XMLoadFloat4(&Collider.Orientation);
-		const auto quaternion = DirectX::XMQuaternionNormalize(orientation);
-		DirectX::XMStoreFloat4(&Collider.Orientation, quaternion);
 	}
 }
 

@@ -1,89 +1,56 @@
 #pragma once
 #include "stdafx.hpp"
-#include "GameTransform.hpp"
-#include "GameMesh.hpp"
+#include "GameEntity.hpp"
 
-class GameObject
+class GameObject : public GameEntity
 {
 public:
-	GameObject(const GameObject&) = default;
-	GameObject(GameObject&&) = default;
-	GameObject(GameScene& scene);
-	GameObject(GameScene& scene, float x, float y, float z);
-	GameObject(GameScene& scene, const XMFLOAT3& position);
-	GameObject(GameScene& scene, XMFLOAT3&& position);
+	GameObject();
+	GameObject(float x, float y, float z);
+	GameObject(float list[3]);
+	GameObject(const XMFLOAT3& position);
+	GameObject(XMFLOAT3&& position);
 	virtual ~GameObject();
 
-	void SetActive(bool flag);
-	void SetStatic(bool flag);
-	void SetMesh(const shared_ptr<CMesh>& mesh);
-	void SetColor(COLORREF color);
-	void SetCamera(shared_ptr<GameCamera>& cam);
+	constexpr bool IsStatic() const override;
 
-	void SetWorldMatrix(const XMFLOAT4X4& tfrm);
-	void SetWorldMatrix(XMFLOAT4X4&& tfrm);
-	void SetPosition(float x, float y, float z);
-	void SetPosition(const XMFLOAT3& pos);
-	void SetPosition(XMFLOAT3&& pos);
-	void SetRotation(const XMFLOAT4X4& tfrm);
-	void AddPosition(XMFLOAT3&& vector);
+	virtual void SetWorldMatrix(const XMFLOAT4X4& tfrm) override;
+	virtual void SetWorldMatrix(XMFLOAT4X4&& tfrm) override;
+	virtual void SetPosition(float x, float y, float z) override;
+	virtual void SetPosition(const XMFLOAT3& pos) override;
+	virtual void SetPosition(XMFLOAT3&& pos) override;
+	virtual void SetRotation(const XMFLOAT4X4& tfrm) override;
+	virtual void LookTo(XMFLOAT3& to, XMFLOAT3& up);
+	virtual void LookAt(XMFLOAT3& from, XMFLOAT3& up);
 
-	bool IsActivated() const;
-	bool IsStatic() const;
-	XMFLOAT3&& GetPosition() const;
-	XMFLOAT3&& GetLook() const;
-	XMFLOAT3&& GetUp() const;
-	XMFLOAT3&& GetRight() const;
-
-	void Destroy();
-	void Activate();
-	void Deactivate();
-
-	virtual void Move(const XMFLOAT3& vDirection, float distance);
-	virtual void MoveStrafe(float distance);
-	virtual void MoveUp(float distance);
-	virtual void MoveForward(float distance);
-	virtual void Rotate(float fPitch, float fYaw, float fRoll);
+	virtual void AddPosition(XMFLOAT3&& vector) override;
+	void Move(const XMFLOAT3& vDirection, float distance);
+	void MoveStrafe(float distance);
+	void MoveUp(float distance);
+	void MoveForward(float distance);
+	virtual void Rotate(float pitch, float yaw, float roll);
 	virtual void Rotate(const XMFLOAT3& axis, float angle);
-
-	void LookTo(XMFLOAT3& to, XMFLOAT3& up);
-	void LookAt(XMFLOAT3& from, XMFLOAT3& up);
 
 	void SetVelocity(const XMFLOAT3& vector);
 	void SetVelocity(XMFLOAT3&& vector);
 	void SetDirection(const XMFLOAT3& direction);
 	void SetDirection(XMFLOAT3&& direction);
 	void SetSpeed(const float value);
-	void AddSpeed(const float value, const float max);
-	void AddSpeed(const float value);
-
-	float GetSpeed() const;
-
 	void SetRotationAxis(const XMFLOAT3& axis);
 	void SetRotationAxis(XMFLOAT3&& axis);
 	void SetRotationSpeed(float speed);
+	float GetSpeed() const;
+
+	void AddSpeed(const float value, const float max);
+	void AddSpeed(const float value);
 
 	virtual void Update(float elapsed_time);
-	virtual void PrepareRendering(GameScene& scene) const;
-	virtual void Render(HDC surface) const;
-
-	virtual bool CheckCameraBounds() const;
-	virtual void UpdateBoundingBox();
 
 	void CreateRay(XMVECTOR& pick_pos, XMMATRIX& view, XMVECTOR& ray_pos, XMVECTOR& ray_dir);
 	int Raycast(XMVECTOR& pick_pos, XMMATRIX& view, float* max_distance);
 
 	inline void OnUpdateTransform();
 
-	GameScene& Scene;
-	shared_ptr<GameCamera> Camera;
-
-	bool isActivated;
-	bool isStatic;
-
-	GameMesh myMesh;
-	GameTransform Transform;
-	BoundingOrientedBox Collider;
 	bool transformModified;
 
 	XMFLOAT3 Direction;

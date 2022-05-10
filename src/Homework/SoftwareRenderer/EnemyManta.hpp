@@ -5,8 +5,6 @@
 class EnemyManta : public Enemy
 {
 public:
-	EnemyManta(GameScene& scene);
-	EnemyManta(GameScene& scene, const XMFLOAT3& pos);
-
-
+	EnemyManta();
+	EnemyManta(const XMFLOAT3& pos);
 };
