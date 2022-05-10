@@ -12,12 +12,15 @@
 #include "Enemy.hpp"
 #include "EnemyCube.hpp"
 #include "EnemyManta.hpp"
+#include "Terrains.hpp"
 #include "CubeMesh.hpp"
 
-GameScene::GameScene(GameFramework& framework, size_t sz_x, size_t height, size_t sz_y)
+GameScene::GameScene(GameFramework& framework, int sz_x, int height, int sz_y)
 	: Framework(framework), Window(NULL)
-	, collisionAreaIndex(0), worldPlayerPositionIndex(0)
+	, collisionAreaIndex(0), worldPlayerPositionIndex(0), worldPlayerPosition(0.0f)
 	, worldBoundary{ -sz_x / 2, -sz_y / 2, sz_x / 2, sz_y / 2 }
+	, myWorldMesh(sz_x, height, sz_y)
+	, globalMatrix(Matrix4x4::Identity())
 	, Instances(), staticBound(), Fragments()
 	, myPlayer(nullptr), myCamera(nullptr)
 	, meshPlayer(nullptr), meshPlayerBullet(nullptr)
@@ -82,9 +85,10 @@ void GameScene::BuildWorld()
 		place.y = 0.0f;
 		place.z = WORLD_U * 0.05f + i * pillar_place_z_gap;
 
-		auto pillar = CreateInstance<GameObject>(place);
+		auto pillar = CreateInstance<Pillar>(place);
 		if (!pillar)
 			continue;
+
 
 		pillar->SetMesh(meshPillars[int(i) % 16]);
 		pillar->SetColor(RGB(110, 30, 30));
@@ -179,6 +183,8 @@ void GameScene::PrepareRendering()
 {
 	GamePipeline::SetProjection(myCamera->projectionPerspective);
 
+	PrepareRenderingWorld();
+
 	std::for_each(Instances.cbegin(), Instances.cend(), [&](const auto& inst) {
 		if (inst->CheckCameraBounds())
 		{
@@ -202,7 +208,8 @@ void GameScene::PrepareRendering()
 
 void GameScene::PrepareRenderingWorld()
 {
-
+	GamePipeline::SetWorldTransform(globalMatrix);
+	myWorldMesh.PrepareRenderingUnchecked(*this, 0);
 }
 
 void GameScene::Render(HDC surface)
@@ -302,9 +309,12 @@ void GameScene::PrepareRenderingCollider(const BoundingFrustum& collider)
 		const auto inside_to = CheckProjection(vtx_to.x, vtx_to.y);
 		const auto inside_far = CheckProjection(vtx_far.x, vtx_far.y);
 
-		AddFragment(CFragment{ vtx_from, vtx_to, RGB(128, 128, 128) });
-		AddFragment(CFragment{ vtx_from, vtx_far, RGB(128, 128, 128) });
-		AddFragment(CFragment{ vtx_to, vtx_far, RGB(128, 128, 128) });
+		if (inside_from && inside_to)
+			AddFragment(CFragment{ vtx_from, vtx_to, RGB(128, 128, 128) });
+		if (inside_from && inside_far)
+			AddFragment(CFragment{ vtx_from, vtx_far, RGB(128, 128, 128) });
+		if (inside_to && inside_far)
+			AddFragment(CFragment{ vtx_to, vtx_far, RGB(128, 128, 128) });
 	}
 }
 
@@ -366,6 +376,11 @@ void GameScene::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	switch (msg)
 	{
 		case WM_KEYDOWN:
+		{
+
+		}
+		break;
+
 		case WM_KEYUP:
 		{
 		}
