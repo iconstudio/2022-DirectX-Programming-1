@@ -104,6 +104,12 @@ void GameScene::BuildObjects()
 	myPlayer->SetColor(RGB(0, 0, 255));
 	myPlayer->SetCamera(myCamera);
 
+	const auto count = myPlayer->myBulletMax;
+	for (int i = 0; i < count; ++i)
+	{
+		myPlayer->AddBullet(CreateInstance<PlayerBullet>(playerSpawnPoint));
+	}
+
 	myCamera->SetFollower(myPlayer.get());
 	myCamera->SetLocalPosition(XMFLOAT3(0.0f, 9.0f, -7.0f));
 	myCamera->SetLookOffset(XMFLOAT3(0.0f, 2.0f, 6.0f));
