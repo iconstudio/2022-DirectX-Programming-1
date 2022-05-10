@@ -12,13 +12,16 @@ Rail::Rail(GameScene& scene)
 
 Pillar::Pillar(GameScene& scene)
 	: GameObject(scene)
+	, myHeight(0.0f), myBottom(), myTop()
+	, nodeBefore(nullptr), nodeNext(nullptr)
+	, distBefore(0.0f), distNext(0.0f)
 {
 	SetMesh(scene.meshPlayer);
 }
 
 void Pillar::SetHeight(float height)
 {
-	myheight = height;
+	myHeight = height;
 
 	auto& pos = Transform.GetPosition();
 	pos.y = height * 0.5f;

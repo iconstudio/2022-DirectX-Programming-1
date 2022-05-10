@@ -17,7 +17,7 @@ public:
 	void SetBefore(Pillar* before);
 	void SetNext(Pillar* next);
 
-	float myheight;
+	float myHeight;
 	XMFLOAT3 myBottom, myTop;
 
 	Pillar* nodeBefore, *nodeNext;
