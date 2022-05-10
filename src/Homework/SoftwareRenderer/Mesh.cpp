@@ -26,20 +26,6 @@ CMesh::CMesh(const size_t number_polygons)
 CMesh::~CMesh()
 {}
 
-void CMesh::AddRef()
-{
-	m_nReferences++;
-}
-
-void CMesh::Release()
-{
-	m_nReferences--;
-	if (m_nReferences <= 0)
-	{
-		delete this;
-	}
-}
-
 void CMesh::BuildLocalFragment(const CPolygon& poly)
 {
 	const auto& Vertices = poly.Vertices;

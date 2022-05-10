@@ -8,9 +8,6 @@ public:
 	CMesh(const size_t number_polygons);
 	~CMesh();
 
-	void AddRef();
-	void Release();
-
 	void Set(const size_t index, const CPolygon& poly);
 	void Set(const size_t index, CPolygon&& poly);
 	void Push(const CPolygon& poly);
