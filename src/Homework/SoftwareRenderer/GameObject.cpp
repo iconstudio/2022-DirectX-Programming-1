@@ -270,7 +270,7 @@ void GameObject::Update(float elapsed_time)
 	}
 }
 
-void GameObject::PrepareRendering(GameScene& scene)
+void GameObject::PrepareRendering(GameScene& scene) const
 {
 	if (myMesh.IsAvailable())
 	{

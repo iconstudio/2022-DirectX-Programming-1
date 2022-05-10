@@ -64,7 +64,7 @@ public:
 	void SetRotationSpeed(float speed);
 
 	virtual void Update(float elapsed_time);
-	virtual void PrepareRendering(GameScene& scene);
+	virtual void PrepareRendering(GameScene& scene) const;
 	virtual void Render(HDC surface) const;
 
 	virtual bool CheckCameraBounds() const;
