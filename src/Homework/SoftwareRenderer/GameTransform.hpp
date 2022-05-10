@@ -17,6 +17,7 @@ public:
 	const XYZWrapper& GetLook() const;
 	const XYZWrapper& GetPosition() const;
 
+	void SetWorldMatrix(const XMFLOAT4X4& mat);
 	void SetPosition(float x, float y, float z);
 	void SetPosition(const XMFLOAT3& pos);
 	void SetPosition(XMFLOAT3&& pos);

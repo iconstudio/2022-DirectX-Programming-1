@@ -14,6 +14,11 @@ GameTransform::GameTransform()
 	myLook = GameTransform::Forward;
 }
 
+void GameTransform::SetWorldMatrix(const XMFLOAT4X4& mat)
+{
+	World = mat;
+}
+
 void GameTransform::SetPosition(float x, float y, float z)
 {
 	myPosition.x = x;
