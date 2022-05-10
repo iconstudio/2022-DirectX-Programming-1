@@ -23,10 +23,10 @@ void Pillar::SetHeight(float height)
 {
 	myHeight = height;
 
-	auto& pos = Transform.GetPosition();
-	pos.y = height * 0.5f;
+	//auto& pos = Transform.GetPosition();
+	//pos.y = height * 0.5f;
 
-	auto field = pos;
+	auto field = Transform.GetPosition();
 	field.y += height * 0.5f;
 	myTop = XMFLOAT3(field);
 
