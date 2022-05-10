@@ -22,6 +22,11 @@ void PlayerBullet::SetDamage(const float value)
 	myDamage = value;
 }
 
+void PlayerBullet::Ready()
+{
+	myLifetime = myDuration;
+}
+
 void PlayerBullet::SetParent(Player* parent)
 {
 	myParent = parent;

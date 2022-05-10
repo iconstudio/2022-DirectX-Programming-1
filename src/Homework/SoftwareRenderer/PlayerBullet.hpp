@@ -8,8 +8,10 @@ public:
 	PlayerBullet(GameScene& scene);
 	PlayerBullet(GameScene& scene, const XMFLOAT3& pos);
 	
-	void SetDamage(const float value);
 	void SetParent(Player* parent);
+	void SetDamage(const float value);
+
+	void Ready();
 
 	virtual void Update(float elapsed_time);
 

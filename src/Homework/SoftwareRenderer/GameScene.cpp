@@ -60,21 +60,21 @@ void GameScene::Start()
 
 void GameScene::BuildMeshes()
 {
-	meshPlayer = static_pointer_cast<CMesh>(make_shared<CubeMesh>(5.0f, 5.0f, 5.0f));
-	meshPlayerBullet = static_pointer_cast<CMesh>(make_shared<CubeMesh>(1.0f, 1.0f, 15.0f));
+	meshPlayer = static_pointer_cast<CMesh>(make_shared<CubeMesh>(5, 5, 5));
+	meshPlayerBullet = static_pointer_cast<CMesh>(make_shared<CubeMesh>(2, 2, 10));
 
-	meshEnemyCube = static_pointer_cast<CMesh>(make_shared<CubeMesh>(3.0f, 3.0f, 3.0f));
-	meshEnemyManta = static_pointer_cast<CMesh>(make_shared<CubeMesh>(6.0f, 2.0f, 9.0f));
-	meshEnemyBullet = static_pointer_cast<CMesh>(make_shared<CubeMesh>(1.0f, 1.0f, 15.0f));
+	meshEnemyCube = static_pointer_cast<CMesh>(make_shared<CubeMesh>(3, 3, 3));
+	meshEnemyManta = static_pointer_cast<CMesh>(make_shared<CubeMesh>(6, 2, 9));
+	meshEnemyBullet = static_pointer_cast<CMesh>(make_shared<CubeMesh>(1, 1, 10));
 
 	meshFloor = static_pointer_cast<CMesh>(make_shared<PlaneMesh>(COLLIDE_AREA_H, COLLIDE_AREA_U));
 	meshSide = static_pointer_cast<CMesh>(make_shared<PlaneMesh>(COLLIDE_AREA_U, COLLIDE_AREA_V));
 
 	for (int i = 0; i < 15; ++i)
 	{
-		meshPillars[i] = static_pointer_cast<CMesh>(make_shared<CubeMesh>(2.0f, 1.0f * i, 2.0f));
+		meshPillars[i] = static_pointer_cast<CMesh>(make_shared<CubeMesh>(2, i, 2.0f));
 	}
-	meshRail = static_pointer_cast<CMesh>(make_shared<CubeMesh>(1.0f, 1.5f, 10.0f));
+	meshRail = static_pointer_cast<CMesh>(make_shared<CubeMesh>(1, 1.5f, 10));
 }
 
 void GameScene::BuildWorld()
@@ -128,6 +128,9 @@ void GameScene::BuildObjects()
 	{
 		auto bullet = CreateInstance<PlayerBullet>(playerSpawnPoint);
 		bullet->SetMesh(meshPlayerBullet);
+		bullet->SetColor(0);
+		bullet->SetDamage(3.0f);
+
 		myPlayer->AddBullet(bullet);
 	}
 

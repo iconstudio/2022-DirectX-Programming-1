@@ -20,6 +20,8 @@ public:
 	void SetColor(COLORREF color);
 	void SetCamera(shared_ptr<GameCamera>& cam);
 
+	void SetWorldMatrix(const XMFLOAT4X4& tfrm);
+	void SetWorldMatrix(XMFLOAT4X4&& tfrm);
 	void SetPosition(float x, float y, float z);
 	void SetPosition(const XMFLOAT3& pos);
 	void SetPosition(XMFLOAT3&& pos);

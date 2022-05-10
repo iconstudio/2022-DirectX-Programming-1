@@ -64,6 +64,16 @@ void GameObject::SetCamera(shared_ptr<GameCamera>& cam)
 	Camera = cam;
 }
 
+void GameObject::SetWorldMatrix(const XMFLOAT4X4& tfrm)
+{
+	Transform.SetWorldMatrix(tfrm);
+}
+
+void GameObject::SetWorldMatrix(XMFLOAT4X4&& tfrm)
+{
+	Transform.SetWorldMatrix(std::forward<XMFLOAT4X4>(tfrm));
+}
+
 void GameObject::SetPosition(float x, float y, float z)
 {
 	Transform.SetPosition(x, y, z);

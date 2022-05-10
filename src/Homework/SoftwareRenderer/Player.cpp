@@ -117,11 +117,12 @@ void Player::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				auto bullet = FindLastBullet();
 				if (bullet)
 				{
-					auto mat = Transform.GetWorldMatrix();
-
-					Transform.SetWorldMatrix(mat);
+					bullet->Activate();
+					bullet->SetWorldMatrix(Transform.GetWorldMatrix());
 					bullet->SetMesh(myMesh.myMeshPtr);
-					bullet->SetSpeed(4.0f);
+					bullet->SetDirection(XMFLOAT3(Transform.GetLook()));
+					bullet->SetSpeed(1.0f);
+					bullet->Ready();
 
 					shootDelay = shootCooldown;
 					myBulletShooted++;
