@@ -20,7 +20,7 @@ GameScene::GameScene(GameFramework& framework, int sz_x, int height, int sz_y)
 	: Framework(framework), Window(NULL)
 	, collisionAreaIndex(0), worldPlayerPositionIndex(0), worldPlayerPosition(0.0f)
 	, worldBoundary{ -sz_x / 2, -sz_y / 2, sz_x / 2, sz_y / 2 }
-	, myWorldMesh(sz_x, height, sz_y)
+	, myWorldMesh()
 	, globalMatrix(Matrix4x4::Identity())
 	, Instances(), staticBound(), Fragments()
 	, myPlayer(nullptr), myCamera(nullptr)
@@ -67,6 +67,9 @@ void GameScene::BuildMeshes()
 	meshEnemyManta = static_pointer_cast<CMesh>(make_shared<CubeMesh>(6.0f, 2.0f, 9.0f));
 	meshEnemyBullet = static_pointer_cast<CMesh>(make_shared<CubeMesh>(1.0f, 1.0f, 15.0f));
 
+	meshFloor = static_pointer_cast<CMesh>(make_shared<PlaneMesh>(COLLIDE_AREA_H, COLLIDE_AREA_U));
+	meshSide = static_pointer_cast<CMesh>(make_shared<PlaneMesh>(COLLIDE_AREA_U, COLLIDE_AREA_V));
+
 	for (int i = 0; i < 15; ++i)
 	{
 		meshPillars[i] = static_pointer_cast<CMesh>(make_shared<CubeMesh>(2.0f, 1.0f * i, 2.0f));
@@ -76,23 +79,37 @@ void GameScene::BuildMeshes()
 
 void GameScene::BuildWorld()
 {
-	constexpr float pillar_count = 40.0f; // 40U
-	constexpr float pillar_place_z_gap = (WORLD_U * 0.9f) / pillar_count;
+	constexpr int boundary_cnt_x = WORLD_H / COLLIDE_AREA_H;
+	constexpr int boundary_cnt_y = WORLD_V / COLLIDE_AREA_V;
+	constexpr int boundary_cnt_z = WORLD_U / COLLIDE_AREA_U;
+
+	float cx, cz;
+	for (int i = 0; i < boundary_cnt_z; ++i)
+	{
+		for (int k = 0; k < boundary_cnt_x; ++k)
+		{
+			cx = k * COLLIDE_AREA_H - COLLIDE_AREA_H * 0.5;
+			cz = i * COLLIDE_AREA_U - COLLIDE_AREA_U * 0.5;
+
+			auto floor = CreateInstance<GameObject>(k * 50, 0, i * 20);
+			floor->isStatic = true;
+			floor->SetMesh(meshFloor);
+			floor->SetColor(0);
+		}
+	}
+
+	//constexpr float pillar_count = 40.0f;
+	constexpr float pillar_place_z_gap = 8.0f;
 	XMFLOAT3 place{};
 
-	for (float i = 0.0f; i < pillar_count; i++)
+	for (float i = 0.0f; i < 100; i++)
 	{
-		place.x = 0.5f * WORLD_H + std::cos(1.0f + i / PI) * 5.0f;
-		place.y = 0.0f;
-		place.z = WORLD_U * 0.05f + i * pillar_place_z_gap;
+		place.x = pillarStartPoint.x + std::cos(1.0f + i / PI) * 5.0f;
+		place.y = pillarStartPoint.y;
+		place.z = pillarStartPoint.z + i * pillar_place_z_gap;
 
 		auto pillar = CreateInstance<Pillar>(place);
-		if (!pillar)
-		{
-			throw "기둥 생성 오류!";
-		}
-
-		pillar->SetMesh(meshPillars[int(i) % 16]);
+		pillar->SetMesh(meshPillars[int(i) % 15]);
 		pillar->SetColor(RGB(110, 30, 30));
 	}
 }
@@ -130,6 +147,11 @@ void GameScene::CompleteBuilds()
 {
 	if (1 < Instances.size())
 	{
+		for (auto& inst : Instances)
+		{
+			inst->UpdateBoundingBox();
+		}
+
 		auto it = std::stable_partition(Instances.begin(), Instances.end()
 			, [](const ObjectPtr& obj) -> bool {
 			return obj->IsStatic();
@@ -180,8 +202,7 @@ void GameScene::Update(float elapsed_time)
 		myPlayer->Update(elapsed_time);
 	}
 
-	auto dy_it = Instances.begin() + staticBound;
-	for (auto& it = dy_it; it != Instances.end(); ++it)
+	for (auto it = Instances.begin() + staticBound; it != Instances.end(); it++)
 	{
 		auto& instance = *it;
 
@@ -196,9 +217,8 @@ void GameScene::PrepareRendering()
 {
 	GamePipeline::SetProjection(myCamera->projectionPerspective);
 
-	PrepareRenderingWorld();
-
-	std::for_each(Instances.cbegin(), Instances.cend(), [&](const ObjectPtr& inst) {
+	std::for_each(Instances.cbegin(), Instances.cend()
+		, [&](const ObjectPtr& inst) {
 		if (inst->IsActivated() && inst->CheckCameraBounds())
 		{
 			inst->PrepareRendering(*this);
@@ -217,12 +237,6 @@ void GameScene::PrepareRendering()
 		, [](const CFragment& lhs, const CFragment& rhs) {
 		return (rhs.start.z < lhs.start.z) && (rhs.dest.z < lhs.dest.z);
 	});
-}
-
-void GameScene::PrepareRenderingWorld()
-{
-	GamePipeline::SetWorldTransform(globalMatrix);
-	myWorldMesh.PrepareRenderingUnchecked(*this, 0);
 }
 
 void GameScene::Render(HDC surface)

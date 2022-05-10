@@ -24,7 +24,6 @@ public:
 
 	void Start();
 	void Update(float elapsed_time);
-	void PrepareRenderingWorld();
 	void PrepareRendering();
 	void Render(HDC surface);
 
@@ -53,9 +52,10 @@ public:
 	shared_ptr<CMesh> meshEnemyManta;
 	shared_ptr<CMesh> meshEnemyBullet;
 
+	// 경계 메쉬
+	shared_ptr<CMesh> meshFloor, meshSide;
 	// 높이 1부터 15까지의 선로 기둥
 	shared_ptr<CMesh> meshPillars[15];
-
 	// 선로 메쉬
 	shared_ptr<CMesh> meshRail;
 
@@ -96,7 +96,7 @@ private:
 	// 렌더링 할 조각
 	std::vector<CFragment> Fragments;
 	// 변하지 않는 조각
-	CubeMesh myWorldMesh;
+	std::vector<CubeMesh> myWorldMesh;
 
 	// 월드의 월드 변환 행렬
 	XMFLOAT4X4 globalMatrix;
@@ -114,7 +114,9 @@ private:
 	RECT worldBoundary;
 
 	// 플레이어 생성 위치
-	XMFLOAT3 playerSpawnPoint = XMFLOAT3{ 5.0f, 0.0f, 1.0f };
+	XMFLOAT3 playerSpawnPoint = XMFLOAT3{ 0.0f, 0.0f, 1.0f };
 
+	// 롤러코스터 시작 위치
+	XMFLOAT3 pillarStartPoint = XMFLOAT3{ 0.0f, 0.0f, 5.0f };
 	//std::vector<Pillar> Pillars;
 };
