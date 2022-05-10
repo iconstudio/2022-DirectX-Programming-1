@@ -24,7 +24,6 @@ public:
 	void OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	void OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	void OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
-	void OnUpdateTransform();
 
 	friend class GameCamera;
 

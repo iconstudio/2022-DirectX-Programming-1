@@ -122,8 +122,6 @@ void Player::Update(float elapsed_time)
 	GameObject::Update(elapsed_time);
 	Camera->Update(elapsed_time);
 	Camera->GenerateViewMatrix();
-
-	OnUpdateTransform();
 }
 
 void Player::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
