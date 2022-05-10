@@ -29,7 +29,6 @@ public:
 
 	void AddFragment(const CFragment& fragment);
 	HPEN ReadyPen(COLORREF color);
-	void PrepareRenderingCollider(const BoundingBox& collider);
 	void PrepareRenderingCollider(const BoundingOrientedBox& collider);
 	void PrepareRenderingCollider(const BoundingFrustum& collider);
 

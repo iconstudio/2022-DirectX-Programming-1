@@ -159,7 +159,6 @@ void GameScene::CompleteBuilds()
 	});
 
 	staticBound = std::distance(Instances.begin(), it);
-
 }
 
 void GameScene::Kill(GameObject* obj)
@@ -274,9 +273,6 @@ HPEN GameScene::ReadyPen(COLORREF color)
 		return it->second;
 	}
 }
-
-void GameScene::PrepareRenderingCollider(const BoundingBox& collider)
-{}
 
 void GameScene::PrepareRenderingCollider(const BoundingOrientedBox& collider)
 {
