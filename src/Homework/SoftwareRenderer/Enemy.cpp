@@ -50,18 +50,26 @@ float Enemy::GetDistanceFromPlayer() const
 	return Vector3::Distance(Human->GetPosition(), GetPosition());
 }
 
-void Enemy::OnCollisionEnter(Player* other)
+void Enemy::OnCollisionEnter(GameObject* other)
 {
-	//Deactivate();
-	isKilled = true;
-}
+	const auto tag = other->GetTag();
+	switch (tag)
+	{
+		case GOBJECT_TAGS::PLAYER:
+		{
+			isKilled = true;
+		}
+		break;
 
-void Enemy::OnCollisionEnter(PlayerBullet* other)
-{
-	//Deactivate();
-	isKilled = true;
-}
+		case GOBJECT_TAGS::PLAYER_BULLET:
+		{
+			isKilled = true;
+		}
+		break;
 
-void Enemy::OnCollisionEnter(Enemy* other)
-{
+		default:
+		{
+		}
+		break;
+	}
 }

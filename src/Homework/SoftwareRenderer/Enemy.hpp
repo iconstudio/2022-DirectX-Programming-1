@@ -18,9 +18,7 @@ public:
 
 	float GetDistanceFromPlayer() const;
 
-	void OnCollisionEnter(Player* other);
-	void OnCollisionEnter(PlayerBullet* other);
-	void OnCollisionEnter(Enemy* other);
+	virtual void OnCollisionEnter(GameObject* other);
 
 	Player* Human;
 

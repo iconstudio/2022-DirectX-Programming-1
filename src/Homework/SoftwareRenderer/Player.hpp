@@ -9,6 +9,8 @@ public:
 	Player();
 	virtual ~Player();
 
+	virtual constexpr GOBJECT_TAGS GetTag() const { return GOBJECT_TAGS::PLAYER; }
+
 	void SetHwnd(HWND hwnd);
 	void SetCamera(shared_ptr<GameCamera>& cam);
 

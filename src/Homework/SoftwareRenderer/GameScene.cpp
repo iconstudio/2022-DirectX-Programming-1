@@ -6,6 +6,7 @@
 #include "GameMesh.hpp"
 #include "Mesh.hpp"
 #include "Fragment.hpp"
+#include "GameObject.hpp"
 #include "Player.hpp"
 #include "PlayerBullet.hpp"
 #include "Enemy.hpp"
@@ -207,19 +208,36 @@ void GameScene::Update(float elapsed_time)
 		myPlayer->Update(elapsed_time);
 	}
 
-	for (auto it = myInstances.begin(); it != myInstances.end(); it++)
+	for (auto it = myInstances.begin(); it != myInstances.end();)
 	{
 		auto& instance = *it;
 
 		if (instance->IsActivated())
 		{
-			instance->Update(elapsed_time);
-
 			if (instance->isKilled)
 			{
 				it = myInstances.erase(it);
+				continue;
+			}
+			else
+			{
+				for (auto& other : myInstances)
+				{
+					auto other_ptr = other.get();
+					if (other != instance
+						&& other->isActivated
+						&& instance->CheckCollideWith(other_ptr))
+					{
+						instance->OnCollisionEnter(other_ptr);
+						other->OnCollisionEnter(instance.get());
+					}
+				}
+
+				instance->Update(elapsed_time);
 			}
 		}
+
+		it++;
 	}
 }
 

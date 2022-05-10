@@ -7,7 +7,9 @@ class PlayerBullet : public GameObject
 public:
 	PlayerBullet();
 	PlayerBullet(const XMFLOAT3& pos);
-	
+
+	virtual constexpr GOBJECT_TAGS GetTag() const { return GOBJECT_TAGS::PLAYER_BULLET; }
+
 	void SetParent(Player* parent);
 	void SetDamage(const float value);
 

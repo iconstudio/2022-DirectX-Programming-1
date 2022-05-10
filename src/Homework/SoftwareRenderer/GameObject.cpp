@@ -247,13 +247,15 @@ int GameObject::Raycast(XMVECTOR& pick_pos, XMMATRIX& view, float* max_distance)
 	return (nIntersected);
 }
 
-inline bool GameObject::CheckCollideWith(const GameObject* other) const
+bool GameObject::CheckCollideWith(const GameObject* other) const
 {
 	return Collider.Intersects(other->Collider);
 }
 
-inline void GameObject::OnUpdateTransform()
+void GameObject::OnUpdateTransform()
 {
 	transformModified = true;
 }
 
+void GameObject::OnCollisionEnter(GameObject* other)
+{}

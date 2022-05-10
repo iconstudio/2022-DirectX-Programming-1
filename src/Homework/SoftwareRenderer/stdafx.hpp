@@ -68,6 +68,18 @@ class Pillar;
 class Rail;
 class RailBorder;
 
+enum class GOBJECT_TAGS
+{
+	NONE = 0,
+	NORMAL,
+	STATIC,
+	PLAYER,
+	PLAYER_BULLET,
+	ENEMY_CUBE,
+	ENEMY_MANTA,
+	ENEMY_BULLET
+};
+
 enum class ENEMY_TYPES
 {
 	CUBE = 0,

@@ -12,6 +12,8 @@ public:
 	GameObject(XMFLOAT3&& position);
 	virtual ~GameObject();
 
+	virtual constexpr GOBJECT_TAGS GetTag() const { return GOBJECT_TAGS::NORMAL; }
+
 	constexpr bool IsStatic() const override;
 
 	virtual void SetWorldMatrix(const XMFLOAT4X4& tfrm) override;
@@ -48,12 +50,11 @@ public:
 
 	void CreateRay(XMVECTOR& pick_pos, XMMATRIX& view, XMVECTOR& ray_pos, XMVECTOR& ray_dir);
 	int Raycast(XMVECTOR& pick_pos, XMMATRIX& view, float* max_distance);
-	inline bool CheckCollideWith(const GameObject* other) const;
+	bool CheckCollideWith(const GameObject* other) const;
 
-	inline void OnUpdateTransform();
+	void OnUpdateTransform();
 
-	template<typename Type>
-	void OnCollisionEnter(Type* other) {};
+	virtual void OnCollisionEnter(GameObject* other);
 
 	bool isKilled = false;
 	bool transformModified;

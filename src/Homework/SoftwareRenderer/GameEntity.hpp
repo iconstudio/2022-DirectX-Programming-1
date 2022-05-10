@@ -13,6 +13,8 @@ public:
 	GameEntity(XMFLOAT3&& position);
 	virtual ~GameEntity();
 
+	virtual constexpr GOBJECT_TAGS GetTag() const = 0;
+
 	void SetActive(bool flag);
 	void SetMesh(const shared_ptr<CMesh>& mesh);
 	void SetColor(COLORREF color);
