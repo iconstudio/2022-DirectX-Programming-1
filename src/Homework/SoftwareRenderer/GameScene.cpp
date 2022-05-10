@@ -16,11 +16,11 @@
 #include "PlaneMesh.hpp"
 
 // 경계 타일의 가로 너비 (x)
-constexpr float COLLIDE_AREA_H = 50.0f;
+constexpr float COLLIDE_AREA_H = 30.0f;
 // 경계 타일의 높이 (y)
-constexpr float COLLIDE_AREA_V = 20.0f;
+constexpr float COLLIDE_AREA_V = 10.0f;
 // 경계 타일의 세로 너비 (z)
-constexpr float COLLIDE_AREA_U = 50.0f;
+constexpr float COLLIDE_AREA_U = 30.0f;
 
 GameScene::GameScene(GameFramework& framework)
 	: Framework(framework), Window(NULL)
@@ -85,17 +85,20 @@ void GameScene::BuildMeshes()
 
 void GameScene::BuildWorld()
 {
-	constexpr int boundary_cnt_x = int(WORLD_H / COLLIDE_AREA_H);
+	constexpr auto floor_width = (COLLIDE_AREA_H + 10.0f);
+	constexpr auto floor_height = (COLLIDE_AREA_U + 10.0f);
+
+	constexpr int boundary_cnt_x = int(WORLD_H / floor_width);
 	constexpr int boundary_cnt_y = int(WORLD_V / COLLIDE_AREA_V);
-	constexpr int boundary_cnt_z = int(WORLD_U / COLLIDE_AREA_U);
+	constexpr int boundary_cnt_z = int(WORLD_U / floor_height);
 
 	float cx, cz;
 	for (int i = 0; i < boundary_cnt_z; ++i)
 	{
 		for (int k = 0; k < boundary_cnt_x; ++k)
 		{
-			cx = k * COLLIDE_AREA_H - COLLIDE_AREA_H * 0.5f;
-			cz = i * COLLIDE_AREA_U - COLLIDE_AREA_U * 0.5f;
+			cx = k * floor_width - floor_width * 0.5f;
+			cz = i * floor_height - floor_height * 0.5f;
 
 			auto floor = CreateInstance<GameStaticObject>(cx, 0.0f, cz);
 			floor->SetMesh(meshFloor);
