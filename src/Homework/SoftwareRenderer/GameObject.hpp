@@ -48,9 +48,14 @@ public:
 
 	void CreateRay(XMVECTOR& pick_pos, XMMATRIX& view, XMVECTOR& ray_pos, XMVECTOR& ray_dir);
 	int Raycast(XMVECTOR& pick_pos, XMMATRIX& view, float* max_distance);
+	inline bool CheckCollideWith(const GameObject* other) const;
 
 	inline void OnUpdateTransform();
 
+	template<typename Type>
+	void OnCollisionEnter(Type* other) {};
+
+	bool isKilled = false;
 	bool transformModified;
 
 	XMFLOAT3 Direction;

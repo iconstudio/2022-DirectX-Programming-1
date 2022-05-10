@@ -18,6 +18,10 @@ public:
 
 	float GetDistanceFromPlayer() const;
 
+	void OnCollisionEnter(Player* other);
+	void OnCollisionEnter(PlayerBullet* other);
+	void OnCollisionEnter(Enemy* other);
+
 	Player* Human;
 
 	float myHealth;

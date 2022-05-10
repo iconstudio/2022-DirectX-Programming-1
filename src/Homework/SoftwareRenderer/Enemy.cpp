@@ -1,9 +1,7 @@
 #include "stdafx.hpp"
 #include "Enemy.hpp"
-#include "GameScene.hpp"
-#include "GameObject.hpp"
-#include "CubeMesh.hpp"
 #include "Player.hpp"
+#include "PlayerBullet.hpp"
 
 Enemy::Enemy()
 	: Enemy(XMFLOAT3(0, 0, 0))
@@ -50,4 +48,20 @@ void Enemy::Update(float elapsed_time)
 float Enemy::GetDistanceFromPlayer() const
 {
 	return Vector3::Distance(Human->GetPosition(), GetPosition());
+}
+
+void Enemy::OnCollisionEnter(Player* other)
+{
+	//Deactivate();
+	isKilled = true;
+}
+
+void Enemy::OnCollisionEnter(PlayerBullet* other)
+{
+	//Deactivate();
+	isKilled = true;
+}
+
+void Enemy::OnCollisionEnter(Enemy* other)
+{
 }
