@@ -82,6 +82,7 @@ public:
 	GameMesh myMesh;
 	GameTransform Transform;
 	BoundingOrientedBox Collider;
+	bool transformModified;
 
 	XMFLOAT3 Direction;
 	float Speed;

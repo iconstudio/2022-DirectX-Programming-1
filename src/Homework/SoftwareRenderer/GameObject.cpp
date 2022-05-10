@@ -11,7 +11,7 @@
 GameObject::GameObject(GameScene& scene)
 	: Scene(scene), Camera(nullptr)
 	, isActivated(true), isStatic(false)
-	, myMesh(), Transform(), Collider()
+	, myMesh(), Transform(), Collider(), transformModified(false)
 	, Direction(XMFLOAT3(0.0f, 0.0f, 0.0f)), Speed(0.0f), Friction(0.0f)
 {}
 
@@ -19,21 +19,18 @@ GameObject::GameObject(GameScene& scene, float x, float y, float z)
 	: GameObject(scene)
 {
 	SetPosition(x, y, z);
-	UpdateBoundingBox();
 }
 
 GameObject::GameObject(GameScene& scene, const XMFLOAT3& position)
 	: GameObject(scene)
 {
 	SetPosition(position);
-	UpdateBoundingBox();
 }
 
 GameObject::GameObject(GameScene& scene, XMFLOAT3&& position)
 	: GameObject(scene)
 {
 	SetPosition(position);
-	UpdateBoundingBox();
 }
 
 GameObject::~GameObject()
@@ -42,6 +39,10 @@ GameObject::~GameObject()
 void GameObject::SetActive(bool flag)
 {
 	isActivated = flag;
+	if (isActivated)
+	{
+		UpdateBoundingBox();
+	}
 }
 
 void GameObject::SetStatic(bool flag)
@@ -67,16 +68,19 @@ void GameObject::SetCamera(shared_ptr<GameCamera>& cam)
 void GameObject::SetWorldMatrix(const XMFLOAT4X4& tfrm)
 {
 	Transform.SetWorldMatrix(tfrm);
+	transformModified = true;
 }
 
 void GameObject::SetWorldMatrix(XMFLOAT4X4&& tfrm)
 {
 	Transform.SetWorldMatrix(std::forward<XMFLOAT4X4>(tfrm));
+	transformModified = true;
 }
 
 void GameObject::SetPosition(float x, float y, float z)
 {
 	Transform.SetPosition(x, y, z);
+	UpdateBoundingBox();
 }
 
 void GameObject::SetPosition(const XMFLOAT3& pos)
@@ -87,16 +91,19 @@ void GameObject::SetPosition(const XMFLOAT3& pos)
 void GameObject::SetPosition(XMFLOAT3&& pos)
 {
 	Transform.SetPosition(std::forward<XMFLOAT3>(pos));
+	UpdateBoundingBox();
 }
 
 void GameObject::SetRotation(const XMFLOAT4X4& tfrm)
 {
 	Transform.SetRotation(tfrm);
+	UpdateBoundingBox();
 }
 
 void GameObject::AddPosition(XMFLOAT3&& vector)
 {
 	Transform.Translate(vector);
+	UpdateBoundingBox();
 }
 
 bool GameObject::IsActivated() const
@@ -145,41 +152,49 @@ XMFLOAT3&& GameObject::GetLook() const
 void GameObject::Move(const XMFLOAT3& dir, float distance)
 {
 	Transform.Move(dir, distance);
+	UpdateBoundingBox();
 }
 
 void GameObject::MoveStrafe(float distance)
 {
 	Transform.MoveStrafe(distance);
+	UpdateBoundingBox();
 }
 
 void GameObject::MoveUp(float distance)
 {
 	Transform.MoveUp(distance);
+	UpdateBoundingBox();
 }
 
 void GameObject::MoveForward(float distance)
 {
 	Transform.MoveForward(distance);
+	UpdateBoundingBox();
 }
 
 void GameObject::Rotate(float pitch, float yaw, float roll)
 {
 	Transform.Rotate(pitch, yaw, roll);
+	UpdateBoundingBox();
 }
 
 void GameObject::Rotate(const XMFLOAT3& axis, float angle)
 {
 	Transform.Rotate(axis, angle);
+	UpdateBoundingBox();
 }
 
 void GameObject::LookTo(XMFLOAT3& to, XMFLOAT3& up)
 {
 	Transform.LookTo(to, up);
+	UpdateBoundingBox();
 }
 
 void GameObject::LookAt(XMFLOAT3& from, XMFLOAT3& up)
 {
 	Transform.LookAt(from, up);
+	UpdateBoundingBox();
 }
 
 void GameObject::SetVelocity(const XMFLOAT3& vector)
@@ -266,7 +281,6 @@ void GameObject::Update(float elapsed_time)
 
 	if (0.0f != elapsed_time)
 	{
-		UpdateBoundingBox();
 	}
 }
 
