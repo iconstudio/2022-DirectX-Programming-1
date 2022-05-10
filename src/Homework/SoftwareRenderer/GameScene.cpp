@@ -17,7 +17,8 @@
 GameScene::GameScene(GameFramework& framework, size_t sz_x, size_t height, size_t sz_y)
 	: Framework(framework), Window(NULL)
 	, collisionAreaIndex(0), worldPlayerPositionIndex(0)
-	, Instances(), staticStart(), Fragments()
+	, worldBoundary{ -sz_x / 2, -sz_y / 2, sz_x / 2, sz_y / 2 }
+	, Instances(), staticBound(), Fragments()
 	, myPlayer(nullptr), myCamera(nullptr)
 	, meshPlayer(nullptr), meshPlayerBullet(nullptr)
 	, meshEnemyCube(nullptr), meshEnemyManta(nullptr), meshEnemyBullet(nullptr)
@@ -77,7 +78,7 @@ void GameScene::BuildWorld()
 
 	for (float i = 0.0f; i < pillar_count; i++)
 	{
-		place.x = 0.5f * WORLD_H + std::cos(1.0f + i / 3.141592f) * 5.0f;
+		place.x = 0.5f * WORLD_H + std::cos(1.0f + i / PI) * 5.0f;
 		place.y = 0.0f;
 		place.z = WORLD_U * 0.05f + i * pillar_place_z_gap;
 
@@ -115,10 +116,12 @@ void GameScene::CompleteBuilds()
 {
 	if (1 < Instances.size())
 	{
-		staticStart = std::stable_partition(Instances.begin(), Instances.end()
+		auto it = std::stable_partition(Instances.begin(), Instances.end()
 			, [](const ObjectPtr& obj) -> bool {
 			return obj->IsStatic();
 		});
+
+		staticBound = std::distance(Instances.begin(), it);
 	}
 }
 
@@ -163,7 +166,8 @@ void GameScene::Update(float elapsed_time)
 		myPlayer->Update(elapsed_time);
 	}
 
-	for (auto it = Instances.begin(); it != Instances.end(); ++it)
+	auto dy_it = Instances.begin() + staticBound;
+	for (auto& it = dy_it; it != Instances.end(); ++it)
 	{
 		auto& instance = *it;
 
@@ -194,6 +198,11 @@ void GameScene::PrepareRendering()
 		, [](const CFragment& lhs, const CFragment& rhs) {
 		return (rhs.start.z < lhs.start.z) && (rhs.dest.z < lhs.dest.z);
 	});
+}
+
+void GameScene::PrepareRenderingWorld()
+{
+
 }
 
 void GameScene::Render(HDC surface)
