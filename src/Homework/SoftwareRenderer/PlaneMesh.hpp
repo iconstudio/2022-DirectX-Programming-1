@@ -5,5 +5,5 @@
 class PlaneMesh : public CMesh
 {
 public:
-	PlaneMesh();
+	PlaneMesh(const float width, const float height);
 };
