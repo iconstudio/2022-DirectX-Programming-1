@@ -87,8 +87,9 @@ void GameScene::BuildWorld()
 
 		auto pillar = CreateInstance<Pillar>(place);
 		if (!pillar)
-			continue;
-
+		{
+			throw "기둥 생성 오류!";
+		}
 
 		pillar->SetMesh(meshPillars[int(i) % 16]);
 		pillar->SetColor(RGB(110, 30, 30));
@@ -352,6 +353,11 @@ Type* GameScene::CreateInstance(XMFLOAT3&& position)
 
 		return inst;
 	}
+	else
+	{
+		throw "인스턴스 생성 오류!";
+	}
+
 	return nullptr;
 }
 

@@ -245,7 +245,7 @@ PlayerBullet* Player::FindLastBullet()
 {
 	for (const auto& bullet : myBulletPool)
 	{
-		if (!bullet->IsActivated())
+		if (bullet && !bullet->IsActivated())
 		{
 			return bullet;
 		}
