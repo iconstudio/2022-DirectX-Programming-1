@@ -21,6 +21,7 @@ public:
 	BoundingOrientedBox& GetCollider();
 
 	void PrepareRendering(GameScene& scene, COLORREF color) const;
+	void PrepareRenderingUnchecked(GameScene& scene, COLORREF color) const;
 	void Render(HDC surface) const;
 	void RenderByFragments(HDC surface) const;
 

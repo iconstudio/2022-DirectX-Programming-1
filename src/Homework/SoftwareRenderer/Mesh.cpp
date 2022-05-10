@@ -250,6 +250,23 @@ void CMesh::PrepareRendering(GameScene& scene, COLORREF color) const
 	}
 }
 
+void CMesh::PrepareRenderingUnchecked(GameScene& scene, COLORREF color) const
+{
+	for (const auto& frag : myFragments)
+	{
+		const auto& start = frag.start;
+		const auto& dest = frag.dest;
+
+		const auto vtx_from = GamePipeline::WorldProjectTransform(start);
+		const auto vtx_to = GamePipeline::WorldProjectTransform(dest);
+
+		if (CheckDepth(vtx_from.z) && CheckDepth(vtx_to.z))
+		{
+			scene.AddFragment(CFragment{ vtx_from, vtx_to, color });
+		}
+	}
+}
+
 void CMesh::Render(HDC surface) const
 {
 	bool is_inside_first = false;
