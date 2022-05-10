@@ -7,13 +7,16 @@
 #include "Fragment.hpp"
 #include "Player.hpp"
 #include "PlayerBullet.hpp"
+#include "CubeMesh.hpp"
+#include "Terrains.hpp"
+#include <array>
 
 using ObjectPtr = shared_ptr<GameObject>;
 
 class GameScene
 {
 public:
-	GameScene(GameFramework& framework, size_t sz_x, size_t height, size_t sz_y);
+	GameScene(GameFramework& framework, int sz_x, int height, int sz_y);
 	~GameScene();
 
 	void SetHwnd(HWND hwnd);
@@ -79,6 +82,7 @@ private:
 
 	// 씬 내의 모든 인스턴스
 	std::vector<ObjectPtr> Instances;
+	// 변하지 않는 객체
 	std::vector<ObjectPtr>::difference_type staticBound;
 
 	// 기준 충돌 영역
@@ -86,11 +90,16 @@ private:
 
 	// 플레이어가 위치한 선로의 번호
 	size_t worldPlayerPositionIndex;
-	// 플레이어의 상대적 위치
+	// 플레이어의 상대적 위치 (0~1)
 	float worldPlayerPosition;
 
 	// 렌더링 할 조각
 	std::vector<CFragment> Fragments;
+	// 변하지 않는 조각
+	CubeMesh myWorldMesh;
+
+	// 월드의 월드 변환 행렬
+	XMFLOAT4X4 globalMatrix;
 
 	// 렌더링 용 펜 모음
 	std::unordered_map<COLORREF, HPEN> Pens;
@@ -100,6 +109,9 @@ private:
 
 	// 프레임워크에서 받은 카메라
 	shared_ptr<GameCamera> myCamera;
+
+	// 월드 경계
+	RECT worldBoundary;
 
 	// 플레이어 생성 위치
 	XMFLOAT3 playerSpawnPoint = XMFLOAT3{ 5.0f, 0.0f, 1.0f };
