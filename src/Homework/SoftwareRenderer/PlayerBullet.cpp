@@ -1,5 +1,6 @@
 #include "stdafx.hpp"
 #include "PlayerBullet.hpp"
+#include "Player.hpp"
 #include "GameScene.hpp"
 #include "GameObject.hpp"
 #include "CubeMesh.hpp"

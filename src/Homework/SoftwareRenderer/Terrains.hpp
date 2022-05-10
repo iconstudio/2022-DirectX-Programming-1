@@ -2,13 +2,13 @@
 #include "stdafx.hpp"
 #include "GameStaticObject.hpp"
 
-class Rail : public GameObject
+class Rail : public GameStaticObject
 {
 public:
 	Rail();
 };
 
-class Pillar : public GameObject
+class Pillar : public GameStaticObject
 {
 public:
 	Pillar();

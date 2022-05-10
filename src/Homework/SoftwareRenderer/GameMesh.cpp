@@ -34,7 +34,7 @@ bool GameMesh::IsAvailable() const noexcept
 	return bool(myMeshPtr);
 }
 
-const shared_ptr<const CMesh>& GameMesh::GetMesh() const
+const shared_ptr<const CMesh> GameMesh::GetMesh() const
 {
 	return myMeshPtr;
 }

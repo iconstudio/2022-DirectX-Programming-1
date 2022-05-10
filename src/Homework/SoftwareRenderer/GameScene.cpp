@@ -5,6 +5,7 @@
 #include "GamePipeline.hpp"
 #include "GameEntity.hpp"
 #include "GameObject.hpp"
+#include "GameStaticObject.hpp"
 #include "GameMesh.hpp"
 #include "Mesh.hpp"
 #include "Fragment.hpp"
@@ -21,16 +22,17 @@ GameScene::GameScene(GameFramework& framework, int sz_x, int height, int sz_y)
 	: Framework(framework), Window(NULL)
 	, collisionAreaIndex(0), worldPlayerPositionIndex(0)
 	, playerPosition(0.0f), playerWorldRelativePosition(0)
-	, worldBoundary{ -sz_x / 2, -sz_y / 2, sz_x / 2, sz_y / 2 }
+	//, worldBoundary{ -sz_x / 2, -sz_y / 2, sz_x / 2, sz_y / 2 }
 	, globalMatrix(Matrix4x4::Identity())
-	, Instances(), staticBound(), Fragments()
+	, myInstances(), staticInstances(), Fragments()
 	, myPlayer(nullptr), myCamera(nullptr)
 	, meshPlayer(nullptr), meshPlayerBullet(nullptr)
 	, meshEnemyCube(nullptr), meshEnemyManta(nullptr), meshEnemyBullet(nullptr)
 	, meshPillars(), meshRail(nullptr)
 {
 	Fragments.reserve(300);
-	Instances.reserve(300);
+	staticInstances.reserve(100);
+	myInstances.reserve(300);
 }
 
 GameScene::~GameScene()
@@ -61,21 +63,21 @@ void GameScene::Start()
 
 void GameScene::BuildMeshes()
 {
-	meshPlayer = static_pointer_cast<CMesh>(make_shared<CubeMesh>(5, 5, 5));
-	meshPlayerBullet = static_pointer_cast<CMesh>(make_shared<CubeMesh>(2, 2, 10));
+	meshPlayer = static_pointer_cast<CMesh>(make_shared<CubeMesh>(5.0f, 5.0f, 5.0f));
+	meshPlayerBullet = static_pointer_cast<CMesh>(make_shared<CubeMesh>(2.0f, 2.0f, 10.0f));
 
-	meshEnemyCube = static_pointer_cast<CMesh>(make_shared<CubeMesh>(3, 3, 3));
-	meshEnemyManta = static_pointer_cast<CMesh>(make_shared<CubeMesh>(6, 2, 9));
-	meshEnemyBullet = static_pointer_cast<CMesh>(make_shared<CubeMesh>(1, 1, 10));
+	meshEnemyCube = static_pointer_cast<CMesh>(make_shared<CubeMesh>(3.0f, 3.0f, 3.0f));
+	meshEnemyManta = static_pointer_cast<CMesh>(make_shared<CubeMesh>(6.0f, 2.0f, 9.0f));
+	meshEnemyBullet = static_pointer_cast<CMesh>(make_shared<CubeMesh>(1.0f, 1.0f, 10.0f));
 
-	meshFloor = static_pointer_cast<CMesh>(make_shared<PlaneMesh>(COLLIDE_AREA_H, COLLIDE_AREA_U));
-	meshSide = static_pointer_cast<CMesh>(make_shared<PlaneMesh>(COLLIDE_AREA_U, COLLIDE_AREA_V));
+	meshFloor = static_pointer_cast<CMesh>(make_shared<PlaneMesh>(float(COLLIDE_AREA_H), float(COLLIDE_AREA_U)));
+	meshSide = static_pointer_cast<CMesh>(make_shared<PlaneMesh>(float(COLLIDE_AREA_U), float(COLLIDE_AREA_V)));
 
 	for (int i = 0; i < 15; ++i)
 	{
-		meshPillars[i] = static_pointer_cast<CMesh>(make_shared<CubeMesh>(2, i, 2.0f));
+		meshPillars[i] = static_pointer_cast<CMesh>(make_shared<CubeMesh>(2.0f, float(i), 2.0f));
 	}
-	meshRail = static_pointer_cast<CMesh>(make_shared<CubeMesh>(1, 1.5f, 10));
+	meshRail = static_pointer_cast<CMesh>(make_shared<CubeMesh>(1.0f, 1.5f, 10.0f));
 }
 
 void GameScene::BuildWorld()
@@ -92,8 +94,7 @@ void GameScene::BuildWorld()
 			cx = k * COLLIDE_AREA_H - COLLIDE_AREA_H * 0.5f;
 			cz = i * COLLIDE_AREA_U - COLLIDE_AREA_U * 0.5f;
 
-			auto floor = CreateInstance<GameObject>(k * 50.0f, 0.0f, i * 20.0f);
-			floor->isStatic = true;
+			auto floor = CreateInstance<GameStaticObject>(k * 50.0f, 0.0f, i * 20.0f);
 			floor->SetMesh(meshFloor);
 			floor->SetColor(0);
 		}
@@ -117,7 +118,7 @@ void GameScene::BuildWorld()
 
 void GameScene::BuildObjects()
 {
-	myPlayer = make_shared<Player>(*this);
+	myPlayer = make_shared<Player>();
 	myPlayer->SetHwnd(Window);
 	myPlayer->SetPosition(playerSpawnPoint);
 	myPlayer->SetMesh(meshPlayer);
@@ -149,21 +150,16 @@ void GameScene::BuildObjects()
 
 void GameScene::CompleteBuilds()
 {
-	for (auto& inst : Instances)
+	for (auto& inst : staticInstances)
 	{
 		inst->UpdateBoundingBox();
 	}
 
-	auto it = std::stable_partition(Instances.begin(), Instances.end()
-		, [](const ObjectPtr& obj) -> bool {
-		return obj->IsStatic();
-	});
-
-	staticBound = std::distance(Instances.begin(), it);
+	for (auto& inst : myInstances)
+	{
+		inst->UpdateBoundingBox();
+	}
 }
-
-void GameScene::Kill(GameObject* obj)
-{}
 
 void GameScene::Kill(ObjectPtr& obj)
 {}
@@ -203,10 +199,8 @@ void GameScene::Update(float elapsed_time)
 		myPlayer->Update(elapsed_time);
 	}
 
-	for (auto it = Instances.begin() + staticBound; it != Instances.end(); it++)
+	for (auto& instance : myInstances)
 	{
-		auto& instance = *it;
-
 		if (instance->IsActivated())
 		{
 			instance->Update(elapsed_time);
@@ -218,14 +212,22 @@ void GameScene::PrepareRendering()
 {
 	GamePipeline::SetProjection(myCamera->projectionPerspective);
 
-	std::for_each(Instances.cbegin(), Instances.cend()
-		, [&](const ObjectPtr& inst) {
-		if (inst->IsActivated() && inst->CheckCameraBounds())
+	for (const auto& instance : staticInstances)
+	{
+		if (instance->IsActivated() && CheckCameraBounds(instance.get()))
 		{
-			inst->PrepareRendering(*this);
+			instance->PrepareRendering(*this);
+		}
+	}
+
+	for (const auto& instance : myInstances)
+	{
+		if (instance->IsActivated() && CheckCameraBounds(instance.get()))
+		{
+			instance->PrepareRendering(*this);
 			//PrepareRenderingCollider(inst->Collider);
 		}
-	});
+	}
 
 	if (myPlayer)
 	{
@@ -256,7 +258,7 @@ void GameScene::Render(HDC surface)
 	Fragments.clear();
 }
 
-bool GameScene::CheckView(const ObjectPtr& obj) const
+bool GameScene::CheckCameraBounds(const GameEntity* obj) const
 {
 	return myCamera->IsInFrustum(obj->Collider);
 }
@@ -367,9 +369,15 @@ Type* GameScene::CreateInstance(XMFLOAT3&& position)
 	if (inst)
 	{
 		inst->SetPosition(std::forward<XMFLOAT3>(position));
-		inst->SetCamera(myCamera);
 
-		Instances.push_back(ObjectPtr(inst));
+		if constexpr (std::is_base_of_v<GameStaticObject, Type>)
+		{
+			staticInstances.push_back(StaticPtr(inst));
+		}
+		else
+		{
+			myInstances.push_back(ObjectPtr(inst));
+		}
 
 		return inst;
 	}

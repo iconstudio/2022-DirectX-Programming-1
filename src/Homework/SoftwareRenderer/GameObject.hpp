@@ -24,12 +24,12 @@ public:
 	virtual void LookAt(XMFLOAT3& from, XMFLOAT3& up);
 
 	virtual void AddPosition(XMFLOAT3&& vector) override;
-	void Move(const XMFLOAT3& vDirection, float distance);
-	void MoveStrafe(float distance);
-	void MoveUp(float distance);
-	void MoveForward(float distance);
-	virtual void Rotate(float pitch, float yaw, float roll);
-	virtual void Rotate(const XMFLOAT3& axis, float angle);
+	virtual void Move(const XMFLOAT3& direction, float distance) override;
+	virtual void MoveStrafe(float distance) override;
+	virtual void MoveUp(float distance) override;
+	virtual void MoveForward(float distance) override;
+	virtual void Rotate(float pitch, float yaw, float roll) override;
+	virtual void Rotate(const XMFLOAT3& axis, float angle) override;
 
 	void SetVelocity(const XMFLOAT3& vector);
 	void SetVelocity(XMFLOAT3&& vector);

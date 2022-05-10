@@ -1,17 +1,12 @@
 #pragma once
 #include "stdafx.hpp"
 #include "GameCamera.hpp"
-#include "GameEntity.hpp"
 #include "GameObject.hpp"
-#include "GameMesh.hpp"
-#include "Mesh.hpp"
-#include "Fragment.hpp"
-#include "Player.hpp"
-#include "PlayerBullet.hpp"
-#include "CubeMesh.hpp"
-#include "Terrains.hpp"
+#include "GameStaticObject.hpp"
 
+using EntityPtr = shared_ptr<GameEntity>;
 using ObjectPtr = shared_ptr<GameObject>;
+using StaticPtr = shared_ptr<GameStaticObject>;
 
 class GameScene
 {
@@ -27,23 +22,18 @@ public:
 	void PrepareRendering();
 	void Render(HDC surface);
 
-	bool CheckView(const ObjectPtr& obj) const;
+	bool CheckCameraBounds(const GameEntity* obj) const;
 	void AddFragment(const CFragment& fragment);
 	HPEN ReadyPen(COLORREF color);
 	void PrepareRenderingCollider(const BoundingOrientedBox& collider);
 	void PrepareRenderingCollider(const BoundingFrustum& collider);
 
-	void Kill(GameObject* obj);
 	void Kill(ObjectPtr& obj);
 	Enemy* SpawnEnemy(ENEMY_TYPES type, const XMFLOAT3& pos);
 
 	void OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	void OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	void OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
-
-	friend class GameCollsionGroup;
-	friend class Player;
-	friend class GameObject;
 
 private:
 	void BuildMeshes();
@@ -80,10 +70,10 @@ private:
 	// 선로 메쉬
 	shared_ptr<CMesh> meshRail;
 
-	// 씬 내의 모든 인스턴스
-	std::vector<ObjectPtr> Instances;
-	// 변하지 않는 객체
-	std::vector<ObjectPtr>::difference_type staticBound;
+	// 씬 내의 변하지 않는 인스턴스
+	std::vector<StaticPtr> staticInstances;
+	// 씬 내의 동적인 인스턴스
+	std::vector<ObjectPtr> myInstances;
 
 	// 기준 충돌 영역
 	size_t collisionAreaIndex;

@@ -15,7 +15,7 @@ public:
 
 	bool IsAvailable() const noexcept;
 
-	const shared_ptr<const CMesh>& GetMesh() const;
+	const shared_ptr<const CMesh> GetMesh() const;
 	shared_ptr<CMesh>& GetMesh();
 	std::size_t GetPolygonsNumber() const;
 	const BoundingOrientedBox& GetCollider() const;

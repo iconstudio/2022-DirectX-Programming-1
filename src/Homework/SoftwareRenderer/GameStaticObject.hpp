@@ -4,5 +4,6 @@
 
 class GameStaticObject : public GameEntity
 {
-
+public:
+	virtual constexpr bool IsStatic() const override { return true; }
 };

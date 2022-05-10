@@ -1,23 +1,19 @@
 #include "stdafx.hpp"
 #include "Terrains.hpp"
-#include "GameObject.hpp"
+#include "GameStaticObject.hpp"
 #include "GameScene.hpp"
 #include "GameMesh.hpp"
 
 Rail::Rail()
-	: GameObject()
-{
-	isStatic = true;
-}
+	: GameStaticObject()
+{}
 
 Pillar::Pillar()
-	: GameObject()
+	: GameStaticObject()
 	, myHeight(0.0f), myBottom(), myTop()
 	, nodeBefore(nullptr), nodeNext(nullptr)
 	, distBefore(0.0f), distNext(0.0f)
-{
-	isStatic = true;
-}
+{}
 
 void Pillar::SetHeight(float height)
 {
