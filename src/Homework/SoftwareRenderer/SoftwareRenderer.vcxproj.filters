@@ -93,6 +93,9 @@
     <ClInclude Include="pch.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="PlaneMesh.hpp">
+      <Filter>헤더 파일\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -157,6 +160,9 @@
     </ClCompile>
     <ClCompile Include="Terrains.cpp">
       <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="PlaneMesh.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
