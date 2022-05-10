@@ -99,6 +99,26 @@ void Player::Update(float elapsed_time)
 		shootDelay -= elapsed_time;
 	}
 
+	if (shootLocking)
+	{
+		if (shootDelay <= 0 && myBulletShooted < myBulletMax)
+		{
+			auto bullet = FindLastBullet();
+			if (bullet)
+			{
+				bullet->Activate();
+				bullet->SetWorldMatrix(Transform.GetWorldMatrix());
+				bullet->SetMesh(myMesh.myMeshPtr);
+				bullet->SetDirection(XMFLOAT3(Transform.GetLook()));
+				bullet->SetSpeed(1.0f);
+				bullet->Ready();
+
+				shootDelay = shootCooldown;
+				myBulletShooted++;
+			}
+		}
+	}
+
 	GameObject::Update(elapsed_time);
 	Camera->Update(elapsed_time);
 	Camera->GenerateViewMatrix();
@@ -112,22 +132,8 @@ void Player::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		case WM_LBUTTONDOWN:
 		{
-			if (shootDelay <= 0 && myBulletShooted < myBulletMax)
-			{
-				auto bullet = FindLastBullet();
-				if (bullet)
-				{
-					bullet->Activate();
-					bullet->SetWorldMatrix(Transform.GetWorldMatrix());
-					bullet->SetMesh(myMesh.myMeshPtr);
-					bullet->SetDirection(XMFLOAT3(Transform.GetLook()));
-					bullet->SetSpeed(1.0f);
-					bullet->Ready();
-
-					shootDelay = shootCooldown;
-					myBulletShooted++;
-				}
-			}
+			shootLocking = true;
+			SetCapture(hwnd);
 		}
 		break;
 
@@ -138,6 +144,11 @@ void Player::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
 		case WM_LBUTTONUP:
 		{
+			shootLocking = false;
+			if (GetCapture() == hwnd)
+			{
+				ReleaseCapture();
+			}
 		}
 		break;
 
@@ -179,10 +190,8 @@ void Player::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 					Orientation |= DIR_BACKWARD;
 				}
 				break;
-				case VK_LCONTROL:
+				case VK_CONTROL:
 				{
-					shootLocking = true;
-					SetCapture(hwnd);
 				}
 				break;
 			}
@@ -213,13 +222,8 @@ void Player::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 					Orientation &= 0xff & ~DIR_BACKWARD;
 				}
 				break;
-				case VK_LCONTROL:
+				case VK_CONTROL:
 				{
-					shootLocking = false;
-					if (GetCapture() == hwnd)
-					{
-						ReleaseCapture();
-					}
 				}
 				break;
 			}

@@ -92,11 +92,13 @@ private:
 	size_t worldPlayerPositionIndex;
 	// 플레이어의 상대적 위치 (0~1)
 	float worldPlayerPosition;
+	// 플레이어의 기본 이동 속도 (초당 픽셀 거리)
+	float playerMoveSpeed = 3.0f;
+	// 선로 목록
+	std::vector<Pillar*> Pillars;
 
 	// 렌더링 할 조각
 	std::vector<CFragment> Fragments;
-	// 변하지 않는 조각
-	std::vector<CubeMesh> myWorldMesh;
 
 	// 월드의 월드 변환 행렬
 	XMFLOAT4X4 globalMatrix;
@@ -118,5 +120,4 @@ private:
 
 	// 롤러코스터 시작 위치
 	XMFLOAT3 pillarStartPoint = XMFLOAT3{ 0.0f, 0.0f, 5.0f };
-	//std::vector<Pillar> Pillars;
 };
