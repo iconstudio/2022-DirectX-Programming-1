@@ -11,8 +11,7 @@ GameFramework::GameFramework()
 	, myFrame(), mySurface(NULL), myFrameBuffer(NULL)
 	, myTimer(make_unique<GameTimer>()), myScene(nullptr)
 	, myCamera(nullptr)
-{
-}
+{}
 
 GameFramework::~GameFramework()
 {
@@ -25,6 +24,13 @@ void GameFramework::Awake(HINSTANCE instance, HWND hwnd, RECT&& rect)
 	process = instance;
 	SetHwnd(hwnd);
 	myFrame = rect;
+
+	POINT center = {
+		myFrame.left + (myFrame.right - myFrame.left) / 2
+		, myFrame.top + (myFrame.bottom - myFrame.top) / 2
+	};
+	ClientToScreen(hwnd, &center);
+	SetCursorPos(center.x, center.y);
 
 	HDC hDC = GetDC(hwnd);
 	mySurface = CreateCompatibleDC(hDC);
