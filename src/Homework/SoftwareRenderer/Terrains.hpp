@@ -5,11 +5,21 @@
 class Rail : public GameObject
 {
 public:
-	Rail(GameScene& scene, const XMFLOAT3& pos);
+	Rail(GameScene& scene);
 };
 
 class Pillar : public GameObject
 {
 public:
-	Pillar(GameScene& scene, const XMFLOAT3& pos);
+	Pillar(GameScene& scene);
+
+	void SetHeight(float height);
+	void SetBefore(Pillar* before);
+	void SetNext(Pillar* next);
+
+	float myheight;
+	XMFLOAT3 myBottom, myTop;
+
+	Pillar* nodeBefore, *nodeNext;
+	float distBefore, distNext;
 };
