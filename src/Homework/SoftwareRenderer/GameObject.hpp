@@ -73,6 +73,8 @@ public:
 	void CreateRay(XMVECTOR& pick_pos, XMMATRIX& view, XMVECTOR& ray_pos, XMVECTOR& ray_dir);
 	int Raycast(XMVECTOR& pick_pos, XMMATRIX& view, float* max_distance);
 
+	inline void OnUpdateTransform();
+
 	GameScene& Scene;
 	shared_ptr<GameCamera> Camera;
 
