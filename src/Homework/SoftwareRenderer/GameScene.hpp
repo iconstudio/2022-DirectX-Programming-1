@@ -21,6 +21,7 @@ public:
 
 	void Start();
 	void Update(float elapsed_time);
+	void PrepareRenderingWorld();
 	void PrepareRendering();
 	void Render(HDC surface);
 
@@ -78,13 +79,15 @@ private:
 
 	// 씬 내의 모든 인스턴스
 	std::vector<ObjectPtr> Instances;
-	std::vector<ObjectPtr>::iterator staticStart;
+	std::vector<ObjectPtr>::difference_type staticBound;
 
 	// 기준 충돌 영역
 	size_t collisionAreaIndex;
 
 	// 플레이어가 위치한 선로의 번호
 	size_t worldPlayerPositionIndex;
+	// 플레이어의 상대적 위치
+	float worldPlayerPosition;
 
 	// 렌더링 할 조각
 	std::vector<CFragment> Fragments;
