@@ -7,18 +7,11 @@ constexpr COLORREF C_GREEN = RGB(0x00, 0x80, 0x00);
 constexpr COLORREF FRAMEBUFFER_CLS_COLOR = C_GREEN;
 
 // 게임 월드의 가로 너비 (x)
-constexpr LONG WORLD_H = 600;
+constexpr float WORLD_H = 600.0f;
 // 게임 월드의 높이 (y)
-constexpr LONG WORLD_V = 20;
+constexpr float WORLD_V = 20.0f;
 // 게임 월드의 세로 너비 (z)
-constexpr LONG WORLD_U = 2000;
-
-// 충돌 영역의 가로 너비 (x)
-constexpr LONG COLLIDE_AREA_H = 300;
-// 충돌 영역의 높이 (y)
-constexpr LONG COLLIDE_AREA_V = 20;
-// 충돌 영역의 세로 너비 (z)
-constexpr LONG COLLIDE_AREA_U = 10;
+constexpr float WORLD_U = 2000.0f;
 
 #define FRAMEBUFFER_WIDTH		800
 #define FRAMEBUFFER_HEIGHT		600

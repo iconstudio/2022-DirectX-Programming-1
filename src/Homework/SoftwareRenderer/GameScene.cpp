@@ -3,9 +3,6 @@
 #include "GameFramework.hpp"
 #include "GameCamera.hpp"
 #include "GamePipeline.hpp"
-#include "GameEntity.hpp"
-#include "GameObject.hpp"
-#include "GameStaticObject.hpp"
 #include "GameMesh.hpp"
 #include "Mesh.hpp"
 #include "Fragment.hpp"
@@ -18,11 +15,17 @@
 #include "CubeMesh.hpp"
 #include "PlaneMesh.hpp"
 
-GameScene::GameScene(GameFramework& framework, int sz_x, int height, int sz_y)
+// 경계 타일의 가로 너비 (x)
+constexpr float COLLIDE_AREA_H = 50.0f;
+// 경계 타일의 높이 (y)
+constexpr float COLLIDE_AREA_V = 20.0f;
+// 경계 타일의 세로 너비 (z)
+constexpr float COLLIDE_AREA_U = 50.0f;
+
+GameScene::GameScene(GameFramework& framework)
 	: Framework(framework), Window(NULL)
 	, collisionAreaIndex(0), worldPlayerPositionIndex(0)
 	, playerPosition(0.0f), playerWorldRelativePosition(0)
-	//, worldBoundary{ -sz_x / 2, -sz_y / 2, sz_x / 2, sz_y / 2 }
 	, globalMatrix(Matrix4x4::Identity())
 	, myInstances(), staticInstances(), Fragments()
 	, myPlayer(nullptr), myCamera(nullptr)
@@ -70,8 +73,8 @@ void GameScene::BuildMeshes()
 	meshEnemyManta = static_pointer_cast<CMesh>(make_shared<CubeMesh>(6.0f, 2.0f, 9.0f));
 	meshEnemyBullet = static_pointer_cast<CMesh>(make_shared<CubeMesh>(1.0f, 1.0f, 10.0f));
 
-	meshFloor = static_pointer_cast<CMesh>(make_shared<PlaneMesh>(float(COLLIDE_AREA_H), float(COLLIDE_AREA_U)));
-	meshSide = static_pointer_cast<CMesh>(make_shared<PlaneMesh>(float(COLLIDE_AREA_U), float(COLLIDE_AREA_V)));
+	meshFloor = static_pointer_cast<CMesh>(make_shared<PlaneMesh>(COLLIDE_AREA_H, COLLIDE_AREA_U));
+	meshSide = static_pointer_cast<CMesh>(make_shared<PlaneMesh>(COLLIDE_AREA_U, COLLIDE_AREA_V));
 
 	for (int i = 0; i < 15; ++i)
 	{
@@ -82,9 +85,9 @@ void GameScene::BuildMeshes()
 
 void GameScene::BuildWorld()
 {
-	constexpr int boundary_cnt_x = WORLD_H / COLLIDE_AREA_H;
-	constexpr int boundary_cnt_y = WORLD_V / COLLIDE_AREA_V;
-	constexpr int boundary_cnt_z = WORLD_U / COLLIDE_AREA_U;
+	constexpr int boundary_cnt_x = int(WORLD_H / COLLIDE_AREA_H);
+	constexpr int boundary_cnt_y = int(WORLD_V / COLLIDE_AREA_V);
+	constexpr int boundary_cnt_z = int(WORLD_U / COLLIDE_AREA_U);
 
 	float cx, cz;
 	for (int i = 0; i < boundary_cnt_z; ++i)
@@ -94,7 +97,7 @@ void GameScene::BuildWorld()
 			cx = k * COLLIDE_AREA_H - COLLIDE_AREA_H * 0.5f;
 			cz = i * COLLIDE_AREA_U - COLLIDE_AREA_U * 0.5f;
 
-			auto floor = CreateInstance<GameStaticObject>(k * 50.0f, 0.0f, i * 20.0f);
+			auto floor = CreateInstance<GameStaticObject>(cx, 0.0f, cz);
 			floor->SetMesh(meshFloor);
 			floor->SetColor(0);
 		}

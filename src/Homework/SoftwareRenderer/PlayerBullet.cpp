@@ -1,9 +1,7 @@
 #include "stdafx.hpp"
 #include "PlayerBullet.hpp"
 #include "Player.hpp"
-#include "GameScene.hpp"
 #include "GameObject.hpp"
-#include "CubeMesh.hpp"
 
 PlayerBullet::PlayerBullet()
 	: PlayerBullet(XMFLOAT3(0, 0, 0))
@@ -13,7 +11,7 @@ PlayerBullet::PlayerBullet(const XMFLOAT3& pos)
 	: GameObject(pos)
 	, myParent(nullptr)
 	, myDamage(0.0f)
-	, myDuration(3.0f), myLifetime(myDuration)
+	, myDuration(3.0f), myLifetime(3.0f)
 {
 }
 

@@ -20,7 +20,7 @@ public:
 	virtual void Move(const XMFLOAT3& dit, float distance);
 	virtual void Rotate(float pitch, float yaw, float roll);
 
-	virtual void Update(float elapsed_time);
+	virtual void Update(float elapsed_time) override;
 
 	void OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	void OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -36,7 +36,6 @@ private:
 	HWND Window;
 	POINT Cursor;
 	DWORD Orientation;
-	bool focused;
 
 	shared_ptr<GameCamera> Camera;
 

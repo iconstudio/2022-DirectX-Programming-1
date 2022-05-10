@@ -10,7 +10,8 @@ GameFramework::GameFramework()
 	, myFrame(), mySurface(NULL), myFrameBuffer(NULL)
 	, myTimer(make_unique<GameTimer>()), myScene(nullptr)
 	, myCamera(nullptr)
-{}
+{
+}
 
 GameFramework::~GameFramework()
 {
@@ -45,7 +46,7 @@ void GameFramework::Start()
 	myCamera->SetFOVAngle(60.0f);
 	myCamera->GenerateOrthographicProjectionMatrix(1.01f, 50.0f, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
 
-	myScene = make_unique<GameScene>(*this, WORLD_H, WORLD_V, WORLD_U);
+	myScene = make_unique<GameScene>(*this);
 	myScene->SetHwnd(Window);
 	myScene->SetCamera(myCamera);
 

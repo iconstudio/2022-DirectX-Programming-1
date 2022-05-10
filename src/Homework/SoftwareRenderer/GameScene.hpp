@@ -11,7 +11,7 @@ using StaticPtr = shared_ptr<GameStaticObject>;
 class GameScene
 {
 public:
-	GameScene(GameFramework& framework, int sz_x, int height, int sz_y);
+	GameScene(GameFramework& framework);
 	~GameScene();
 
 	void SetHwnd(HWND hwnd);

@@ -7,7 +7,7 @@
 
 Player::Player()
 	: GameObject()
-	, Window(NULL), Cursor(), Orientation(0), focused(false)
+	, Window(NULL), Cursor(), Orientation(0)
 	, Camera(nullptr)
 	, shootDelay(0.0f), shootCooldown(0.3f), shootLocking(false)
 	, myBulletShooted(0), myBulletMax(10), myBulletPool(myBulletMax)
@@ -16,7 +16,12 @@ Player::Player()
 }
 
 Player::~Player()
-{}
+{
+	if (GetCapture() == Window)
+	{
+		ReleaseCapture();
+	}
+}
 
 void Player::SetHwnd(HWND hwnd)
 {
@@ -80,19 +85,26 @@ void Player::Rotate(float pitch, float yaw, float roll)
 
 void Player::Update(float elapsed_time)
 {
-	if (NULL != Window && focused)
+	if (NULL != Window)
 	{
 		POINT ptCursorPos;
 		GetCursorPos(&ptCursorPos);
 
 		float cxMouseDelta = (float)(ptCursorPos.x - Cursor.x) / 4.0f;
 		float cyMouseDelta = (float)(ptCursorPos.y - Cursor.y) / 4.0f;
-		Cursor = ptCursorPos;
 
 		if (cxMouseDelta || cyMouseDelta)
 		{
 			Rotate(0.0f, cxMouseDelta, 0.0f);
+
+			if (GetFocus() == Window)
+			{
+				SetCursorPos(Cursor.x, Cursor.y);
+				GetCursorPos(&ptCursorPos);
+			}
 		}
+
+		Cursor = ptCursorPos;
 	}
 
 	if (Orientation)
@@ -114,7 +126,6 @@ void Player::Update(float elapsed_time)
 			{
 				bullet->Activate();
 				bullet->SetWorldMatrix(Transform.GetWorldMatrix());
-				bullet->SetMesh(myMesh.myMeshPtr);
 				bullet->SetDirection(XMFLOAT3(Transform.GetLook()));
 				bullet->SetSpeed(1.0f);
 				bullet->Ready();
@@ -246,12 +257,10 @@ void Player::OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
 			if (WA_INACTIVE == act)
 			{
-				focused = false;
 				//ReleaseCapture();
 			}
 			else
 			{
-				focused = true;
 				//SetCapture(hwnd);
 				GetCursorPos(&Cursor);
 			}
