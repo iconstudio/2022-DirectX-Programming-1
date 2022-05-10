@@ -10,6 +10,7 @@ public:
 	virtual ~Player();
 
 	void SetHwnd(HWND hwnd);
+	void AddBullet(shared_ptr<PlayerBullet> bullet);
 
 	void Crawl(DWORD dwdir, float accel);
 
@@ -26,13 +27,17 @@ public:
 	friend class GameCamera;
 
 private:
+	shared_ptr<PlayerBullet> FindLastBullet() const;
+
 	HWND Window;
 	POINT Cursor;
 	DWORD Orientation;
 	bool focused;
 
 	float shootDelay;
-	const float shootCooldown = 0.3f;
+	const float shootCooldown;
 
-	std::vector<PlayerBullet*> myBulletPool;
+	int myBulletShooted;
+	const int myBulletMax;
+	std::vector<shared_ptr<PlayerBullet>> myBulletPool;
 };

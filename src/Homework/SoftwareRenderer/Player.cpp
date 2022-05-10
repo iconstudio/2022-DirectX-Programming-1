@@ -8,7 +8,8 @@
 Player::Player(GameScene& scene)
 	: GameObject(scene)
 	, Window(NULL), Cursor(), Orientation(0), focused(false)
-	, shootDelay(0.0f)
+	, shootDelay(0.0f), shootCooldown(0.3f)
+	, myBulletShooted(0), myBulletMax(10), myBulletPool(myBulletMax)
 {
 	Friction = 30.0f;
 }
@@ -19,6 +20,11 @@ Player::~Player()
 void Player::SetHwnd(HWND hwnd)
 {
 	Window = hwnd;
+}
+
+void Player::AddBullet(shared_ptr<PlayerBullet> bullet)
+{
+	myBulletPool.push_back(bullet);
 }
 
 void Player::Crawl(DWORD dwdir, float accel)
@@ -77,6 +83,11 @@ void Player::Update(float elapsed_time)
 		Crawl(Orientation, 10.0f * elapsed_time); // 1000m/s^2
 	}
 
+	if (0 < shootDelay)
+	{
+		shootDelay -= elapsed_time;
+	}
+
 	GameObject::Update(elapsed_time);
 	Camera->Update(elapsed_time);
 	Camera->GenerateViewMatrix();
@@ -90,15 +101,21 @@ void Player::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		case WM_LBUTTONDOWN:
 		{
-			//auto& mat = Transform.GetWorldMatrix();
-			//mat._41 = 0;
-			//mat._42 = 0;
-			//mat._43 = 0;
+			if (shootDelay <= 0 && myBulletShooted < myBulletMax)
+			{
+				auto mat = Transform.GetWorldMatrix();
+				mat._41 = 0;
+				mat._42 = 0;
+				mat._43 = 0;
 
-			//auto bullet = Scene.CreateInstance<PlayerBullet>(GetPosition());
-			//bullet->SetMesh(myMesh.myMeshPtr);
-			//bullet->SetRotation(mat);
-			//bullet->SetSpeed(4.0f);
+				auto bullet = Scene.CreateInstance<PlayerBullet>(GetPosition());
+				bullet->SetMesh(myMesh.myMeshPtr);
+				bullet->SetRotation(mat);
+				bullet->SetSpeed(4.0f);
+
+				shootDelay = shootCooldown;
+				myBulletShooted++;
+			}
 		}
 		break;
 
@@ -224,4 +241,9 @@ void Player::OnUpdateTransform()
 
 	m_xmf4x4World._41 = m_xmf3Position.x; m_xmf4x4World._42 = m_xmf3Position.y; m_xmf4x4World._43 = m_xmf3Position.z;
 	*/
+}
+
+shared_ptr<PlayerBullet> Player::FindLastBullet() const
+{
+	return shared_ptr<PlayerBullet>();
 }
