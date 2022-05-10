@@ -152,11 +152,11 @@
     <ClCompile Include="EnemyManta.cpp">
       <Filter>소스 파일\Components</Filter>
     </ClCompile>
-    <ClCompile Include="Terrains.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Terrains.cpp">
+      <Filter>소스 파일\Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
