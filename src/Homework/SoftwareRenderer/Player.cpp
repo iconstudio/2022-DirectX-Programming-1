@@ -8,7 +8,7 @@
 Player::Player(GameScene& scene)
 	: GameObject(scene)
 	, Window(NULL), Cursor(), Orientation(0), focused(false)
-	, shootDelay(0.0f), shootCooldown(0.3f)
+	, shootDelay(0.0f), shootCooldown(0.3f), shootLocking(false)
 	, myBulletShooted(0), myBulletMax(10), myBulletPool(myBulletMax)
 {
 	Friction = 30.0f;
@@ -178,6 +178,12 @@ void Player::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 					Orientation |= DIR_BACKWARD;
 				}
 				break;
+				case VK_LCONTROL:
+				{
+					shootLocking = true;
+					SetCapture(hwnd);
+				}
+				break;
 			}
 		}
 		break;
@@ -204,6 +210,15 @@ void Player::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				case 'S':
 				{
 					Orientation &= 0xff & ~DIR_BACKWARD;
+				}
+				break;
+				case VK_LCONTROL:
+				{
+					shootLocking = false;
+					if (GetCapture() == hwnd)
+					{
+						ReleaseCapture();
+					}
 				}
 				break;
 			}

@@ -40,6 +40,7 @@ private:
 
 	float shootDelay;
 	const float shootCooldown;
+	bool shootLocking;
 
 	int myBulletShooted;
 	std::vector<PlayerBullet*> myBulletPool;
