@@ -14,6 +14,7 @@
 #include "EnemyManta.hpp"
 #include "Terrains.hpp"
 #include "CubeMesh.hpp"
+#include "PlaneMesh.hpp"
 
 GameScene::GameScene(GameFramework& framework, int sz_x, int height, int sz_y)
 	: Framework(framework), Window(NULL)
@@ -108,7 +109,9 @@ void GameScene::BuildObjects()
 	const auto count = myPlayer->myBulletMax;
 	for (int i = 0; i < count; ++i)
 	{
-		myPlayer->AddBullet(CreateInstance<PlayerBullet>(playerSpawnPoint));
+		auto bullet = CreateInstance<PlayerBullet>(playerSpawnPoint);
+		bullet->SetMesh(meshPlayerBullet);
+		myPlayer->AddBullet(bullet);
 	}
 
 	myCamera->SetFollower(myPlayer.get());
