@@ -26,6 +26,7 @@ public:
 	void SetRotation(const XMFLOAT4X4& tfrm);
 	void AddPosition(XMFLOAT3&& vector);
 
+	bool IsActivated() const;
 	bool IsStatic() const;
 	XMFLOAT3&& GetPosition() const;
 	XMFLOAT3&& GetLook() const;

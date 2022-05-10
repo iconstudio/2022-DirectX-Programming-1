@@ -89,6 +89,11 @@ void GameObject::AddPosition(XMFLOAT3&& vector)
 	Transform.Translate(vector);
 }
 
+bool GameObject::IsActivated() const
+{
+	return isActivated;
+}
+
 bool GameObject::IsStatic() const
 {
 	return isStatic;

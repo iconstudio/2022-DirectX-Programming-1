@@ -175,7 +175,10 @@ void GameScene::Update(float elapsed_time)
 	{
 		auto& instance = *it;
 
-		instance->Update(elapsed_time);
+		if (instance->IsActivated())
+		{
+			instance->Update(elapsed_time);
+		}
 	}
 }
 
@@ -185,8 +188,8 @@ void GameScene::PrepareRendering()
 
 	PrepareRenderingWorld();
 
-	std::for_each(Instances.cbegin(), Instances.cend(), [&](const auto& inst) {
-		if (inst->CheckCameraBounds())
+	std::for_each(Instances.cbegin(), Instances.cend(), [&](const ObjectPtr& inst) {
+		if (inst->IsActivated() && inst->CheckCameraBounds())
 		{
 			inst->PrepareRendering(*this);
 			//PrepareRenderingCollider(inst->Collider);
