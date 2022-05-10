@@ -35,7 +35,7 @@ public:
 
 	void Destroy();
 	void Activate();
-	void Diactivate();
+	void Deactivate();
 
 	virtual void Move(const XMFLOAT3& vDirection, float distance);
 	virtual void MoveStrafe(float distance);

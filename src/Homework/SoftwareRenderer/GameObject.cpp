@@ -117,7 +117,7 @@ void GameObject::Activate()
 	SetActive(true);
 }
 
-void GameObject::Diactivate()
+void GameObject::Deactivate()
 {
 	SetActive(false);
 }
