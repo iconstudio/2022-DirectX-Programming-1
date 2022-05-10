@@ -90,8 +90,10 @@ private:
 
 	// 플레이어가 위치한 선로의 번호
 	size_t worldPlayerPositionIndex;
+	// 플레이어의 위치 (0~선로의 길이)
+	float playerPosition;
 	// 플레이어의 상대적 위치 (0~1)
-	float worldPlayerPosition;
+	float playerWorldRelativePosition;
 	// 플레이어의 기본 이동 속도 (초당 픽셀 거리)
 	float playerMoveSpeed = 3.0f;
 	// 선로 목록

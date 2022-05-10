@@ -18,7 +18,8 @@
 
 GameScene::GameScene(GameFramework& framework, int sz_x, int height, int sz_y)
 	: Framework(framework), Window(NULL)
-	, collisionAreaIndex(0), worldPlayerPositionIndex(0), worldPlayerPosition(0.0f)
+	, collisionAreaIndex(0), worldPlayerPositionIndex(0)
+	, playerPosition(0.0f), playerWorldRelativePosition(0)
 	, worldBoundary{ -sz_x / 2, -sz_y / 2, sz_x / 2, sz_y / 2 }
 	, globalMatrix(Matrix4x4::Identity())
 	, Instances(), staticBound(), Fragments()
