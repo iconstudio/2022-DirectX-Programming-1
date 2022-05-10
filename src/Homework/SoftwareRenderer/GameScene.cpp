@@ -207,11 +207,18 @@ void GameScene::Update(float elapsed_time)
 		myPlayer->Update(elapsed_time);
 	}
 
-	for (auto& instance : myInstances)
+	for (auto it = myInstances.begin(); it != myInstances.end(); it++)
 	{
+		auto& instance = *it;
+
 		if (instance->IsActivated())
 		{
 			instance->Update(elapsed_time);
+
+			if (instance->isKilled)
+			{
+				it = myInstances.erase(it);
+			}
 		}
 	}
 }
