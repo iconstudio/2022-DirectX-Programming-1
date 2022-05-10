@@ -7,7 +7,7 @@
 Rail::Rail(GameScene& scene)
 	: GameObject(scene)
 {
-	SetMesh(scene.meshRail);
+	isStatic = true;
 }
 
 Pillar::Pillar(GameScene& scene)
@@ -16,7 +16,7 @@ Pillar::Pillar(GameScene& scene)
 	, nodeBefore(nullptr), nodeNext(nullptr)
 	, distBefore(0.0f), distNext(0.0f)
 {
-	SetMesh(scene.meshPlayer);
+	isStatic = true;
 }
 
 void Pillar::SetHeight(float height)
