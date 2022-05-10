@@ -22,9 +22,20 @@ void Player::SetHwnd(HWND hwnd)
 	Window = hwnd;
 }
 
-void Player::AddBullet(shared_ptr<PlayerBullet> bullet)
+void Player::AddBullet(PlayerBullet* bullet)
 {
+	bullet->Deactivate();
+	bullet->SetParent(this);
+
 	myBulletPool.push_back(bullet);
+}
+
+void Player::ReturnBullet(PlayerBullet* bullet)
+{
+	if (bullet)
+	{
+		myBulletShooted--;
+	}
 }
 
 void Player::Crawl(DWORD dwdir, float accel)
@@ -103,18 +114,18 @@ void Player::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 		{
 			if (shootDelay <= 0 && myBulletShooted < myBulletMax)
 			{
-				auto mat = Transform.GetWorldMatrix();
-				mat._41 = 0;
-				mat._42 = 0;
-				mat._43 = 0;
+				auto bullet = FindLastBullet();
+				if (bullet)
+				{
+					auto mat = Transform.GetWorldMatrix();
 
-				auto bullet = Scene.CreateInstance<PlayerBullet>(GetPosition());
-				bullet->SetMesh(myMesh.myMeshPtr);
-				bullet->SetRotation(mat);
-				bullet->SetSpeed(4.0f);
+					Transform.SetWorldMatrix(mat);
+					bullet->SetMesh(myMesh.myMeshPtr);
+					bullet->SetSpeed(4.0f);
 
-				shootDelay = shootCooldown;
-				myBulletShooted++;
+					shootDelay = shootCooldown;
+					myBulletShooted++;
+				}
 			}
 		}
 		break;
@@ -230,6 +241,19 @@ void Player::OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	}
 }
 
+PlayerBullet* Player::FindLastBullet()
+{
+	for (const auto& bullet : myBulletPool)
+	{
+		if (!bullet->IsActivated())
+		{
+			return bullet;
+		}
+	}
+
+	return nullptr;
+}
+
 void Player::OnUpdateTransform()
 {
 	/*
@@ -241,9 +265,4 @@ void Player::OnUpdateTransform()
 
 	m_xmf4x4World._41 = m_xmf3Position.x; m_xmf4x4World._42 = m_xmf3Position.y; m_xmf4x4World._43 = m_xmf3Position.z;
 	*/
-}
-
-shared_ptr<PlayerBullet> Player::FindLastBullet() const
-{
-	return shared_ptr<PlayerBullet>();
 }

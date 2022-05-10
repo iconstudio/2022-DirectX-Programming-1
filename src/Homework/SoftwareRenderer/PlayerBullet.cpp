@@ -10,14 +10,40 @@ PlayerBullet::PlayerBullet(GameScene& scene)
 
 PlayerBullet::PlayerBullet(GameScene& scene, const XMFLOAT3& pos)
 	: GameObject(scene, pos)
-	, Damage(0.0f)
+	, myParent(nullptr)
+	, myDamage(0.0f)
+	, myDuration(3.0f), myLifetime(myDuration)
 {
 	SetMesh(scene.meshPlayerBullet);
 }
 
 void PlayerBullet::SetDamage(const float value)
 {
-	Damage = value;
+	myDamage = value;
+}
+
+void PlayerBullet::SetParent(Player* parent)
+{
+	myParent = parent;
+}
+
+void PlayerBullet::Update(float elapsed_time)
+{
+	if (0 < myLifetime)
+	{
+		myLifetime -= elapsed_time;
+	}
+	else
+	{
+		Deactivate();
+
+		if (myParent)
+		{
+			myParent->ReturnBullet(this);
+		}
+	}
+
+	GameObject::Update(elapsed_time);
 }
 
 void PlayerBullet::OnCollisionWall(const XMFLOAT3& reflection)
