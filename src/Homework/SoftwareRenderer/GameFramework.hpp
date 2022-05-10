@@ -19,6 +19,8 @@ public:
 
 private:
 	void SetHwnd(HWND hwnd);
+	bool TryPause();
+	void Resume();
 
 	void ClearFrameBuffer(COLORREF color);
 	void PresentFrameBuffer(HDC surface);
@@ -29,6 +31,7 @@ private:
 
 	HINSTANCE process;
 	HWND Window;
+	bool isPaused, autoPaused;
 
 	RECT myFrame;
 	HDC mySurface;

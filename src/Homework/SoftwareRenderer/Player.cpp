@@ -205,8 +205,10 @@ void Player::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 					Orientation |= DIR_BACKWARD;
 				}
 				break;
-				case VK_CONTROL:
+				case VK_ESCAPE:
 				{
+					Orientation = 0;
+					shootLocking = false;
 				}
 				break;
 			}

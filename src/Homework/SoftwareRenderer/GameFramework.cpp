@@ -7,6 +7,7 @@
 
 GameFramework::GameFramework()
 	: process(NULL), Window(NULL)
+	, isPaused(false), autoPaused(false)
 	, myFrame(), mySurface(NULL), myFrameBuffer(NULL)
 	, myTimer(make_unique<GameTimer>()), myScene(nullptr)
 	, myCamera(nullptr)
@@ -58,7 +59,7 @@ void GameFramework::Update()
 	myTimer->Tick(FPS_LIMIT);
 	auto delta_time = myTimer->GetTimeElapsed();
 
-	if (myScene)
+	if (!isPaused && myScene)
 	{
 		myScene->Update(delta_time);
 	}
@@ -89,6 +90,25 @@ void GameFramework::SetHwnd(HWND hwnd)
 	Window = hwnd;
 }
 
+bool GameFramework::TryPause()
+{
+	if (isPaused)
+	{
+		return false;
+	}
+	else
+	{
+		isPaused = true;
+		return true;
+	}
+}
+
+void GameFramework::Resume()
+{
+	isPaused = false;
+	autoPaused = false;
+}
+
 void GameFramework::ClearFrameBuffer(COLORREF color)
 {
 	HPEN hPen = CreatePen(PS_SOLID, 0, color);
@@ -117,7 +137,7 @@ void GameFramework::PresentFrameBuffer(HDC surface)
 
 void GameFramework::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	if (myScene)
+	if (!isPaused && myScene)
 	{
 		myScene->OnMouse(hwnd, msg, wp, lp);
 	}
@@ -125,7 +145,31 @@ void GameFramework::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
 void GameFramework::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	if (myScene)
+	switch (msg)
+	{
+		case WM_KEYDOWN:
+		{
+			switch (wp)
+			{
+				case VK_ESCAPE:
+				{
+					if (!TryPause())
+					{
+						Resume();
+					}
+				}
+				break;
+			}
+		}
+		break;
+
+		case WM_KEYUP:
+		{
+		}
+		break;
+	}
+
+	if (!isPaused && myScene)
 	{
 		myScene->OnKeyboard(hwnd, msg, wp, lp);
 	}
@@ -133,11 +177,6 @@ void GameFramework::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
 void GameFramework::OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	if (myScene)
-	{
-		myScene->OnHWND(hwnd, msg, wp, lp);
-	}
-
 	switch (msg)
 	{
 		case WM_ACTIVATE:
@@ -147,10 +186,20 @@ void GameFramework::OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			if (WA_INACTIVE == act)
 			{
 				myTimer->Stop();
+
+				if (TryPause())
+				{
+					autoPaused = true;
+				}
 			}
 			else
 			{
 				myTimer->Start();
+
+				if (autoPaused)
+				{
+					Resume();
+				}
 			}
 		}
 		break;
@@ -159,6 +208,11 @@ void GameFramework::OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 		{
 		}
 		break;
+	}
+
+	if (!isPaused && myScene)
+	{
+		myScene->OnHWND(hwnd, msg, wp, lp);
 	}
 }
 

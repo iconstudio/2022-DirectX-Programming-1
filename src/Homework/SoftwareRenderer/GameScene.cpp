@@ -168,7 +168,9 @@ void GameScene::CompleteBuilds()
 }
 
 void GameScene::Kill(ObjectPtr& obj)
-{}
+{
+
+}
 
 Enemy* GameScene::SpawnEnemy(ENEMY_TYPES type, const XMFLOAT3& pos)
 {
