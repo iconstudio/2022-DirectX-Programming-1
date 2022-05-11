@@ -4,10 +4,11 @@
 #include "GameCamera.hpp"
 #include "GameObject.hpp"
 #include "PlayerBullet.hpp"
+#include "Terrains.hpp"
 
 Player::Player()
 	: GameObject()
-	, myStatus(STATES::IDLE)
+	, myStatus(PLAYER_STATES::IDLE)
 	, Window(NULL), Cursor(), Orientation(0)
 	, Camera(nullptr)
 	, shootDelay(0.0f), shootCooldown(0.3f), shootLocking(false)
@@ -50,6 +51,26 @@ void Player::ReturnBullet(PlayerBullet* bullet)
 	}
 }
 
+void Player::RideOn(RailBorder* entrance)
+{
+	if (PLAYER_STATES::NORMAL == myStatus)
+	{
+		myStatus = PLAYER_STATES::RIDING;
+
+		SetPosition(entrance->GetPosition());
+	}
+}
+
+void Player::TakeOff(RailBorder* exit)
+{
+	if (PLAYER_STATES::RIDING == myStatus)
+	{
+		myStatus = PLAYER_STATES::NORMAL;
+
+		SetPosition(exit->myExit);
+	}
+}
+
 void Player::Crawl(DWORD dwdir, float accel)
 {
 	XMFLOAT3 dir = XMFLOAT3(0, 0, 0);
@@ -86,38 +107,41 @@ void Player::Rotate(float pitch, float yaw, float roll)
 
 void Player::Update(float elapsed_time)
 {
-	switch (myStatus)
+	if (PLAYER_STATES::IDLE != myStatus)
 	{
 		if (NULL != Window)
 		{
-			POINT ptCursorPos;
-			GetCursorPos(&ptCursorPos);
+			POINT temp_cursor;
+			GetCursorPos(&temp_cursor);
 
-			float cxMouseDelta = (float)(ptCursorPos.x - Cursor.x) / 4.0f;
-			float cyMouseDelta = (float)(ptCursorPos.y - Cursor.y) / 4.0f;
+			auto delta_mx = float(temp_cursor.x - Cursor.x) * 0.25f;
+			auto delta_my = float(temp_cursor.y - Cursor.y) * 0.25f;
 
-			if (cxMouseDelta || cyMouseDelta)
+			if (delta_mx || delta_my)
 			{
-				Rotate(0.0f, cxMouseDelta, 0.0f);
+				Rotate(delta_my * 0.5f, delta_mx, 0.0f);
+
+				XMFLOAT3 myRight = GetRight();
+				//TODO
 
 				if (GetFocus() == Window)
 				{
 					SetCursorPos(Cursor.x, Cursor.y);
-					GetCursorPos(&ptCursorPos);
+					GetCursorPos(&temp_cursor);
 				}
 			}
 
-			Cursor = ptCursorPos;
+			Cursor = temp_cursor;
 		}
 
-		if (Orientation)
+		if (PLAYER_STATES::NORMAL == myStatus)
 		{
-			Crawl(Orientation, 10.0f * elapsed_time); // 1000m/s^2
+			if (Orientation)
+			{
+				Crawl(Orientation, 10.0f * elapsed_time);
+			}
 		}
-	}
 
-	if (STATES::DEAD != myStatus)
-	{
 		if (0 < shootDelay)
 		{
 			shootDelay -= elapsed_time;
@@ -154,8 +178,15 @@ void Player::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		case WM_LBUTTONDOWN:
 		{
-			shootLocking = true;
-			SetCapture(hwnd);
+			if (PLAYER_STATES::IDLE == myStatus)
+			{
+				myStatus = PLAYER_STATES::NORMAL;
+			}
+			else if (PLAYER_STATES::DEAD != myStatus)
+			{
+				shootLocking = true;
+				SetCapture(hwnd);
+			}
 		}
 		break;
 
@@ -166,10 +197,14 @@ void Player::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
 		case WM_LBUTTONUP:
 		{
-			shootLocking = false;
-			if (GetCapture() == hwnd)
+			if (PLAYER_STATES::IDLE != myStatus && PLAYER_STATES::DEAD != myStatus)
 			{
-				ReleaseCapture();
+				shootLocking = false;
+
+				if (GetCapture() == hwnd)
+				{
+					ReleaseCapture();
+				}
 			}
 		}
 		break;

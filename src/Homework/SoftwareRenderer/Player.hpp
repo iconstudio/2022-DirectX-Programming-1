@@ -3,6 +3,11 @@
 #include "GameObject.hpp"
 #include "PlayerBullet.hpp"
 
+enum class PLAYER_STATES
+{
+	IDLE = 0, NORMAL, RIDING, DEAD
+};
+
 class Player : public GameObject
 {
 public:
@@ -17,6 +22,8 @@ public:
 	void AddBullet(PlayerBullet* bullet);
 	void ReturnBullet(PlayerBullet* bullet);
 
+	void RideOn(RailBorder* entrance);
+	void TakeOff(RailBorder* exit);
 	void Crawl(DWORD dwdir, float accel);
 
 	virtual void Move(const XMFLOAT3& dit, float distance);
@@ -28,17 +35,11 @@ public:
 	void OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	void OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
-	friend class GameCamera;
+	PLAYER_STATES myStatus;
 
 	const int myBulletMax;
 
 private:
-	enum class STATES
-	{
-		IDLE = 0, NORMAL, RIDING, DEAD
-	};
-	STATES myStatus;
-
 	PlayerBullet* FindLastBullet();
 
 	HWND Window;

@@ -31,7 +31,7 @@ void Pillar::SetHeight(float height)
 	myHeight = height;
 
 	auto& pos = Transform.GetPosition();
-	pos.y = height;
+	pos.y = height * 0.5f;
 
 	XMFLOAT3 field = XMFLOAT3(pos);
 	field.y += height * 0.5f;

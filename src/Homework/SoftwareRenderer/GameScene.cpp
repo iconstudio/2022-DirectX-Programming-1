@@ -133,7 +133,7 @@ void GameScene::BuildWorld()
 	Pillars.reserve(100);
 	for (int i = 0; i < 100; i++)
 	{
-		place.x = pillarStartPoint.x + std::cos(1.0f + float(i) / PI) * 10.0f;
+		place.x = pillarStartPoint.x + std::cos(1.0f + float(i) / PI) * 30.0f;
 		place.y = pillarStartPoint.y;
 		place.z = pillarStartPoint.z + i * pillar_place_z_gap;
 
@@ -508,7 +508,40 @@ void GameScene::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		case WM_KEYDOWN:
 		{
-
+			switch (wp)
+			{
+				case VK_SPACE:
+				{
+					if (myPlayer)
+					{
+						bool is_normal = (PLAYER_STATES::NORMAL == myPlayer->myStatus);
+						bool is_riding = (PLAYER_STATES::RIDING == myPlayer->myStatus);
+						if (myPlayer->CheckCollideWith(myEntrance))
+						{
+							if (is_normal)
+							{
+								myPlayer->RideOn(myEntrance);
+							}
+							else if (is_riding)
+							{
+								myPlayer->TakeOff(myEntrance);
+							}
+						}
+						else if (myPlayer->CheckCollideWith(myExit))
+						{
+							if (is_normal)
+							{
+								myPlayer->RideOn(myExit);
+							}
+							else if (is_riding)
+							{
+								myPlayer->TakeOff(myExit);
+							}
+						}
+					}
+				}
+				break;
+			}
 		}
 		break;
 

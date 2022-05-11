@@ -50,7 +50,7 @@ public:
 
 	void CreateRay(XMVECTOR& pick_pos, XMMATRIX& view, XMVECTOR& ray_pos, XMVECTOR& ray_dir);
 	int Raycast(XMVECTOR& pick_pos, XMMATRIX& view, float* max_distance);
-	bool CheckCollideWith(const GameObject* other) const;
+	bool CheckCollideWith(const GameEntity* other) const;
 
 	void OnUpdateTransform();
 
