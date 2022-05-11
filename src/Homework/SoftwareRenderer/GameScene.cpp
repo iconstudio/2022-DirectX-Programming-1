@@ -29,7 +29,7 @@ GameScene::GameScene(GameFramework& framework)
 	, playerPosition(0.0f), playerWorldRelativePosition(0)
 	, globalMatrix(Matrix4x4::Identity())
 	, myInstances(), staticInstances(), Fragments()
-	, Pillars(), myEntrance(nullptr), myExit(nullptr)
+	, Pillars(), boardFront(nullptr), boardBack(nullptr)
 	, myPlayer(nullptr), myCamera(nullptr)
 	, meshPlayer(nullptr), meshPlayerBullet(nullptr)
 	, meshEnemyCube(nullptr), meshEnemyManta(nullptr), meshEnemyBullet(nullptr)
@@ -163,14 +163,6 @@ void GameScene::BuildWorld()
 
 	if (0 < Pillars.size())
 	{
-		auto first = Pillars.front();
-		auto last = Pillars.back();
-
-		myEntrance = CreateInstance<RailBorder>(first->GetPosition());
-		myEntrance->SetMesh(meshEntrance);
-		myExit = CreateInstance<RailBorder>(last->GetPosition());
-		myExit->SetMesh(meshEntrance);
-
 		Pillar* current, * before;
 		for (auto pit = Pillars.begin() + 1; pit != Pillars.end(); pit++)
 		{
@@ -180,6 +172,20 @@ void GameScene::BuildWorld()
 			current->SetBefore(before);
 			before->SetNext(current);
 		}
+
+		auto first = Pillars.front();
+		boardFront = CreateInstance<RailBorder>(first->GetPosition());
+		boardFront->SetMesh(meshEntrance);
+
+		XMFLOAT3 temp_pos = Vector3::Add(boardFront->GetPosition(), XMFLOAT3(0, 1, 10));
+		boardFront->SetExit(temp_pos);
+
+		auto last = Pillars.back();
+		boardBack = CreateInstance<RailBorder>(last->GetPosition());
+		boardBack->SetMesh(meshEntrance);
+
+		temp_pos = Vector3::Add(boardBack->GetPosition(), XMFLOAT3(0, 1, -10));
+		boardBack->SetExit(temp_pos);
 	}
 }
 
@@ -516,26 +522,26 @@ void GameScene::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 					{
 						bool is_normal = (PLAYER_STATES::NORMAL == myPlayer->myStatus);
 						bool is_riding = (PLAYER_STATES::RIDING == myPlayer->myStatus);
-						if (myPlayer->CheckCollideWith(myEntrance))
+						if (myPlayer->CheckCollideWith(boardFront))
 						{
 							if (is_normal)
 							{
-								myPlayer->RideOn(myEntrance);
+								myPlayer->RideOn(boardFront);
 							}
 							else if (is_riding)
 							{
-								myPlayer->TakeOff(myEntrance);
+								myPlayer->TakeOff(boardFront);
 							}
 						}
-						else if (myPlayer->CheckCollideWith(myExit))
+						else if (myPlayer->CheckCollideWith(boardBack))
 						{
 							if (is_normal)
 							{
-								myPlayer->RideOn(myExit);
+								myPlayer->RideOn(boardBack);
 							}
 							else if (is_riding)
 							{
-								myPlayer->TakeOff(myExit);
+								myPlayer->TakeOff(boardBack);
 							}
 						}
 					}

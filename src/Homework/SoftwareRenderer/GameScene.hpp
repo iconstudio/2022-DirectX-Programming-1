@@ -82,7 +82,7 @@ private:
 	// 선로 목록
 	std::vector<Pillar*> Pillars;
 	// 출입구
-	RailBorder* myEntrance, * myExit;
+	RailBorder* boardFront, * boardBack;
 	// 플레이어가 위치한 선로의 번호
 	size_t worldPlayerPositionIndex;
 	// 플레이어의 위치 (0~선로의 길이)

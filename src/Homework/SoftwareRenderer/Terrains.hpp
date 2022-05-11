@@ -7,6 +7,8 @@ class RailBorder : public GameStaticObject
 public:
 	RailBorder();
 
+	void SetExit(const XMFLOAT3& pos);
+
 	XMFLOAT3 myExit;
 };
 
@@ -30,4 +32,5 @@ public:
 
 	Pillar* nodeBefore, *nodeNext;
 	float distBefore, distNext;
+	XMFLOAT3 normalToNext;
 };

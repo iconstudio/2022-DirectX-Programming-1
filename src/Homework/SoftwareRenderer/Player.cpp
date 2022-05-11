@@ -90,7 +90,7 @@ void Player::Crawl(DWORD dwdir, float accel)
 	if (dwdir & DIR_BACKWARD) dir = Vector3::Add(dir, look, -1.0f);
 
 	SetDirection(dir);
-	AddSpeed(accel, 0.1f); // 10m/s
+	AddSpeed(accel, 0.3f); // 0.3m/s
 }
 
 void Player::Move(const XMFLOAT3& vDirection, float distance)

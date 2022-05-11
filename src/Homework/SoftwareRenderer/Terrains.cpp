@@ -11,6 +11,11 @@ RailBorder::RailBorder()
 	SetColor(RGB(120, 160, 40));
 }
 
+void RailBorder::SetExit(const XMFLOAT3& pos)
+{
+	myExit = pos;
+}
+
 Rail::Rail()
 	: GameStaticObject()
 {
