@@ -119,7 +119,16 @@ void Player::Update(float elapsed_time)
 
 			if (delta_mx || delta_my)
 			{
-				Rotate(delta_my * 0.5f, delta_mx, 0.0f);
+				if (PLAYER_STATES::RIDING == myStatus)
+				{
+					Rotate(delta_my * 0.5f, delta_mx, 0.0f);
+				}
+				else
+				{
+					//TODO: 버그 있음
+					Camera->Rotate(delta_my * 0.5f, delta_mx, 0.0f);
+					GameObject::Rotate(0.0f, delta_mx, 0.0f);
+				}
 
 				XMFLOAT3 myRight = GetRight();
 				//TODO
@@ -154,10 +163,12 @@ void Player::Update(float elapsed_time)
 				auto bullet = FindLastBullet();
 				if (bullet)
 				{
+					const auto& cam_tranform = Camera->Transform;
+
 					bullet->Activate();
-					bullet->SetWorldMatrix(Transform.GetWorldMatrix());
-					bullet->SetDirection(XMFLOAT3(Transform.GetLook()));
-					bullet->SetSpeed(1.0f);
+					bullet->SetWorldMatrix(cam_tranform.GetWorldMatrix());
+					bullet->SetDirection(XMFLOAT3(cam_tranform.GetLook()));
+					bullet->SetSpeed(1.2f);
 					bullet->Ready();
 
 					shootDelay = shootCooldown;
