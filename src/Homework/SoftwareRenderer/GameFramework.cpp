@@ -85,7 +85,7 @@ void GameFramework::PrepareRendering()
 
 void GameFramework::Render(HDC surface)
 {
-	ClearFrameBuffer(RGB(230, 230, 230)); // FRAMEBUFFER_CLS_COLOR
+	ClearFrameBuffer(FRAMEBUFFER_CLS_COLOR);
 
 	if (myScene)
 	{
