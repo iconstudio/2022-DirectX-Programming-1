@@ -74,6 +74,51 @@ void GameCamera::SetRotation(XMFLOAT4X4&& tfrm)
 	Transform.SetRotation(std::forward<XMFLOAT4X4>(tfrm));
 }
 
+void GameCamera::GenerateViewMatrix()
+{
+	auto& myRight = Transform.GetRight();
+	auto& myUp = Transform.GetUp();
+	auto& myLook = Transform.GetLook();
+	auto myPosition = XMFLOAT3(Transform.GetPosition());
+
+	Transform.myRight = Vector3::Normalize(XMFLOAT3(myRight));
+	Transform.myUp = Vector3::Normalize(XMFLOAT3(myUp));
+	Transform.myLook = Vector3::Normalize(XMFLOAT3(myLook));
+
+	// 카메라를 위한 카메라 변환 행렬
+	// 1행
+	projectionView._11 = myRight.x;
+	projectionView._12 = myUp.x;
+	projectionView._13 = myLook.x;
+
+	// 2행
+	projectionView._21 = myRight.y;
+	projectionView._22 = myUp.y;
+	projectionView._23 = myLook.y;
+
+	// 3행
+	projectionView._31 = myRight.z;
+	projectionView._32 = myUp.z;
+	projectionView._33 = myLook.z;
+
+	// 4행
+	projectionView._41 = -Vector3::DotProduct(myPosition, XMFLOAT3(myRight));
+	projectionView._42 = -Vector3::DotProduct(myPosition, XMFLOAT3(myUp));
+	projectionView._43 = -Vector3::DotProduct(myPosition, XMFLOAT3(myLook));
+
+	// 원근 투영 행렬
+	projectionPerspective = Matrix4x4::Multiply(projectionView, m_xmf4x4PerspectiveProject);
+
+	// 직교 투영 행렬
+	projectionOrthographic = Matrix4x4::Multiply(projectionView, m_xmf4x4ViewOrthographicProject);
+
+	// 카메라를 위한 월드 변환 행렬
+	// 충돌체를 월드 위치로 옮긴다.
+	const auto& world_mat = Transform.GetWorldMatrix();
+
+	StaticCollider.Transform(Collider, XMLoadFloat4x4(&world_mat));
+}
+
 void GameCamera::Update(const XMFLOAT3& look_at, const GameTransform& follower, const XMFLOAT3& up, float time_elapsed)
 {
 	const auto& fwlWorld = follower.GetWorldMatrix();
@@ -118,51 +163,6 @@ void GameCamera::Update(const XMFLOAT3& look_at, const GameTransform& follower, 
 	}
 
 	LookAt(look_at, up);
-}
-
-void GameCamera::GenerateViewMatrix()
-{
-	auto& myRight = Transform.GetRight();
-	auto& myUp = Transform.GetUp();
-	auto& myLook = Transform.GetLook();
-	auto myPosition = XMFLOAT3(Transform.GetPosition());
-
-	Transform.myRight = Vector3::Normalize(XMFLOAT3(myRight));
-	Transform.myUp = Vector3::Normalize(XMFLOAT3(myUp));
-	Transform.myLook = Vector3::Normalize(XMFLOAT3(myLook));
-
-	// 카메라를 위한 카메라 변환 행렬
-	// 1행
-	projectionView._11 = myRight.x;
-	projectionView._12 = myUp.x;
-	projectionView._13 = myLook.x;
-
-	// 2행
-	projectionView._21 = myRight.y;
-	projectionView._22 = myUp.y;
-	projectionView._23 = myLook.y;
-
-	// 3행
-	projectionView._31 = myRight.z;
-	projectionView._32 = myUp.z;
-	projectionView._33 = myLook.z;
-
-	// 4행
-	projectionView._41 = -Vector3::DotProduct(myPosition, XMFLOAT3(myRight));
-	projectionView._42 = -Vector3::DotProduct(myPosition, XMFLOAT3(myUp));
-	projectionView._43 = -Vector3::DotProduct(myPosition, XMFLOAT3(myLook));
-
-	// 원근 투영 행렬
-	projectionPerspective = Matrix4x4::Multiply(projectionView, m_xmf4x4PerspectiveProject);
-
-	// 직교 투영 행렬
-	projectionOrthographic = Matrix4x4::Multiply(projectionView, m_xmf4x4ViewOrthographicProject);
-
-	// 카메라를 위한 월드 변환 행렬
-	// 충돌체를 월드 위치로 옮긴다.
-	const auto& world_mat = Transform.GetWorldMatrix();
-
-	StaticCollider.Transform(Collider, XMLoadFloat4x4(&world_mat));
 }
 
 void GameCamera::LookAt(const XMFLOAT3 pos, const XMFLOAT3 look, const XMFLOAT3 up)
