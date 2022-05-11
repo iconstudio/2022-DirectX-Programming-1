@@ -163,6 +163,9 @@ void GameScene::BuildWorld()
 
 	if (0 < Pillars.size())
 	{
+		GameTransform transform{};
+		auto& world_mat = transform.GetWorldMatrix();
+
 		Pillar* current, * before;
 		for (auto pit = Pillars.begin() + 1; pit != Pillars.end(); pit++)
 		{
@@ -171,6 +174,20 @@ void GameScene::BuildWorld()
 
 			current->SetBefore(before);
 			before->SetNext(current);
+
+			const auto& from = before->myTop;
+			const auto& to = current->myTop;
+
+			const auto& right = transform.Right;
+			const auto& vector = Vector3::Subtract(to, from);
+			const auto& up = Vector3::CrossProduct(vector, right);
+
+			transform.SetPosition(from);
+			transform.LookAt(to, up);
+
+			auto rail = CreateInstance<Rail>(before->myTop);
+			rail->SetMesh(meshRail);
+			rail->SetWorldMatrix(world_mat);
 		}
 
 		auto first = Pillars.front();
