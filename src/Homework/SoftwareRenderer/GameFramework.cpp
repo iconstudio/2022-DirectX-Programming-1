@@ -5,6 +5,9 @@
 #include "GameCamera.hpp"
 #include "Player.hpp"
 
+// 프레임 버퍼 색상
+constexpr COLORREF FRAMEBUFFER_CLS_COLOR = C_SMOG;
+
 GameFramework::GameFramework()
 	: process(NULL), Window(NULL)
 	, isPaused(false), autoPaused(false)
@@ -81,7 +84,7 @@ void GameFramework::PrepareRendering()
 
 void GameFramework::Render(HDC surface)
 {
-	ClearFrameBuffer(FRAMEBUFFER_CLS_COLOR);
+	ClearFrameBuffer(RGB(230, 230, 230)); // FRAMEBUFFER_CLS_COLOR
 
 	if (myScene)
 	{

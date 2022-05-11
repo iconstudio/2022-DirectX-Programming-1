@@ -3,8 +3,8 @@
 
 constexpr FLOAT FPS_LIMIT = 100.0f;
 constexpr COLORREF C_WHITE = RGB(0xff, 0xff, 0xff);
+constexpr COLORREF C_SMOG = RGB(0xe6, 0xe6, 0xe6);
 constexpr COLORREF C_GREEN = RGB(0x00, 0x80, 0x00);
-constexpr COLORREF FRAMEBUFFER_CLS_COLOR = C_GREEN;
 
 // 게임 월드의 가로 너비 (x)
 constexpr float WORLD_H = 600.0f;
