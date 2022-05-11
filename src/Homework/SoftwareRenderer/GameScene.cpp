@@ -22,6 +22,8 @@ constexpr float COLLIDE_AREA_H = 30.0f;
 constexpr float COLLIDE_AREA_V = 10.0f;
 // 경계 타일의 세로 너비 (z)
 constexpr float COLLIDE_AREA_U = 30.0f;
+// 선로의 길이 (z)
+constexpr float RAIL_LENGTH = 16.0f;
 
 GameScene::GameScene(GameFramework& framework)
 	: Framework(framework), Window(NULL)
@@ -96,7 +98,7 @@ void GameScene::BuildMeshes()
 	{
 		meshPillars[i] = MakeCubeMesh(2.0f, 1.0f + float(i) * 1.5f, 2.0f);
 	}
-	meshRail = MakeCubeMesh(1.0f, 1.5f, 10.0f);
+	meshRail = MakeCubeMesh(6.0f, 1.5f, RAIL_LENGTH);
 }
 
 void GameScene::BuildWorld()
@@ -179,11 +181,12 @@ void GameScene::BuildWorld()
 			const auto& to = current->myTop;
 
 			const auto& right = transform.Right;
-			const auto& vector = Vector3::Subtract(to, from);
-			const auto& up = Vector3::CrossProduct(vector, right);
+			const auto& look = Vector3::Normalize(Vector3::Subtract(to, from));
+			const auto& up = Vector3::Normalize(Vector3::CrossProduct(look, right));
 
 			transform.SetPosition(from);
 			transform.LookAt(to, up);
+			transform.Move(XMFLOAT3(transform.GetLook()), RAIL_LENGTH * 0.5f);
 
 			auto rail = CreateInstance<Rail>(before->myTop);
 			rail->SetMesh(meshRail);
@@ -194,15 +197,17 @@ void GameScene::BuildWorld()
 		boardFront = CreateInstance<RailBorder>(first->GetPosition());
 		boardFront->SetMesh(meshEntrance);
 
-		XMFLOAT3 temp_pos = Vector3::Add(boardFront->GetPosition(), XMFLOAT3(0, 1, 10));
-		boardFront->SetExit(temp_pos);
+		//XMFLOAT3 temp_pos = Vector3::Add(boardFront->GetPosition(), XMFLOAT3(0, 1, 10));
+		//boardFront->SetExit(temp_pos);
+		boardFront->SetExit(boardFront->GetPosition());
 
 		auto last = Pillars.back();
 		boardBack = CreateInstance<RailBorder>(last->GetPosition());
 		boardBack->SetMesh(meshEntrance);
 
-		temp_pos = Vector3::Add(boardBack->GetPosition(), XMFLOAT3(0, 1, -10));
-		boardBack->SetExit(temp_pos);
+		//temp_pos = Vector3::Add(boardBack->GetPosition(), XMFLOAT3(0, 1, -10));
+		//boardBack->SetExit(temp_pos);
+		boardBack->SetExit(boardBack->GetPosition());
 	}
 }
 
