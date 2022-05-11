@@ -33,6 +33,12 @@ public:
 	const int myBulletMax;
 
 private:
+	enum class STATES
+	{
+		IDLE = 0, NORMAL, RIDING, DEAD
+	};
+	STATES myStatus;
+
 	PlayerBullet* FindLastBullet();
 
 	HWND Window;

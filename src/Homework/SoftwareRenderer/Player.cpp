@@ -7,6 +7,7 @@
 
 Player::Player()
 	: GameObject()
+	, myStatus(STATES::IDLE)
 	, Window(NULL), Cursor(), Orientation(0)
 	, Camera(nullptr)
 	, shootDelay(0.0f), shootCooldown(0.3f), shootLocking(false)
@@ -85,53 +86,59 @@ void Player::Rotate(float pitch, float yaw, float roll)
 
 void Player::Update(float elapsed_time)
 {
-	if (NULL != Window)
+	switch (myStatus)
 	{
-		POINT ptCursorPos;
-		GetCursorPos(&ptCursorPos);
-
-		float cxMouseDelta = (float)(ptCursorPos.x - Cursor.x) / 4.0f;
-		float cyMouseDelta = (float)(ptCursorPos.y - Cursor.y) / 4.0f;
-
-		if (cxMouseDelta || cyMouseDelta)
+		if (NULL != Window)
 		{
-			Rotate(0.0f, cxMouseDelta, 0.0f);
+			POINT ptCursorPos;
+			GetCursorPos(&ptCursorPos);
 
-			if (GetFocus() == Window)
+			float cxMouseDelta = (float)(ptCursorPos.x - Cursor.x) / 4.0f;
+			float cyMouseDelta = (float)(ptCursorPos.y - Cursor.y) / 4.0f;
+
+			if (cxMouseDelta || cyMouseDelta)
 			{
-				SetCursorPos(Cursor.x, Cursor.y);
-				GetCursorPos(&ptCursorPos);
+				Rotate(0.0f, cxMouseDelta, 0.0f);
+
+				if (GetFocus() == Window)
+				{
+					SetCursorPos(Cursor.x, Cursor.y);
+					GetCursorPos(&ptCursorPos);
+				}
 			}
+
+			Cursor = ptCursorPos;
 		}
 
-		Cursor = ptCursorPos;
-	}
-
-	if (Orientation)
-	{
-		Crawl(Orientation, 10.0f * elapsed_time); // 1000m/s^2
-	}
-
-	if (0 < shootDelay)
-	{
-		shootDelay -= elapsed_time;
-	}
-
-	if (shootLocking)
-	{
-		if (shootDelay <= 0 && myBulletShooted < myBulletMax)
+		if (Orientation)
 		{
-			auto bullet = FindLastBullet();
-			if (bullet)
-			{
-				bullet->Activate();
-				bullet->SetWorldMatrix(Transform.GetWorldMatrix());
-				bullet->SetDirection(XMFLOAT3(Transform.GetLook()));
-				bullet->SetSpeed(1.0f);
-				bullet->Ready();
+			Crawl(Orientation, 10.0f * elapsed_time); // 1000m/s^2
+		}
+	}
 
-				shootDelay = shootCooldown;
-				myBulletShooted++;
+	if (STATES::DEAD != myStatus)
+	{
+		if (0 < shootDelay)
+		{
+			shootDelay -= elapsed_time;
+		}
+
+		if (shootLocking)
+		{
+			if (shootDelay <= 0 && myBulletShooted < myBulletMax)
+			{
+				auto bullet = FindLastBullet();
+				if (bullet)
+				{
+					bullet->Activate();
+					bullet->SetWorldMatrix(Transform.GetWorldMatrix());
+					bullet->SetDirection(XMFLOAT3(Transform.GetLook()));
+					bullet->SetSpeed(1.0f);
+					bullet->Ready();
+
+					shootDelay = shootCooldown;
+					myBulletShooted++;
+				}
 			}
 		}
 	}
