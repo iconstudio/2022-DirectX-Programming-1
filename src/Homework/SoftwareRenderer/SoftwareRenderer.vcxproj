@@ -182,6 +182,7 @@
     <ClInclude Include="GameFramework.hpp" />
     <ClInclude Include="GameMesh.hpp" />
     <ClInclude Include="GameObject.hpp" />
+    <ClInclude Include="GameParticle.hpp" />
     <ClInclude Include="GamePipeline.hpp" />
     <ClInclude Include="GameStaticObject.hpp" />
     <ClInclude Include="GameTimer.hpp" />
@@ -209,6 +210,7 @@
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="GameMesh.cpp" />
     <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="GameParticle.cpp" />
     <ClCompile Include="GamePipeline.cpp" />
     <ClCompile Include="GameStaticObject.cpp" />
     <ClCompile Include="GameTimer.cpp" />

@@ -102,6 +102,9 @@
     <ClInclude Include="GameEntity.hpp">
       <Filter>헤더 파일\System</Filter>
     </ClInclude>
+    <ClInclude Include="GameParticle.hpp">
+      <Filter>헤더 파일\System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -175,6 +178,9 @@
     </ClCompile>
     <ClCompile Include="PlaneMesh.cpp">
       <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="GameParticle.cpp">
+      <Filter>소스 파일\System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
