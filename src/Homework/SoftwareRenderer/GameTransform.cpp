@@ -76,12 +76,12 @@ void GameTransform::Translate(XMFLOAT3&& shift)
 
 void GameTransform::Move(const XMFLOAT3& dir, float distance)
 {
-	Translate(Vector3::ScalarProduct(Vector3::Normalize(dir), distance));
+	Translate(Vector3::ScalarProduct(dir, distance));
 }
 
 void GameTransform::Move(XMFLOAT3&& dir, float distance)
 {
-	Translate(Vector3::ScalarProduct(Vector3::Normalize(std::forward<XMFLOAT3>(dir)), distance));
+	Translate(Vector3::ScalarProduct(std::forward<XMFLOAT3>(dir), distance));
 }
 
 void GameTransform::MoveStrafe(float distance)
@@ -130,7 +130,7 @@ void GameTransform::Rotate(const XMFLOAT3& axis, float angle)
 
 void GameTransform::LookTo(const XMFLOAT3& look, const XMFLOAT3& up)
 {
-	auto&& view = Matrix4x4::LookToLH(XMFLOAT3(GetPosition()), look, up);
+	const auto&& view = Matrix4x4::LookToLH(XMFLOAT3(GetPosition()), look, up);
 
 	World._11 = view._11; World._12 = view._21; World._13 = view._31;
 
@@ -141,7 +141,7 @@ void GameTransform::LookTo(const XMFLOAT3& look, const XMFLOAT3& up)
 
 void GameTransform::LookAt(const XMFLOAT3& look, const XMFLOAT3& up)
 {
-	auto&& view = Matrix4x4::LookAtLH(XMFLOAT3(GetPosition()), look, up);
+	const auto&& view = Matrix4x4::LookAtLH(XMFLOAT3(GetPosition()), look, up);
 
 	World._11 = view._11; World._12 = view._21; World._13 = view._31;
 
