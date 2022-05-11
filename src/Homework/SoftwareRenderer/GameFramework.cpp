@@ -71,6 +71,7 @@ void GameFramework::Update()
 	if (!isPaused && myScene)
 	{
 		myScene->Update(delta_time);
+		SetCursor(NULL);
 	}
 }
 
@@ -106,7 +107,7 @@ bool GameFramework::TryPause()
 		return false;
 	}
 	else
-	{
+	{ 
 		isPaused = true;
 		return true;
 	}

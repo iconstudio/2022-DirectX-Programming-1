@@ -268,34 +268,6 @@ void GameScene::CompleteBuilds()
 	}
 }
 
-Enemy* GameScene::SpawnEnemy(ENEMY_TYPES type, const XMFLOAT3& pos)
-{
-	switch (type)
-	{
-		case ENEMY_TYPES::CUBE:
-		{
-			Enemy* instance_ptr = CreateInstance<EnemyCube>(pos);
-			instance_ptr->SetMesh(meshEnemyCube);
-			instance_ptr->SetColor(RGB(255, 0, 0));
-
-			return instance_ptr;
-		}
-		break;
-
-		case ENEMY_TYPES::MANTA:
-		{
-			Enemy* instance_ptr = CreateInstance<EnemyManta>(pos);
-			instance_ptr->SetMesh(meshEnemyManta);
-			instance_ptr->SetColor(RGB(255, 0, 0));
-
-			return instance_ptr;
-		}
-		break;
-	}
-
-	return nullptr;
-}
-
 void GameScene::Update(float elapsed_time)
 {
 	if (myPlayer)
@@ -522,6 +494,34 @@ Type* GameScene::CreateInstance(XMFLOAT3&& position)
 	else
 	{
 		throw "인스턴스 생성 오류!";
+	}
+
+	return nullptr;
+}
+
+Enemy* GameScene::SpawnEnemy(ENEMY_TYPES type, const XMFLOAT3& pos)
+{
+	switch (type)
+	{
+		case ENEMY_TYPES::CUBE:
+		{
+			Enemy* instance_ptr = CreateInstance<EnemyCube>(pos);
+			instance_ptr->SetMesh(meshEnemyCube);
+			instance_ptr->SetColor(RGB(255, 0, 0));
+
+			return instance_ptr;
+		}
+		break;
+
+		case ENEMY_TYPES::MANTA:
+		{
+			Enemy* instance_ptr = CreateInstance<EnemyManta>(pos);
+			instance_ptr->SetMesh(meshEnemyManta);
+			instance_ptr->SetColor(RGB(255, 0, 0));
+
+			return instance_ptr;
+		}
+		break;
 	}
 
 	return nullptr;
