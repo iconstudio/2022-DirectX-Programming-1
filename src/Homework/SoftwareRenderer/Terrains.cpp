@@ -23,7 +23,7 @@ void RailBorder::SetExit(const XMFLOAT3& pos)
 Rail::Rail()
 	: Rail(XMFLOAT3())
 {
-	SetColor(RGB(10, 128, 255));
+	SetColor(RGB(255, 128, 10));
 }
 
 Rail::Rail(const XMFLOAT3& pos)
