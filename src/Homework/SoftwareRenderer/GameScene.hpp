@@ -3,10 +3,17 @@
 #include "GameCamera.hpp"
 #include "GameObject.hpp"
 #include "GameStaticObject.hpp"
+#include "GameParticle.hpp"
 
 using EntityPtr = shared_ptr<GameEntity>;
 using ObjectPtr = shared_ptr<GameObject>;
 using StaticPtr = shared_ptr<GameStaticObject>;
+using EffectPtr = shared_ptr<GameParticle>;
+
+struct TerrainChunk
+{
+
+};
 
 class GameScene
 {
@@ -39,6 +46,9 @@ private:
 	void BuildWorld();
 	void BuildObjects();
 	void CompleteBuilds();
+
+	template<class Type>
+	Type* CreateInstance();
 
 	template<class Type>
 	Type* CreateInstance(float x, float y, float z);
@@ -75,12 +85,16 @@ private:
 	std::vector<StaticPtr> staticInstances;
 	// 씬 내의 동적인 인스턴스
 	std::vector<ObjectPtr> myInstances;
+	// 씬 내의 동적인 인스턴스
+	std::vector<EffectPtr> myParticles;
 
 	// 기준 충돌 영역
 	size_t collisionAreaIndex;
 
 	// 선로 목록
 	std::vector<Pillar*> Pillars;
+	// 지형 정보
+	std::vector<TerrainChunk> Terrain;
 	// 출입구
 	RailBorder* boardFront, * boardBack;
 	// 플레이어가 위치한 선로의 번호
@@ -108,7 +122,7 @@ private:
 	shared_ptr<GameCamera> myCamera;
 
 	// 월드 경계
-	RECT worldBoundary;
+	struct { float left; float right; float top; float bottom; } worldBoundary;
 
 	// 플레이어 생성 위치
 	XMFLOAT3 playerSpawnPoint = XMFLOAT3{ 0.0f, 0.5f, 1.0f };

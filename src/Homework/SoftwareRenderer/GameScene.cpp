@@ -30,7 +30,7 @@ GameScene::GameScene(GameFramework& framework)
 	, collisionAreaIndex(0), worldPlayerPositionIndex(0)
 	, playerPosition(0.0f), playerWorldRelativePosition(0)
 	, globalMatrix(Matrix4x4::Identity())
-	, myInstances(), staticInstances(), Fragments()
+	, myInstances(100), staticInstances(200), myParticles(200), Fragments()
 	, Pillars(), boardFront(nullptr), boardBack(nullptr)
 	, myPlayer(nullptr), myCamera(nullptr)
 	, meshPlayer(nullptr), meshPlayerBullet(nullptr)
@@ -38,11 +38,10 @@ GameScene::GameScene(GameFramework& framework)
 	, meshPillars(), meshRail(nullptr)
 {
 	ZeroMemory(meshPillars, sizeof(meshPillars));
-	Fragments.reserve(300);
+
 	Fragments.clear();
-	staticInstances.reserve(100);
 	staticInstances.clear();
-	myInstances.reserve(300);
+	myParticles.clear();
 	myInstances.clear();
 }
 
@@ -124,7 +123,6 @@ void GameScene::BuildWorld()
 		}
 	}
 
-	//constexpr float pillar_count = 40.0f;
 	constexpr float pillar_place_z_gap = 14.0f;
 	XMFLOAT3 place{};
 
@@ -194,20 +192,30 @@ void GameScene::BuildWorld()
 		}
 
 		auto first = Pillars.front();
-		boardFront = CreateInstance<RailBorder>(first->GetPosition());
+		boardFront = CreateInstance<RailBorder>();
 		boardFront->SetMesh(meshEntrance);
 
-		//XMFLOAT3 temp_pos = Vector3::Add(boardFront->GetPosition(), XMFLOAT3(0, 1, 10));
-		//boardFront->SetExit(temp_pos);
-		boardFront->SetExit(boardFront->GetPosition());
+		XMFLOAT3 from_pos = first->GetPosition();
+		from_pos.y = 0.0f;
+
+		XMFLOAT3 to_pos = Vector3::Add(from_pos, XMFLOAT3(0, 0, -2));
+		transform.SetPosition(from_pos);
+		transform.LookAt(to_pos, GameTransform::Up);
+		boardFront->SetWorldMatrix(world_mat);
+		boardFront->SetExit(to_pos);
 
 		auto last = Pillars.back();
 		boardBack = CreateInstance<RailBorder>(last->GetPosition());
 		boardBack->SetMesh(meshEntrance);
 
-		//temp_pos = Vector3::Add(boardBack->GetPosition(), XMFLOAT3(0, 1, -10));
-		//boardBack->SetExit(temp_pos);
-		boardBack->SetExit(boardBack->GetPosition());
+		from_pos = last->GetPosition();
+		from_pos.y = 0.0f;
+
+		to_pos = Vector3::Add(from_pos, XMFLOAT3(0, 0, -2));
+		transform.SetPosition(from_pos);
+		transform.LookAt(to_pos, GameTransform::Up);
+		boardBack->SetWorldMatrix(world_mat);
+		boardBack->SetExit(to_pos);
 	}
 }
 
@@ -217,7 +225,7 @@ void GameScene::BuildObjects()
 	myPlayer->SetHwnd(Window);
 	myPlayer->SetPosition(playerSpawnPoint);
 	myPlayer->SetMesh(meshPlayer);
-	myPlayer->SetColor(RGB(0, 0, 255));
+	myPlayer->SetColor(RGB(128, 128, 255));
 	myPlayer->SetCamera(myCamera);
 
 	const auto count = myPlayer->myBulletMax;
@@ -225,7 +233,6 @@ void GameScene::BuildObjects()
 	{
 		auto bullet = CreateInstance<PlayerBullet>(playerSpawnPoint);
 		bullet->SetMesh(meshPlayerBullet);
-		bullet->SetColor(0);
 		bullet->SetDamage(3.0f);
 
 		myPlayer->AddBullet(bullet);
@@ -467,6 +474,12 @@ void GameScene::PrepareRenderingCollider(const BoundingFrustum& collider)
 }
 
 template<class Type>
+Type* GameScene::CreateInstance()
+{
+	return CreateInstance<Type>(std::move(XMFLOAT3()));
+}
+
+template<class Type>
 Type* GameScene::CreateInstance(float x, float y, float z)
 {
 	return CreateInstance<Type>(std::move(XMFLOAT3(x, y, z)));
@@ -486,7 +499,11 @@ Type* GameScene::CreateInstance(XMFLOAT3&& position)
 	{
 		inst->SetPosition(std::forward<XMFLOAT3>(position));
 
-		if constexpr (std::is_base_of_v<GameStaticObject, Type>)
+		if constexpr (std::is_base_of_v<GameParticle, Type>)
+		{
+			myParticles.push_back(EffectPtr(inst));
+		}
+		else if constexpr (std::is_base_of_v<GameStaticObject, Type>)
 		{
 			staticInstances.push_back(StaticPtr(inst));
 		}
