@@ -67,11 +67,11 @@ void GameScene::Start()
 
 void GameScene::BuildMeshes()
 {
-	auto MakeCubeMesh = [](float h, float v, float d) -> shared_ptr<CMesh> {
+	auto MakeCubeMesh = [](float h, float v, float d) -> shared_ptr<CMesh>&& {
 		return static_pointer_cast<CMesh>(make_shared<CubeMesh>(h, v, d));
 	};
 
-	auto MakePlaneMesh = [](float w, float h) -> shared_ptr<CMesh> {
+	auto MakePlaneMesh = [](float w, float h) -> shared_ptr<CMesh>&& {
 		return static_pointer_cast<CMesh>(make_shared<PlaneMesh>(w, h));
 	};
 
