@@ -8,7 +8,7 @@ public:
 	GameParticle(XMFLOAT3&& position, XMFLOAT3&& dir, float speed, float duration);
 	virtual ~GameParticle();
 
-	virtual constexpr GOBJECT_TAGS GetTag() const { return GOBJECT_TAGS::NONE; }
+	constexpr GOBJECT_TAGS GetTag() const override { return GOBJECT_TAGS::NONE; }
 
 	virtual void Update(float elapsed_time);
 

@@ -12,9 +12,9 @@ class Player : public GameObject
 {
 public:
 	Player();
-	virtual ~Player();
+	~Player();
 
-	virtual constexpr GOBJECT_TAGS GetTag() const { return GOBJECT_TAGS::PLAYER; }
+	constexpr GOBJECT_TAGS GetTag() const override { return GOBJECT_TAGS::PLAYER; }
 
 	void SetHwnd(HWND hwnd);
 	void SetCamera(shared_ptr<GameCamera>& cam);
@@ -26,10 +26,10 @@ public:
 	void TakeOff(RailBorder* exit);
 	void Crawl(DWORD dwdir, float accel);
 
-	virtual void Move(const XMFLOAT3& dit, float distance);
-	virtual void Rotate(float pitch, float yaw, float roll);
+	void Move(const XMFLOAT3& dit, float distance) override;
+	void Rotate(float pitch, float yaw, float roll) override;
 
-	virtual void Update(float elapsed_time) override;
+	void Update(float elapsed_time) override;
 
 	void OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	void OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -47,6 +47,7 @@ private:
 	DWORD Orientation;
 
 	shared_ptr<GameCamera> Camera;
+	GameTransform mySight;
 
 	float shootDelay;
 	const float shootCooldown;

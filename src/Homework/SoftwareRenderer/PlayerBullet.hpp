@@ -8,16 +8,16 @@ public:
 	PlayerBullet();
 	PlayerBullet(const XMFLOAT3& pos);
 
-	constexpr GOBJECT_TAGS GetTag() const { return GOBJECT_TAGS::PLAYER_BULLET; }
+	constexpr GOBJECT_TAGS GetTag() const override { return GOBJECT_TAGS::PLAYER_BULLET; }
 
 	void SetParent(Player* parent);
 	void SetDamage(const float value);
 
 	void Ready();
-	void Update(float elapsed_time);
+	void Update(float elapsed_time) override;
 
 	void OnCollisionWall(const XMFLOAT3& reflection);
-	void OnCollision(GameObject* other);
+	void OnCollisionEnter(GameObject* other) override;
 
 	Player* myParent;
 

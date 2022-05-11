@@ -19,7 +19,7 @@ public:
 
 	float GetDistanceFromPlayer() const;
 
-	virtual void OnCollisionEnter(GameObject* other);
+	virtual void OnCollisionEnter(GameObject* other) override;
 
 	Player* Human;
 

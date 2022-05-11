@@ -53,5 +53,5 @@ void PlayerBullet::Update(float elapsed_time)
 void PlayerBullet::OnCollisionWall(const XMFLOAT3& reflection)
 {}
 
-void PlayerBullet::OnCollision(GameObject * other)
+void PlayerBullet::OnCollisionEnter(GameObject* other)
 {}

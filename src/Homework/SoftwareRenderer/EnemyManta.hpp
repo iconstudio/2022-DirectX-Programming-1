@@ -8,5 +8,5 @@ public:
 	EnemyManta();
 	EnemyManta(const XMFLOAT3& pos);
 
-	virtual constexpr GOBJECT_TAGS GetTag() const { return GOBJECT_TAGS::ENEMY_MANTA; }
+	constexpr GOBJECT_TAGS GetTag() const override { return GOBJECT_TAGS::ENEMY_MANTA; }
 };

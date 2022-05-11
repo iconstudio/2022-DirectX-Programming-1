@@ -15,6 +15,7 @@ Player::Player()
 	, myBulletShooted(0), myBulletMax(10), myBulletPool(myBulletMax)
 {
 	Friction = 30.0f;
+	ZeroMemory(&mySight, sizeof(mySight));
 }
 
 Player::~Player()
@@ -95,13 +96,13 @@ void Player::Crawl(DWORD dwdir, float accel)
 
 void Player::Move(const XMFLOAT3& vDirection, float distance)
 {
-	Camera->Move(vDirection, distance);
+	//Camera->Move(vDirection, distance);
 	GameObject::Move(vDirection, distance);
 }
 
 void Player::Rotate(float pitch, float yaw, float roll)
 {
-	Camera->Rotate(pitch, yaw, roll);
+	//Camera->Rotate(pitch, yaw, roll);
 	GameObject::Rotate(pitch, yaw, roll);
 }
 
