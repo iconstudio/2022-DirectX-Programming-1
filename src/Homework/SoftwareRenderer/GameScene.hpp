@@ -28,7 +28,6 @@ public:
 	void PrepareRenderingCollider(const BoundingOrientedBox& collider);
 	void PrepareRenderingCollider(const BoundingFrustum& collider);
 
-	void Kill(ObjectPtr& obj);
 	Enemy* SpawnEnemy(ENEMY_TYPES type, const XMFLOAT3& pos);
 
 	void OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -65,7 +64,9 @@ private:
 
 	// 경계 메쉬
 	shared_ptr<CMesh> meshFloor, meshSide;
-	// 높이 1부터 15까지의 선로 기둥
+	// 출입구 메쉬
+	shared_ptr<CMesh> meshEntrance;
+	// 높이 1부터 15까지의 기둥의 메쉬
 	shared_ptr<CMesh> meshPillars[15];
 	// 선로 메쉬
 	shared_ptr<CMesh> meshRail;
@@ -78,6 +79,10 @@ private:
 	// 기준 충돌 영역
 	size_t collisionAreaIndex;
 
+	// 선로 목록
+	std::vector<Pillar*> Pillars;
+	// 출입구
+	RailBorder* myEntrance, * myExit;
 	// 플레이어가 위치한 선로의 번호
 	size_t worldPlayerPositionIndex;
 	// 플레이어의 위치 (0~선로의 길이)
@@ -86,8 +91,6 @@ private:
 	float playerWorldRelativePosition;
 	// 플레이어의 기본 이동 속도 (초당 픽셀 거리)
 	float playerMoveSpeed = 3.0f;
-	// 선로 목록
-	std::vector<Pillar*> Pillars;
 
 	// 렌더링 할 조각
 	std::vector<CFragment> Fragments;

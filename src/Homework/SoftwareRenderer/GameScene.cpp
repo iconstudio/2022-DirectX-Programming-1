@@ -29,14 +29,19 @@ GameScene::GameScene(GameFramework& framework)
 	, playerPosition(0.0f), playerWorldRelativePosition(0)
 	, globalMatrix(Matrix4x4::Identity())
 	, myInstances(), staticInstances(), Fragments()
+	, Pillars(), myEntrance(nullptr), myExit(nullptr)
 	, myPlayer(nullptr), myCamera(nullptr)
 	, meshPlayer(nullptr), meshPlayerBullet(nullptr)
 	, meshEnemyCube(nullptr), meshEnemyManta(nullptr), meshEnemyBullet(nullptr)
 	, meshPillars(), meshRail(nullptr)
 {
+	ZeroMemory(meshPillars, sizeof(meshPillars));
 	Fragments.reserve(300);
+	Fragments.clear();
 	staticInstances.reserve(100);
+	staticInstances.clear();
 	myInstances.reserve(300);
+	myInstances.clear();
 }
 
 GameScene::~GameScene()
@@ -67,12 +72,12 @@ void GameScene::Start()
 
 void GameScene::BuildMeshes()
 {
-	auto MakeCubeMesh = [](float h, float v, float d) -> shared_ptr<CMesh>&& {
-		return static_pointer_cast<CMesh>(make_shared<CubeMesh>(h, v, d));
+	auto MakeCubeMesh = [](float h, float v, float d) -> shared_ptr<CMesh> {
+		return std::move(static_pointer_cast<CMesh>(make_shared<CubeMesh>(h, v, d)));
 	};
 
-	auto MakePlaneMesh = [](float w, float h) -> shared_ptr<CMesh>&& {
-		return static_pointer_cast<CMesh>(make_shared<PlaneMesh>(w, h));
+	auto MakePlaneMesh = [](float w, float h) -> shared_ptr<CMesh> {
+		return std::move(static_pointer_cast<CMesh>(make_shared<PlaneMesh>(w, h)));
 	};
 
 	meshPlayer = MakeCubeMesh(5.0f, 5.0f, 5.0f);
@@ -89,7 +94,7 @@ void GameScene::BuildMeshes()
 
 	for (int i = 0; i < 15; ++i)
 	{
-		meshPillars[i] = MakeCubeMesh(2.0f, 1.0f + float(i), 2.0f);
+		meshPillars[i] = MakeCubeMesh(2.0f, 1.0f + float(i) * 1.5f, 2.0f);
 	}
 	meshRail = MakeCubeMesh(1.0f, 1.5f, 10.0f);
 }
@@ -118,18 +123,63 @@ void GameScene::BuildWorld()
 	}
 
 	//constexpr float pillar_count = 40.0f;
-	constexpr float pillar_place_z_gap = 8.0f;
+	constexpr float pillar_place_z_gap = 14.0f;
 	XMFLOAT3 place{};
 
-	for (float i = 0.0f; i < 100; i++)
+	int peek = 0;
+	float temp;
+	float end_ratio;
+
+	Pillars.reserve(100);
+	for (int i = 0; i < 100; i++)
 	{
-		place.x = pillarStartPoint.x + std::cos(1.0f + i / PI) * 5.0f;
+		place.x = pillarStartPoint.x + std::cos(1.0f + float(i) / PI) * 10.0f;
 		place.y = pillarStartPoint.y;
 		place.z = pillarStartPoint.z + i * pillar_place_z_gap;
 
+		if (i < 10)
+		{
+			peek = i;
+		}
+		else if (i < 90)
+		{
+			temp = std::sin(DegreeToRadian(float(i - 10) * 10.0f)) * 6.0f;
+			peek = std::min(14, 10 + int(temp));
+		}
+		else
+		{
+			// float(90 - 10) * 10.0f
+			temp = std::sin(DegreeToRadian(800.0f)) * 5.0f;
+			end_ratio = float(i - 90) / 10.0f;
+			peek = int(10.0 + temp * end_ratio);
+		}
+
 		auto pillar = CreateInstance<Pillar>(place);
-		pillar->SetMesh(meshPillars[int(i) % 15]);
-		pillar->SetColor(RGB(110, 30, 30));
+
+		pillar->SetMesh(meshPillars[peek]);
+		pillar->SetHeight(1.0f + float(peek) * 1.5f);
+		Pillars.push_back(pillar);
+	}
+
+	if (0 < Pillars.size())
+	{
+		auto first = Pillars.front();
+		auto last = Pillars.back();
+
+		myEntrance = CreateInstance<RailBorder>(first->GetPosition());
+		myEntrance->SetMesh(meshEntrance);
+		myExit = CreateInstance<RailBorder>(last->GetPosition());
+		myExit->SetMesh(meshEntrance);
+
+		Pillar* current, * before;
+		for (auto pit = Pillars.begin() + 1; pit != Pillars.end(); pit++)
+		{
+			current = *pit;
+			before = *(pit - 1);
+
+			current->SetBefore(before);
+			before->SetNext(current);
+		}
 	}
 }
 
@@ -176,11 +226,6 @@ void GameScene::CompleteBuilds()
 	{
 		inst->UpdateBoundingBox();
 	}
-}
-
-void GameScene::Kill(ObjectPtr& obj)
-{
-
 }
 
 Enemy* GameScene::SpawnEnemy(ENEMY_TYPES type, const XMFLOAT3& pos)

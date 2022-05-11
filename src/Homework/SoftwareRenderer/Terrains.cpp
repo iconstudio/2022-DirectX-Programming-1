@@ -7,32 +7,38 @@
 RailBorder::RailBorder()
 	: GameStaticObject()
 	, myExit()
-{}
+{
+	SetColor(RGB(120, 160, 40));
+}
 
 Rail::Rail()
 	: GameStaticObject()
-{}
+{
+	SetColor(RGB(10, 128, 255));
+}
 
 Pillar::Pillar()
 	: GameStaticObject()
 	, myHeight(0.0f), myBottom(), myTop()
 	, nodeBefore(nullptr), nodeNext(nullptr)
 	, distBefore(0.0f), distNext(0.0f)
-{}
+{
+	SetColor(RGB(110, 30, 30));
+}
 
 void Pillar::SetHeight(float height)
 {
 	myHeight = height;
 
-	//auto& pos = Transform.GetPosition();
-	//pos.y = height * 0.5f;
+	auto& pos = Transform.GetPosition();
+	pos.y = height;
 
-	auto field = Transform.GetPosition();
+	XMFLOAT3 field = XMFLOAT3(pos);
 	field.y += height * 0.5f;
-	myTop = XMFLOAT3(field);
+	myTop = (field);
 
 	field.y = 0.0f;
-	myBottom = XMFLOAT3(field);
+	myBottom = (field);
 }
 
 void Pillar::SetBefore(Pillar* before)
