@@ -27,12 +27,12 @@ constexpr float RAIL_LENGTH = 16.0f;
 
 GameScene::GameScene(GameFramework& framework)
 	: Framework(framework), Window(NULL)
-	, collisionAreaIndex(0), worldPlayerPositionIndex(0)
-	, playerPosition(0.0f), playerWorldRelativePosition(0)
 	, globalMatrix(Matrix4x4::Identity())
 	, myInstances(100), staticInstances(200), myParticles(200), Fragments()
-	, Pillars(), boardFront(nullptr), boardBack(nullptr)
+	, numberPillars(100), Pillars(), boardFront(nullptr), boardBack(nullptr)
 	, myPlayer(nullptr), myCamera(nullptr)
+	, worldPlayerPositionIndex(0), playerWorldRelativePosition(0)
+	, playerPosition(0.0f)
 	, meshPlayer(nullptr), meshPlayerBullet(nullptr)
 	, meshEnemyCube(nullptr), meshEnemyManta(nullptr), meshEnemyBullet(nullptr)
 	, meshPillars(), meshRail(nullptr)
@@ -130,8 +130,8 @@ void GameScene::BuildWorld()
 	float temp;
 	float end_ratio;
 
-	Pillars.reserve(100);
-	for (int i = 0; i < 100; i++)
+	Pillars.reserve(numberPillars);
+	for (int i = 0; i < numberPillars; i++)
 	{
 		place.x = pillarStartPoint.x + std::cos(1.0f + float(i) / PI) * 30.0f;
 		place.y = pillarStartPoint.y;
@@ -150,7 +150,7 @@ void GameScene::BuildWorld()
 		{
 			// float(90 - 10) * 10.0f
 			temp = std::sin(DegreeToRadian(800.0f)) * 5.0f;
-			end_ratio = float(i - 90) / 10.0f;
+			end_ratio = float(numberPillars - i) / 10.0f;
 			peek = int(10.0 + temp * end_ratio);
 		}
 

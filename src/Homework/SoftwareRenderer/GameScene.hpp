@@ -65,6 +65,34 @@ private:
 	// 프레임워크
 	GameFramework& Framework;
 
+	// 선로 개수
+	const size_t numberPillars;
+	// 선로 목록
+	std::vector<Pillar*> Pillars;
+	// 지형 정보
+	std::vector<TerrainChunk> Terrain;
+	// 출입구
+	RailBorder* boardFront, * boardBack;
+	// 플레이어가 위치한 선로의 번호
+	size_t worldPlayerPositionIndex;
+	// 플레이어의 위치 (0~선로의 길이)
+	float playerPosition;
+	// 플레이어의 상대적 위치 (0~1)
+	float playerWorldRelativePosition;
+	// 플레이어의 기본 이동 속도 (초당 픽셀 거리)
+	float playerMoveSpeed = 3.0f;
+
+	// 씬 내의 변하지 않는 인스턴스
+	std::vector<StaticPtr> staticInstances;
+	// 씬 내의 동적인 인스턴스
+	std::vector<ObjectPtr> myInstances;
+	// 씬 내의 파티클 인스턴스
+	std::vector<EffectPtr> myParticles;
+	// 플레이어 객체
+	shared_ptr<Player> myPlayer;
+	// 프레임워크에서 받은 카메라
+	shared_ptr<GameCamera> myCamera;
+
 	// 플레이어의 메쉬
 	shared_ptr<CMesh> meshPlayer;
 	shared_ptr<CMesh> meshPlayerBullet;
@@ -81,31 +109,6 @@ private:
 	// 선로 메쉬
 	shared_ptr<CMesh> meshRail;
 
-	// 씬 내의 변하지 않는 인스턴스
-	std::vector<StaticPtr> staticInstances;
-	// 씬 내의 동적인 인스턴스
-	std::vector<ObjectPtr> myInstances;
-	// 씬 내의 동적인 인스턴스
-	std::vector<EffectPtr> myParticles;
-
-	// 기준 충돌 영역
-	size_t collisionAreaIndex;
-
-	// 선로 목록
-	std::vector<Pillar*> Pillars;
-	// 지형 정보
-	std::vector<TerrainChunk> Terrain;
-	// 출입구
-	RailBorder* boardFront, * boardBack;
-	// 플레이어가 위치한 선로의 번호
-	size_t worldPlayerPositionIndex;
-	// 플레이어의 위치 (0~선로의 길이)
-	float playerPosition;
-	// 플레이어의 상대적 위치 (0~1)
-	float playerWorldRelativePosition;
-	// 플레이어의 기본 이동 속도 (초당 픽셀 거리)
-	float playerMoveSpeed = 3.0f;
-
 	// 렌더링 할 조각
 	std::vector<CFragment> Fragments;
 
@@ -114,12 +117,6 @@ private:
 
 	// 렌더링 용 펜 모음
 	std::unordered_map<COLORREF, HPEN> Pens;
-
-	// 플레이어 객체
-	shared_ptr<Player> myPlayer;
-
-	// 프레임워크에서 받은 카메라
-	shared_ptr<GameCamera> myCamera;
 
 	// 월드 경계
 	struct { float left; float right; float top; float bottom; } worldBoundary;
