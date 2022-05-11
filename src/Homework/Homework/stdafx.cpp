@@ -1,13 +1,4 @@
 #include "stdafx.h"
-#include "GraphicsPipeline.h"
-
-void Draw2DLine(HDC hDCFrameBuffer, XMFLOAT3& f3PreviousProject, XMFLOAT3& f3CurrentProject)
-{
-	XMFLOAT3 f3Previous = CGraphicsPipeline::ScreenTransform(f3PreviousProject);
-	XMFLOAT3 f3Current = CGraphicsPipeline::ScreenTransform(f3CurrentProject);
-	::MoveToEx(hDCFrameBuffer, (long)f3Previous.x, (long)f3Previous.y, NULL);
-	::LineTo(hDCFrameBuffer, (long)f3Current.x, (long)f3Current.y);
-}
 
 XMFLOAT3&& Vector3::XMVectorToFloat3(const XMVECTOR& vector)
 {

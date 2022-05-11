@@ -53,14 +53,6 @@ void CMesh::SetPolygon(int nIndex, CPolygon *pPolygon)
 	if ((0 <= nIndex) && (nIndex < m_nPolygons)) m_ppPolygons[nIndex] = pPolygon;
 }
 
-void Draw2DLine(HDC hDCFrameBuffer, XMFLOAT3& f3PreviousProject, XMFLOAT3& f3CurrentProject)
-{
-	XMFLOAT3 f3Previous = CGraphicsPipeline::ScreenTransform(f3PreviousProject);
-	XMFLOAT3 f3Current = CGraphicsPipeline::ScreenTransform(f3CurrentProject);
-	::MoveToEx(hDCFrameBuffer, (long)f3Previous.x, (long)f3Previous.y, NULL);
-	::LineTo(hDCFrameBuffer, (long)f3Current.x, (long)f3Current.y);
-}
-
 void CMesh::Render(HDC hDCFrameBuffer)
 {
 	XMFLOAT3 f3InitialProject, f3PreviousProject;

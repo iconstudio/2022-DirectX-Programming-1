@@ -20,3 +20,5 @@ public:
 	static XMFLOAT3 Project(XMFLOAT3& xmf3Model);
 	static XMFLOAT3 Transform(XMFLOAT3& xmf3Model);
 };
+
+void Draw2DLine(HDC hDCFrameBuffer, XMFLOAT3& f3PreviousProject, XMFLOAT3& f3CurrentProject);

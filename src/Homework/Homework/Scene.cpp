@@ -6,7 +6,6 @@
 #include "Player.h"
 
 CScene::CScene(CPlayer* pPlayer)
-	: Instances()
 {
 	m_pPlayer = pPlayer;
 }

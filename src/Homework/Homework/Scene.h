@@ -26,6 +26,8 @@ public:
 
 private:
 	CGameObject** m_ppObjects = NULL;
+	int m_nObjects = 0;
+
 	CWallsObject* m_pWallsObject = NULL;
 	CPlayer* m_pPlayer = NULL;
 #ifdef _WITH_DRAW_AXIS

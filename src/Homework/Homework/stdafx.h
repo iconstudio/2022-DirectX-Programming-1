@@ -41,7 +41,7 @@ inline float RandF(float fMin, float fMax)
 	return(fMin + ((float)rand() / (float)RAND_MAX) * (fMax - fMin));
 }
 
-XMVECTOR RandomUnitVectorOnSphere()
+inline XMVECTOR RandomUnitVectorOnSphere()
 {
 	XMVECTOR xmvOne = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
 	XMVECTOR xmvZero = XMVectorZero();
@@ -63,8 +63,6 @@ class GameViewport;
 class GameWorld;
 class GameObject;
 class Player;
-
-void Draw2DLine(HDC hDCFrameBuffer, XMFLOAT3& f3PreviousProject, XMFLOAT3& f3CurrentProject);
 
 namespace Vector3
 {
