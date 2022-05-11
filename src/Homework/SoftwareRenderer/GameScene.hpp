@@ -73,6 +73,9 @@ private:
 	std::vector<TerrainChunk> Terrain;
 	// 출입구
 	RailBorder* boardFront, * boardBack;
+
+	// 플레이어의 탑승 여부
+	bool isPlayerRiding;
 	// 플레이어가 위치한 선로의 번호
 	size_t worldPlayerPositionIndex;
 	// 플레이어의 위치 (0~선로의 길이)

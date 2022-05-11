@@ -31,8 +31,10 @@ GameScene::GameScene(GameFramework& framework)
 	, myInstances(100), staticInstances(200), myParticles(200), Fragments()
 	, numberPillars(100), Pillars(), boardFront(nullptr), boardBack(nullptr)
 	, myPlayer(nullptr), myCamera(nullptr)
-	, worldPlayerPositionIndex(0), playerWorldRelativePosition(0)
-	, playerPosition(0.0f)
+
+	, isPlayerRiding(false), worldPlayerPositionIndex(0)
+	, playerPosition(0.0f), playerWorldRelativePosition(0.0f)
+
 	, meshPlayer(nullptr), meshPlayerBullet(nullptr)
 	, meshEnemyCube(nullptr), meshEnemyManta(nullptr), meshEnemyBullet(nullptr)
 	, meshPillars(), meshRail(nullptr)
