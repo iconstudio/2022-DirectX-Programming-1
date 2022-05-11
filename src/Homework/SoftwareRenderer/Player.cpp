@@ -52,6 +52,11 @@ void Player::ReturnBullet(PlayerBullet* bullet)
 	}
 }
 
+void Player::Start()
+{
+	mySight.SetWorldMatrix(Transform.GetWorldMatrix());
+}
+
 void Player::RideOn(RailBorder* entrance)
 {
 	if (PLAYER_STATES::NORMAL == myStatus)

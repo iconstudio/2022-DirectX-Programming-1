@@ -22,6 +22,7 @@ public:
 	void AddBullet(PlayerBullet* bullet);
 	void ReturnBullet(PlayerBullet* bullet);
 
+	void Start();
 	void RideOn(RailBorder* entrance);
 	void TakeOff(RailBorder* exit);
 	void Crawl(DWORD dwdir, float accel);

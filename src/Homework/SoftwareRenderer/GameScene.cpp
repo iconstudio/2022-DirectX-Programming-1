@@ -261,6 +261,12 @@ void GameScene::CompleteBuilds()
 	{
 		inst->UpdateBoundingBox();
 	}
+
+	if (myPlayer)
+	{
+		myPlayer->UpdateBoundingBox();
+		myPlayer->Start();
+	}
 }
 
 Enemy* GameScene::SpawnEnemy(ENEMY_TYPES type, const XMFLOAT3& pos)
