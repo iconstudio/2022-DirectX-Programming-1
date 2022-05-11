@@ -5,11 +5,15 @@
 #include "GameMesh.hpp"
 
 RailBorder::RailBorder()
-	: GameStaticObject()
-	, myExit()
+	: RailBorder(XMFLOAT3())
 {
 	SetColor(RGB(120, 160, 40));
 }
+
+RailBorder::RailBorder(const XMFLOAT3& pos)
+	: GameStaticObject(pos)
+	, myExit(pos)
+{}
 
 void RailBorder::SetExit(const XMFLOAT3& pos)
 {
@@ -17,19 +21,27 @@ void RailBorder::SetExit(const XMFLOAT3& pos)
 }
 
 Rail::Rail()
-	: GameStaticObject()
+	: Rail(XMFLOAT3())
 {
 	SetColor(RGB(10, 128, 255));
 }
 
+Rail::Rail(const XMFLOAT3& pos)
+	: GameStaticObject(pos)
+{}
+
 Pillar::Pillar()
-	: GameStaticObject()
-	, myHeight(0.0f), myBottom(), myTop()
-	, nodeBefore(nullptr), nodeNext(nullptr)
-	, distBefore(0.0f), distNext(0.0f)
+	: Pillar(XMFLOAT3())
 {
 	SetColor(RGB(110, 30, 30));
 }
+
+Pillar::Pillar(const XMFLOAT3& pos)
+	: GameStaticObject(pos)
+	, myHeight(0.0f), myBottom(), myTop()
+	, nodeBefore(nullptr), nodeNext(nullptr)
+	, distBefore(0.0f), distNext(0.0f)
+{}
 
 void Pillar::SetHeight(float height)
 {

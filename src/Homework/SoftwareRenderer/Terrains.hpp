@@ -6,6 +6,7 @@ class RailBorder : public GameStaticObject
 {
 public:
 	RailBorder();
+	RailBorder(const XMFLOAT3& pos);
 
 	void SetExit(const XMFLOAT3& pos);
 
@@ -16,12 +17,14 @@ class Rail : public GameStaticObject
 {
 public:
 	Rail();
+	Rail(const XMFLOAT3& pos);
 };
 
 class Pillar : public GameStaticObject
 {
 public:
 	Pillar();
+	Pillar(const XMFLOAT3& pos);
 
 	void SetHeight(float height);
 	void SetBefore(Pillar* before);
@@ -32,5 +35,4 @@ public:
 
 	Pillar* nodeBefore, *nodeNext;
 	float distBefore, distNext;
-	XMFLOAT3 normalToNext;
 };
