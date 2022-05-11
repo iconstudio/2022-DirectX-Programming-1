@@ -67,7 +67,7 @@ void Player::TakeOff(RailBorder* exit)
 	{
 		myStatus = PLAYER_STATES::NORMAL;
 
-		SetPosition(exit->myExit);
+		SetWorldMatrix(exit->Transform.GetWorldMatrix());
 	}
 }
 
