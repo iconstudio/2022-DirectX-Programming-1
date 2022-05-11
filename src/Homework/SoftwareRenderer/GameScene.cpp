@@ -67,21 +67,31 @@ void GameScene::Start()
 
 void GameScene::BuildMeshes()
 {
-	meshPlayer = static_pointer_cast<CMesh>(make_shared<CubeMesh>(5.0f, 5.0f, 5.0f));
-	meshPlayerBullet = static_pointer_cast<CMesh>(make_shared<CubeMesh>(2.0f, 2.0f, 10.0f));
+	auto MakeCubeMesh = [](float h, float v, float d) -> shared_ptr<CMesh> {
+		return static_pointer_cast<CMesh>(make_shared<CubeMesh>(h, v, d));
+	};
 
-	meshEnemyCube = static_pointer_cast<CMesh>(make_shared<CubeMesh>(3.0f, 3.0f, 3.0f));
-	meshEnemyManta = static_pointer_cast<CMesh>(make_shared<CubeMesh>(6.0f, 2.0f, 9.0f));
-	meshEnemyBullet = static_pointer_cast<CMesh>(make_shared<CubeMesh>(1.0f, 1.0f, 10.0f));
+	auto MakePlaneMesh = [](float w, float h) -> shared_ptr<CMesh> {
+		return static_pointer_cast<CMesh>(make_shared<PlaneMesh>(w, h));
+	};
 
-	meshFloor = static_pointer_cast<CMesh>(make_shared<PlaneMesh>(COLLIDE_AREA_H, COLLIDE_AREA_U));
-	meshSide = static_pointer_cast<CMesh>(make_shared<PlaneMesh>(COLLIDE_AREA_U, COLLIDE_AREA_V));
+	meshPlayer = MakeCubeMesh(5.0f, 5.0f, 5.0f);
+	meshPlayerBullet = MakeCubeMesh(2.0f, 2.0f, 10.0f);
+
+	meshEnemyCube = MakeCubeMesh(3.0f, 3.0f, 3.0f);
+	meshEnemyManta = MakeCubeMesh(6.0f, 2.0f, 9.0f);
+	meshEnemyBullet = MakeCubeMesh(1.0f, 1.0f, 10.0f);
+
+	meshEntrance = MakePlaneMesh(8.0f, 4.0f);
+
+	meshFloor = MakePlaneMesh(COLLIDE_AREA_H, COLLIDE_AREA_U);
+	meshSide = MakePlaneMesh(COLLIDE_AREA_U, COLLIDE_AREA_V);
 
 	for (int i = 0; i < 15; ++i)
 	{
-		meshPillars[i] = static_pointer_cast<CMesh>(make_shared<CubeMesh>(2.0f, float(i), 2.0f));
+		meshPillars[i] = MakeCubeMesh(2.0f, 1.0f + float(i), 2.0f);
 	}
-	meshRail = static_pointer_cast<CMesh>(make_shared<CubeMesh>(1.0f, 1.5f, 10.0f));
+	meshRail = MakeCubeMesh(1.0f, 1.5f, 10.0f);
 }
 
 void GameScene::BuildWorld()
