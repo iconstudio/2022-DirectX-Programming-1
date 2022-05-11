@@ -7,6 +7,7 @@ class Enemy : public GameObject
 public:
 	Enemy();
 	Enemy(const XMFLOAT3& pos);
+	virtual ~Enemy();
 
 	void InitHealth(float max_health);
 	void SetHealth(float value);

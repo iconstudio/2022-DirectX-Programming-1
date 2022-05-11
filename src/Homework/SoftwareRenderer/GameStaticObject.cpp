@@ -12,3 +12,6 @@ GameStaticObject::GameStaticObject(const XMFLOAT3& position)
 GameStaticObject::GameStaticObject(XMFLOAT3&& position)
 	: GameEntity(std::forward<XMFLOAT3>(position))
 {}
+
+GameStaticObject::~GameStaticObject()
+{}

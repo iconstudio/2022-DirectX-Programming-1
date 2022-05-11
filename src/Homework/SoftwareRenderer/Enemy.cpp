@@ -14,6 +14,9 @@ Enemy::Enemy(const XMFLOAT3& pos)
 	, Waypoint(pos), patrolDistance(200.0f), isPatrolling(false)
 {}
 
+Enemy::~Enemy()
+{}
+
 void Enemy::InitHealth(float max_health)
 {
 	SetMaxHealth(max_health);

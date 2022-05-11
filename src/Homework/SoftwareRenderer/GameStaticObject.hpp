@@ -8,6 +8,7 @@ public:
 	GameStaticObject();
 	GameStaticObject(const XMFLOAT3& position);
 	GameStaticObject(XMFLOAT3&& position);
+	virtual ~GameStaticObject();
 
 	virtual constexpr GOBJECT_TAGS GetTag() const { return GOBJECT_TAGS::STATIC; }
 
