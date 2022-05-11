@@ -251,6 +251,7 @@ void Player::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				{
 					Orientation = 0;
 					shootLocking = false;
+					GetCursorPos(&Cursor);
 				}
 				break;
 			}
