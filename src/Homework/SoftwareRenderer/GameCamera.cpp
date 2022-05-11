@@ -1,17 +1,10 @@
 #include "stdafx.hpp"
 #include "GameCamera.hpp"
 #include "GamePipeline.hpp"
+#include "GameViewport.hpp"
 #include "GameTransform.hpp"
 #include "GameObject.hpp"
 #include "Mesh.hpp"
-
-void GameViewport::Set(int nLeft, int nTop, int nWidth, int nHeight)
-{
-	m_nLeft = nLeft;
-	m_nTop = nTop;
-	m_nWidth = nWidth;
-	m_nHeight = nHeight;
-}
 
 GameCamera::GameCamera()
 	: Transform(), localPosition()
@@ -78,7 +71,7 @@ void GameCamera::SetRotation(XMFLOAT4X4&& tfrm)
 	Transform.SetRotation(std::forward<XMFLOAT4X4>(tfrm));
 }
 
-void GameCamera::Update(const GameTransform& follower, float fTimeElapsed)
+void GameCamera::Update(const XMFLOAT3& look_at, const GameTransform& follower, const XMFLOAT3& up, float time_elapsed)
 {
 	const auto& fwlWorld = follower.GetWorldMatrix();
 	const auto fwlRight = XMFLOAT3(follower.myRight);
@@ -106,7 +99,7 @@ void GameCamera::Update(const GameTransform& follower, float fTimeElapsed)
 
 	if (0 < move_far)
 	{
-		float time_lag_scale = fTimeElapsed * (1.0f / 0.1f);
+		float time_lag_scale = time_elapsed * (1.0f / 0.1f);
 		float move_distane = move_far * time_lag_scale;
 
 		if (move_distane < EPSILON)
@@ -120,6 +113,8 @@ void GameCamera::Update(const GameTransform& follower, float fTimeElapsed)
 			Transform.Translate(Vector3::ScalarProduct(Vector3::Normalize(move_vector), move_distane));
 		}
 	}
+
+	LookAt(look_at, up);
 }
 
 void GameCamera::GenerateViewMatrix()

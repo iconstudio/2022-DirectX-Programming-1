@@ -1,20 +1,7 @@
 #pragma once
 #include "stdafx.hpp"
+#include "GameViewport.hpp"
 #include "GameTransform.hpp"
-
-class GameViewport
-{
-public:
-	GameViewport() {}
-	virtual ~GameViewport() {}
-
-	void Set(int nLeft, int nTop, int nWidth, int nHeight);
-
-	int m_nLeft = 0;
-	int m_nTop = 0;
-	int m_nWidth = 0;
-	int m_nHeight = 0;
-};
 
 class GameCamera
 {
@@ -44,7 +31,7 @@ public:
 	void LookAt(const XMFLOAT3 pos, const XMFLOAT3 look, const XMFLOAT3 up);
 
 	void GenerateViewMatrix();
-	void Update(const GameTransform& follower, float elapsed_time);
+	void Update(const XMFLOAT3& look_at, const GameTransform& follower, const XMFLOAT3& up, float elapsed_time);
 
 	bool IsInFrustum(const BoundingBox& collider) const;
 	bool IsInFrustum(const BoundingOrientedBox& collider) const;

@@ -221,7 +221,7 @@ void GameScene::BuildWorld()
 
 void GameScene::BuildObjects()
 {
-	myCamera->SetLocalPosition(XMFLOAT3(0.0f, 4.0f, -9.0f));
+	myCamera->SetLocalPosition(XMFLOAT3(0.0f, 7.0f, -10.0f));
 	myCamera->GenerateViewMatrix();
 
 	myPlayer = make_shared<Player>();
@@ -230,7 +230,7 @@ void GameScene::BuildObjects()
 	myPlayer->SetMesh(meshPlayer);
 	myPlayer->SetColor(RGB(128, 128, 255));
 	myPlayer->SetCamera(myCamera);
-	myPlayer->SetLookOffset(XMFLOAT3(0.0f, 1.0f, myCamera->m_fProjectRectDistance));
+	myPlayer->SetLookOffset(XMFLOAT3(0.0f, 0.0f, 100.0f));
 
 	const auto count = myPlayer->myBulletMax;
 	for (int i = 0; i < count; ++i)
@@ -244,8 +244,6 @@ void GameScene::BuildObjects()
 
 	auto cube1 = SpawnEnemy(ENEMY_TYPES::CUBE, XMFLOAT3(40.0f, 0.0f, 60.0f));
 	auto cube3 = SpawnEnemy(ENEMY_TYPES::CUBE, XMFLOAT3(60.0f, 0.0f, 60.0f));
-
-
 	auto cube2 = SpawnEnemy(ENEMY_TYPES::MANTA, XMFLOAT3(50.0f, 0.0f, 70.0f));
 }
 

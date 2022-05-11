@@ -125,7 +125,7 @@ private:
 	struct { float left; float right; float top; float bottom; } worldBoundary;
 
 	// 플레이어 생성 위치
-	XMFLOAT3 playerSpawnPoint = XMFLOAT3{ 0.0f, 0.5f, 1.0f };
+	XMFLOAT3 playerSpawnPoint = XMFLOAT3{ 0.0f, 2.5f, 1.0f };
 
 	// 롤러코스터 시작 위치
 	XMFLOAT3 pillarStartPoint = XMFLOAT3{ 0.0f, 0.0f, 5.0f };

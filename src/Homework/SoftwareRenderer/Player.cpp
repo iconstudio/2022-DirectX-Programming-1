@@ -10,7 +10,7 @@ Player::Player()
 	: GameObject()
 	, myStatus(PLAYER_STATES::IDLE)
 	, Window(NULL), Cursor(), Orientation(0)
-	, Camera(nullptr), mySight()
+	, Camera(nullptr), mySight(), lookOffset()
 	, shootDelay(0.0f), shootCooldown(0.3f), shootLocking(false)
 	, myBulletShooted(0), myBulletMax(10), myBulletPool(myBulletMax)
 {
@@ -65,6 +65,7 @@ void Player::ReturnBullet(PlayerBullet* bullet)
 void Player::Start()
 {
 	mySight.SetRotation(Transform.GetWorldMatrix());
+	mySight.SetPosition(0, 0, 0);
 }
 
 void Player::RideOn(RailBorder* entrance)
@@ -83,6 +84,8 @@ void Player::TakeOff(RailBorder* exit)
 	{
 		myStatus = PLAYER_STATES::NORMAL;
 
+		SetWorldMatrix(Matrix4x4::Identity());
+		mySight.SetWorldMatrix(Matrix4x4::Identity());
 		SetPosition(exit->GetPosition());
 	}
 }
@@ -124,8 +127,9 @@ void Player::Update(float elapsed_time)
 {
 	if (PLAYER_STATES::IDLE != myStatus)
 	{
-		if (NULL != Window)
+		if (NULL != Window && GetFocus() == Window)
 		{
+			SetCursor(NULL);
 			POINT temp_cursor;
 			GetCursorPos(&temp_cursor);
 
@@ -142,16 +146,19 @@ void Player::Update(float elapsed_time)
 				else
 				{
 					//TODO: 버그 있음
+
+					//mySight.Rotate(delta_my * 0.5f, 0.0f, 0.0f);
 					mySight.Rotate(GameTransform::Up, delta_mx);
-					mySight.Rotate(delta_my * 0.5f, 0.0f, 0.0f);
-					Rotate(0.0f, delta_mx, 0.0f);
+
+					//mySight.Rotate(delta_my * 0.5f, delta_mx, 0.0f);
+					//mySight.Rotate(GameTransform::Up, delta_mx);
+					mySight.Rotate(GameTransform::Right, delta_my * 0.5f);
+					GameObject::Rotate(GameTransform::Up, delta_mx);
+					//Rotate(0.0f, delta_mx, 0.0f);
 				}
 
-				if (GetFocus() == Window)
-				{
-					SetCursorPos(Cursor.x, Cursor.y);
-					GetCursorPos(&temp_cursor);
-				}
+				SetCursorPos(Cursor.x, Cursor.y);
+				GetCursorPos(&temp_cursor);
 			}
 
 			Cursor = temp_cursor;
@@ -194,8 +201,11 @@ void Player::Update(float elapsed_time)
 
 	GameObject::Update(elapsed_time);
 
-	Camera->SetRotation(mySight.GetWorldMatrix());
-	Camera->Update(Transform, elapsed_time);
+	const auto& sight_mat = mySight.GetWorldMatrix();
+	const auto&& look_at = Vector3::TransformCoord(lookOffset, sight_mat);
+
+	Camera->SetRotation(sight_mat);
+	Camera->Update(look_at, Transform, GameTransform::Up, elapsed_time);
 	Camera->GenerateViewMatrix();
 }
 
