@@ -18,16 +18,17 @@ public:
 
 	void SetHwnd(HWND hwnd);
 	void SetCamera(shared_ptr<GameCamera>& cam);
+	void SetLookOffset(const XMFLOAT3& vector);
+	void SetLookOffset(XMFLOAT3&& vector);
+	void Start();
 
 	void AddBullet(PlayerBullet* bullet);
 	void ReturnBullet(PlayerBullet* bullet);
-
-	void Start();
 	void RideOn(RailBorder* entrance);
 	void TakeOff(RailBorder* exit);
 	void Crawl(DWORD dwdir, float accel);
 
-	void Move(const XMFLOAT3& dit, float distance) override;
+	void Move(const XMFLOAT3& dir, float distance) override;
 	void Rotate(float pitch, float yaw, float roll) override;
 
 	void Update(float elapsed_time) override;
@@ -49,6 +50,7 @@ private:
 
 	shared_ptr<GameCamera> Camera;
 	GameTransform mySight;
+	XMFLOAT3 lookOffset;
 
 	float shootDelay;
 	const float shootCooldown;

@@ -69,6 +69,12 @@ void GameObject::SetRotation(const XMFLOAT4X4& tfrm)
 	OnUpdateTransform();
 }
 
+void GameObject::SetRotation(XMFLOAT4X4&& tfrm)
+{
+	GameEntity::SetRotation(std::forward<XMFLOAT4X4>(tfrm));
+	OnUpdateTransform();
+}
+
 void GameObject::AddPosition(XMFLOAT3&& vector)
 {
 	GameEntity::AddPosition(std::forward<XMFLOAT3>(vector));

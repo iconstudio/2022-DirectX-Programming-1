@@ -10,12 +10,12 @@ Player::Player()
 	: GameObject()
 	, myStatus(PLAYER_STATES::IDLE)
 	, Window(NULL), Cursor(), Orientation(0)
-	, Camera(nullptr)
+	, Camera(nullptr), mySight()
 	, shootDelay(0.0f), shootCooldown(0.3f), shootLocking(false)
 	, myBulletShooted(0), myBulletMax(10), myBulletPool(myBulletMax)
 {
 	Friction = 30.0f;
-	ZeroMemory(&mySight, sizeof(mySight));
+	mySight.SetWorldMatrix(Matrix4x4::Identity());
 }
 
 Player::~Player()
@@ -36,6 +36,16 @@ void Player::SetCamera(shared_ptr<GameCamera>& cam)
 	Camera = cam;
 }
 
+void Player::SetLookOffset(const XMFLOAT3& vector)
+{
+	SetLookOffset(std::move(XMFLOAT3(vector)));
+}
+
+void Player::SetLookOffset(XMFLOAT3&& vector)
+{
+	lookOffset = std::forward<XMFLOAT3>(vector);
+}
+
 void Player::AddBullet(PlayerBullet* bullet)
 {
 	bullet->Deactivate();
@@ -54,7 +64,7 @@ void Player::ReturnBullet(PlayerBullet* bullet)
 
 void Player::Start()
 {
-	mySight.SetWorldMatrix(Transform.GetWorldMatrix());
+	mySight.SetRotation(Transform.GetWorldMatrix());
 }
 
 void Player::RideOn(RailBorder* entrance)
@@ -73,7 +83,7 @@ void Player::TakeOff(RailBorder* exit)
 	{
 		myStatus = PLAYER_STATES::NORMAL;
 
-		SetWorldMatrix(exit->Transform.GetWorldMatrix());
+		SetPosition(exit->GetPosition());
 	}
 }
 
@@ -99,15 +109,14 @@ void Player::Crawl(DWORD dwdir, float accel)
 	AddSpeed(accel, 0.3f); // 0.3m/s
 }
 
-void Player::Move(const XMFLOAT3& vDirection, float distance)
+void Player::Move(const XMFLOAT3& dir, float distance)
 {
-	//Camera->Move(vDirection, distance);
-	GameObject::Move(vDirection, distance);
+	mySight.Move(dir, distance);
+	GameObject::Move(dir, distance);
 }
 
 void Player::Rotate(float pitch, float yaw, float roll)
 {
-	//Camera->Rotate(pitch, yaw, roll);
 	GameObject::Rotate(pitch, yaw, roll);
 }
 
@@ -127,17 +136,16 @@ void Player::Update(float elapsed_time)
 			{
 				if (PLAYER_STATES::RIDING == myStatus)
 				{
-					Rotate(delta_my * 0.5f, delta_mx, 0.0f);
+					//Camera.Rotate(delta_my * 0.5f, delta_mx, 0.0f);
+					//Rotate(delta_my * 0.5f, delta_mx, 0.0f);
 				}
 				else
 				{
 					//TODO: 버그 있음
-					Camera->Rotate(delta_my * 0.5f, delta_mx, 0.0f);
-					GameObject::Rotate(0.0f, delta_mx, 0.0f);
+					mySight.Rotate(GameTransform::Up, delta_mx);
+					mySight.Rotate(delta_my * 0.5f, 0.0f, 0.0f);
+					Rotate(0.0f, delta_mx, 0.0f);
 				}
-
-				XMFLOAT3 myRight = GetRight();
-				//TODO
 
 				if (GetFocus() == Window)
 				{
@@ -169,11 +177,11 @@ void Player::Update(float elapsed_time)
 				auto bullet = FindLastBullet();
 				if (bullet)
 				{
-					const auto& cam_tranform = Camera->Transform;
+					const auto& shot_tranform = mySight;
 
 					bullet->Activate();
-					bullet->SetWorldMatrix(cam_tranform.GetWorldMatrix());
-					bullet->SetDirection(XMFLOAT3(cam_tranform.GetLook()));
+					bullet->SetWorldMatrix(shot_tranform.GetWorldMatrix());
+					bullet->SetDirection(XMFLOAT3(shot_tranform.GetLook()));
 					bullet->SetSpeed(1.2f);
 					bullet->Ready();
 
@@ -185,7 +193,9 @@ void Player::Update(float elapsed_time)
 	}
 
 	GameObject::Update(elapsed_time);
-	Camera->Update(elapsed_time);
+
+	Camera->SetRotation(mySight.GetWorldMatrix());
+	Camera->Update(Transform, elapsed_time);
 	Camera->GenerateViewMatrix();
 }
 

@@ -22,22 +22,15 @@ public:
 	GameCamera();
 	virtual ~GameCamera();
 
-	void SetFollower(GameObject* target);
 	void SetViewport(int left, int top, int width, int height);
 	void SetFOVAngle(float angle);
-	void SetLocalPosition(const XMFLOAT3& pos);
-	void SetLocalPosition(XMFLOAT3&& pos);
-	void SetLookOffset(const XMFLOAT3& vector);
-	void SetLookOffset(XMFLOAT3&& vector);
-
 	void GeneratePerspectiveProjectionMatrix(float znear, float zfar, float fov);
 	void GenerateOrthographicProjectionMatrix(float znear, float zfar, float width, float height);
 
-	void GenerateViewMatrix();
-	void Update(float elapsed_time);
-
-	void LookAt(const XMFLOAT3 look, const XMFLOAT3 up);
-	void LookAt(const XMFLOAT3 pos, const XMFLOAT3 look, const XMFLOAT3 up);
+	void SetLocalPosition(const XMFLOAT3& pos);
+	void SetLocalPosition(XMFLOAT3&& pos);
+	void SetRotation(const XMFLOAT4X4& tfrm);
+	void SetRotation(XMFLOAT4X4&& tfrm);
 
 	void Translate(float x, float y, float z);
 	void Translate(const XMFLOAT3& shift);
@@ -45,6 +38,13 @@ public:
 	void Move(const XMFLOAT3& dir, float distance);
 	void Move(XMFLOAT3&& dir, float distance);
 	void Rotate(float pitch, float yaw, float roll);
+	void Rotate(const XMFLOAT3& axis, float angle);
+
+	void LookAt(const XMFLOAT3 look, const XMFLOAT3 up);
+	void LookAt(const XMFLOAT3 pos, const XMFLOAT3 look, const XMFLOAT3 up);
+
+	void GenerateViewMatrix();
+	void Update(const GameTransform& follower, float elapsed_time);
 
 	bool IsInFrustum(const BoundingBox& collider) const;
 	bool IsInFrustum(const BoundingOrientedBox& collider) const;
@@ -52,8 +52,8 @@ public:
 
 	GameTransform Transform;
 	XMFLOAT3 localPosition;
-	XMFLOAT3 lookOffset;
-	
+	float myRoll, myYaw, myPitch;
+
 	// ºä Æ÷Æ®
 	GameViewport m_Viewport;
 
@@ -70,10 +70,7 @@ public:
 	BoundingFrustum	StaticCollider;
 	BoundingFrustum	Collider;
 
-private:
 	float m_fFOVAngle = 60.0f;
 	float m_fProjectRectDistance = 1.0f;
 	float m_fAspectRatio = float(FRAMEBUFFER_WIDTH) / float(FRAMEBUFFER_HEIGHT);
-
-	GameObject* Follower;
 };

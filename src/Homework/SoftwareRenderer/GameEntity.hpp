@@ -30,6 +30,7 @@ public:
 	virtual void SetPosition(const XMFLOAT3& pos);
 	virtual void SetPosition(XMFLOAT3&& pos);
 	virtual void SetRotation(const XMFLOAT4X4& tfrm);
+	virtual void SetRotation(XMFLOAT4X4&& tfrm);
 	virtual void LookTo(XMFLOAT3& to, XMFLOAT3& up);
 	virtual void LookAt(XMFLOAT3& from, XMFLOAT3& up);
 

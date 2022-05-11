@@ -221,12 +221,16 @@ void GameScene::BuildWorld()
 
 void GameScene::BuildObjects()
 {
+	myCamera->SetLocalPosition(XMFLOAT3(0.0f, 4.0f, -9.0f));
+	myCamera->GenerateViewMatrix();
+
 	myPlayer = make_shared<Player>();
 	myPlayer->SetHwnd(Window);
 	myPlayer->SetPosition(playerSpawnPoint);
 	myPlayer->SetMesh(meshPlayer);
 	myPlayer->SetColor(RGB(128, 128, 255));
 	myPlayer->SetCamera(myCamera);
+	myPlayer->SetLookOffset(XMFLOAT3(0.0f, 1.0f, myCamera->m_fProjectRectDistance));
 
 	const auto count = myPlayer->myBulletMax;
 	for (int i = 0; i < count; ++i)
@@ -237,11 +241,6 @@ void GameScene::BuildObjects()
 
 		myPlayer->AddBullet(bullet);
 	}
-
-	myCamera->SetFollower(myPlayer.get());
-	myCamera->SetLocalPosition(XMFLOAT3(0.0f, 9.0f, -7.0f));
-	myCamera->SetLookOffset(XMFLOAT3(0.0f, 2.0f, 6.0f));
-	myCamera->GenerateViewMatrix();
 
 	auto cube1 = SpawnEnemy(ENEMY_TYPES::CUBE, XMFLOAT3(40.0f, 0.0f, 60.0f));
 	auto cube3 = SpawnEnemy(ENEMY_TYPES::CUBE, XMFLOAT3(60.0f, 0.0f, 60.0f));

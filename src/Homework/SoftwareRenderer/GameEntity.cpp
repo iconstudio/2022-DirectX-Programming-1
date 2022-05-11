@@ -96,7 +96,12 @@ void GameEntity::SetPosition(XMFLOAT3&& pos)
 
 void GameEntity::SetRotation(const XMFLOAT4X4& tfrm)
 {
-	Transform.SetRotation(tfrm);
+	SetRotation(std::move(XMFLOAT4X4(tfrm)));
+}
+
+void GameEntity::SetRotation(XMFLOAT4X4&& tfrm)
+{
+	Transform.SetRotation(std::forward<XMFLOAT4X4>(tfrm));
 }
 
 void GameEntity::LookTo(XMFLOAT3& to, XMFLOAT3& up)
