@@ -169,13 +169,11 @@ void GameCamera::LookAt(const XMFLOAT3 pos, const XMFLOAT3 look, const XMFLOAT3 
 {
 	Transform.SetPosition(pos);
 	Transform.LookAt(look, up);
-	//projectionView = Transform.GetWorldMatrix();
 }
 
 void GameCamera::LookAt(const XMFLOAT3 look, const XMFLOAT3 up)
 {
 	Transform.LookAt(look, up);
-	//projectionView = Transform.GetWorldMatrix();
 }
 
 void GameCamera::Translate(float x, float y, float z)
