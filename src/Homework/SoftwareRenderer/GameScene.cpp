@@ -230,7 +230,7 @@ void GameScene::BuildObjects()
 	myPlayer->SetMesh(meshPlayer);
 	myPlayer->SetColor(RGB(128, 128, 255));
 	myPlayer->SetCamera(myCamera);
-	myPlayer->SetLookOffset(XMFLOAT3(0.0f, 0.0f, 100.0f));
+	myPlayer->SetLookOffset(XMFLOAT3(0.0f, 0.0f, myCamera->myFarPlane));
 
 	const auto count = myPlayer->myBulletMax;
 	for (int i = 0; i < count; ++i)

@@ -10,6 +10,7 @@ GameCamera::GameCamera()
 	: Transform(), localPosition()
 	, StaticCollider(), Collider()
 	, m_Viewport()
+	, myFarPlane()
 {
 	Transform.myRight = GameTransform::Right;
 	Transform.myUp = GameTransform::Up;
@@ -36,6 +37,8 @@ void GameCamera::SetFOVAngle(float angle)
 void GameCamera::GeneratePerspectiveProjectionMatrix(float znear, float zfar, float fov)
 {
 	float ratio = (float(m_Viewport.m_nWidth) / float(m_Viewport.m_nHeight));
+
+	myFarPlane = zfar;
 
 	const auto rad = XMConvertToRadians(fov);
 	XMMATRIX xmmtxProjection = XMMatrixPerspectiveFovLH(rad, ratio, znear, zfar);
@@ -207,13 +210,7 @@ void GameCamera::Rotate(const XMFLOAT3& axis, float angle)
 
 void GameCamera::Rotate(float pitch, float yaw, float roll)
 {
-	myRoll += pitch;
-	myYaw += yaw;
-	myPitch += roll;
-	Transform.SetRotation(Matrix4x4::Identity());
-
-	Transform.Rotate(myPitch, myYaw, myRoll);
-	//Transform.Rotate(pitch, yaw, roll);
+	Transform.Rotate(pitch, yaw, roll);
 }
 
 bool GameCamera::IsInFrustum(const BoundingBox& collider) const

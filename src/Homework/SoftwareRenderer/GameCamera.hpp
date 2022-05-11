@@ -57,6 +57,9 @@ public:
 	BoundingFrustum	StaticCollider;
 	BoundingFrustum	Collider;
 
+	float myFarPlane;
+
+private:
 	float m_fFOVAngle = 60.0f;
 	float m_fProjectRectDistance = 1.0f;
 	float m_fAspectRatio = float(FRAMEBUFFER_WIDTH) / float(FRAMEBUFFER_HEIGHT);
