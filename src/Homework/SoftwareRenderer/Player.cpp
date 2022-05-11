@@ -187,8 +187,9 @@ void Player::Update(float elapsed_time)
 					const auto& shot_tranform = mySight;
 
 					bullet->Activate();
-					bullet->SetWorldMatrix(shot_tranform.GetWorldMatrix());
-					bullet->SetDirection(XMFLOAT3(shot_tranform.GetLook()));
+					bullet->SetRotation(shot_tranform.GetWorldMatrix());
+					bullet->SetPosition(GetPosition());
+;					bullet->SetDirection(XMFLOAT3(shot_tranform.GetLook()));
 					bullet->SetSpeed(1.2f);
 					bullet->Ready();
 
