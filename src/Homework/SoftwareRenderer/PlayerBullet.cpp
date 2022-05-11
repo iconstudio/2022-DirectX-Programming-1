@@ -13,6 +13,7 @@ PlayerBullet::PlayerBullet(const XMFLOAT3& pos)
 	, myDamage(0.0f)
 	, myDuration(3.0f), myLifetime(3.0f)
 {
+	SetColor(RGB(50, 50, 100));
 }
 
 void PlayerBullet::SetDamage(const float value)
