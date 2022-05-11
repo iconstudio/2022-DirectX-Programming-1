@@ -1,6 +1,6 @@
 #include "stdafx.hpp"
 #include "GamePipeline.hpp"
-#include "GameCamera.hpp"
+#include "GameViewport.hpp"
 
 XMFLOAT4X4 GamePipeline::matrixWorld = XMFLOAT4X4();
 XMFLOAT4X4 GamePipeline::matrixProjection = XMFLOAT4X4();

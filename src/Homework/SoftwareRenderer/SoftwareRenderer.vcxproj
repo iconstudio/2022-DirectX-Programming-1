@@ -187,6 +187,7 @@
     <ClInclude Include="GameStaticObject.hpp" />
     <ClInclude Include="GameTimer.hpp" />
     <ClInclude Include="GameTransform.hpp" />
+    <ClInclude Include="GameViewport.hpp" />
     <ClInclude Include="Main.hpp" />
     <ClInclude Include="Mesh.hpp" />
     <ClInclude Include="pch.hpp" />
@@ -215,6 +216,7 @@
     <ClCompile Include="GameStaticObject.cpp" />
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="GameTransform.cpp" />
+    <ClCompile Include="GameViewport.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="pch.cpp" />
