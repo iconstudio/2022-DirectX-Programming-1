@@ -2,6 +2,14 @@
 #include "stdafx.hpp"
 #include "GameStaticObject.hpp"
 
+class RailBorder : public GameStaticObject
+{
+public:
+	RailBorder();
+
+	XMFLOAT3 myExit;
+};
+
 class Rail : public GameStaticObject
 {
 public:

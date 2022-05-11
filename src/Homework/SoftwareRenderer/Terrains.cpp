@@ -4,6 +4,11 @@
 #include "GameScene.hpp"
 #include "GameMesh.hpp"
 
+RailBorder::RailBorder()
+	: GameStaticObject()
+	, myExit()
+{}
+
 Rail::Rail()
 	: GameStaticObject()
 {}
