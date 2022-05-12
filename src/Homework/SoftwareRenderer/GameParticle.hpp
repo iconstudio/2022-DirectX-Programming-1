@@ -5,18 +5,20 @@
 class GameParticle : public GameEntity
 {
 public:
-	GameParticle(XMFLOAT3&& position, XMFLOAT3&& dir, float speed, float duration);
+	GameParticle(float duration);
 	virtual ~GameParticle();
 
 	constexpr GOBJECT_TAGS GetTag() const override { return GOBJECT_TAGS::NONE; }
 
+	constexpr bool IsStatic() const override { return false; }
+
 	virtual void Update(float elapsed_time);
 
-	const XMFLOAT3 Direction;
+	XMFLOAT3 Direction;
 	float Speed;
 	float Friction;
 
 	bool isKilled;
 	float myLifetime;
-	float myDuration;
+	const float myDuration;
 };
