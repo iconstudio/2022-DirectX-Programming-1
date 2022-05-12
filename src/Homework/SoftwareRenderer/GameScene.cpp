@@ -30,11 +30,30 @@ std::random_device Random_device{};
 std::default_random_engine Random_engine{ Random_device() };
 std::uniform_real_distribution<float> Random_distribution{ 0.0f, 1.0f };
 
+inline XMVECTOR RandomUnitVectorOnSphere()
+{
+	XMVECTOR xmvOne = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
+	XMVECTOR xmvZero = XMVectorZero();
+
+	while (true)
+	{
+		const auto vx = Random_distribution(Random_engine) * 2.0f - 1.0f;
+		const auto vy = Random_distribution(Random_engine) * 2.0f - 1.0f;
+		const auto vz = Random_distribution(Random_engine) * 2.0f - 1.0f;
+
+		XMVECTOR v = XMVectorSet(vx, vy, vz, 0.0f);
+		if (!XMVector3Greater(XMVector3LengthSq(v), xmvOne))
+		{
+			return(XMVector3Normalize(v));
+		}
+	}
+}
+
 GameScene::GameScene(GameFramework& framework)
 	: Framework(framework), Window(NULL)
 	, globalMatrix(Matrix4x4::Identity())
 	, myInstances(200), staticInstances(200)
-	, myParticleBlobs(10), myParticles(300), Fragments()
+	, myParticleBlobs(10), myParticles(310), Fragments()
 	, numberPillars(100), Pillars(), boardFront(nullptr), boardBack(nullptr)
 	, myPlayer(nullptr), myCamera(nullptr)
 
@@ -50,6 +69,7 @@ GameScene::GameScene(GameFramework& framework)
 	Fragments.clear();
 	staticInstances.clear();
 	myParticles.clear();
+	myParticleBlobs.clear();
 	myInstances.clear();
 }
 
@@ -75,7 +95,9 @@ void GameScene::Start()
 {
 	BuildMeshes();
 	BuildWorld();
+	BuildPlayerables();
 	BuildObjects();
+	BuildParticles();
 	CompleteBuilds();
 }
 
@@ -210,7 +232,7 @@ void GameScene::BuildWorld()
 			chunk->vector = look;
 			chunk->normal = up;
 			chunk->axis = right;
-			chunk->myLength = RAIL_LENGTH;//Vector3::Length(vector);
+			chunk->myLength = Vector3::Length(vector);
 			Terrain.push_back(chunk);
 		}
 
@@ -246,7 +268,7 @@ void GameScene::BuildWorld()
 	}
 }
 
-void GameScene::BuildObjects()
+void GameScene::BuildPlayerables()
 {
 	myCamera->SetLocalPosition(XMFLOAT3(0.0f, 7.0f, -10.0f));
 	myCamera->GenerateViewMatrix();
@@ -268,7 +290,10 @@ void GameScene::BuildObjects()
 
 		myPlayer->AddBullet(bullet);
 	}
+}
 
+void GameScene::BuildObjects()
+{
 	for (size_t j = 0; j < countEnemiesCube; ++j)
 	{
 		float cx = Random_distribution(Random_engine) * (WORLD_H - 20.0f) + 10.0f;
@@ -292,18 +317,34 @@ void GameScene::BuildObjects()
 
 void GameScene::BuildParticles()
 {
+	GameTransform trasform{};
+
 	for (int i = 0; i < 10; ++i)
 	{
+		auto blob = new ParticleBlob();
+
 		for (int j = 0; j < ParticleBlob::count; ++j)
 		{
-			auto particle = EffectPtr();
+			blob->myParticles[j] = new GameParticle(5.0f);
+
+			auto& particle = blob->myParticles[j];
+
+			const float rx = Random_distribution(Random_engine) * 360.0f;
+			const float ry = Random_distribution(Random_engine) * 360.0f;
+			const float rz = Random_distribution(Random_engine) * 360.0f;
+
+			trasform.Rotate(rx, ry, rz);
+			const auto& quaternion = trasform.GetWorldMatrix();
+
 			particle->SetMesh(meshParticle);
-			particle->SetColor(Random_distribution(Random_engine) * 0xffffff);
+			particle->SetColor(COLORREF(Random_distribution(Random_engine) * 0xffffff));
+			particle->SetWorldMatrix(quaternion);
+			particle->Direction = Vector3::Normalize(Vector3::TransformCoord(GameTransform::Forward, quaternion));
+			particle->Friction = 10.0f;
+
 			myParticles.push_back(particle);
 		}
 
-		auto blob = ParticleBlob();
-		blob.particle = myParticles.begin() + i * ParticleBlob::count;
 		myParticleBlobs.push_back(blob);
 	}
 }
@@ -374,9 +415,13 @@ void GameScene::Update(float elapsed_time)
 		}
 		else
 		{
-			//auto& pos = myPlayer;
-
-			//myPlayer->SetPosition();
+			auto& pos = myPlayer->Transform.GetPosition();
+			if (pos.x < 0.0f) pos.x = 0.0f;
+			if (pos.y < 0.0f) pos.y = 0.0f;
+			if (pos.z < 0.0f) pos.z = 0.0f;
+			if (WORLD_H < pos.x) pos.x = WORLD_H;
+			if (WORLD_V < pos.y) pos.y = WORLD_V;
+			if (WORLD_U < pos.z) pos.z = WORLD_U;
 		}
 
 		myPlayer->Update(elapsed_time);
@@ -390,7 +435,14 @@ void GameScene::Update(float elapsed_time)
 		{
 			if (instance->isKilled)
 			{
+				auto blob = PopParticleBlob();
+				if (blob)
+				{
+					CastParticles(instance->GetPosition(), blob);
+				}
+
 				it = myInstances.erase(it);
+
 				continue;
 			}
 			else
@@ -407,6 +459,12 @@ void GameScene::Update(float elapsed_time)
 					}
 				}
 
+				if (instance->CheckCollideWith(myPlayer.get()))
+				{
+					instance->OnCollisionEnter(myPlayer.get());
+					myPlayer->OnCollisionEnter(instance.get());
+				}
+
 				instance->Update(elapsed_time);
 			}
 		}
@@ -416,16 +474,15 @@ void GameScene::Update(float elapsed_time)
 
 	for (auto& blob : myParticleBlobs)
 	{
-		blob.Update(elapsed_time);
+		blob->Update(elapsed_time);
 
-		if (blob.IsActivated())
+		if (blob->IsActivated())
 		{
-			std::for_each_n(blob.particle, blob.count, [&](EffectPtr& part) {
-				if (CheckCameraBounds(part.get()))
-				{
-					part->Update(elapsed_time);
-				}
-			});
+			for (int i = 0; i < blob->count; ++i)
+			{
+				auto& particle = blob->myParticles[i];
+				particle->Update(elapsed_time);
+			}
 		}
 	}
 }
@@ -452,14 +509,16 @@ void GameScene::PrepareRendering()
 
 	for (const auto& blob : myParticleBlobs)
 	{
-		if (blob.IsActivated())
+		if (blob->IsActivated())
 		{
-			std::for_each_n(blob.particle, blob.count, [&](EffectPtr& part) {
-				if (CheckCameraBounds(part.get()))
+			for (int i = 0; i < blob->count; ++i)
+			{
+				auto& particle = blob->myParticles[i];
+				//if (CheckCameraBounds(particle))
 				{
-					part->PrepareRendering(*this);
+					particle->PrepareRendering(*this);
 				}
-			});
+			}
 		}
 	}
 
@@ -618,7 +677,15 @@ void GameScene::PlayerJumpToNext()
 	else
 	{
 		const auto& chunk = Terrain.at(++worldPlayerPositionIndex);
-		playerPosition -= chunk->myLength;
+		if (chunk->myLength < playerPosition)
+		{
+			playerPosition -= chunk->myLength;
+		}
+		else
+		{
+			playerPosition = 0.0f;
+		}
+
 
 		PlayerJumpToRail(chunk);
 	}
@@ -630,7 +697,7 @@ bool GameScene::PlayerMoveOnRail(float value)
 
 	const auto& rail_length = worldCurrentTerrain->myLength;
 
-	if (rail_length < playerPosition)
+	if (rail_length <= playerPosition)
 	{
 		PlayerJumpToNext();
 		return true;
@@ -646,20 +713,38 @@ bool GameScene::PlayerMoveOnRail(float value)
 	}
 }
 
-ParticleBlob& GameScene::PopParticleBlob()
+ParticleBlob* GameScene::PopParticleBlob()
 {
 	for (auto& blob : myParticleBlobs)
 	{
-		if (!blob.IsActivated())
+		if (!blob->IsActivated())
 		{
 			return blob;
 		}
 	}
+
+	return nullptr;
 }
 
-void GameScene::CastParticles(ParticleBlob& blob)
+void GameScene::CastParticles(const XMFLOAT3& pos, ParticleBlob* blob)
 {
-	blob.lifetime = 4.0f;
+	CastParticles(std::move(XMFLOAT3(pos)), blob);
+}
+
+void GameScene::CastParticles(XMFLOAT3&& pos, ParticleBlob* blob)
+{
+	const auto mypos = std::forward<XMFLOAT3>(pos);
+
+	blob->lifetime = 4.0f;
+
+	XMFLOAT3 temp{};
+	for (int i = 0; i < blob->count; ++i)
+	{
+		auto& particle = blob->myParticles[i];
+		particle->SetPosition(mypos);
+		particle->Speed = 40.0f;
+		particle->isKilled = false;
+	}
 }
 
 template<class Type>
@@ -777,7 +862,8 @@ void GameScene::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				{
 					if (isPlayerRiding)
 					{
-						playerSpeed += playerAccel;
+						if (playerSpeed < playerMaxSpeed)
+							playerSpeed += playerAccel;
 					}
 				}
 				break;
@@ -787,7 +873,8 @@ void GameScene::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				{
 					if (isPlayerRiding)
 					{
-						playerSpeed -= playerAccel;
+						if (-playerMaxSpeed < playerSpeed)
+							playerSpeed -= playerAccel;
 					}
 				}
 				break;

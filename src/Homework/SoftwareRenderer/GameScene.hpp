@@ -26,8 +26,9 @@ struct TerrainChunk
 class ParticleBlob
 {
 public:
-	std::vector<EffectPtr>::iterator particle;
 	static const size_t count = 30;
+
+	GameParticle* myParticles[count];
 	float lifetime = 0.0f;
 
 	bool IsActivated() const
@@ -68,6 +69,7 @@ public:
 private:
 	void BuildMeshes();
 	void BuildWorld();
+	void BuildPlayerables();
 	void BuildObjects();
 	void BuildParticles();
 	void CompleteBuilds();
@@ -77,8 +79,11 @@ private:
 	void PlayerJumpToNext();
 	bool PlayerMoveOnRail(float value);
 
-	ParticleBlob& PopParticleBlob();
-	void CastParticles(ParticleBlob& blob);
+
+	ParticleBlob* PopParticleBlob();
+
+	void CastParticles(const XMFLOAT3& pos, ParticleBlob* blob);
+	void CastParticles(XMFLOAT3&& pos, ParticleBlob* blob);
 
 	template<class Type>
 	Type* CreateInstance();
@@ -121,8 +126,10 @@ private:
 	float playerSpeed;
 	// 플레이어의 상대적 위치 (0~1)
 	float playerWorldRelativePosition;
-	// 플레이어의 기본 이동 속도 (초당 픽셀 거리)
+	// 선로에서의 플레이어의 가속도 (초당 픽셀 거리)
 	const float playerAccel = 2.0f;
+	// 선로에서의 플레이어의 최대 속도 (초당 픽셀 거리)
+	const float playerMaxSpeed = 50.0f;
 
 	// 적의 수
 	const size_t countEnemiesCube = 20, countEnemiesManta = 20;
@@ -132,9 +139,9 @@ private:
 	// 씬 내의 동적인 인스턴스
 	std::vector<ObjectPtr> myInstances;
 	// 씬 내의 파티클 인스턴스 모음
-	std::vector<ParticleBlob> myParticleBlobs;
+	std::vector<ParticleBlob*> myParticleBlobs;
 	// 씬 내의 파티클 인스턴스
-	std::vector<EffectPtr> myParticles;
+	std::vector<GameParticle*> myParticles;
 	// 플레이어 객체
 	shared_ptr<Player> myPlayer;
 	// 프레임워크에서 받은 카메라
