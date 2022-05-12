@@ -8,5 +8,5 @@ EnemyCube::EnemyCube()
 EnemyCube::EnemyCube(const XMFLOAT3& pos)
 	: Enemy(pos)
 {
-	InitHealth(10.0f);
+	InitHealth(6.0f);
 }

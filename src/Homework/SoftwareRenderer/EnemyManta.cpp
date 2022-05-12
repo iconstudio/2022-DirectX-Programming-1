@@ -8,5 +8,5 @@ EnemyManta::EnemyManta()
 EnemyManta::EnemyManta(const XMFLOAT3& pos)
 	: Enemy(pos)
 {
-	InitHealth(20.0f);
+	InitHealth(10.0f);
 }
