@@ -13,7 +13,10 @@ using EffectPtr = shared_ptr<GameParticle>;
 struct TerrainChunk
 {
 	XMFLOAT3 from, to;
+
+	XMFLOAT3 vector;
 	XMFLOAT3 normal;
+	XMFLOAT3 axis;
 
 	float myLength = 0.0f;
 };
@@ -50,9 +53,10 @@ private:
 	void BuildObjects();
 	void CompleteBuilds();
 
+	void PlayerJumpToRail(const shared_ptr<TerrainChunk>& node);
 	void PlayerJumpToBefore();
 	void PlayerJumpToNext();
-	void PlayerMoveOnRail(float value);
+	bool PlayerMoveOnRail(float value);
 
 	template<class Type>
 	Type* CreateInstance();
@@ -77,7 +81,7 @@ private:
 	// 선로 목록
 	std::vector<Pillar*> Pillars;
 	// 지형 정보
-	std::vector<TerrainChunk> Terrain;
+	std::vector<shared_ptr<TerrainChunk>> Terrain;
 	// 출입구
 	RailBorder* boardFront, * boardBack;
 
@@ -85,6 +89,8 @@ private:
 	bool isPlayerRiding;
 	// 플레이어가 위치한 선로의 번호
 	size_t worldPlayerPositionIndex;
+	// 플레이어가 위치한 지형
+	shared_ptr<TerrainChunk> worldCurrentTerrain;
 	// 플레이어의 위치 (0~선로의 길이)
 	float playerPosition;
 	// 플레이어의 상대적 위치 (0~1)
