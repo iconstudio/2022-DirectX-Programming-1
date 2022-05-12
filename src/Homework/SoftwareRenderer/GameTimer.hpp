@@ -13,6 +13,7 @@ public:
 	void Stop();
 	void Reset();
 
+	unsigned long GetFrameRate() const;
 	unsigned long GetFrameRate(LPTSTR lpszString = NULL, int nCharacters = 0);
 	float GetTimeElapsed();
 	float GetTotalTime();
