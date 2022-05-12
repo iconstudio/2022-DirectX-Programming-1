@@ -79,7 +79,6 @@ private:
 	void PlayerJumpToNext();
 	bool PlayerMoveOnRail(float value);
 
-
 	ParticleBlob* PopParticleBlob();
 
 	void CastParticles(const XMFLOAT3& pos, ParticleBlob* blob);
@@ -122,10 +121,10 @@ private:
 	shared_ptr<TerrainChunk> worldCurrentTerrain;
 	// 플레이어의 위치 (0~선로의 길이)
 	float playerPosition;
-	// 플레이어의 속도 (초당 픽셀 거리)
-	float playerSpeed;
 	// 플레이어의 상대적 위치 (0~1)
 	float playerWorldRelativePosition;
+	// 플레이어의 속도 (초당 픽셀 거리)
+	float playerSpeed;
 	// 선로에서의 플레이어의 가속도 (초당 픽셀 거리)
 	const float playerAccel = 2.0f;
 	// 선로에서의 플레이어의 최대 속도 (초당 픽셀 거리)
