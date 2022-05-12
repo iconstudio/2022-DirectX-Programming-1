@@ -119,7 +119,7 @@ void GameCamera::GenerateViewMatrix()
 	StaticCollider.Transform(Collider, XMLoadFloat4x4(&world_mat));
 }
 
-void GameCamera::Update(const XMFLOAT3& look_at, const GameTransform& follower, const GameTransform& rotation, float time_elapsed)
+void GameCamera::Update(const XMFLOAT3& look_at, const GameTransform& follower, const XMFLOAT4X4& rotation, float time_elapsed)
 {
 	const auto& fwlWorld = follower.GetWorldMatrix();
 	const auto fwlRight = XMFLOAT3(follower.myRight);
@@ -163,13 +163,7 @@ void GameCamera::Update(const XMFLOAT3& look_at, const GameTransform& follower, 
 	}
 		
 	//LookAt(look_at, fwlUp);
-
-	const auto& rotWorld = rotation.GetWorldMatrix();
-	SetRotation(rotWorld);
-	const auto&& rot_mat = Matrix4x4::Multiply(fwlRot, rotWorld);
-
-	// 
-	//const auto&& look_to = Vector3::TransformCoord(localPosition, rot_mat);
+	SetRotation(rotation);
 
 }
 
