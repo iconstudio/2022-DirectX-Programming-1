@@ -7,11 +7,11 @@ constexpr COLORREF C_SMOG = RGB(0xe6, 0xe6, 0xe6);
 constexpr COLORREF C_GREEN = RGB(0x00, 0x80, 0x00);
 
 // 게임 월드의 가로 너비 (x)
-constexpr float WORLD_H = 600.0f;
+constexpr float WORLD_H = 100.0f;
 // 게임 월드의 높이 (y)
 constexpr float WORLD_V = 20.0f;
 // 게임 월드의 세로 너비 (z)
-constexpr float WORLD_U = 2000.0f;
+constexpr float WORLD_U = 300.0f;
 
 #define FRAMEBUFFER_WIDTH		800
 #define FRAMEBUFFER_HEIGHT		600

@@ -66,6 +66,7 @@ void Player::Start()
 {
 	mySight.SetRotation(Transform.GetWorldMatrix());
 	mySight.SetPosition(0, 0, 0);
+	UpdateCamera();
 }
 
 void Player::RideOn(RailBorder* entrance)
@@ -78,7 +79,7 @@ void Player::RideOn(RailBorder* entrance)
 		Rotate(GameTransform::Up, entrance->myExitLook);
 		mySight.SetRotation(Transform.GetWorldMatrix());
 
-		SetPosition(entrance->myExit);
+		SetPosition(entrance->GetPosition());
 	}
 }
 
@@ -93,6 +94,7 @@ void Player::TakeOff(RailBorder* exit)
 		mySight.SetRotation(Transform.GetWorldMatrix());
 
 		SetPosition(exit->myExit);
+		MoveUp(2.5f);
 	}
 }
 
@@ -141,14 +143,17 @@ void Player::Update(float elapsed_time)
 			{
 				if (PLAYER_STATES::RIDING == myStatus)
 				{
-					//Camera.Rotate(delta_my * 0.5f, delta_mx, 0.0f);
-					//Rotate(delta_my * 0.5f, delta_mx, 0.0f);
+					headAngle += delta_my * 0.5f;
+
+					Rotate(0.0f, delta_mx, 0.0f);
+					mySight.SetRotation(Transform.GetWorldMatrix());
+					mySight.Rotate(headAngle, 0, 0.0f);
 				}
 				else
 				{
 					headAngle += delta_my * 0.5f;
 
-					GameObject::Rotate(GameTransform::Up, delta_mx);
+					Rotate(GameTransform::Up, delta_mx);
 					mySight.SetRotation(Transform.GetWorldMatrix());
 					mySight.Rotate(headAngle, 0, 0.0f);
 				}

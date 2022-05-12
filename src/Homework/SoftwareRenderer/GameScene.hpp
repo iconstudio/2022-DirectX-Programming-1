@@ -77,7 +77,7 @@ private:
 	GameFramework& Framework;
 
 	// 선로 개수
-	const size_t numberPillars;
+	const int numberPillars;
 	// 선로 목록
 	std::vector<Pillar*> Pillars;
 	// 지형 정보
@@ -88,15 +88,20 @@ private:
 	// 플레이어의 탑승 여부
 	bool isPlayerRiding;
 	// 플레이어가 위치한 선로의 번호
-	size_t worldPlayerPositionIndex;
+	int worldPlayerPositionIndex;
 	// 플레이어가 위치한 지형
 	shared_ptr<TerrainChunk> worldCurrentTerrain;
 	// 플레이어의 위치 (0~선로의 길이)
 	float playerPosition;
+	// 플레이어의 속도 (초당 픽셀 거리)
+	float playerSpeed;
 	// 플레이어의 상대적 위치 (0~1)
 	float playerWorldRelativePosition;
 	// 플레이어의 기본 이동 속도 (초당 픽셀 거리)
-	const float playerMoveSpeed = 3.0f;
+	const float playerAccel = 2.0f;
+
+	// 적의 수
+	const size_t countEnemiesCube = 20, countEnemiesManta = 20;
 
 	// 씬 내의 변하지 않는 인스턴스
 	std::vector<StaticPtr> staticInstances;

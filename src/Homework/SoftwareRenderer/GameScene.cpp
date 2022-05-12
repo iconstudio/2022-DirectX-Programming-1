@@ -15,15 +15,20 @@
 #include "Terrains.hpp"
 #include "CubeMesh.hpp"
 #include "PlaneMesh.hpp"
+#include <random>
 
 // 경계 타일의 가로 너비 (x)
-constexpr float COLLIDE_AREA_H = 30.0f;
+constexpr float COLLIDE_AREA_H = 20.0f;
 // 경계 타일의 높이 (y)
 constexpr float COLLIDE_AREA_V = 10.0f;
 // 경계 타일의 세로 너비 (z)
 constexpr float COLLIDE_AREA_U = 30.0f;
 // 선로의 길이 (z)
 constexpr float RAIL_LENGTH = 16.0f;
+
+std::random_device Random_device{};
+std::default_random_engine Random_engine{ Random_device() };
+std::uniform_real_distribution<float> Random_distribution{ 0.0f, 1.0f };
 
 GameScene::GameScene(GameFramework& framework)
 	: Framework(framework), Window(NULL)
@@ -40,7 +45,7 @@ GameScene::GameScene(GameFramework& framework)
 	, meshPillars(), meshRail(nullptr)
 {
 	ZeroMemory(meshPillars, sizeof(meshPillars));
-
+	
 	Fragments.clear();
 	staticInstances.clear();
 	myParticles.clear();
@@ -192,7 +197,7 @@ void GameScene::BuildWorld()
 			transform.LookAt(to, up);
 			transform.Move(XMFLOAT3(transform.GetLook()), RAIL_LENGTH * 0.5f);
 
-			auto rail = CreateInstance<Rail>(before->myTop);
+			rail = CreateInstance<Rail>(before->myTop);
 			rail->SetMesh(meshRail);
 			rail->SetWorldMatrix(world_mat);
 
@@ -202,7 +207,7 @@ void GameScene::BuildWorld()
 			chunk->vector = look;
 			chunk->normal = up;
 			chunk->axis = right;
-			chunk->myLength = Vector3::Length(vector);
+			chunk->myLength = RAIL_LENGTH;//Vector3::Length(vector);
 			Terrain.push_back(chunk);
 		}
 
@@ -228,13 +233,13 @@ void GameScene::BuildWorld()
 		from_pos = last->GetPosition();
 		from_pos.y = 0.0f;
 
-		to_pos = Vector3::Add(from_pos, XMFLOAT3(0, 0, -2));
+		to_pos = Vector3::Add(from_pos, XMFLOAT3(0, 0, 2));
 		transform.SetPosition(from_pos);
 		transform.LookAt(to_pos, GameTransform::Up);
 		boardBack->SetWorldMatrix(world_mat);
 		boardBack->SetExit(to_pos);
-		boardFront->SetExitLook(90.0f);
-		boardFront->SetIndex(Terrain.size() - 1);
+		boardBack->SetExitLook(90.0f);
+		boardBack->SetIndex(Terrain.size() - 1);
 	}
 }
 
@@ -261,9 +266,25 @@ void GameScene::BuildObjects()
 		myPlayer->AddBullet(bullet);
 	}
 
-	auto cube1 = SpawnEnemy(ENEMY_TYPES::CUBE, XMFLOAT3(40.0f, 0.0f, 60.0f));
-	auto cube3 = SpawnEnemy(ENEMY_TYPES::CUBE, XMFLOAT3(60.0f, 0.0f, 60.0f));
-	auto cube2 = SpawnEnemy(ENEMY_TYPES::MANTA, XMFLOAT3(50.0f, 0.0f, 70.0f));
+	for (size_t j = 0; j < countEnemiesCube; ++j)
+	{
+		float cx = Random_distribution(Random_engine) * (WORLD_H - 20.0f) + 10.0f;
+		float cz = Random_distribution(Random_engine) * (WORLD_U - 20.0f) + 10.0f;
+		float cy = Random_distribution(Random_engine) * 4.0f + 2.0f;
+
+		auto cube = SpawnEnemy(ENEMY_TYPES::CUBE, XMFLOAT3(cx, cy, cz));
+		cube->Rotate(GameTransform::Up, Random_distribution(Random_engine) * 360.0f);
+	}
+
+	for (size_t j = 0; j < countEnemiesManta; ++j)
+	{
+		float cx = Random_distribution(Random_engine) * (WORLD_H - 20.0f) + 10.0f;
+		float cz = Random_distribution(Random_engine) * (WORLD_U - 20.0f) + 10.0f;
+		float cy = Random_distribution(Random_engine) * 10.0f + 2.0f;
+
+		auto manta = SpawnEnemy(ENEMY_TYPES::MANTA, XMFLOAT3(cx, cy, cz));
+		manta->Rotate(GameTransform::Up, Random_distribution(Random_engine) * 360.0f);
+	}
 }
 
 void GameScene::CompleteBuilds()
@@ -292,9 +313,12 @@ void GameScene::PlayerJumpToRail(const shared_ptr<TerrainChunk>& node)
 
 void GameScene::PlayerJumpToBefore()
 {
-	if (0 == worldPlayerPositionIndex)
+	if (worldPlayerPositionIndex <= 0)
 	{
 		// 첫번째
+		playerPosition = 0.0f;
+
+		playerSpeed = 0.0;
 	}
 	else
 	{
@@ -307,11 +331,15 @@ void GameScene::PlayerJumpToBefore()
 
 void GameScene::PlayerJumpToNext()
 {
-	if (numberPillars <= worldPlayerPositionIndex - 1)
+	if (int(Terrain.size()) == worldPlayerPositionIndex - 1)
 	{
 		// 마지막
+		const auto& chunk = Terrain.at(worldPlayerPositionIndex);
+		playerPosition = chunk->myLength;
+
+		playerSpeed = 0.0;
 	}
-	else
+	else if (worldPlayerPositionIndex - 2 < int(Terrain.size()))
 	{
 		const auto& chunk = Terrain.at(++worldPlayerPositionIndex);
 		playerPosition -= chunk->myLength;
@@ -325,16 +353,15 @@ bool GameScene::PlayerMoveOnRail(float value)
 	playerPosition += value;
 
 	const auto& rail_length = worldCurrentTerrain->myLength;
-	playerWorldRelativePosition = playerPosition / rail_length;
 
 	if (rail_length < playerPosition)
 	{
-		PlayerJumpToBefore();
+		PlayerJumpToNext();
 		return true;
 	}
-	else if (playerPosition < 0)
+	else if (playerPosition < 0.0f)
 	{
-		PlayerJumpToNext();
+		PlayerJumpToBefore();
 		return true;
 	}
 	else
@@ -349,22 +376,52 @@ void GameScene::Update(float elapsed_time)
 	{
 		if (isPlayerRiding)
 		{
+			const auto& distance = playerSpeed * elapsed_time;
+			PlayerMoveOnRail(distance);
+
 			const auto& chunk = worldCurrentTerrain;
 			const auto& from = chunk->from;
 			const auto& to = chunk->to;
 			const auto& look = chunk->vector;
 			const auto& up = chunk->normal;
-			const auto& len = chunk->myLength * playerWorldRelativePosition;
+			const auto& len = chunk->myLength;
 
-			const auto& vector = Vector3::ScalarProduct(look, len);
+			playerWorldRelativePosition = playerPosition / len;
+
+			const auto& vector = Vector3::ScalarProduct(look, len * playerWorldRelativePosition);
 			const auto& newpos = Vector3::Add(from, vector);
 
 			myPlayer->SetPosition(newpos);
+
+			if (0.0f != playerSpeed)
+			{
+				const auto friction = myPlayer->Friction;
+				float deceleration = friction * elapsed_time;
+
+				if (std::abs(playerSpeed) < deceleration)
+				{
+					playerSpeed = 0.0f;
+				}
+				else
+				{
+					if (0 < playerSpeed)
+					{
+						playerSpeed -= deceleration;
+					}
+					else
+					{
+						playerSpeed += deceleration;
+					}
+				}
+			}
 		}
 		else
 		{
+			//auto& pos = myPlayer;
 
+			//myPlayer->SetPosition();
 		}
+
 		myPlayer->Update(elapsed_time);
 	}
 
@@ -658,9 +715,9 @@ void GameScene::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				{
 					if (isPlayerRiding)
 					{
-						if (PlayerMoveOnRail(playerMoveSpeed))
+						if (worldPlayerPositionIndex < int(Terrain.size()) - 1)
 						{
-							
+							playerSpeed += playerAccel;
 						}
 					}
 				}
@@ -671,9 +728,9 @@ void GameScene::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				{
 					if (isPlayerRiding)
 					{
-						if (PlayerMoveOnRail(-playerMoveSpeed))
+						if (0 < worldPlayerPositionIndex)
 						{
-
+							playerSpeed -= playerAccel;
 						}
 					}
 				}
@@ -685,12 +742,15 @@ void GameScene::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 					{
 						bool is_normal = (PLAYER_STATES::NORMAL == myPlayer->myStatus);
 						bool is_riding = (PLAYER_STATES::RIDING == myPlayer->myStatus);
+
 						if (myPlayer->CheckCollideWith(boardFront))
 						{
 							if (is_normal)
 							{
 								myPlayer->RideOn(boardFront);
 								worldCurrentTerrain = Terrain.at(boardFront->myIndex);
+
+								playerPosition = 0.0f;
 								isPlayerRiding = true;
 							}
 							else if (is_riding)
@@ -704,7 +764,9 @@ void GameScene::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 							if (is_normal)
 							{
 								myPlayer->RideOn(boardBack);
-								worldCurrentTerrain = Terrain.at(boardFront->myIndex);
+								worldCurrentTerrain = Terrain.at(boardBack->myIndex);
+
+								playerPosition = worldCurrentTerrain->myLength;
 								isPlayerRiding = true;
 							}
 							else if (is_riding)
