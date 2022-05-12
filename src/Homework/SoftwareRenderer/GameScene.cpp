@@ -414,7 +414,6 @@ void GameScene::Update(float elapsed_time)
 		it++;
 	}
 
-
 	for (auto& blob : myParticleBlobs)
 	{
 		blob.Update(elapsed_time);
@@ -608,7 +607,7 @@ void GameScene::PlayerJumpToBefore()
 
 void GameScene::PlayerJumpToNext()
 {
-	if (int(Terrain.size()) <= worldPlayerPositionIndex - 2)
+	if (int(Terrain.size()) - 1 <= worldPlayerPositionIndex)
 	{
 		// ¸¶Áö¸·
 		const auto& chunk = Terrain.at(worldPlayerPositionIndex);
@@ -616,7 +615,7 @@ void GameScene::PlayerJumpToNext()
 
 		playerSpeed = 0.0;
 	}
-	else if (worldPlayerPositionIndex < int(Terrain.size()) - 2)
+	else
 	{
 		const auto& chunk = Terrain.at(++worldPlayerPositionIndex);
 		playerPosition -= chunk->myLength;
