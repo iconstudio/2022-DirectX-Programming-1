@@ -23,6 +23,7 @@ void PlayerBullet::SetDamage(const float value)
 
 void PlayerBullet::Ready()
 {
+	Activate();
 	myLifetime = myDuration;
 }
 
