@@ -147,7 +147,7 @@ void GameScene::BuildWorld()
 		for (int k = 0; k <= boundary_cnt_x; ++k)
 		{
 			cx = k * floor_width;
-			cz = i * floor_height;
+			cz = i * floor_height + COLLIDE_AREA_U * 0.5f;
 
 			auto floor = CreateInstance<GameStaticObject>(cx, 0.0f, cz);
 			floor->SetMesh(meshFloor);
@@ -658,7 +658,14 @@ void GameScene::PlayerJumpToBefore()
 	else
 	{
 		const auto& chunk = Terrain.at(--worldPlayerPositionIndex);
-		playerPosition += chunk->myLength;
+		if (0 < playerPosition)
+		{
+			playerPosition += chunk->myLength;
+		}
+		else
+		{
+			playerPosition = chunk->myLength;
+		}
 
 		PlayerJumpToRail(chunk);
 	}
