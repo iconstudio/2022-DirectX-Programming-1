@@ -10,7 +10,7 @@ Player::Player()
 	: GameObject()
 	, myStatus(PLAYER_STATES::IDLE)
 	, Window(NULL), Cursor(), Orientation(0)
-	, Camera(nullptr), mySight(), lookOffset()
+	, Camera(nullptr), mySight(), lookOffset(), headAngle(0.0f)
 	, shootDelay(0.0f), shootCooldown(0.3f), shootLocking(false)
 	, myBulletShooted(0), myBulletMax(10), myBulletPool(myBulletMax)
 {
@@ -114,7 +114,6 @@ void Player::Crawl(DWORD dwdir, float accel)
 
 void Player::Move(const XMFLOAT3& dir, float distance)
 {
-	mySight.Move(dir, distance);
 	GameObject::Move(dir, distance);
 }
 
@@ -145,16 +144,11 @@ void Player::Update(float elapsed_time)
 				}
 				else
 				{
-					//TODO: 버그 있음
+					headAngle += delta_my * 0.5f;
 
-					//mySight.Rotate(delta_my * 0.5f, 0.0f, 0.0f);
-					mySight.Rotate(GameTransform::Up, delta_mx);
-
-					//mySight.Rotate(delta_my * 0.5f, delta_mx, 0.0f);
-					//mySight.Rotate(GameTransform::Up, delta_mx);
-					mySight.Rotate(GameTransform::Right, delta_my * 0.5f);
 					GameObject::Rotate(GameTransform::Up, delta_mx);
-					//Rotate(0.0f, delta_mx, 0.0f);
+					mySight.SetRotation(Transform.GetWorldMatrix());
+					mySight.Rotate(headAngle, 0, 0.0f);
 				}
 
 				SetCursorPos(Cursor.x, Cursor.y);
@@ -205,8 +199,8 @@ void Player::Update(float elapsed_time)
 	const auto& sight_mat = mySight.GetWorldMatrix();
 	const auto&& look_at = Vector3::TransformCoord(lookOffset, sight_mat);
 
-	Camera->SetRotation(sight_mat);
-	Camera->Update(look_at, Transform, GameTransform::Up, elapsed_time);
+	//Camera->SetRotation(sight_mat);
+	Camera->Update(look_at, Transform, mySight, elapsed_time);
 	Camera->GenerateViewMatrix();
 }
 

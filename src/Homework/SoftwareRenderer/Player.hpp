@@ -51,6 +51,7 @@ private:
 	shared_ptr<GameCamera> Camera;
 	GameTransform mySight;
 	XMFLOAT3 lookOffset;
+	float headAngle;
 
 	float shootDelay;
 	const float shootCooldown;

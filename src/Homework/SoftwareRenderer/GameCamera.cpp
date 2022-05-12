@@ -119,7 +119,7 @@ void GameCamera::GenerateViewMatrix()
 	StaticCollider.Transform(Collider, XMLoadFloat4x4(&world_mat));
 }
 
-void GameCamera::Update(const XMFLOAT3& look_at, const GameTransform& follower, const XMFLOAT3& up, float time_elapsed)
+void GameCamera::Update(const XMFLOAT3& look_at, const GameTransform& follower, const GameTransform& rotation, float time_elapsed)
 {
 	const auto& fwlWorld = follower.GetWorldMatrix();
 	const auto fwlRight = XMFLOAT3(follower.myRight);
@@ -143,8 +143,8 @@ void GameCamera::Update(const XMFLOAT3& look_at, const GameTransform& follower, 
 
 	// 현재 카메라 위치에서 고정 좌표로 향하는 벡터
 	const XMFLOAT3 move_vector = Vector3::Subtract(look_from, myPosition);
-	float move_far = Vector3::Length(move_vector);
 
+		float move_far = Vector3::Length(move_vector);
 	if (0 < move_far)
 	{
 		float time_lag_scale = time_elapsed * (1.0f / 0.1f);
@@ -161,8 +161,16 @@ void GameCamera::Update(const XMFLOAT3& look_at, const GameTransform& follower, 
 			Transform.Translate(Vector3::ScalarProduct(Vector3::Normalize(move_vector), move_distane));
 		}
 	}
+		
+	//LookAt(look_at, fwlUp);
 
-	LookAt(look_at, up);
+	const auto& rotWorld = rotation.GetWorldMatrix();
+	SetRotation(rotWorld);
+	const auto&& rot_mat = Matrix4x4::Multiply(fwlRot, rotWorld);
+
+	// 
+	//const auto&& look_to = Vector3::TransformCoord(localPosition, rot_mat);
+
 }
 
 void GameCamera::LookAt(const XMFLOAT3 pos, const XMFLOAT3 look, const XMFLOAT3 up)

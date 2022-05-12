@@ -32,7 +32,7 @@ public:
 
 	void GenerateViewMatrix();
 
-	void Update(const XMFLOAT3& look_at, const GameTransform& follower, const XMFLOAT3& up, float elapsed_time);
+	void Update(const XMFLOAT3& look_at, const GameTransform& follower, const GameTransform& rotation, float elapsed_time);
 
 	bool IsInFrustum(const BoundingBox& collider) const;
 	bool IsInFrustum(const BoundingOrientedBox& collider) const;
