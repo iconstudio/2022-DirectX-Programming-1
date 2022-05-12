@@ -647,13 +647,21 @@ bool GameScene::PlayerMoveOnRail(float value)
 	}
 }
 
-ParticleBlob& GameScene::PopParticleBlob() const
+ParticleBlob& GameScene::PopParticleBlob()
 {
-	// // O: 여기에 return 문을 삽입합니다.
+	for (auto& blob : myParticleBlobs)
+	{
+		if (!blob.IsActivated())
+		{
+			return blob;
+		}
+	}
 }
 
 void GameScene::CastParticles(ParticleBlob& blob)
-{}
+{
+	blob.lifetime = 4.0f;
+}
 
 template<class Type>
 Type* GameScene::CreateInstance()
