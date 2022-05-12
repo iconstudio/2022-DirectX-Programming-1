@@ -191,6 +191,11 @@ void GameScene::BuildWorld()
 			auto rail = CreateInstance<Rail>(before->myTop);
 			rail->SetMesh(meshRail);
 			rail->SetWorldMatrix(world_mat);
+
+			TerrainChunk chunk{};
+
+
+			Terrain.push_back(chunk);
 		}
 
 		auto first = Pillars.front();
@@ -267,6 +272,15 @@ void GameScene::CompleteBuilds()
 		myPlayer->Start();
 	}
 }
+
+void GameScene::PlayerJumpToBefore()
+{}
+
+void GameScene::PlayerJumpToNext()
+{}
+
+void GameScene::PlayerMoveOnRail(float value)
+{}
 
 void GameScene::Update(float elapsed_time)
 {
@@ -560,6 +574,35 @@ void GameScene::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 		{
 			switch (wp)
 			{
+				case 'A':
+				case 'W':
+				{
+					if (isPlayerRiding)
+					{
+						playerPosition += playerMoveSpeed;
+
+						const auto& chunk = Terrain.at(worldPlayerPositionIndex);
+
+						const auto& rail_length = chunk.myLength;
+
+						if (rail_length <= playerPosition)
+						{
+
+						}
+					}
+				}
+				break;
+
+				case 'D':
+				case 'S':
+				{
+					if (isPlayerRiding)
+					{
+
+					}
+				}
+				break;
+
 				case VK_SPACE:
 				{
 					if (myPlayer)
@@ -571,10 +614,12 @@ void GameScene::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 							if (is_normal)
 							{
 								myPlayer->RideOn(boardFront);
+								isPlayerRiding = true;
 							}
 							else if (is_riding)
 							{
 								myPlayer->TakeOff(boardFront);
+								isPlayerRiding = false;
 							}
 						}
 						else if (myPlayer->CheckCollideWith(boardBack))
@@ -582,13 +627,41 @@ void GameScene::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 							if (is_normal)
 							{
 								myPlayer->RideOn(boardBack);
+								isPlayerRiding = true;
 							}
 							else if (is_riding)
 							{
 								myPlayer->TakeOff(boardBack);
+								isPlayerRiding = false;
 							}
 						}
 					}
+				}
+				break;
+
+				case VK_HOME:
+				{
+					if (myPlayer)
+					{
+						myPlayer->SetPosition(boardFront->GetPosition());
+						myPlayer->MoveUp(2.5f);
+					}
+				}
+				break;
+
+				case VK_END:
+				{
+					if (myPlayer)
+					{
+						myPlayer->SetPosition(boardBack->GetPosition());
+						myPlayer->MoveUp(2.5f);
+					}
+				}
+				break;
+
+				case 'R':
+				{
+
 				}
 				break;
 			}

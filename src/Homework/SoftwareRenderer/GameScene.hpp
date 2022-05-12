@@ -12,7 +12,10 @@ using EffectPtr = shared_ptr<GameParticle>;
 
 struct TerrainChunk
 {
+	XMFLOAT3 from, to;
+	XMFLOAT3 normal;
 
+	float myLength = 0.0f;
 };
 
 class GameScene
@@ -46,6 +49,10 @@ private:
 	void BuildWorld();
 	void BuildObjects();
 	void CompleteBuilds();
+
+	void PlayerJumpToBefore();
+	void PlayerJumpToNext();
+	void PlayerMoveOnRail(float value);
 
 	template<class Type>
 	Type* CreateInstance();
@@ -83,7 +90,7 @@ private:
 	// 플레이어의 상대적 위치 (0~1)
 	float playerWorldRelativePosition;
 	// 플레이어의 기본 이동 속도 (초당 픽셀 거리)
-	float playerMoveSpeed = 3.0f;
+	const float playerMoveSpeed = 3.0f;
 
 	// 씬 내의 변하지 않는 인스턴스
 	std::vector<StaticPtr> staticInstances;
