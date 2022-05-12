@@ -75,10 +75,6 @@ void Player::RideOn(RailBorder* entrance)
 	{
 		myStatus = PLAYER_STATES::RIDING;
 
-		SetWorldMatrix(Matrix4x4::Identity());
-		Rotate(GameTransform::Up, entrance->myExitLook);
-		mySight.SetRotation(Transform.GetWorldMatrix());
-
 		SetPosition(entrance->GetPosition());
 	}
 }
@@ -211,6 +207,19 @@ void Player::UpdateCamera(float elapsed_time)
 
 	Camera->Update(look_at, Transform, sight_mat, elapsed_time);
 	Camera->GenerateViewMatrix();
+}
+
+PlayerBullet* Player::FindLastBullet()
+{
+	for (const auto& bullet : myBulletPool)
+	{
+		if (bullet && !bullet->IsActivated())
+		{
+			return bullet;
+		}
+	}
+
+	return nullptr;
 }
 
 void Player::OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
@@ -358,17 +367,4 @@ void Player::OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 		}
 		break;
 	}
-}
-
-PlayerBullet* Player::FindLastBullet()
-{
-	for (const auto& bullet : myBulletPool)
-	{
-		if (bullet && !bullet->IsActivated())
-		{
-			return bullet;
-		}
-	}
-
-	return nullptr;
 }
