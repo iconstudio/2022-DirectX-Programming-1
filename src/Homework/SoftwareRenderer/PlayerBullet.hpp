@@ -14,6 +14,7 @@ public:
 	void SetDamage(const float value);
 
 	void Ready();
+	void Return();
 	void Update(float elapsed_time) override;
 
 	void OnCollisionWall(const XMFLOAT3& reflection);

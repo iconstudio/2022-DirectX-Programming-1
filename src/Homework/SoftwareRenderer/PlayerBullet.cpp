@@ -26,6 +26,16 @@ void PlayerBullet::Ready()
 	myLifetime = myDuration;
 }
 
+void PlayerBullet::Return()
+{
+	Deactivate();
+
+	if (myParent)
+	{
+		myParent->ReturnBullet(this);
+	}
+}
+
 void PlayerBullet::SetParent(Player* parent)
 {
 	myParent = parent;
@@ -39,12 +49,7 @@ void PlayerBullet::Update(float elapsed_time)
 	}
 	else
 	{
-		Deactivate();
-
-		if (myParent)
-		{
-			myParent->ReturnBullet(this);
-		}
+		Return();
 	}
 
 	GameObject::Update(elapsed_time);
@@ -54,4 +59,10 @@ void PlayerBullet::OnCollisionWall(const XMFLOAT3& reflection)
 {}
 
 void PlayerBullet::OnCollisionEnter(GameObject* other)
-{}
+{
+	const auto tag = other->GetTag();
+	if (GOBJECT_TAGS::ENEMY_CUBE == tag)
+	{
+		Return();
+	}
+}
