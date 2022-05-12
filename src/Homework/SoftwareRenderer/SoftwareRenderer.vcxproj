@@ -196,7 +196,6 @@
     <ClInclude Include="PlayerBullet.hpp" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="GameScene.hpp" />
-    <ClInclude Include="RidingPlayer.hpp" />
     <ClInclude Include="stdafx.hpp" />
     <ClInclude Include="Terrains.hpp" />
   </ItemGroup>
@@ -224,7 +223,6 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="GameScene.cpp" />
     <ClCompile Include="PlayerBullet.cpp" />
-    <ClCompile Include="RidingPlayer.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Terrains.cpp" />
   </ItemGroup>

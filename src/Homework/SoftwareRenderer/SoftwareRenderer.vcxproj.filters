@@ -63,9 +63,6 @@
     <ClInclude Include="Player.hpp">
       <Filter>헤더 파일\Components</Filter>
     </ClInclude>
-    <ClInclude Include="RidingPlayer.hpp">
-      <Filter>헤더 파일\Components</Filter>
-    </ClInclude>
     <ClInclude Include="Fragment.hpp">
       <Filter>헤더 파일\System</Filter>
     </ClInclude>
@@ -141,9 +138,6 @@
       <Filter>소스 파일\Components</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
-      <Filter>소스 파일\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="RidingPlayer.cpp">
       <Filter>소스 파일\Components</Filter>
     </ClCompile>
     <ClCompile Include="Fragment.cpp">
