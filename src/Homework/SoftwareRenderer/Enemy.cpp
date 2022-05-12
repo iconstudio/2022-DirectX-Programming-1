@@ -66,7 +66,12 @@ void Enemy::OnCollisionEnter(GameObject* other)
 
 		case GOBJECT_TAGS::PLAYER_BULLET:
 		{
-			isKilled = true;
+			AddHealth(-3.0f);
+
+			if (myHealth <= 0.0f)
+			{
+				isKilled = true;
+			}
 		}
 		break;
 

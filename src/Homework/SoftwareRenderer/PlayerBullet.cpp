@@ -61,7 +61,7 @@ void PlayerBullet::OnCollisionWall(const XMFLOAT3& reflection)
 void PlayerBullet::OnCollisionEnter(GameObject* other)
 {
 	const auto tag = other->GetTag();
-	if (GOBJECT_TAGS::ENEMY_CUBE == tag)
+	if (GOBJECT_TAGS::ENEMY == tag)
 	{
 		Return();
 	}

@@ -9,6 +9,8 @@ public:
 	Enemy(const XMFLOAT3& pos);
 	virtual ~Enemy();
 
+	constexpr GOBJECT_TAGS GetTag() const override { return GOBJECT_TAGS::ENEMY; }
+
 	void InitHealth(float max_health);
 	void SetHealth(float value);
 	void AddHealth(float value);
