@@ -61,8 +61,6 @@ public:
 	void PrepareRenderingCollider(const BoundingOrientedBox& collider);
 	void PrepareRenderingCollider(const BoundingFrustum& collider);
 
-	Enemy* SpawnEnemy(ENEMY_TYPES type, const XMFLOAT3& pos);
-
 	void OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	void OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	void OnHWND(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -80,7 +78,7 @@ private:
 	bool PlayerMoveOnRail(float value);
 
 	ParticleBlob& PopParticleBlob() const;
-
+	void CastParticles(ParticleBlob& blob);
 
 	template<class Type>
 	Type* CreateInstance();
@@ -93,6 +91,8 @@ private:
 
 	template<class Type>
 	Type* CreateInstance(XMFLOAT3&& position);
+
+	Enemy* SpawnEnemy(ENEMY_TYPES type, const XMFLOAT3& pos);
 
 	// 윈도우 핸들
 	HWND Window;

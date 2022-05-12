@@ -327,70 +327,6 @@ void GameScene::CompleteBuilds()
 	}
 }
 
-void GameScene::PlayerJumpToRail(const shared_ptr<TerrainChunk>& node)
-{
-	worldCurrentTerrain = node;
-}
-
-void GameScene::PlayerJumpToBefore()
-{
-	if (worldPlayerPositionIndex <= 0)
-	{
-		// 첫번째
-		playerPosition = 0.0f;
-
-		playerSpeed = 0.0;
-	}
-	else
-	{
-		const auto& chunk = Terrain.at(--worldPlayerPositionIndex);
-		playerPosition += chunk->myLength;
-
-		PlayerJumpToRail(chunk);
-	}
-}
-
-void GameScene::PlayerJumpToNext()
-{
-	if (int(Terrain.size()) == worldPlayerPositionIndex - 1)
-	{
-		// 마지막
-		const auto& chunk = Terrain.at(worldPlayerPositionIndex);
-		playerPosition = chunk->myLength;
-
-		playerSpeed = 0.0;
-	}
-	else if (worldPlayerPositionIndex - 2 < int(Terrain.size()))
-	{
-		const auto& chunk = Terrain.at(++worldPlayerPositionIndex);
-		playerPosition -= chunk->myLength;
-
-		PlayerJumpToRail(chunk);
-	}
-}
-
-bool GameScene::PlayerMoveOnRail(float value)
-{
-	playerPosition += value;
-
-	const auto& rail_length = worldCurrentTerrain->myLength;
-
-	if (rail_length < playerPosition)
-	{
-		PlayerJumpToNext();
-		return true;
-	}
-	else if (playerPosition < 0.0f)
-	{
-		PlayerJumpToBefore();
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
 void GameScene::Update(float elapsed_time)
 {
 	if (myPlayer)
@@ -512,7 +448,6 @@ void GameScene::PrepareRendering()
 		if (instance->IsActivated() && CheckCameraBounds(instance.get()))
 		{
 			instance->PrepareRendering(*this);
-			//PrepareRenderingCollider(inst->Collider);
 		}
 	}
 
@@ -532,8 +467,6 @@ void GameScene::PrepareRendering()
 	if (myPlayer)
 	{
 		myPlayer->PrepareRendering(*this);
-		//PrepareRenderingCollider(myCamera->StaticCollider);
-		//PrepareRenderingCollider(myCamera->Collider);
 	}
 
 	std::sort(Fragments.begin(), Fragments.end()
@@ -649,6 +582,78 @@ void GameScene::PrepareRenderingCollider(const BoundingFrustum& collider)
 			AddFragment(CFragment{ vtx_to, vtx_far, RGB(128, 128, 128) });
 	}
 }
+
+void GameScene::PlayerJumpToRail(const shared_ptr<TerrainChunk>& node)
+{
+	worldCurrentTerrain = node;
+}
+
+void GameScene::PlayerJumpToBefore()
+{
+	if (worldPlayerPositionIndex <= 0)
+	{
+		// 첫번째
+		playerPosition = 0.0f;
+
+		playerSpeed = 0.0;
+	}
+	else
+	{
+		const auto& chunk = Terrain.at(--worldPlayerPositionIndex);
+		playerPosition += chunk->myLength;
+
+		PlayerJumpToRail(chunk);
+	}
+}
+
+void GameScene::PlayerJumpToNext()
+{
+	if (int(Terrain.size()) == worldPlayerPositionIndex - 1)
+	{
+		// 마지막
+		const auto& chunk = Terrain.at(worldPlayerPositionIndex);
+		playerPosition = chunk->myLength;
+
+		playerSpeed = 0.0;
+	}
+	else if (worldPlayerPositionIndex - 2 < int(Terrain.size()))
+	{
+		const auto& chunk = Terrain.at(++worldPlayerPositionIndex);
+		playerPosition -= chunk->myLength;
+
+		PlayerJumpToRail(chunk);
+	}
+}
+
+bool GameScene::PlayerMoveOnRail(float value)
+{
+	playerPosition += value;
+
+	const auto& rail_length = worldCurrentTerrain->myLength;
+
+	if (rail_length < playerPosition)
+	{
+		PlayerJumpToNext();
+		return true;
+	}
+	else if (playerPosition < 0.0f)
+	{
+		PlayerJumpToBefore();
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+ParticleBlob& GameScene::PopParticleBlob() const
+{
+	// // O: 여기에 return 문을 삽입합니다.
+}
+
+void GameScene::CastParticles(ParticleBlob& blob)
+{}
 
 template<class Type>
 Type* GameScene::CreateInstance()
