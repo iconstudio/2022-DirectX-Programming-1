@@ -28,8 +28,7 @@ public:
 	void TakeOff(RailBorder* exit);
 	void Crawl(DWORD dwdir, float accel);
 
-	void Move(const XMFLOAT3& dir, float distance) override;
-	void Rotate(float pitch, float yaw, float roll) override;
+	void SetPosition(const XMFLOAT3& pos) override;
 
 	void Update(float elapsed_time) override;
 
