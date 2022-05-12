@@ -119,31 +119,7 @@ void GameTransform::Rotate(float pitch, float yaw, float roll)
 	XMFLOAT4X4 mtxRotate = Matrix4x4::RotationYawPitchRoll(pitch, yaw, roll);
 
 	World = Matrix4x4::Multiply(mtxRotate, World);
-	/*
-	auto& myRight = mySight.myRight;
-	auto& myUp = mySight.myUp;
-	auto& myLook = mySight.myLook;
-	auto axis_right = XMFLOAT3(myRight);
-	auto axis_up = XMFLOAT3(myUp);
 
-	float pitch = delta_my * 0.5f;
-	if (pitch != 0.0f)
-	{
-		XMMATRIX rot = XMMatrixRotationAxis(XMLoadFloat3(&axis_right), XMConvertToRadians(pitch));
-
-		myLook = Vector3::TransformNormal(XMFLOAT3(myLook), rot);
-		myUp = Vector3::TransformNormal(axis_up, rot);
-	}
-
-	float yaw = delta_mx;
-	if (yaw != 0.0f)
-	{
-		XMMATRIX rot = XMMatrixRotationAxis(XMLoadFloat3(&axis_up), XMConvertToRadians(yaw));
-
-		myLook = Vector3::TransformNormal(XMFLOAT3(myLook), rot);
-		myRight = Vector3::TransformNormal(axis_right, rot);
-	}
-	*/
 	myRight = Vector3::Normalize(XMFLOAT3(myRight));
 	myUp = Vector3::Normalize(XMFLOAT3(myUp));
 	myLook = Vector3::Normalize(XMFLOAT3(myLook));
