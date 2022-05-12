@@ -79,6 +79,9 @@ private:
 	void PlayerJumpToNext();
 	bool PlayerMoveOnRail(float value);
 
+	ParticleBlob& PopParticleBlob() const;
+
+
 	template<class Type>
 	Type* CreateInstance();
 
