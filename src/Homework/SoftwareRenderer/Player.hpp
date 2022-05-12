@@ -31,6 +31,7 @@ public:
 	void SetPosition(const XMFLOAT3& pos) override;
 
 	void Update(float elapsed_time) override;
+	void UpdateCamera(float elapsed_time = 0.0f);
 
 	void OnMouse(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	void OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);

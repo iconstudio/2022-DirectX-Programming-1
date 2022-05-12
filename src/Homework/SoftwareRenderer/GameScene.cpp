@@ -325,6 +325,8 @@ bool GameScene::PlayerMoveOnRail(float value)
 	playerPosition += value;
 
 	const auto& rail_length = worldCurrentTerrain->myLength;
+	playerWorldRelativePosition = playerPosition / rail_length;
+
 	if (rail_length < playerPosition)
 	{
 		PlayerJumpToBefore();
@@ -345,6 +347,24 @@ void GameScene::Update(float elapsed_time)
 {
 	if (myPlayer)
 	{
+		if (isPlayerRiding)
+		{
+			const auto& chunk = worldCurrentTerrain;
+			const auto& from = chunk->from;
+			const auto& to = chunk->to;
+			const auto& look = chunk->vector;
+			const auto& up = chunk->normal;
+			const auto& len = chunk->myLength * playerWorldRelativePosition;
+
+			const auto& vector = Vector3::ScalarProduct(look, len);
+			const auto& newpos = Vector3::Add(from, vector);
+
+			myPlayer->SetPosition(newpos);
+		}
+		else
+		{
+
+		}
 		myPlayer->Update(elapsed_time);
 	}
 

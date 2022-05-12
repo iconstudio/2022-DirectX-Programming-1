@@ -121,12 +121,7 @@ void Player::Crawl(DWORD dwdir, float accel)
 void Player::SetPosition(const XMFLOAT3& pos)
 {
 	GameObject::SetPosition(pos);
-
-	const auto& sight_mat = mySight.GetWorldMatrix();
-	const auto&& look_at = Vector3::TransformCoord(lookOffset, sight_mat);
-
-	Camera->Update(look_at, Transform, sight_mat, 0.0f);
-	Camera->GenerateViewMatrix();
+	UpdateCamera();
 }
 
 void Player::Update(float elapsed_time)
@@ -187,7 +182,6 @@ void Player::Update(float elapsed_time)
 				{
 					const auto& shot_tranform = mySight;
 
-					bullet->Activate();
 					bullet->SetRotation(shot_tranform.GetWorldMatrix());
 					bullet->SetPosition(GetPosition());
 ;					bullet->SetDirection(XMFLOAT3(shot_tranform.GetLook()));
@@ -202,11 +196,14 @@ void Player::Update(float elapsed_time)
 	}
 
 	GameObject::Update(elapsed_time);
+	UpdateCamera(elapsed_time);
+}
 
+void Player::UpdateCamera(float elapsed_time)
+{
 	const auto& sight_mat = mySight.GetWorldMatrix();
 	const auto&& look_at = Vector3::TransformCoord(lookOffset, sight_mat);
 
-	//Camera->SetRotation(sight_mat);
 	Camera->Update(look_at, Transform, sight_mat, elapsed_time);
 	Camera->GenerateViewMatrix();
 }
