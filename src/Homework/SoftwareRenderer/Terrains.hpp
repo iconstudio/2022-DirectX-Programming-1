@@ -9,8 +9,12 @@ public:
 	RailBorder(const XMFLOAT3& pos);
 
 	void SetExit(const XMFLOAT3& pos);
+	void SetExitLook(const float angle);
+	void SetIndex(const size_t index);
 
+	size_t myIndex;
 	XMFLOAT3 myExit;
+	float myExitLook;
 };
 
 class Rail : public GameStaticObject

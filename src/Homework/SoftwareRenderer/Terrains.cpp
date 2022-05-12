@@ -20,6 +20,16 @@ void RailBorder::SetExit(const XMFLOAT3& pos)
 	myExit = pos;
 }
 
+void RailBorder::SetExitLook(const float angle)
+{
+	myExitLook = angle;
+}
+
+void RailBorder::SetIndex(const size_t index)
+{
+	myIndex = index;
+}
+
 Rail::Rail()
 	: Rail(XMFLOAT3())
 {

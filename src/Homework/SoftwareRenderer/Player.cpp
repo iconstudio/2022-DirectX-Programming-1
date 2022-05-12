@@ -74,7 +74,11 @@ void Player::RideOn(RailBorder* entrance)
 	{
 		myStatus = PLAYER_STATES::RIDING;
 
-		SetPosition(entrance->GetPosition());
+		SetWorldMatrix(Matrix4x4::Identity());
+		Rotate(GameTransform::Up, entrance->myExitLook);
+		mySight.SetRotation(Transform.GetWorldMatrix());
+
+		SetPosition(entrance->myExit);
 	}
 }
 
@@ -85,8 +89,10 @@ void Player::TakeOff(RailBorder* exit)
 		myStatus = PLAYER_STATES::NORMAL;
 
 		SetWorldMatrix(Matrix4x4::Identity());
-		mySight.SetWorldMatrix(Matrix4x4::Identity());
-		SetPosition(exit->GetPosition());
+		Rotate(GameTransform::Up, exit->myExitLook);
+		mySight.SetRotation(Transform.GetWorldMatrix());
+
+		SetPosition(exit->myExit);
 	}
 }
 
@@ -112,14 +118,15 @@ void Player::Crawl(DWORD dwdir, float accel)
 	AddSpeed(accel, 0.3f); // 0.3m/s
 }
 
-void Player::Move(const XMFLOAT3& dir, float distance)
+void Player::SetPosition(const XMFLOAT3& pos)
 {
-	GameObject::Move(dir, distance);
-}
+	GameObject::SetPosition(pos);
 
-void Player::Rotate(float pitch, float yaw, float roll)
-{
-	GameObject::Rotate(pitch, yaw, roll);
+	const auto& sight_mat = mySight.GetWorldMatrix();
+	const auto&& look_at = Vector3::TransformCoord(lookOffset, sight_mat);
+
+	Camera->Update(look_at, Transform, sight_mat, 0.0f);
+	Camera->GenerateViewMatrix();
 }
 
 void Player::Update(float elapsed_time)
@@ -200,7 +207,7 @@ void Player::Update(float elapsed_time)
 	const auto&& look_at = Vector3::TransformCoord(lookOffset, sight_mat);
 
 	//Camera->SetRotation(sight_mat);
-	Camera->Update(look_at, Transform, mySight, elapsed_time);
+	Camera->Update(look_at, Transform, sight_mat, elapsed_time);
 	Camera->GenerateViewMatrix();
 }
 
