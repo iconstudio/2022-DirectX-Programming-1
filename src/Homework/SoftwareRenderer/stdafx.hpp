@@ -11,7 +11,7 @@ constexpr float WORLD_H = 100.0f;
 // 게임 월드의 높이 (y)
 constexpr float WORLD_V = 20.0f;
 // 게임 월드의 세로 너비 (z)
-constexpr float WORLD_U = 300.0f;
+constexpr float WORLD_U = 1450.0f;
 
 #define FRAMEBUFFER_WIDTH		800
 #define FRAMEBUFFER_HEIGHT		600

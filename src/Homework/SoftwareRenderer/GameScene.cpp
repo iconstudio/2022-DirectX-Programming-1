@@ -120,12 +120,12 @@ void GameScene::BuildWorld()
 	constexpr int boundary_cnt_z = int(WORLD_U / floor_height);
 
 	float cx, cz;
-	for (int i = 0; i < boundary_cnt_z; ++i)
+	for (int i = 0; i <= boundary_cnt_z; ++i)
 	{
-		for (int k = 0; k < boundary_cnt_x; ++k)
+		for (int k = 0; k <= boundary_cnt_x; ++k)
 		{
-			cx = k * floor_width - floor_width * 0.5f;
-			cz = i * floor_height - floor_height * 0.5f;
+			cx = k * floor_width;
+			cz = i * floor_height;
 
 			auto floor = CreateInstance<GameStaticObject>(cx, 0.0f, cz);
 			floor->SetMesh(meshFloor);
@@ -608,7 +608,7 @@ void GameScene::PlayerJumpToBefore()
 
 void GameScene::PlayerJumpToNext()
 {
-	if (int(Terrain.size()) == worldPlayerPositionIndex - 1)
+	if (int(Terrain.size()) <= worldPlayerPositionIndex - 2)
 	{
 		// ¸¶Áö¸·
 		const auto& chunk = Terrain.at(worldPlayerPositionIndex);
@@ -616,7 +616,7 @@ void GameScene::PlayerJumpToNext()
 
 		playerSpeed = 0.0;
 	}
-	else if (worldPlayerPositionIndex - 2 < int(Terrain.size()))
+	else if (worldPlayerPositionIndex < int(Terrain.size()) - 2)
 	{
 		const auto& chunk = Terrain.at(++worldPlayerPositionIndex);
 		playerPosition -= chunk->myLength;
@@ -778,10 +778,7 @@ void GameScene::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				{
 					if (isPlayerRiding)
 					{
-						if (worldPlayerPositionIndex < int(Terrain.size()) - 1)
-						{
-							playerSpeed += playerAccel;
-						}
+						playerSpeed += playerAccel;
 					}
 				}
 				break;
@@ -791,10 +788,7 @@ void GameScene::OnKeyboard(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 				{
 					if (isPlayerRiding)
 					{
-						if (0 < worldPlayerPositionIndex)
-						{
-							playerSpeed -= playerAccel;
-						}
+						playerSpeed -= playerAccel;
 					}
 				}
 				break;
