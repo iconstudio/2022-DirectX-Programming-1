@@ -33,7 +33,8 @@ std::uniform_real_distribution<float> Random_distribution{ 0.0f, 1.0f };
 GameScene::GameScene(GameFramework& framework)
 	: Framework(framework), Window(NULL)
 	, globalMatrix(Matrix4x4::Identity())
-	, myInstances(100), staticInstances(200), myParticles(200), Fragments()
+	, myInstances(200), staticInstances(200)
+	, myParticleBlobs(10), myParticles(300), Fragments()
 	, numberPillars(100), Pillars(), boardFront(nullptr), boardBack(nullptr)
 	, myPlayer(nullptr), myCamera(nullptr)
 
@@ -45,7 +46,7 @@ GameScene::GameScene(GameFramework& framework)
 	, meshPillars(), meshRail(nullptr)
 {
 	ZeroMemory(meshPillars, sizeof(meshPillars));
-	
+
 	Fragments.clear();
 	staticInstances.clear();
 	myParticles.clear();
@@ -99,6 +100,8 @@ void GameScene::BuildMeshes()
 
 	meshFloor = MakePlaneMesh(COLLIDE_AREA_H, COLLIDE_AREA_U);
 	meshSide = MakePlaneMesh(COLLIDE_AREA_U, COLLIDE_AREA_V);
+
+	meshParticle = MakeCubeMesh(0.5f, 0.5f, 1.5f);
 
 	for (int i = 0; i < 15; ++i)
 	{
@@ -287,6 +290,24 @@ void GameScene::BuildObjects()
 	}
 }
 
+void GameScene::BuildParticles()
+{
+	for (int i = 0; i < 10; ++i)
+	{
+		for (int j = 0; j < ParticleBlob::count; ++j)
+		{
+			auto particle = EffectPtr();
+			particle->SetMesh(meshParticle);
+			particle->SetColor(Random_distribution(Random_engine) * 0xffffff);
+			myParticles.push_back(particle);
+		}
+
+		auto blob = ParticleBlob();
+		blob.particle = myParticles.begin() + i * ParticleBlob::count;
+		myParticleBlobs.push_back(blob);
+	}
+}
+
 void GameScene::CompleteBuilds()
 {
 	for (auto& inst : staticInstances)
@@ -456,6 +477,22 @@ void GameScene::Update(float elapsed_time)
 
 		it++;
 	}
+
+
+	for (auto& blob : myParticleBlobs)
+	{
+		blob.Update(elapsed_time);
+
+		if (blob.IsActivated())
+		{
+			std::for_each_n(blob.particle, blob.count, [&](EffectPtr& part) {
+				if (CheckCameraBounds(part.get()))
+				{
+					part->Update(elapsed_time);
+				}
+			});
+		}
+	}
 }
 
 void GameScene::PrepareRendering()
@@ -476,6 +513,19 @@ void GameScene::PrepareRendering()
 		{
 			instance->PrepareRendering(*this);
 			//PrepareRenderingCollider(inst->Collider);
+		}
+	}
+
+	for (const auto& blob : myParticleBlobs)
+	{
+		if (blob.IsActivated())
+		{
+			std::for_each_n(blob.particle, blob.count, [&](EffectPtr& part) {
+				if (CheckCameraBounds(part.get()))
+				{
+					part->PrepareRendering(*this);
+				}
+			});
 		}
 	}
 

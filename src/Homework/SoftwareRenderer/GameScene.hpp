@@ -4,7 +4,9 @@
 #include "GameObject.hpp"
 #include "GameStaticObject.hpp"
 #include "GameParticle.hpp"
+#include "Mesh.hpp"
 
+using ModelPtr = shared_ptr<CMesh>;
 using EntityPtr = shared_ptr<GameEntity>;
 using ObjectPtr = shared_ptr<GameObject>;
 using StaticPtr = shared_ptr<GameStaticObject>;
@@ -19,6 +21,24 @@ struct TerrainChunk
 	XMFLOAT3 axis;
 
 	float myLength = 0.0f;
+};
+
+class ParticleBlob
+{
+public:
+	std::vector<EffectPtr>::iterator particle;
+	static const size_t count = 30;
+	float lifetime = 0.0f;
+
+	bool IsActivated() const
+	{
+		return 0 < lifetime;
+	}
+
+	void Update(float elapsed_time)
+	{
+		if (0 < lifetime) lifetime -= elapsed_time;
+	}
 };
 
 class GameScene
@@ -51,6 +71,7 @@ private:
 	void BuildMeshes();
 	void BuildWorld();
 	void BuildObjects();
+	void BuildParticles();
 	void CompleteBuilds();
 
 	void PlayerJumpToRail(const shared_ptr<TerrainChunk>& node);
@@ -107,6 +128,8 @@ private:
 	std::vector<StaticPtr> staticInstances;
 	// 씬 내의 동적인 인스턴스
 	std::vector<ObjectPtr> myInstances;
+	// 씬 내의 파티클 인스턴스 모음
+	std::vector<ParticleBlob> myParticleBlobs;
 	// 씬 내의 파티클 인스턴스
 	std::vector<EffectPtr> myParticles;
 	// 플레이어 객체
@@ -115,20 +138,22 @@ private:
 	shared_ptr<GameCamera> myCamera;
 
 	// 플레이어의 메쉬
-	shared_ptr<CMesh> meshPlayer;
-	shared_ptr<CMesh> meshPlayerBullet;
-	shared_ptr<CMesh> meshEnemyCube;
-	shared_ptr<CMesh> meshEnemyManta;
-	shared_ptr<CMesh> meshEnemyBullet;
+	ModelPtr meshPlayer;
+	ModelPtr meshPlayerBullet;
+	ModelPtr meshEnemyCube;
+	ModelPtr meshEnemyManta;
+	ModelPtr meshEnemyBullet;
 
 	// 경계 메쉬
-	shared_ptr<CMesh> meshFloor, meshSide;
+	ModelPtr meshFloor, meshSide;
 	// 출입구 메쉬
-	shared_ptr<CMesh> meshEntrance;
+	ModelPtr meshEntrance;
 	// 높이 1부터 15까지의 기둥의 메쉬
-	shared_ptr<CMesh> meshPillars[15];
+	ModelPtr meshPillars[15];
 	// 선로 메쉬
-	shared_ptr<CMesh> meshRail;
+	ModelPtr meshRail;
+	// 입자 효과 메쉬
+	ModelPtr meshParticle;
 
 	// 렌더링 할 조각
 	std::vector<CFragment> Fragments;
