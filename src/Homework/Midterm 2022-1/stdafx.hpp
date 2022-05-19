@@ -45,6 +45,7 @@ class CFragment;
 class GameTimer;
 class GameFramework;
 class GameScene;
+class GameTerrain;
 
 class GamePipeline;
 class GameCamera;
@@ -56,17 +57,19 @@ class GameEntity;
 class GameStaticObject;
 class GameObject;
 
-class Player;
-class RidingPlayer;
-class PlayerBullet;
-class Enemy;
-class EnemyCube;
-class EnemyManta;
-class EnemyBullet;
+class SceneMain;
+class SceneGame;
+class SceneEnd;
 
-class Pillar;
-class Rail;
-class RailBorder;
+class Car;
+class Item;
+
+class Player;
+class Enemy;
+
+class Guard;
+class Road;
+class Tree;
 
 enum class GOBJECT_TAGS
 {
@@ -74,9 +77,9 @@ enum class GOBJECT_TAGS
 	NORMAL,
 	STATIC,
 	PLAYER,
-	PLAYER_BULLET,
 	ENEMY,
-	ENEMY_BULLET
+	GUARD,
+	TREE,
 };
 
 enum class ENEMY_TYPES
