@@ -28,4 +28,20 @@ class Obstacle;
 class Tree;
 class Rock;
 
+constexpr unsigned int sizeFrameBufferW = 800;
+constexpr unsigned int sizeFrameBufferH = 600;
+constexpr unsigned int numberFrameBuffers = 2;
+
+constexpr FLOAT FPS_LIMIT = 100.0f;
+constexpr COLORREF C_WHITE = RGB(0xff, 0xff, 0xff);
+constexpr COLORREF C_SMOG = RGB(0xe6, 0xe6, 0xe6);
+constexpr COLORREF C_GREEN = RGB(0x00, 0x80, 0x00);
+
+constexpr int DIR_FORWARD = 0x01;
+constexpr int DIR_BACKWARD = 0x02;
+constexpr int DIR_LEFT = 0x04;
+constexpr int DIR_RIGHT = 0x08;
+constexpr int DIR_UP = 0x10;
+constexpr int DIR_DOWN = 0x20;
+
 #endif //PCH_H
