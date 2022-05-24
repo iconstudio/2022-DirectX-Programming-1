@@ -79,9 +79,14 @@ private:
 
 	Timer myGameTimer;
 
+	// 월드의 월드 변환 행렬
+	XMFLOAT4X4 globalMatrix;
+
 	std::vector<shared_ptr<Scene>> myScenes;
 	std::vector<shared_ptr<Scene>> myScenePipeline;
 	shared_ptr<Camera> myCamera;
+
+	std::unordered_map<const char*, shared_ptr<Mesh>> myMeshes;
 
 	_TCHAR m_pszFrameRate[70];
 };
