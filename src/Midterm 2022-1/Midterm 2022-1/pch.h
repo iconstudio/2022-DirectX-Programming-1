@@ -15,10 +15,10 @@ class Camera;
 class GameObject;
 class GameEntity;
 
-class Shader;
-class Material;
-class Model;
-class Mesh;
+class CShader;
+class CMaterial;
+class CModel;
+class CMesh;
 
 class Car;
 class Player;
@@ -43,5 +43,13 @@ constexpr int DIR_LEFT = 0x04;
 constexpr int DIR_RIGHT = 0x08;
 constexpr int DIR_UP = 0x10;
 constexpr int DIR_DOWN = 0x20;
+
+#define MATERIAL_ALBEDO_MAP			0x01
+#define MATERIAL_SPECULAR_MAP		0x02
+#define MATERIAL_NORMAL_MAP			0x04
+#define MATERIAL_METALLIC_MAP		0x08
+#define MATERIAL_EMISSION_MAP		0x10
+#define MATERIAL_DETAIL_ALBEDO_MAP	0x20
+#define MATERIAL_DETAIL_NORMAL_MAP	0x40
 
 #endif //PCH_H
