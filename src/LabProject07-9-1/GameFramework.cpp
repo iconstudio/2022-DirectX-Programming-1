@@ -426,7 +426,7 @@ void GameFramework::ToggleFullscreen()
 		throw "스왑 체인에서 전체 화면 상태를 얻어오는데에 실패!";
 	}
 
-	valid = mySwapChain->SetFullscreenState(~fullscreen, NULL);
+	valid = mySwapChain->SetFullscreenState(!fullscreen, NULL);
 	if (FAILED(valid))
 	{
 		throw "스왑 체인의 전체 화면 상태를 설정하는데에 실패!";
