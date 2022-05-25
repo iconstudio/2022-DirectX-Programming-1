@@ -29,7 +29,7 @@ using namespace DirectX::PackedVector;
 
 #include <memory>
 #include <string>
-#include <filesystem>
+//#include <filesystem>
 #include <fstream>
 #include <vector>
 #include <unordered_map>
@@ -41,7 +41,7 @@ using std::unique_ptr;
 using std::make_shared;
 using std::make_unique;
 using std::string;
-using Filepath = std::filesystem::path;
+//using Filepath = std::filesystem::path;
 
 constexpr auto PI = 3.141592654f;
 template <typename T> constexpr auto DegreeToRadian(T x)

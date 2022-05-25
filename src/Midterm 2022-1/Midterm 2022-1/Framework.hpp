@@ -79,7 +79,7 @@ private:
 
 	Timer myGameTimer;
 
-	// ¿ùµåÀÇ ¿ùµå º¯È¯ Çà·Ä
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯ ï¿½ï¿½ï¿½
 	XMFLOAT4X4 globalMatrix;
 
 	std::vector<shared_ptr<Scene>> myScenes;
