@@ -9,6 +9,7 @@ public:
 	GameFramework(unsigned int width, unsigned int height);
 	~GameFramework();
 
+	// 다이렉트X 초기화
 	void Awake(HINSTANCE hinstance, HWND window);
 	void CreateDirect3DDevice();
 	void CreateCommanders();
@@ -16,12 +17,13 @@ public:
 	void CreateRenderTargetViews();
 	void CreateDepthStencilView();
 
+	// 월드 초기화
 	void Start();
-
-	void ToggleFullscreen();
-
 	void BuildObjects();
 	void ReleaseObjects();
+
+	// 전체화면 전환
+	void ToggleFullscreen();
 
 	void ProcessInput();
 	void AnimateObjects();
@@ -30,9 +32,9 @@ public:
 	void WaitForGpuComplete();
 	void MoveToNextFrame();
 
-	void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
-	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
-	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+	void OnMouseEvent(HWND hWnd, UINT msg, WPARAM btn, LPARAM info);
+	void OnKeyboardEvent(HWND hWnd, UINT msg, WPARAM key, LPARAM state);
+	LRESULT CALLBACK OnWindowsEvent(HWND, UINT msg, WPARAM wp, LPARAM lp);
 
 private:
 	HINSTANCE myHInstance;

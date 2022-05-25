@@ -109,7 +109,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 		case WM_KEYDOWN:
 		case WM_KEYUP:
 		{
-			gameFramework.OnProcessingWindowMessage(hwnd, msg, wp, lp);
+			gameFramework.OnWindowsEvent(hwnd, msg, wp, lp);
 		}
 		break;
 

@@ -13,6 +13,9 @@ GameFramework::GameFramework(unsigned int width, unsigned int height)
 	, heapRtvDesc(nullptr), szRtvDescIncrements(0)
 	, myDepthStencilBuffer(nullptr)
 	, heapDsvDesc(nullptr), szDsvDescIncrements(0)
+#ifdef _DEBUG
+	, myDebugController(nullptr)
+#endif //  _DEBUG
 {
 	m_pScene = NULL;
 	m_pPlayer = NULL;
@@ -477,60 +480,93 @@ void GameFramework::ToggleFullscreen()
 	CreateRenderTargetViews();
 }
 
-void GameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+void GameFramework::OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 {
-	if (m_pScene) m_pScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
-	switch (nMessageID)
+	if (m_pScene)
+	{
+		m_pScene->OnMouseEvent(hwnd, msg, btn, info);
+	}
+
+	switch (msg)
 	{
 		case WM_LBUTTONDOWN:
 		case WM_RBUTTONDOWN:
-			::SetCapture(hWnd);
-			::GetCursorPos(&m_ptOldCursorPos);
-			break;
+		{
+			SetCapture(hwnd);
+			GetCursorPos(&m_ptOldCursorPos);
+		}
+		break;
+
 		case WM_LBUTTONUP:
 		case WM_RBUTTONUP:
-			::ReleaseCapture();
-			break;
+		{
+			ReleaseCapture();
+		}
+		break;
+
 		case WM_MOUSEMOVE:
-			break;
+		{}
+		break;
+
 		default:
-			break;
+		{}
+		break;
 	}
 }
 
-void GameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+void GameFramework::OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
 {
-	if (m_pScene) m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
-	switch (nMessageID)
+	if (m_pScene)
+	{
+		m_pScene->OnKeyboardEvent(hwnd, msg, key, state);
+	}
+
+	switch (msg)
 	{
 		case WM_KEYUP:
-			switch (wParam)
+		{
+			switch (key)
 			{
 				case VK_ESCAPE:
-					::PostQuitMessage(0);
-					break;
+				{
+					PostQuitMessage(0);
+				}
+				break;
+
 				case VK_RETURN:
-					break;
+				break;
+
 				case VK_F1:
 				case VK_F2:
 				case VK_F3:
-					m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
-					break;
+				{
+					m_pCamera = m_pPlayer->ChangeCamera((DWORD)(key - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
+				}
+
+				break;
+
 				case VK_F9:
+				{
 					ToggleFullscreen();
-					break;
+				}
+				break;
+
 				case VK_F5:
-					break;
+				break;
+
 				default:
-					break;
+				break;
 			}
-			break;
+		}
+		break;
+
 		default:
-			break;
+		{}
+		break;
 	}
 }
 
-LRESULT CALLBACK GameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK GameFramework::OnWindowsEvent(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)
 	{
@@ -543,18 +579,18 @@ LRESULT CALLBACK GameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessa
 			break;
 		}
 		case WM_SIZE:
-			break;
+		break;
 		case WM_LBUTTONDOWN:
-        case WM_RBUTTONDOWN:
-        case WM_LBUTTONUP:
-        case WM_RBUTTONUP:
-        case WM_MOUSEMOVE:
-			OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
-            break;
-        case WM_KEYDOWN:
-        case WM_KEYUP:
-			OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
-			break;
+		case WM_RBUTTONDOWN:
+		case WM_LBUTTONUP:
+		case WM_RBUTTONUP:
+		case WM_MOUSEMOVE:
+		OnMouseEvent(hWnd, nMessageID, wParam, lParam);
+		break;
+		case WM_KEYDOWN:
+		case WM_KEYUP:
+		OnKeyboardEvent(hWnd, nMessageID, wParam, lParam);
+		break;
 	}
 	return(0);
 }
@@ -566,13 +602,13 @@ void GameFramework::BuildObjects()
 	m_pScene = new CScene();
 	if (m_pScene) m_pScene->BuildObjects(myDevice, myCommandList);
 
-	CAirplanePlayer *pAirplanePlayer = new CAirplanePlayer(myDevice, myCommandList, m_pScene->GetGraphicsRootSignature());
+	CAirplanePlayer* pAirplanePlayer = new CAirplanePlayer(myDevice, myCommandList, m_pScene->GetGraphicsRootSignature());
 	pAirplanePlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	m_pScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
 	m_pCamera = m_pPlayer->GetCamera();
 
 	myCommandList->Close();
-	ID3D12CommandList *ppd3dCommandLists[] = { myCommandList };
+	ID3D12CommandList* ppd3dCommandLists[] = { myCommandList };
 	myCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 
 	WaitForGpuComplete();
@@ -668,12 +704,12 @@ void GameFramework::MoveToNextFrame()
 //#define _WITH_PLAYER_TOP
 
 void GameFramework::FrameAdvance()
-{    
+{
 	m_GameTimer.Tick(0.0f);
-	
+
 	ProcessInput();
 
-    AnimateObjects();
+	AnimateObjects();
 
 	HRESULT hResult = myCommandAlloc->Reset();
 	hResult = myCommandList->Reset(myCommandAlloc, NULL);
@@ -712,8 +748,8 @@ void GameFramework::FrameAdvance()
 	myCommandList->ResourceBarrier(1, &d3dResourceBarrier);
 
 	hResult = myCommandList->Close();
-	
-	ID3D12CommandList *ppd3dCommandLists[] = { myCommandList };
+
+	ID3D12CommandList* ppd3dCommandLists[] = { myCommandList };
 	myCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 
 	WaitForGpuComplete();
