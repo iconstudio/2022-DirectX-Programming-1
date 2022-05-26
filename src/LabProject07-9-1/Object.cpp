@@ -120,13 +120,18 @@ void GameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, GameCamera* 
 		{
 			if (m_ppMaterials[i])
 			{
-				if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+				if (m_ppMaterials[i]->m_pShader)
+				{
+					m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+				}
+
 				m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
 			}
 
 			if (m_pMesh) m_pMesh->Render(pd3dCommandList, i);
 		}
 	}
+
 	if (mySibling) mySibling->Render(pd3dCommandList, pCamera);
 	if (myChild) myChild->Render(pd3dCommandList, pCamera);
 }

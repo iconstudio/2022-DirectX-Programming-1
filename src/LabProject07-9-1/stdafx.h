@@ -11,18 +11,22 @@
 
 #include <d3d12.h>
 #include <dxgi1_4.h>
-#include <D3Dcompiler.h>
 #ifdef _DEBUG
 #include <dxgidebug.h>
 #endif
+#include <D3Dcompiler.h>
 #include <DirectXMath.h>
 #include <DirectXPackedVector.h>
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
+using namespace DirectX;
+using namespace DirectX::PackedVector;
+using DESC_HANDLE = D3D12_CPU_DESCRIPTOR_HANDLE;
 
 #include <wrl.h>
 #include <shellapi.h>
 #include <Mmsystem.h>
+using Microsoft::WRL::ComPtr;
 
 #include <memory>
 #include <filesystem>
@@ -32,21 +36,19 @@
 #include <unordered_map>
 #include <array>
 #include <algorithm>
-
 using std::shared_ptr;
 using std::unique_ptr;
 using std::make_shared;
 using std::make_unique;
 
-using namespace DirectX;
-using namespace DirectX::PackedVector;
-using Microsoft::WRL::ComPtr;
-using DESC_HANDLE = D3D12_CPU_DESCRIPTOR_HANDLE;
+class GameFramework;
+class CScene;
 
 class CMaterial;
 class CShader;
 class CLight;
 using ShaderBlob = D3D12_SHADER_BYTECODE;
+
 class GameCamera;
 class GameObject;
 
