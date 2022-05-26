@@ -1,50 +1,55 @@
 #include "stdafx.h"
 #include "DirectX.hpp"
 #include "GameFramework.h"
+#include "Timer.h"
 
 #define MAX_LOADSTRING 100
 
 HINSTANCE appInstance;
-TCHAR captionTitle[MAX_LOADSTRING];
-TCHAR captionClass[MAX_LOADSTRING];
+WCHAR captionTitle[MAX_LOADSTRING];
+WCHAR captionClass[MAX_LOADSTRING];
 
+CGameTimer gameTimer;
 GameFramework gameFramework{ FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
 
 ATOM MyRegisterClass(HINSTANCE);
 BOOL InitInstance(HINSTANCE, int);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
+void SetTitle(HWND hwnd, const wchar_t* caption);
 
-int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
+int APIENTRY _tWinMain(HINSTANCE hInstance
+	, HINSTANCE hPrevInstance
+	, LPTSTR lpCmdLine
+	, int nCmdShow)
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
 	MSG msg;
-	HACCEL hAccelTable;
 
-	::LoadString(hInstance, IDS_APP_TITLE, captionTitle, MAX_LOADSTRING);
-	::LoadString(hInstance, IDC_LABPROJECT0791, captionClass, MAX_LOADSTRING);
+	ZeroMemory(captionTitle, sizeof(captionTitle));
+	ZeroMemory(captionClass, sizeof(captionClass));
+
+	LoadString(hInstance, IDS_APP_TITLE, captionTitle, MAX_LOADSTRING);
+	LoadString(hInstance, IDC_LABPROJECT0791, captionClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
 
-	if (!InitInstance(hInstance, nCmdShow)) return(FALSE);
-
-	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_LABPROJECT0791));
-
-	while (1)
+	if (!InitInstance(hInstance, nCmdShow))
 	{
-		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		return(FALSE);
+	}
+
+	while (true)
+	{
+		gameTimer.Tick(0.0f);
+		gameFramework.Update(gameTimer.GetTimeElapsed());
+
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			if (msg.message == WM_QUIT) break;
-			if (!::TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-			{
-				::TranslateMessage(&msg);
-				::DispatchMessage(&msg);
-			}
-		}
-		else
-		{
-			gameFramework.FrameAdvance();
+
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
 		}
 	}
 
@@ -101,9 +106,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 		case WM_CREATE:
 		{
 			gameFramework.Awake(appInstance, hwnd);
+			gameTimer.Reset();
+
+			SetTimer(hwnd, 0, 1, NULL);
 		}
 		break;
 
+		case WM_ACTIVATE:
+		{
+			if (LOWORD(wp) == WA_INACTIVE)
+				gameTimer.Stop();
+			else
+				gameTimer.Start();
+		}
+		[[fallthrough]]
 		case WM_SIZE:
 		case WM_LBUTTONDOWN:
 		case WM_LBUTTONUP:
@@ -117,26 +133,18 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 		}
 		break;
 
-		case WM_COMMAND:
+		case WM_TIMER:
 		{
-			wmId = LOWORD(wp);
-			wmEvent = HIWORD(wp);
-			switch (wmId)
-			{
-				case IDM_ABOUT:
-				DialogBox(appInstance, MAKEINTRESOURCE(IDD_ABOUTBOX), hwnd, About);
-				break;
+			const auto framerate = gameTimer.GetFrameRate();
+			WCHAR framerate_caption[MAX_LOADSTRING]{};
+			ZeroMemory(framerate_caption, sizeof(framerate_caption));
 
-				case IDM_EXIT:
-				DestroyWindow(hwnd);
-				break;
+			wsprintf(framerate_caption, L"Racing Game (FPS: %u)", framerate);
 
-				default:
-				return(::DefWindowProc(hwnd, msg, wp, lp));
-			}
+			SetTitle(hwnd, framerate_caption);
 		}
 		break;
-
+		
 		case WM_PAINT:
 		{
 			hdc = BeginPaint(hwnd, &ps);
@@ -159,20 +167,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	}
 }
 
-INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+void SetTitle(HWND hwnd, const wchar_t* caption)
 {
-	UNREFERENCED_PARAMETER(lParam);
-	switch (message)
-	{
-		case WM_INITDIALOG:
-		return((INT_PTR)TRUE);
-		case WM_COMMAND:
-		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-		{
-			::EndDialog(hDlg, LOWORD(wParam));
-			return((INT_PTR)TRUE);
-		}
-		break;
-	}
-	return((INT_PTR)FALSE);
+	SetWindowText(hwnd, caption);
 }

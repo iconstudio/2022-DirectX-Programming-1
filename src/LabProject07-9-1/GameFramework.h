@@ -1,5 +1,4 @@
 #pragma once
-#include "Timer.h"
 #include "Player.h"
 #include "Scene.h"
 
@@ -22,15 +21,17 @@ public:
 	void BuildObjects();
 	void ReleaseObjects();
 
-	// 전체화면 전환
-	void ToggleFullscreen();
+	void Update(float elapsed_time);
 
-	void ProcessInput();
-	void AnimateObjects();
-	void FrameAdvance();
+	void PrepareRendering();
+	void Render();
+	void AfterRendering();
 
 	void WaitForGpuComplete();
 	void MoveToNextFrame();
+
+	// 전체화면 전환
+	void ToggleFullscreen();
 
 	void OnMouseEvent(HWND hWnd, UINT msg, WPARAM btn, LPARAM info);
 	void OnKeyboardEvent(HWND hWnd, UINT msg, WPARAM key, LPARAM state);
@@ -73,14 +74,10 @@ private:
 	ID3D12Debug* myDebugController;
 #endif
 
-	CGameTimer m_GameTimer;
-
 	CScene* m_pScene = NULL;
 	CPlayer* m_pPlayer = NULL;
 	GameCamera* m_pCamera = NULL;
 
 	POINT m_ptOldCursorPos;
-
-	_TCHAR m_pszFrameRate[70];
 };
 

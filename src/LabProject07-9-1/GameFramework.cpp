@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "GameFramework.h"
+#include "Timer.h"
 
 GameFramework::GameFramework(unsigned int width, unsigned int height)
 	: frameWidth(width), frameHeight(height)
@@ -19,8 +20,6 @@ GameFramework::GameFramework(unsigned int width, unsigned int height)
 {
 	m_pScene = NULL;
 	m_pPlayer = NULL;
-
-	_tcscpy_s(m_pszFrameRate, _T("LabProject ("));
 }
 
 GameFramework::~GameFramework()
@@ -540,7 +539,7 @@ void GameFramework::OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM stat
 				case VK_F2:
 				case VK_F3:
 				{
-					m_pCamera = m_pPlayer->ChangeCamera((DWORD)(key - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
+					m_pCamera = m_pPlayer->ChangeCamera((DWORD)(key - VK_F1 + 1), 0);
 				}
 
 				break;
@@ -570,14 +569,6 @@ LRESULT CALLBACK GameFramework::OnWindowsEvent(HWND hWnd, UINT nMessageID, WPARA
 {
 	switch (nMessageID)
 	{
-		case WM_ACTIVATE:
-		{
-			if (LOWORD(wParam) == WA_INACTIVE)
-				m_GameTimer.Stop();
-			else
-				m_GameTimer.Start();
-			break;
-		}
 		case WM_SIZE:
 		break;
 		case WM_LBUTTONDOWN:
@@ -595,6 +586,11 @@ LRESULT CALLBACK GameFramework::OnWindowsEvent(HWND hWnd, UINT nMessageID, WPARA
 	return(0);
 }
 
+void GameFramework::Start()
+{
+
+}
+
 void GameFramework::BuildObjects()
 {
 	myCommandList->Reset(myCommandAlloc, NULL);
@@ -602,8 +598,9 @@ void GameFramework::BuildObjects()
 	m_pScene = new CScene();
 	if (m_pScene) m_pScene->BuildObjects(myDevice, myCommandList);
 
-	CAirplanePlayer* pAirplanePlayer = new CAirplanePlayer(myDevice, myCommandList, m_pScene->GetGraphicsRootSignature());
+	auto pAirplanePlayer = new CAirplanePlayer(myDevice, myCommandList, m_pScene->GetGraphicsRootSignature());
 	pAirplanePlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+
 	m_pScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
 	m_pCamera = m_pPlayer->GetCamera();
 
@@ -615,8 +612,6 @@ void GameFramework::BuildObjects()
 
 	if (m_pScene) m_pScene->ReleaseUploadBuffers();
 	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
-
-	m_GameTimer.Reset();
 }
 
 void GameFramework::ReleaseObjects()
@@ -625,8 +620,52 @@ void GameFramework::ReleaseObjects()
 	if (m_pScene) delete m_pScene;
 }
 
-void GameFramework::ProcessInput()
+void GameFramework::PrepareRendering()
+{}
+
+void GameFramework::Render()
+{}
+
+void GameFramework::AfterRendering()
+{}
+
+void GameFramework::WaitForGpuComplete()
 {
+	const auto signal = ++myFences[indexFrameBuffer];
+	auto valid = myCommandQueue->Signal(myRenderFence, signal);
+	if (FAILED(valid))
+	{
+		throw "명령 큐에 신호 보내기 실패!";
+	}
+
+	if (myRenderFence->GetCompletedValue() < signal)
+	{
+		valid = myRenderFence->SetEventOnCompletion(signal, eventFence);
+		if (FAILED(valid))
+		{
+			throw "렌더링 완료 이벤트 설정 실패!";
+		}
+		
+		WaitForSingleObject(eventFence, INFINITE);
+	}
+}
+
+void GameFramework::MoveToNextFrame()
+{
+	indexFrameBuffer = mySwapChain->GetCurrentBackBufferIndex();
+
+	WaitForGpuComplete();
+}
+
+void GameFramework::Update(float elapsed_time)
+{
+	if (m_pScene)
+	{
+		m_pScene->Update(elapsed_time);
+	}
+
+	m_pPlayer->Animate(elapsed_time, NULL);
+
 	static UCHAR pKeysBuffer[256];
 	bool bProcessedByScene = false;
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
@@ -663,53 +702,8 @@ void GameFramework::ProcessInput()
 			if (dwDirection) m_pPlayer->Move(dwDirection, 1.5f, true);
 		}
 	}
-	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
-}
 
-void GameFramework::AnimateObjects()
-{
-	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
-
-	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
-
-	m_pPlayer->Animate(fTimeElapsed, NULL);
-}
-
-void GameFramework::WaitForGpuComplete()
-{
-	const UINT64 nFenceValue = ++myFences[indexFrameBuffer];
-	HRESULT hResult = myCommandQueue->Signal(myRenderFence, nFenceValue);
-
-	if (myRenderFence->GetCompletedValue() < nFenceValue)
-	{
-		hResult = myRenderFence->SetEventOnCompletion(nFenceValue, eventFence);
-		::WaitForSingleObject(eventFence, INFINITE);
-	}
-}
-
-void GameFramework::MoveToNextFrame()
-{
-	indexFrameBuffer = mySwapChain->GetCurrentBackBufferIndex();
-
-	UINT64 nFenceValue = ++myFences[indexFrameBuffer];
-	HRESULT hResult = myCommandQueue->Signal(myRenderFence, nFenceValue);
-
-	if (myRenderFence->GetCompletedValue() < nFenceValue)
-	{
-		hResult = myRenderFence->SetEventOnCompletion(nFenceValue, eventFence);
-		::WaitForSingleObject(eventFence, INFINITE);
-	}
-}
-
-//#define _WITH_PLAYER_TOP
-
-void GameFramework::FrameAdvance()
-{
-	m_GameTimer.Tick(0.0f);
-
-	ProcessInput();
-
-	AnimateObjects();
+	m_pPlayer->Update(elapsed_time);
 
 	HRESULT hResult = myCommandAlloc->Reset();
 	hResult = myCommandList->Reset(myCommandAlloc, NULL);
@@ -770,11 +764,5 @@ void GameFramework::FrameAdvance()
 #endif
 
 	MoveToNextFrame();
-
-	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
-	size_t nLength = _tcslen(m_pszFrameRate);
-	XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
-	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%4f, %4f, %4f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
-	::SetWindowText(myWindow, m_pszFrameRate);
 }
 
