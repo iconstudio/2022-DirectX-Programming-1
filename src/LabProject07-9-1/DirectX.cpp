@@ -9,7 +9,7 @@ HINSTANCE appInstance;
 WCHAR captionTitle[MAX_LOADSTRING];
 WCHAR captionClass[MAX_LOADSTRING];
 
-CGameTimer gameTimer;
+CGameTimer gameTimer{};
 GameFramework gameFramework{ FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
 
 ATOM MyRegisterClass(HINSTANCE);
@@ -25,8 +25,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	MSG msg;
-
 	ZeroMemory(captionTitle, sizeof(captionTitle));
 	ZeroMemory(captionClass, sizeof(captionClass));
 
@@ -36,13 +34,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance
 
 	if (!InitInstance(hInstance, nCmdShow))
 	{
-		return(FALSE);
+		return FALSE;
 	}
 
+	MSG msg;
 	while (true)
 	{
 		gameTimer.Tick(0.0f);
-		gameFramework.Update(gameTimer.GetTimeElapsed());
 
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -51,12 +49,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
+
+		gameFramework.Update(gameTimer.GetTimeElapsed());
+		gameFramework.Render();
 	}
 
 	return((int)msg.wParam);
 }
 
-ATOM MyRegisterClass(HINSTANCE hInstance)
+ATOM MyRegisterClass(HINSTANCE instance)
 {
 	WNDCLASSEX wcex{};
 	ZeroMemory(&wcex, sizeof(wcex));
@@ -66,8 +67,8 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.lpfnWndProc = WndProc;
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
-	wcex.hInstance = hInstance;
-	wcex.hIcon = ::LoadIcon(hInstance, MAKEINTRESOURCE(IDI_LABPROJECT0791));
+	wcex.hInstance = instance;
+	wcex.hIcon = ::LoadIcon(instance, MAKEINTRESOURCE(IDI_LABPROJECT0791));
 	wcex.hCursor = ::LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wcex.lpszMenuName = NULL;//MAKEINTRESOURCE(IDC_LABPROJECT0791);
@@ -97,7 +98,6 @@ BOOL InitInstance(HINSTANCE instance, int cmd_show)
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	int wmId, wmEvent;
 	PAINTSTRUCT ps;
 	HDC hdc;
 
@@ -106,6 +106,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 		case WM_CREATE:
 		{
 			gameFramework.Awake(appInstance, hwnd);
+			gameFramework.Start();
 			gameTimer.Reset();
 
 			SetTimer(hwnd, 0, 1, NULL);
@@ -119,7 +120,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			else
 				gameTimer.Start();
 		}
-		[[fallthrough]]
 		case WM_SIZE:
 		case WM_LBUTTONDOWN:
 		case WM_LBUTTONUP:

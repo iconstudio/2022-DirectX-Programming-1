@@ -56,8 +56,8 @@ class Car;
 class Player;
 
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
-#define FRAME_BUFFER_WIDTH		640
-#define FRAME_BUFFER_HEIGHT		480
+#define FRAME_BUFFER_WIDTH		800
+#define FRAME_BUFFER_HEIGHT		600
 
 #define DIR_FORWARD					0x01
 #define DIR_BACKWARD				0x02

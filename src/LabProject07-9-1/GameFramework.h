@@ -18,17 +18,22 @@ public:
 
 	// 월드 초기화
 	void Start();
+	void BuildWorld();
+	void BuildParticles();
+	void BuildPlayer();
+	void BuildTerrains();
 	void BuildObjects();
-	void ReleaseObjects();
 
+	// 갱신
 	void Update(float elapsed_time);
 
-	void PrepareRendering();
+	// 렌더링
 	void Render();
+	void PrepareRendering();
 	void AfterRendering();
 
+	// 동기화
 	void WaitForGpuComplete();
-	void MoveToNextFrame();
 
 	// 전체화면 전환
 	void ToggleFullscreen();
@@ -38,6 +43,15 @@ public:
 	LRESULT CALLBACK OnWindowsEvent(HWND, UINT msg, WPARAM wp, LPARAM lp);
 
 private:
+	bool D3DAssert(HRESULT valid, const char* error);
+
+	void ResetCmdList(ID3D12PipelineState* pipeline = nullptr);
+	void CloseCmdList();
+	void ExecuteCmdList(ID3D12CommandList* list[], UINT count);
+
+	void SetFenceEvent(HANDLE signal, UINT64 limit);
+	void SignalToFence(UINT64 count);
+
 	HINSTANCE myAppInstance;
 	HWND myWindow;
 

@@ -17,13 +17,18 @@ GameFramework::GameFramework(unsigned int width, unsigned int height)
 #ifdef _DEBUG
 	, myDebugController(nullptr)
 #endif //  _DEBUG
+	, m_pScene(nullptr), m_pPlayer(nullptr)
 {
-	m_pScene = NULL;
-	m_pPlayer = NULL;
+	ZeroMemory(resSwapChainBackBuffers, sizeof(resSwapChainBackBuffers));
 }
 
 GameFramework::~GameFramework()
 {
+	if (m_pScene)
+	{
+		m_pScene->ReleaseObjects();
+	}
+
 	CloseHandle(eventFence);
 
 	if (myDepthStencilBuffer) myDepthStencilBuffer->Release();
@@ -74,8 +79,6 @@ void GameFramework::Awake(HINSTANCE hInstance, HWND hMainWnd)
 	CreateSwapChain();
 	CreateRenderTargetViews();
 	CreateDepthStencilView();
-
-	BuildObjects();
 }
 
 void GameFramework::CreateDirect3DDevice()
@@ -414,6 +417,210 @@ void GameFramework::CreateDepthStencilView()
 	myDevice->CreateDepthStencilView(myDepthStencilBuffer, &dsv_desc, cpu_ptr_handle);
 }
 
+void GameFramework::Start()
+{
+	HRESULT valid = myCommandList->Reset(myCommandAlloc, NULL);
+	if (FAILED(valid))
+	{
+		throw "명령 리스트 초기화 실패!";
+	}
+
+	m_pScene = new CScene();
+	if (m_pScene)
+	{
+		m_pScene->BuildObjects(myDevice, myCommandList);
+	}
+
+	auto pAirplanePlayer = new CAirplanePlayer(myDevice, myCommandList, m_pScene->GetGraphicsRootSignature());
+	pAirplanePlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+
+	m_pScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
+	m_pCamera = m_pPlayer->GetCamera();
+
+	BuildWorld();
+	BuildParticles();
+	BuildPlayer();
+	BuildTerrains();
+	BuildObjects();
+
+	myCommandList->Close();
+	ID3D12CommandList* ppd3dCommandLists[] = { myCommandList };
+	myCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+
+	WaitForGpuComplete();
+
+	if (m_pScene) m_pScene->ReleaseUploadBuffers();
+	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
+
+}
+
+void GameFramework::BuildWorld()
+{
+}
+
+void GameFramework::BuildParticles()
+{}
+
+void GameFramework::BuildPlayer()
+{
+}
+
+void GameFramework::BuildTerrains()
+{}
+
+void GameFramework::BuildObjects()
+{
+}
+
+void GameFramework::Update(float elapsed_time)
+{
+	if (m_pScene)
+	{
+		m_pScene->Update(elapsed_time);
+	}
+
+	m_pPlayer->Animate(elapsed_time, NULL);
+
+	static UCHAR pKeysBuffer[256];
+	bool bProcessedByScene = false;
+	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
+	if (!bProcessedByScene)
+	{
+		DWORD dwDirection = 0;
+		if (pKeysBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
+		if (pKeysBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
+		if (pKeysBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT;
+		if (pKeysBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT;
+		if (pKeysBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
+		if (pKeysBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
+
+		float cxDelta = 0.0f, cyDelta = 0.0f;
+		POINT ptCursorPos;
+		if (GetCapture() == myWindow)
+		{
+			SetCursor(NULL);
+			GetCursorPos(&ptCursorPos);
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
+			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+		}
+
+		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+		{
+			if (cxDelta || cyDelta)
+			{
+				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+				else
+					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+			}
+			if (dwDirection) m_pPlayer->Move(dwDirection, 1.5f, true);
+		}
+	}
+
+	m_pPlayer->Update(elapsed_time);
+}
+
+void GameFramework::PrepareRendering()
+{
+	HRESULT hResult = myCommandAlloc->Reset();
+	hResult = myCommandList->Reset(myCommandAlloc, NULL);
+
+	D3D12_RESOURCE_BARRIER barrier_swap{};
+	barrier_swap.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrier_swap.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barrier_swap.Transition.pResource = nullptr;
+	barrier_swap.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	barrier_swap.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	barrier_swap.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	barrier_swap.Transition.pResource = resSwapChainBackBuffers[indexFrameBuffer];
+
+	myCommandList->ResourceBarrier(1, &barrier_swap);
+}
+
+void GameFramework::Render()
+{
+	PrepareRendering();
+
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = heapRtvDesc->GetCPUDescriptorHandleForHeapStart();
+	d3dRtvCPUDescriptorHandle.ptr += (indexFrameBuffer * szRtvDescIncrements);
+
+	float pfClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
+	myCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor/*Colors::Azure*/, 0, NULL);
+
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = heapDsvDesc->GetCPUDescriptorHandleForHeapStart();
+	myCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+
+	myCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
+
+	if (m_pScene) m_pScene->Render(myCommandList, m_pCamera);
+
+#ifdef _WITH_PLAYER_TOP
+	myCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+#endif
+	if (m_pPlayer) m_pPlayer->Render(myCommandList, m_pCamera);
+
+	D3D12_RESOURCE_BARRIER barrier_render{};
+	barrier_render.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrier_render.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barrier_render.Transition.pResource = nullptr;
+	barrier_render.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	barrier_render.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	barrier_render.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	barrier_render.Transition.pResource = resSwapChainBackBuffers[indexFrameBuffer];
+
+	myCommandList->ResourceBarrier(1, &barrier_render);
+
+	HRESULT hResult = myCommandList->Close();
+
+	ID3D12CommandList* ppd3dCommandLists[] = { myCommandList };
+	myCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+
+	WaitForGpuComplete();
+
+#ifdef _WITH_PRESENT_PARAMETERS
+	DXGI_PRESENT_PARAMETERS dxgiPresentParameters;
+	dxgiPresentParameters.DirtyRectsCount = 0;
+	dxgiPresentParameters.pDirtyRects = NULL;
+	dxgiPresentParameters.pScrollRect = NULL;
+	dxgiPresentParameters.pScrollOffset = NULL;
+	mySwapChain->Present1(1, 0, &dxgiPresentParameters);
+#else
+#ifdef _WITH_SYNCH_SWAPCHAIN
+	mySwapChain->Present(1, 0);
+#else
+	mySwapChain->Present(0, 0);
+#endif
+#endif
+
+	AfterRendering();
+}
+
+void GameFramework::AfterRendering()
+{
+	// 프레임 갱신
+	indexFrameBuffer = mySwapChain->GetCurrentBackBufferIndex();
+
+	WaitForGpuComplete();
+}
+
+void GameFramework::WaitForGpuComplete()
+{
+	const auto signal = ++myFences[indexFrameBuffer];
+	auto valid = myCommandQueue->Signal(myRenderFence, signal);
+	if (FAILED(valid))
+	{
+		throw "명령 큐에 신호 보내기 실패!";
+	}
+
+	if (myRenderFence->GetCompletedValue() < signal)
+	{
+		SetFenceEvent(eventFence, signal);
+		
+		WaitForSingleObject(eventFence, INFINITE);
+	}
+}
+
 void GameFramework::ToggleFullscreen()
 {
 	HRESULT valid = 0;
@@ -586,183 +793,44 @@ LRESULT CALLBACK GameFramework::OnWindowsEvent(HWND hWnd, UINT nMessageID, WPARA
 	return(0);
 }
 
-void GameFramework::Start()
+bool GameFramework::D3DAssert(HRESULT valid, const char* error)
 {
-
-}
-
-void GameFramework::BuildObjects()
-{
-	myCommandList->Reset(myCommandAlloc, NULL);
-
-	m_pScene = new CScene();
-	if (m_pScene) m_pScene->BuildObjects(myDevice, myCommandList);
-
-	auto pAirplanePlayer = new CAirplanePlayer(myDevice, myCommandList, m_pScene->GetGraphicsRootSignature());
-	pAirplanePlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-
-	m_pScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
-	m_pCamera = m_pPlayer->GetCamera();
-
-	myCommandList->Close();
-	ID3D12CommandList* ppd3dCommandLists[] = { myCommandList };
-	myCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
-
-	WaitForGpuComplete();
-
-	if (m_pScene) m_pScene->ReleaseUploadBuffers();
-	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
-}
-
-void GameFramework::ReleaseObjects()
-{
-	if (m_pScene) m_pScene->ReleaseObjects();
-	if (m_pScene) delete m_pScene;
-}
-
-void GameFramework::PrepareRendering()
-{}
-
-void GameFramework::Render()
-{}
-
-void GameFramework::AfterRendering()
-{}
-
-void GameFramework::WaitForGpuComplete()
-{
-	const auto signal = ++myFences[indexFrameBuffer];
-	auto valid = myCommandQueue->Signal(myRenderFence, signal);
 	if (FAILED(valid))
 	{
-		throw "명령 큐에 신호 보내기 실패!";
+		throw error;
+		return false;
 	}
-
-	if (myRenderFence->GetCompletedValue() < signal)
+	else
 	{
-		valid = myRenderFence->SetEventOnCompletion(signal, eventFence);
-		if (FAILED(valid))
-		{
-			throw "렌더링 완료 이벤트 설정 실패!";
-		}
-		
-		WaitForSingleObject(eventFence, INFINITE);
+		return true;
 	}
 }
 
-void GameFramework::MoveToNextFrame()
+void GameFramework::ResetCmdList(ID3D12PipelineState* pipeline)
 {
-	indexFrameBuffer = mySwapChain->GetCurrentBackBufferIndex();
-
-	WaitForGpuComplete();
+	D3DAssert(myCommandList->Reset(myCommandAlloc, pipeline)
+		, "명령어 리스트의 초기화 실패!");
 }
 
-void GameFramework::Update(float elapsed_time)
+void GameFramework::CloseCmdList()
 {
-	if (m_pScene)
-	{
-		m_pScene->Update(elapsed_time);
-	}
-
-	m_pPlayer->Animate(elapsed_time, NULL);
-
-	static UCHAR pKeysBuffer[256];
-	bool bProcessedByScene = false;
-	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
-	if (!bProcessedByScene)
-	{
-		DWORD dwDirection = 0;
-		if (pKeysBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
-		if (pKeysBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
-		if (pKeysBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT;
-		if (pKeysBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT;
-		if (pKeysBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
-		if (pKeysBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
-
-		float cxDelta = 0.0f, cyDelta = 0.0f;
-		POINT ptCursorPos;
-		if (GetCapture() == myWindow)
-		{
-			SetCursor(NULL);
-			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
-			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-		}
-
-		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
-		{
-			if (cxDelta || cyDelta)
-			{
-				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-				else
-					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
-			}
-			if (dwDirection) m_pPlayer->Move(dwDirection, 1.5f, true);
-		}
-	}
-
-	m_pPlayer->Update(elapsed_time);
-
-	HRESULT hResult = myCommandAlloc->Reset();
-	hResult = myCommandList->Reset(myCommandAlloc, NULL);
-
-	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
-	::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
-	d3dResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	d3dResourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	d3dResourceBarrier.Transition.pResource = resSwapChainBackBuffers[indexFrameBuffer];
-	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-	myCommandList->ResourceBarrier(1, &d3dResourceBarrier);
-
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = heapRtvDesc->GetCPUDescriptorHandleForHeapStart();
-	d3dRtvCPUDescriptorHandle.ptr += (indexFrameBuffer * szRtvDescIncrements);
-
-	float pfClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
-	myCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor/*Colors::Azure*/, 0, NULL);
-
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = heapDsvDesc->GetCPUDescriptorHandleForHeapStart();
-	myCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-
-	myCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
-
-	if (m_pScene) m_pScene->Render(myCommandList, m_pCamera);
-
-#ifdef _WITH_PLAYER_TOP
-	myCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-#endif
-	if (m_pPlayer) m_pPlayer->Render(myCommandList, m_pCamera);
-
-	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-	myCommandList->ResourceBarrier(1, &d3dResourceBarrier);
-
-	hResult = myCommandList->Close();
-
-	ID3D12CommandList* ppd3dCommandLists[] = { myCommandList };
-	myCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
-
-	WaitForGpuComplete();
-
-#ifdef _WITH_PRESENT_PARAMETERS
-	DXGI_PRESENT_PARAMETERS dxgiPresentParameters;
-	dxgiPresentParameters.DirtyRectsCount = 0;
-	dxgiPresentParameters.pDirtyRects = NULL;
-	dxgiPresentParameters.pScrollRect = NULL;
-	dxgiPresentParameters.pScrollOffset = NULL;
-	mySwapChain->Present1(1, 0, &dxgiPresentParameters);
-#else
-#ifdef _WITH_SYNCH_SWAPCHAIN
-	mySwapChain->Present(1, 0);
-#else
-	mySwapChain->Present(0, 0);
-#endif
-#endif
-
-	MoveToNextFrame();
+	D3DAssert(myCommandList->Close()
+		, "명령어 리스트의 닫기 실패");
 }
 
+void GameFramework::ExecuteCmdList(ID3D12CommandList* list[], UINT count)
+{
+	myCommandQueue->ExecuteCommandLists(count, list);
+}
+
+void GameFramework::SetFenceEvent(HANDLE signal, UINT64 limit)
+{
+	D3DAssert(myRenderFence->SetEventOnCompletion(limit, eventFence)
+		, "렌더링 완료 이벤트 설정 실패!");
+}
+
+void GameFramework::SignalToFence(UINT64 count)
+{
+	D3DAssert(myCommandQueue->Signal(myRenderFence, count)
+		, "명령 큐에 신호 보내기 실패!");
+}
