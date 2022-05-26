@@ -37,7 +37,7 @@ public:
 	LRESULT CALLBACK OnWindowsEvent(HWND, UINT msg, WPARAM wp, LPARAM lp);
 
 private:
-	HINSTANCE myHInstance;
+	HINSTANCE myAppInstance;
 	HWND myWindow;
 
 	int frameWidth;

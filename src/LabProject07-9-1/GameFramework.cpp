@@ -67,7 +67,7 @@ GameFramework::~GameFramework()
 
 void GameFramework::Awake(HINSTANCE hInstance, HWND hMainWnd)
 {
-	myHInstance = hInstance;
+	myAppInstance = hInstance;
 	myWindow = hMainWnd;
 
 	CreateDirect3DDevice();

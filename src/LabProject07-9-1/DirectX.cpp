@@ -4,13 +4,13 @@
 
 #define MAX_LOADSTRING 100
 
-HINSTANCE						ghAppInstance;
-TCHAR							szTitle[MAX_LOADSTRING];
-TCHAR							szWindowClass[MAX_LOADSTRING];
+HINSTANCE appInstance;
+TCHAR captionTitle[MAX_LOADSTRING];
+TCHAR captionClass[MAX_LOADSTRING];
 
 GameFramework gameFramework{ FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
 
-ATOM MyRegisterClass(HINSTANCE hInstance);
+ATOM MyRegisterClass(HINSTANCE);
 BOOL InitInstance(HINSTANCE, int);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
@@ -23,8 +23,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	MSG msg;
 	HACCEL hAccelTable;
 
-	::LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	::LoadString(hInstance, IDC_LABPROJECT0791, szWindowClass, MAX_LOADSTRING);
+	::LoadString(hInstance, IDS_APP_TITLE, captionTitle, MAX_LOADSTRING);
+	::LoadString(hInstance, IDC_LABPROJECT0791, captionClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
 
 	if (!InitInstance(hInstance, nCmdShow)) return(FALSE);
@@ -66,7 +66,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hCursor = ::LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wcex.lpszMenuName = NULL;//MAKEINTRESOURCE(IDC_LABPROJECT0791);
-	wcex.lpszClassName = szWindowClass;
+	wcex.lpszClassName = captionClass;
 	wcex.hIconSm = ::LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
 	return ::RegisterClassEx(&wcex);
@@ -74,17 +74,15 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
 BOOL InitInstance(HINSTANCE instance, int cmd_show)
 {
-	ghAppInstance = instance;
+	appInstance = instance;
 
 	RECT rc = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
 	DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_BORDER;
 	AdjustWindowRect(&rc, style, FALSE);
 
-	HWND hMainWnd = CreateWindow(szWindowClass, szTitle, style, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, instance, NULL);
+	HWND hMainWnd = CreateWindow(captionClass, captionTitle, style, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, instance, NULL);
 
 	if (!hMainWnd) return(FALSE);
-
-	gameFramework.Awake(instance, hMainWnd);
 
 	::ShowWindow(hMainWnd, cmd_show);
 	::UpdateWindow(hMainWnd);
@@ -100,6 +98,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
 	switch (msg)
 	{
+		case WM_CREATE:
+		{
+			gameFramework.Awake(appInstance, hwnd);
+		}
+		break;
+
 		case WM_SIZE:
 		case WM_LBUTTONDOWN:
 		case WM_LBUTTONUP:
@@ -120,7 +124,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			switch (wmId)
 			{
 				case IDM_ABOUT:
-				DialogBox(ghAppInstance, MAKEINTRESOURCE(IDD_ABOUTBOX), hwnd, About);
+				DialogBox(appInstance, MAKEINTRESOURCE(IDD_ABOUTBOX), hwnd, About);
 				break;
 
 				case IDM_EXIT:
