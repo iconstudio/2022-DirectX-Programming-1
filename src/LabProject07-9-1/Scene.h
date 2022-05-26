@@ -24,7 +24,7 @@ public:
 	ID3D12RootSignature *GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
 
 	bool ProcessInput(UCHAR *pKeysBuffer);
-    void AnimateObjects(float fTimeElapsed);
+    void Update(float fTimeElapsed);
     void Render(ID3D12GraphicsCommandList *pd3dCommandList, GameCamera *pCamera=NULL);
 
 	void ReleaseUploadBuffers();

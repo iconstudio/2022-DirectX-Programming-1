@@ -31,7 +31,7 @@ protected:
 	LPVOID						m_pPlayerUpdatedContext;
 	LPVOID						m_pCameraUpdatedContext;
 
-	GameCamera						*m_pCamera = NULL;
+	GameCamera* m_pCamera = NULL;
 
 public:
 	CPlayer();
@@ -54,8 +54,8 @@ public:
 	float GetPitch() const { return(m_fPitch); }
 	float GetRoll() const { return(m_fRoll); }
 
-	GameCamera *GetCamera() { return(m_pCamera); }
-	void SetCamera(GameCamera *pCamera) { m_pCamera = pCamera; }
+	GameCamera* GetCamera() { return(m_pCamera); }
+	void SetCamera(GameCamera* pCamera) { m_pCamera = pCamera; }
 
 	void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
 	void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false);
@@ -64,38 +64,38 @@ public:
 
 	void Update(float fTimeElapsed);
 
-	virtual void OnPlayerUpdateCallback(float fTimeElapsed) { }
+	virtual void OnPlayerUpdateCallback(float fTimeElapsed) {}
 	void SetPlayerUpdatedContext(LPVOID pContext) { m_pPlayerUpdatedContext = pContext; }
 
-	virtual void OnCameraUpdateCallback(float fTimeElapsed) { }
+	virtual void OnCameraUpdateCallback(float fTimeElapsed) {}
 	void SetCameraUpdatedContext(LPVOID pContext) { m_pCameraUpdatedContext = pContext; }
 
-	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 
-	GameCamera *OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode);
+	GameCamera* OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode);
 
-	virtual GameCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(NULL); }
+	virtual GameCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(NULL); }
 	virtual void OnPrepareRender();
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, GameCamera *pCamera = NULL);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, GameCamera* pCamera = NULL);
 };
 
 class CAirplanePlayer : public CPlayer
 {
 public:
-	CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
+	CAirplanePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual ~CAirplanePlayer();
 
-	GameObject*				m_pMainRotorFrame = NULL;
-	GameObject*				m_pTailRotorFrame = NULL;
+	GameObject* m_pMainRotorFrame = NULL;
+	GameObject* m_pTailRotorFrame = NULL;
 
 private:
 	virtual void OnInitialize();
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent = NULL);
+	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 public:
-	virtual GameCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
+	virtual GameCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 	virtual void OnPrepareRender();
 };
 

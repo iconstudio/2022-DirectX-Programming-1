@@ -10,21 +10,6 @@ public:
 	virtual ~GameObject();
 
 public:
-	char m_pstrFrameName[256];
-
-	//shared_ptr<CMesh> m_pMesh;
-	CMesh* m_pMesh = nullptr;
-
-	int m_nMaterials = 0;
-	CMaterial** m_ppMaterials = NULL;
-
-	XMFLOAT4X4						m_xmf4x4Transform;
-	XMFLOAT4X4						m_xmf4x4World;
-
-	GameObject* m_pParent = NULL;
-	GameObject* myChild = NULL;
-	GameObject* mySibling = NULL;
-
 	void SetMesh(CMesh* pMesh);
 	void SetShader(CShader* pShader);
 	void SetShader(int nMaterial, CShader* pShader);
@@ -34,7 +19,6 @@ public:
 
 	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
 
-	virtual void OnInitialize() {}
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	virtual void OnPrepareRender() {}
@@ -71,6 +55,21 @@ public:
 	GameObject* FindFrame(const char* pstrFrameName);
 
 	UINT GetMeshType() { return((m_pMesh) ? m_pMesh->GetType() : 0); }
+
+	char m_pstrFrameName[256];
+
+	//shared_ptr<CMesh> m_pMesh;
+	CMesh* m_pMesh = nullptr;
+
+	int m_nMaterials = 0;
+	CMaterial** m_ppMaterials = NULL;
+
+	XMFLOAT4X4 m_xmf4x4Transform;
+	XMFLOAT4X4 m_xmf4x4World;
+
+	GameObject* m_pParent = NULL;
+	GameObject* myChild = NULL;
+	GameObject* mySibling = NULL;
 
 public:
 	static MATERIALSLOADINFO* LoadMaterialsInfoFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);

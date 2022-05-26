@@ -222,7 +222,11 @@ void CPlayer::OnPrepareRender()
 void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, GameCamera *pCamera)
 {
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
-	if (nCameraMode == THIRD_PERSON_CAMERA) GameObject::Render(pd3dCommandList, pCamera);
+
+	if (nCameraMode == THIRD_PERSON_CAMERA)
+	{
+		GameObject::Render(pd3dCommandList, pCamera);
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -296,6 +300,7 @@ GameCamera *CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElaps
 			m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 			m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 			break;
+
 		case SPACESHIP_CAMERA:
 			SetFriction(100.5f);
 			SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -308,6 +313,7 @@ GameCamera *CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElaps
 			m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 			m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 			break;
+
 		case THIRD_PERSON_CAMERA:
 			SetFriction(20.5f);
 			SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -320,6 +326,7 @@ GameCamera *CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElaps
 			m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 			m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 			break;
+
 		default:
 			break;
 	}

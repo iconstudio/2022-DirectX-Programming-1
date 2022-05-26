@@ -17,25 +17,25 @@ CShader::~CShader()
 	}
 }
 
-D3D12_SHADER_BYTECODE CShader::CreateVertexShader()
+ShaderBlob CShader::CreateVertexShader()
 {
-	D3D12_SHADER_BYTECODE d3dShaderByteCode;
+	ShaderBlob d3dShaderByteCode;
 	d3dShaderByteCode.BytecodeLength = 0;
 	d3dShaderByteCode.pShaderBytecode = NULL;
 
 	return(d3dShaderByteCode);
 }
 
-D3D12_SHADER_BYTECODE CShader::CreatePixelShader()
+ShaderBlob CShader::CreatePixelShader()
 {
-	D3D12_SHADER_BYTECODE d3dShaderByteCode;
+	ShaderBlob d3dShaderByteCode;
 	d3dShaderByteCode.BytecodeLength = 0;
 	d3dShaderByteCode.pShaderBytecode = NULL;
 
 	return(d3dShaderByteCode);
 }
 
-D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR *pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob **ppd3dShaderBlob)
+ShaderBlob CShader::CompileShaderFromFile(WCHAR *pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob **ppd3dShaderBlob)
 {
 	UINT nCompileFlags = 0;
 #if defined(_DEBUG)
@@ -47,7 +47,7 @@ D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR *pszFileName, LPCSTR 
 	char *pErrorString = NULL;
 	if (pd3dErrorBlob) pErrorString = (char *)pd3dErrorBlob->GetBufferPointer();
 
-	D3D12_SHADER_BYTECODE d3dShaderByteCode;
+	ShaderBlob d3dShaderByteCode;
 	d3dShaderByteCode.BytecodeLength = (*ppd3dShaderBlob)->GetBufferSize();
 	d3dShaderByteCode.pShaderBytecode = (*ppd3dShaderBlob)->GetBufferPointer();
 
@@ -64,7 +64,7 @@ D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR *pszFileName, LPCSTR 
 #include <sstream>
 #endif
 
-D3D12_SHADER_BYTECODE CShader::ReadCompiledShaderFromFile(WCHAR *pszFileName, ID3DBlob **ppd3dShaderBlob)
+ShaderBlob CShader::ReadCompiledShaderFromFile(WCHAR *pszFileName, ID3DBlob **ppd3dShaderBlob)
 {
 	UINT nReadBytes = 0;
 #ifdef _WITH_WFOPEN
@@ -87,7 +87,7 @@ D3D12_SHADER_BYTECODE CShader::ReadCompiledShaderFromFile(WCHAR *pszFileName, ID
 	ifsFile.close();
 #endif
 
-	D3D12_SHADER_BYTECODE d3dShaderByteCode;
+	ShaderBlob d3dShaderByteCode;
 	if (ppd3dShaderBlob)
 	{
 		*ppd3dShaderBlob = NULL;
@@ -252,12 +252,12 @@ D3D12_INPUT_LAYOUT_DESC CIlluminatedShader::CreateInputLayout()
 	return(d3dInputLayoutDesc);
 }
 
-D3D12_SHADER_BYTECODE CIlluminatedShader::CreateVertexShader()
+ShaderBlob CIlluminatedShader::CreateVertexShader()
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSLighting", "vs_5_1", &m_pd3dVertexShaderBlob));
 }
 
-D3D12_SHADER_BYTECODE CIlluminatedShader::CreatePixelShader()
+ShaderBlob CIlluminatedShader::CreatePixelShader()
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSLighting", "ps_5_1", &m_pd3dPixelShaderBlob));
 }

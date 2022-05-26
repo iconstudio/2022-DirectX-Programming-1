@@ -250,7 +250,7 @@ bool CScene::ProcessInput(UCHAR* pKeysBuffer)
 	return(false);
 }
 
-void CScene::AnimateObjects(float fTimeElapsed)
+void CScene::Update(float fTimeElapsed)
 {
 	m_fElapsedTime = fTimeElapsed;
 
@@ -279,7 +279,6 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, GameCamera* pCam
 	{
 		if (m_ppGameObjects[i])
 		{
-			m_ppGameObjects[i]->Animate(m_fElapsedTime, NULL);
 			m_ppGameObjects[i]->UpdateTransform(NULL);
 			m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
 		}
