@@ -8,6 +8,7 @@
 HINSTANCE appInstance;
 WCHAR captionTitle[MAX_LOADSTRING];
 WCHAR captionClass[MAX_LOADSTRING];
+WCHAR captionFrame[MAX_LOADSTRING];
 
 CGameTimer gameTimer{};
 GameFramework gameFramework{ FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
@@ -136,12 +137,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 		case WM_TIMER:
 		{
 			const auto framerate = gameTimer.GetFrameRate();
-			WCHAR framerate_caption[MAX_LOADSTRING]{};
-			ZeroMemory(framerate_caption, sizeof(framerate_caption));
+			ZeroMemory(captionFrame, sizeof(captionFrame));
 
-			wsprintf(framerate_caption, L"Racing Game (FPS: %u)", framerate);
+			wsprintf(captionFrame, L"Racing Game (FPS: %u)", framerate);
 
-			SetTitle(hwnd, framerate_caption);
+			SetTitle(hwnd, captionFrame);
 		}
 		break;
 		
@@ -160,11 +160,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
 		default:
 		{
-			return(::DefWindowProc(hwnd, msg, wp, lp));
+			return DefWindowProc(hwnd, msg, wp, lp);
 		}
-
-		return 0;
 	}
+
+	return 0;
 }
 
 void SetTitle(HWND hwnd, const wchar_t* caption)

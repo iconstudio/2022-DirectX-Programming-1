@@ -19,6 +19,9 @@
     <Filter Include="소스 파일\Contents">
       <UniqueIdentifier>{24ee9503-cc86-4c68-afe1-aa092f809492}</UniqueIdentifier>
     </Filter>
+    <Filter Include="쉐이더 파일">
+      <UniqueIdentifier>{c5acdaa3-2ca2-4b27-8a5c-a99c25ac1f81}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -131,7 +134,17 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Light.hlsl" />
-    <FxCompile Include="Shaders.hlsl" />
+    <FxCompile Include="Light.hlsli">
+      <Filter>쉐이더 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="VertexShader.hlsl">
+      <Filter>쉐이더 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShader.hlsl">
+      <Filter>쉐이더 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="Basis.hlsli">
+      <Filter>쉐이더 파일</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
