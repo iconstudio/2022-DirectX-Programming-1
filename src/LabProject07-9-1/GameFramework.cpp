@@ -455,7 +455,6 @@ void GameFramework::BuildStages()
 	if (m_pScene)
 	{
 		m_pScene->Awake(myDevice, myCommandList);
-		m_pScene->BuildObjects();
 	}
 }
 

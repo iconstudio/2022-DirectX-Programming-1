@@ -111,6 +111,9 @@ private:
 	ID3D12Debug* myDebugController;
 #endif
 
+	std::unordered_map<std::string, shared_ptr<CScene>> myScene;
+	std::vector<shared_ptr<CScene>> myStages;
+
 	CScene* m_pScene = NULL;
 	CPlayer* m_pPlayer = NULL;
 	GameCamera* m_pCamera = NULL;
