@@ -47,6 +47,7 @@ using Microsoft::WRL::ComPtr;
 class CMaterial;
 class CShader;
 class CLight;
+using ShaderBlob = D3D12_SHADER_BYTECODE;
 
 class GameCamera;
 class GameObject;
