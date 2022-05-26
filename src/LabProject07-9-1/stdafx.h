@@ -41,14 +41,12 @@ using std::make_unique;
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 using Microsoft::WRL::ComPtr;
-
-#include "Arithmetics.hpp"
+using DESC_HANDLE = D3D12_CPU_DESCRIPTOR_HANDLE;
 
 class CMaterial;
 class CShader;
 class CLight;
 using ShaderBlob = D3D12_SHADER_BYTECODE;
-
 class GameCamera;
 class GameObject;
 
@@ -78,6 +76,8 @@ class Player;
 #define POINT_LIGHT			1
 #define SPOT_LIGHT			2
 #define DIRECTIONAL_LIGHT	3
+
+#include "Arithmetics.hpp"
 
 //#define _WITH_CB_GAMEOBJECT_32BIT_CONSTANTS
 //#define _WITH_CB_GAMEOBJECT_ROOT_DESCRIPTOR

@@ -1,16 +1,15 @@
-
 #include "stdafx.h"
 #include "GameFramework.h"
-#include "Timer.h"
 
 GameFramework::GameFramework(unsigned int width, unsigned int height)
 	: frameWidth(width), frameHeight(height)
+	, frameBasisColour{ 0.0f, 0.125f, 0.3f, 1.0f }
 	, isAntiAliasingEnabled(false), levelAntiAliasing(0)
 	, indexFrameBuffer(0)
 	, myFactory(nullptr), myDevice(nullptr)
 	, myRenderFence(nullptr), myFences(), eventFence(NULL)
 	, myCommandList(nullptr), myCommandQueue(nullptr), myCommandAlloc(nullptr)
-	, mySwapChain(nullptr), resSwapChainBackBuffers()
+	, mySwapChain(nullptr), resSwapChainBackBuffers(), myBarriers()
 	, heapRtvDesc(nullptr), szRtvDescIncrements(0)
 	, myDepthStencilBuffer(nullptr)
 	, heapDsvDesc(nullptr), szDsvDescIncrements(0)
@@ -20,6 +19,23 @@ GameFramework::GameFramework(unsigned int width, unsigned int height)
 	, m_pScene(nullptr), m_pPlayer(nullptr)
 {
 	ZeroMemory(resSwapChainBackBuffers, sizeof(resSwapChainBackBuffers));
+	ZeroMemory(myBarriers, sizeof(myBarriers));
+
+	auto& barrier_render = myBarriers[0];
+	barrier_render.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrier_render.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barrier_render.Transition.pResource = nullptr;
+	barrier_render.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	barrier_render.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	barrier_render.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+	auto& barrier_swap = myBarriers[1];
+	barrier_swap.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrier_swap.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	barrier_swap.Transition.pResource = nullptr;
+	barrier_swap.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	barrier_swap.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	barrier_swap.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 }
 
 GameFramework::~GameFramework()
@@ -419,23 +435,7 @@ void GameFramework::CreateDepthStencilView()
 
 void GameFramework::Start()
 {
-	HRESULT valid = myCommandList->Reset(myCommandAlloc, NULL);
-	if (FAILED(valid))
-	{
-		throw "명령 리스트 초기화 실패!";
-	}
-
-	m_pScene = new CScene();
-	if (m_pScene)
-	{
-		m_pScene->BuildObjects(myDevice, myCommandList);
-	}
-
-	auto pAirplanePlayer = new CAirplanePlayer(myDevice, myCommandList, m_pScene->GetGraphicsRootSignature());
-	pAirplanePlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-
-	m_pScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
-	m_pCamera = m_pPlayer->GetCamera();
+	ResetCmdList();
 
 	BuildWorld();
 	BuildParticles();
@@ -443,19 +443,23 @@ void GameFramework::Start()
 	BuildTerrains();
 	BuildObjects();
 
-	myCommandList->Close();
-	ID3D12CommandList* ppd3dCommandLists[] = { myCommandList };
-	myCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+	CloseCmdList();
+	ID3D12CommandList* cmd_lists[] = { myCommandList };
+	ExecuteCmdList(cmd_lists, std::size(cmd_lists));
 
 	WaitForGpuComplete();
 
 	if (m_pScene) m_pScene->ReleaseUploadBuffers();
 	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
-
 }
 
 void GameFramework::BuildWorld()
 {
+	m_pScene = new CScene();
+	if (m_pScene)
+	{
+		m_pScene->BuildObjects(myDevice, myCommandList);
+	}
 }
 
 void GameFramework::BuildParticles()
@@ -463,6 +467,11 @@ void GameFramework::BuildParticles()
 
 void GameFramework::BuildPlayer()
 {
+	auto pAirplanePlayer = new CAirplanePlayer(myDevice, myCommandList, m_pScene->GetGraphicsRootSignature());
+	pAirplanePlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+
+	m_pScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
+	m_pCamera = m_pPlayer->GetCamera();
 }
 
 void GameFramework::BuildTerrains()
@@ -474,13 +483,6 @@ void GameFramework::BuildObjects()
 
 void GameFramework::Update(float elapsed_time)
 {
-	if (m_pScene)
-	{
-		m_pScene->Update(elapsed_time);
-	}
-
-	m_pPlayer->Animate(elapsed_time, NULL);
-
 	static UCHAR pKeysBuffer[256];
 	bool bProcessedByScene = false;
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
@@ -518,40 +520,35 @@ void GameFramework::Update(float elapsed_time)
 		}
 	}
 
+	if (m_pScene)
+	{
+		m_pScene->Update(elapsed_time);
+	}
+
+	m_pPlayer->Animate(elapsed_time, NULL);
 	m_pPlayer->Update(elapsed_time);
 }
 
 void GameFramework::PrepareRendering()
 {
-	HRESULT hResult = myCommandAlloc->Reset();
-	hResult = myCommandList->Reset(myCommandAlloc, NULL);
+	ResetCmdAllocator();
+	ResetCmdList();
+	SetBarrier(barrierSwap);
 
-	D3D12_RESOURCE_BARRIER barrier_swap{};
-	barrier_swap.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	barrier_swap.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	barrier_swap.Transition.pResource = nullptr;
-	barrier_swap.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-	barrier_swap.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	barrier_swap.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-	barrier_swap.Transition.pResource = resSwapChainBackBuffers[indexFrameBuffer];
+	auto cpu_rtv_handle = GetRTVHandle();
+	auto frame_ptr = static_cast<size_t>(indexFrameBuffer * szRtvDescIncrements);
+	AddtoDescriptor(cpu_rtv_handle, frame_ptr);
+	ClearRenderTargetView(cpu_rtv_handle);
 
-	myCommandList->ResourceBarrier(1, &barrier_swap);
+	auto cpu_dsv_handle = GetDSVHandle();
+	ClearDepthStencilView(cpu_dsv_handle);
+
+	ReadyOutputMerger(cpu_rtv_handle, cpu_dsv_handle);
 }
 
 void GameFramework::Render()
 {
 	PrepareRendering();
-
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = heapRtvDesc->GetCPUDescriptorHandleForHeapStart();
-	d3dRtvCPUDescriptorHandle.ptr += (indexFrameBuffer * szRtvDescIncrements);
-
-	float pfClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
-	myCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor/*Colors::Azure*/, 0, NULL);
-
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = heapDsvDesc->GetCPUDescriptorHandleForHeapStart();
-	myCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-
-	myCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 
 	if (m_pScene) m_pScene->Render(myCommandList, m_pCamera);
 
@@ -560,21 +557,11 @@ void GameFramework::Render()
 #endif
 	if (m_pPlayer) m_pPlayer->Render(myCommandList, m_pCamera);
 
-	D3D12_RESOURCE_BARRIER barrier_render{};
-	barrier_render.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	barrier_render.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	barrier_render.Transition.pResource = nullptr;
-	barrier_render.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	barrier_render.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-	barrier_render.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-	barrier_render.Transition.pResource = resSwapChainBackBuffers[indexFrameBuffer];
+	SetBarrier(barrierRender);
 
-	myCommandList->ResourceBarrier(1, &barrier_render);
-
-	HRESULT hResult = myCommandList->Close();
-
-	ID3D12CommandList* ppd3dCommandLists[] = { myCommandList };
-	myCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+	CloseCmdList();
+	ID3D12CommandList* cmd_lists[] = { myCommandList };
+	ExecuteCmdList(cmd_lists, std::size(cmd_lists));
 
 	WaitForGpuComplete();
 
@@ -607,11 +594,7 @@ void GameFramework::AfterRendering()
 void GameFramework::WaitForGpuComplete()
 {
 	const auto signal = ++myFences[indexFrameBuffer];
-	auto valid = myCommandQueue->Signal(myRenderFence, signal);
-	if (FAILED(valid))
-	{
-		throw "명령 큐에 신호 보내기 실패!";
-	}
+	SignalToFence(signal);
 
 	if (myRenderFence->GetCompletedValue() < signal)
 	{
@@ -806,6 +789,12 @@ bool GameFramework::D3DAssert(HRESULT valid, const char* error)
 	}
 }
 
+void GameFramework::ResetCmdAllocator()
+{
+	D3DAssert(myCommandAlloc->Reset()
+		, "명령어 할당자의 초기화 실패!");
+}
+
 void GameFramework::ResetCmdList(ID3D12PipelineState* pipeline)
 {
 	D3DAssert(myCommandList->Reset(myCommandAlloc, pipeline)
@@ -823,6 +812,46 @@ void GameFramework::ExecuteCmdList(ID3D12CommandList* list[], UINT count)
 	myCommandQueue->ExecuteCommandLists(count, list);
 }
 
+DESC_HANDLE& GameFramework::AddtoDescriptor(DESC_HANDLE& handle, const size_t increment)
+{
+	handle.ptr += increment;
+	return handle;
+}
+
+DESC_HANDLE GameFramework::GetRTVHandle() const
+{
+	return heapRtvDesc->GetCPUDescriptorHandleForHeapStart();
+}
+
+DESC_HANDLE GameFramework::GetDSVHandle() const
+{
+	return heapDsvDesc->GetCPUDescriptorHandleForHeapStart();
+}
+
+inline void GameFramework::ClearRenderTargetView(DESC_HANDLE& handle
+	, D3D12_RECT* erase_rects, size_t erase_count)
+{
+	myCommandList->ClearRenderTargetView(handle
+		, frameBasisColour
+		, erase_count, erase_rects);
+}
+
+void GameFramework::ClearDepthStencilView(DESC_HANDLE& handle
+	, float depth, UINT8 stencil
+	, D3D12_RECT* erase_rects, size_t erase_count)
+{
+	myCommandList->ClearDepthStencilView(handle
+		, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL
+		, depth, stencil
+		, erase_count, erase_rects);
+}
+
+void GameFramework::ReadyOutputMerger(DESC_HANDLE& rtv, DESC_HANDLE& dsv)
+{
+	constexpr BOOL is_single = TRUE;
+	myCommandList->OMSetRenderTargets(1, &rtv, is_single, &dsv);
+}
+
 void GameFramework::SetFenceEvent(HANDLE signal, UINT64 limit)
 {
 	D3DAssert(myRenderFence->SetEventOnCompletion(limit, eventFence)
@@ -833,4 +862,12 @@ void GameFramework::SignalToFence(UINT64 count)
 {
 	D3DAssert(myCommandQueue->Signal(myRenderFence, count)
 		, "명령 큐에 신호 보내기 실패!");
+}
+
+void GameFramework::SetBarrier(UINT type)
+{
+	auto& barrier = myBarriers[type];
+	barrier.Transition.pResource = resSwapChainBackBuffers[indexFrameBuffer];
+
+	myCommandList->ResourceBarrier(1, &barrier);
 }

@@ -45,18 +45,33 @@ public:
 private:
 	bool D3DAssert(HRESULT valid, const char* error);
 
+	//
+	void ResetCmdAllocator();
 	void ResetCmdList(ID3D12PipelineState* pipeline = nullptr);
 	void CloseCmdList();
 	void ExecuteCmdList(ID3D12CommandList* list[], UINT count);
 
+	//
+	DESC_HANDLE& AddtoDescriptor(DESC_HANDLE& handle, const size_t increment);
+	DESC_HANDLE GetRTVHandle() const;
+	DESC_HANDLE GetDSVHandle() const;
+	void ClearRenderTargetView(DESC_HANDLE& handle, D3D12_RECT* erase_rects = nullptr, size_t erase_count = 0);
+	void ClearDepthStencilView(DESC_HANDLE& handle, float depth = 1.0f, UINT8 stencil = 0, D3D12_RECT* erase_rects = nullptr, size_t erase_count = 0);
+	void ReadyOutputMerger(DESC_HANDLE& rtv, DESC_HANDLE& dsv);
+
 	void SetFenceEvent(HANDLE signal, UINT64 limit);
 	void SignalToFence(UINT64 count);
+
+	const UINT barrierRender = 0;
+	const UINT barrierSwap = 1;
+	void SetBarrier(UINT type);
 
 	HINSTANCE myAppInstance;
 	HWND myWindow;
 
 	int frameWidth;
 	int frameHeight;
+	const float frameBasisColour[4];
 
 	bool isAntiAliasingEnabled;
 	UINT levelAntiAliasing;
@@ -73,6 +88,7 @@ private:
 	ID3D12CommandAllocator* myCommandAlloc;
 
 	ID3D12Resource* resSwapChainBackBuffers[numberFrameBuffers];
+	D3D12_RESOURCE_BARRIER myBarriers[numberFrameBuffers];
 	ID3D12DescriptorHeap* heapRtvDesc;
 	UINT szRtvDescIncrements;
 
@@ -94,4 +110,3 @@ private:
 
 	POINT m_ptOldCursorPos;
 };
-
