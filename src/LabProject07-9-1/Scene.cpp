@@ -1,11 +1,30 @@
 #include "stdafx.h"
 #include "Scene.h"
 
-CScene::CScene()
+CScene::CScene(const char* name)
+	: d3dDevice(nullptr), d3dTaskList(nullptr)
 {}
 
 CScene::~CScene()
-{}
+{
+	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
+
+	if (m_ppGameObjects)
+	{
+		for (int i = 0; i < m_nGameObjects; i++)
+		{
+			if (m_ppGameObjects[i])
+			{
+				//m_ppGameObjects[i]->Release();
+			}
+		}
+		delete[] m_ppGameObjects;
+	}
+
+	ReleaseShaderVariables();
+
+	if (m_pLights) delete[] m_pLights;
+}
 
 void CScene::BuildDefaultLightsAndMaterials()
 {
@@ -56,11 +75,11 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[3].m_fTheta = (float)cos(XMConvertToRadians(30.0f));
 }
 
-void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CScene::BuildObjects()
 {
-	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(d3dDevice);
 
-	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CMaterial::PrepareShaders(d3dDevice, d3dTaskList, m_pd3dGraphicsRootSignature);
 
 	BuildDefaultLightsAndMaterials();
 
@@ -68,7 +87,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_ppGameObjects = new GameObject * [m_nGameObjects];
 
 	// Apache
-	GameObject* pApacheModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Rock.bin");
+	GameObject* pApacheModel = GameObject::LoadGeometryFromFile(d3dDevice, d3dTaskList, m_pd3dGraphicsRootSignature, "Model/Rock.bin");
 	CApacheObject* pApacheObject = NULL;
 
 	pApacheObject = new CApacheObject();
@@ -88,7 +107,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_ppGameObjects[1] = pApacheObject;
 
 	// Gunship
-	GameObject* pGunshipModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/PoliceCar.bin");
+	GameObject* pGunshipModel = GameObject::LoadGeometryFromFile(d3dDevice, d3dTaskList, m_pd3dGraphicsRootSignature, "Model/PoliceCar.bin");
 	CGunshipObject* pGunshipObject = NULL;
 
 	pGunshipObject = new CGunshipObject();
@@ -100,7 +119,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_ppGameObjects[2] = pGunshipObject;
 
 	// SuperCobra
-	GameObject* pSuperCobraModel = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Cactus.bin");
+	GameObject* pSuperCobraModel = GameObject::LoadGeometryFromFile(d3dDevice, d3dTaskList, m_pd3dGraphicsRootSignature, "Model/Cactus.bin");
 	CSuperCobraObject* pSuperCobraObject = NULL;
 
 	pSuperCobraObject = new CSuperCobraObject();
@@ -112,7 +131,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_ppGameObjects[3] = pSuperCobraObject;
 
 	// Mi24
-	GameObject* pMi24Model = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/RallyCar.bin");
+	GameObject* pMi24Model = GameObject::LoadGeometryFromFile(d3dDevice, d3dTaskList, m_pd3dGraphicsRootSignature, "Model/RallyCar.bin");
 	CMi24Object* pMi24Object = NULL;
 
 	pMi24Object = new CMi24Object();
@@ -123,35 +142,23 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pMi24Object->Rotate(0.0f, -90.0f, 0.0f);
 	m_ppGameObjects[4] = pMi24Object;
 
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	CreateShaderVariables();
 }
 
-void CScene::ReleaseObjects()
-{
-	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
+void CScene::Start()
+{}
 
-	if (m_ppGameObjects)
-	{
-		for (int i = 0; i < m_nGameObjects; i++)
-		{
-			if (m_ppGameObjects[i])
-			{
-				//m_ppGameObjects[i]->Release();
-			}
-		}
-		delete[] m_ppGameObjects;
-	}
+void CScene::Reset()
+{}
 
-	ReleaseShaderVariables();
+void CScene::Restart()
+{}
 
-	if (m_pLights) delete[] m_pLights;
-}
-
-ID3D12RootSignature* CScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
+ID3D12RootSignature* CScene::CreateGraphicsRootSignature(ID3D12Device* d3dDevice)
 {
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[3];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[3]{};
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 1; //Camera
@@ -161,6 +168,7 @@ ID3D12RootSignature* CScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[1].Constants.Num32BitValues = 32;
 	pd3dRootParameters[1].Constants.ShaderRegister = 2; //GameObject
+
 	pd3dRootParameters[1].Constants.RegisterSpace = 0;
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
@@ -181,22 +189,30 @@ ID3D12RootSignature* CScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	ID3DBlob* pd3dSignatureBlob = NULL;
 	ID3DBlob* pd3dErrorBlob = NULL;
 	D3D12SerializeRootSignature(&d3dRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &pd3dSignatureBlob, &pd3dErrorBlob);
-	pd3dDevice->CreateRootSignature(0, pd3dSignatureBlob->GetBufferPointer(), pd3dSignatureBlob->GetBufferSize(), __uuidof(ID3D12RootSignature), (void**)&pd3dGraphicsRootSignature);
+	d3dDevice->CreateRootSignature(0, pd3dSignatureBlob->GetBufferPointer(), pd3dSignatureBlob->GetBufferSize(), __uuidof(ID3D12RootSignature), (void**)&pd3dGraphicsRootSignature);
 	if (pd3dSignatureBlob) pd3dSignatureBlob->Release();
 	if (pd3dErrorBlob) pd3dErrorBlob->Release();
 
 	return(pd3dGraphicsRootSignature);
 }
 
-void CScene::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CScene::Awake(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list)
 {
-	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256의 배수
-	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	d3dDevice = device;
+	d3dTaskList = cmd_list;
+}
+
+void CScene::CreateShaderVariables()
+{
+	// 256의 배수
+	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255);
+
+	m_pd3dcbLights = ::CreateBufferResource(d3dDevice, d3dTaskList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
 }
 
-void CScene::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+void CScene::UpdateShaderVariables()
 {
 	::memcpy(m_pcbMappedLights->m_pLights, m_pLights, sizeof(CLight) * m_nLights);
 	::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
@@ -263,24 +279,24 @@ void CScene::Update(float fTimeElapsed)
 	}
 }
 
-void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, GameCamera* pCamera)
+void CScene::Render(GameCamera* pCamera)
 {
-	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+	d3dTaskList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 
-	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
-	pCamera->UpdateShaderVariables(pd3dCommandList);
+	pCamera->SetViewportsAndScissorRects(d3dTaskList);
+	pCamera->UpdateShaderVariables(d3dTaskList);
 
-	UpdateShaderVariables(pd3dCommandList);
+	UpdateShaderVariables();
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
+	d3dTaskList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
 
 	for (int i = 0; i < m_nGameObjects; i++)
 	{
 		if (m_ppGameObjects[i])
 		{
 			m_ppGameObjects[i]->UpdateTransform(NULL);
-			m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
+			m_ppGameObjects[i]->Render(d3dTaskList, pCamera);
 		}
 	}
 }
