@@ -16,8 +16,9 @@ public:
 	void CreateRenderTargetViews();
 	void CreateDepthStencilView();
 
-	// 월드 초기화
+	// 게임 콘텐츠 초기화
 	void Start();
+	void BuildStages();
 	void BuildWorld();
 	void BuildParticles();
 	void BuildPlayer();
@@ -34,6 +35,12 @@ public:
 
 	// 동기화
 	void WaitForGpuComplete();
+
+	// 스테이지 등록
+	shared_ptr<CScene> RegisterStage(CScene&& stage);
+	// 스테이지 순서에 추가
+	void AddStage(const shared_ptr<CScene>& stage);
+
 
 	// 전체화면 전환
 	void ToggleFullscreen();

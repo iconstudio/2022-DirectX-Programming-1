@@ -40,11 +40,6 @@ GameFramework::GameFramework(unsigned int width, unsigned int height)
 
 GameFramework::~GameFramework()
 {
-	if (m_pScene)
-	{
-		m_pScene->ReleaseObjects();
-	}
-
 	CloseHandle(eventFence);
 
 	if (myDepthStencilBuffer) myDepthStencilBuffer->Release();
@@ -436,7 +431,7 @@ void GameFramework::CreateDepthStencilView()
 void GameFramework::Start()
 {
 	ResetCmdList();
-
+	BuildStages();
 	BuildWorld();
 	BuildParticles();
 	BuildPlayer();
@@ -453,13 +448,19 @@ void GameFramework::Start()
 	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
 }
 
-void GameFramework::BuildWorld()
+void GameFramework::BuildStages()
 {
-	m_pScene = new CScene();
+	m_pScene = new CScene("Scene");
+
 	if (m_pScene)
 	{
-		m_pScene->BuildObjects(myDevice, myCommandList);
+		m_pScene->Awake(myDevice, myCommandList);
+		m_pScene->BuildObjects();
 	}
+}
+
+void GameFramework::BuildWorld()
+{
 }
 
 void GameFramework::BuildParticles()
@@ -486,6 +487,7 @@ void GameFramework::Update(float elapsed_time)
 	static UCHAR pKeysBuffer[256];
 	bool bProcessedByScene = false;
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
+
 	if (!bProcessedByScene)
 	{
 		DWORD dwDirection = 0;
@@ -550,7 +552,7 @@ void GameFramework::Render()
 {
 	PrepareRendering();
 
-	if (m_pScene) m_pScene->Render(myCommandList, m_pCamera);
+	if (m_pScene) m_pScene->Render(m_pCamera);
 
 #ifdef _WITH_PLAYER_TOP
 	myCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
@@ -607,9 +609,6 @@ void GameFramework::WaitForGpuComplete()
 void GameFramework::ToggleFullscreen()
 {
 	HRESULT valid = 0;
-	IID uiid{};
-	void** place = nullptr;
-	ZeroMemory(&uiid, sizeof(uiid));
 
 	BOOL fullscreen = FALSE;
 	valid = mySwapChain->GetFullscreenState(&fullscreen, NULL);
