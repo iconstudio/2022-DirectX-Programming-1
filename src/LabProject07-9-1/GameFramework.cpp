@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GameFramework.h"
+#include "GameScenes.hpp"
 
 GameFramework::GameFramework(unsigned int width, unsigned int height)
 	: frameWidth(width), frameHeight(height)
@@ -459,8 +460,7 @@ void GameFramework::BuildStages()
 }
 
 void GameFramework::BuildWorld()
-{
-}
+{}
 
 void GameFramework::BuildParticles()
 {}
@@ -478,8 +478,7 @@ void GameFramework::BuildTerrains()
 {}
 
 void GameFramework::BuildObjects()
-{
-}
+{}
 
 void GameFramework::Update(float elapsed_time)
 {
@@ -551,12 +550,19 @@ void GameFramework::Render()
 {
 	PrepareRendering();
 
-	if (m_pScene) m_pScene->Render(m_pCamera);
+	if (m_pScene)
+	{
+		m_pScene->Render(m_pCamera);
+	}
 
 #ifdef _WITH_PLAYER_TOP
 	myCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #endif
-	if (m_pPlayer) m_pPlayer->Render(myCommandList, m_pCamera);
+
+	if (m_pPlayer)
+	{
+		m_pPlayer->Render(myCommandList, m_pCamera);
+	}
 
 	SetBarrier(barrierRender);
 
@@ -582,7 +588,7 @@ void GameFramework::Render()
 #endif
 
 	AfterRendering();
-}
+	}
 
 void GameFramework::AfterRendering()
 {
@@ -600,9 +606,21 @@ void GameFramework::WaitForGpuComplete()
 	if (myRenderFence->GetCompletedValue() < signal)
 	{
 		SetFenceEvent(eventFence, signal);
-		
+
 		WaitForSingleObject(eventFence, INFINITE);
 	}
+}
+
+shared_ptr<CScene> GameFramework::RegisterStage(CScene&& stage)
+{
+	auto ptr = shared_ptr<CScene>(&stage);
+	myScenes.try_emplace(ptr->myName, ptr);
+	return ptr;
+}
+
+void GameFramework::AddStage(const shared_ptr<CScene>& stage)
+{
+	myStages.push_back(stage);
 }
 
 void GameFramework::ToggleFullscreen()

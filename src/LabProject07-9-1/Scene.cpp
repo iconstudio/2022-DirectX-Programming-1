@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "Scene.h"
 
-CScene::CScene(const char* name)
-	: myName(name)
+CScene::CScene(GameFramework& framework, const char* name)
+	: myFramework(framework), myName(name)
 	, d3dDevice(nullptr), d3dTaskList(nullptr), d3dShaderParameters(nullptr)
 {}
 

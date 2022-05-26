@@ -41,7 +41,6 @@ public:
 	// 스테이지 순서에 추가
 	void AddStage(const shared_ptr<CScene>& stage);
 
-
 	// 전체화면 전환
 	void ToggleFullscreen();
 
@@ -111,7 +110,7 @@ private:
 	ID3D12Debug* myDebugController;
 #endif
 
-	std::unordered_map<std::string, shared_ptr<CScene>> myScene;
+	std::unordered_map<std::string, shared_ptr<CScene>> myScenes;
 	std::vector<shared_ptr<CScene>> myStages;
 
 	CScene* m_pScene = NULL;

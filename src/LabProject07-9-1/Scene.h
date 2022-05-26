@@ -6,7 +6,7 @@
 class CScene
 {
 public:
-	CScene(const char* name);
+	CScene(GameFramework& framework, const char* name);
 	virtual ~CScene();
 
 	// √ ±‚»≠
@@ -45,6 +45,7 @@ public:
 public:
 	const std::string myName;
 
+	GameFramework& myFramework;
 	ID3D12Device* d3dDevice;
 	ID3D12GraphicsCommandList* d3dTaskList;
 	ID3D12RootSignature* d3dShaderParameters;
