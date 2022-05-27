@@ -85,3 +85,23 @@ ID3D12Resource *CreateBufferResource(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 	return(pd3dBuffer);
 }
 
+DESC_HANDLE operator+(const DESC_HANDLE& handle, const size_t increment)
+{
+	DESC_HANDLE result = DESC_HANDLE(handle);
+	result.ptr += increment;
+	return result;
+}
+
+DESC_HANDLE operator+(DESC_HANDLE&& handle, const size_t increment)
+{
+	DESC_HANDLE result = std::forward<DESC_HANDLE>(handle);
+	result.ptr += increment;
+	return result;
+}
+
+DESC_HANDLE& operator+=(DESC_HANDLE& handle, const size_t increment)
+{
+	handle.ptr += increment;
+	return handle;
+}
+
