@@ -154,6 +154,7 @@
     <ClInclude Include="DirectX.hpp" />
     <ClInclude Include="Material.hpp" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Model.hpp" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="Player.h" />
@@ -173,6 +174,7 @@
     <ClCompile Include="DirectX.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="Player.cpp" />
