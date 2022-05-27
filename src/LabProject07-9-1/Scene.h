@@ -12,9 +12,6 @@ public:
 	// 초기화
 	void Awake(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list);
 	virtual void Build();
-	ID3D12RootSignature* CreateGraphicsRootSignature();
-	virtual void CreateShaderVariables();
-	virtual void ReleaseUploadBuffers();
 
 	// 시작
 	virtual void Start();
@@ -24,25 +21,29 @@ public:
 	// 갱신
 	virtual void Update(float time_elapsed);
 	virtual void UpdateShaderVariables();
-	virtual bool ProcessInput(UCHAR* pKeysBuffer);
 
 	// 렌더링
 	void Render(GameCamera* pCamera = nullptr);
 
 	// 이름 얻기
-	virtual const char* GetName() const noexcept { return "Scene"; };
-	// 파이프라인의 쉐이더 서명 얻기
-	ID3D12RootSignature* GetGraphicsRootSignature() { return(d3dShaderParameters); }
+	virtual const std::string& GetName() const noexcept;
+	ID3D12RootSignature* GetGraphicsRootSignature();
+	ID3D12RootSignature const* GetGraphicsRootSignature() const;
 
 	//
+	virtual void ReleaseUploadBuffers();
 	virtual void ReleaseShaderVariables();
 
-	bool OnMouseEvent(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
-	bool OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+	bool OnMouseEvent(HWND hWnd, UINT msg, WPARAM btn, LPARAM info);
+	bool OnKeyboardEvent(HWND hWnd, UINT msg, WPARAM key, LPARAM state);
+	bool OnWindowsEvent(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
 	CPlayer* m_pPlayer = NULL;
 
-public:
+private:
+	ID3D12RootSignature* CreateGraphicsRootSignature();
+	virtual void CreateShaderVariables();
+
 	const std::string myName;
 
 	GameFramework& myFramework;
@@ -51,13 +52,11 @@ public:
 	ID3D12RootSignature* d3dShaderParameters;
 
 	std::vector<shared_ptr<GameObject>> myInstances;
-	//GameObject** m_ppGameObjects = NULL;
 
 	CLight* m_pLights = NULL;
 	int m_nLights = 0;
 
 	XMFLOAT4 m_xmf4GlobalAmbient;
-
 	ID3D12Resource* m_pd3dcbLights = NULL;
 	LIGHTS* m_pcbMappedLights = NULL;
 

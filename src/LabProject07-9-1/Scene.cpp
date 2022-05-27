@@ -165,6 +165,21 @@ void CScene::UpdateShaderVariables()
 	memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
 }
 
+const std::string& CScene::GetName() const noexcept
+{
+	return myName;
+}
+
+ID3D12RootSignature* CScene::GetGraphicsRootSignature()
+{
+	return d3dShaderParameters;
+}
+
+ID3D12RootSignature const* CScene::GetGraphicsRootSignature() const
+{
+	return d3dShaderParameters;
+}
+
 void CScene::ReleaseShaderVariables()
 {
 	if (m_pd3dcbLights)
@@ -184,47 +199,63 @@ void CScene::ReleaseUploadBuffers()
 
 ID3D12RootSignature* CScene::CreateGraphicsRootSignature()
 {
-	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
-
 	D3D12_ROOT_PARAMETER pd3dRootParameters[3]{};
 
-	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	// register(b1)
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 1; //Camera
 	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[1].Constants.Num32BitValues = 32;
-	pd3dRootParameters[1].Constants.ShaderRegister = 2; //GameObject
-
+	// register(b2)
+	pd3dRootParameters[1].Constants.ShaderRegister = 2; // GameObject
 	pd3dRootParameters[1].Constants.RegisterSpace = 0;
+	pd3dRootParameters[1].Constants.Num32BitValues = 32; // ÃÖ´ë 32°³
+	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	// register(b4)
 	pd3dRootParameters[2].Descriptor.ShaderRegister = 4; //Lights
 	pd3dRootParameters[2].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 
-	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
-	::ZeroMemory(&d3dRootSignatureDesc, sizeof(D3D12_ROOT_SIGNATURE_DESC));
+	D3D12_ROOT_SIGNATURE_DESC rootsignature_desc{};
+	::ZeroMemory(&rootsignature_desc, sizeof(D3D12_ROOT_SIGNATURE_DESC));
 
-	d3dRootSignatureDesc.NumParameters = _countof(pd3dRootParameters);
-	d3dRootSignatureDesc.pParameters = pd3dRootParameters;
-	d3dRootSignatureDesc.NumStaticSamplers = 0;
-	d3dRootSignatureDesc.pStaticSamplers = NULL;
-	d3dRootSignatureDesc.Flags = d3dRootSignatureFlags;
+	rootsignature_desc.NumParameters = std::size(pd3dRootParameters);
+	rootsignature_desc.pParameters = pd3dRootParameters;
+	rootsignature_desc.NumStaticSamplers = 0;
+	rootsignature_desc.pStaticSamplers = nullptr;
+	rootsignature_desc.Flags = d3dRootSignatureFlags;
 
-	ID3DBlob* pd3dSignatureBlob = NULL;
-	ID3DBlob* pd3dErrorBlob = NULL;
-	D3D12SerializeRootSignature(&d3dRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &pd3dSignatureBlob, &pd3dErrorBlob);
-	d3dDevice->CreateRootSignature(0, pd3dSignatureBlob->GetBufferPointer(), pd3dSignatureBlob->GetBufferSize(), __uuidof(ID3D12RootSignature), (void**)&pd3dGraphicsRootSignature);
+	ID3DBlob* pd3dSignatureBlob = nullptr;
+	ID3DBlob* pd3dErrorBlob = nullptr;
+	D3D12SerializeRootSignature(&rootsignature_desc, D3D_ROOT_SIGNATURE_VERSION_1, &pd3dSignatureBlob, &pd3dErrorBlob);
 
-	if (pd3dSignatureBlob) pd3dSignatureBlob->Release();
-	if (pd3dErrorBlob) pd3dErrorBlob->Release();
+	ID3D12RootSignature* root_signature = nullptr;
 
-	return(pd3dGraphicsRootSignature);
+	UINT gpu_mask = 0;
+	void* blob = pd3dSignatureBlob->GetBufferPointer();
+	size_t blob_size = pd3dSignatureBlob->GetBufferSize();
+
+	auto uuid = __uuidof(ID3D12RootSignature);
+	void** place = reinterpret_cast<void**>(&root_signature);
+	d3dDevice->CreateRootSignature(gpu_mask, blob, blob_size, uuid, place);
+
+	if (pd3dSignatureBlob)
+	{
+		pd3dSignatureBlob->Release();
+	}
+
+	if (pd3dErrorBlob)
+	{
+		pd3dErrorBlob->Release();
+	}
+
+	return  root_signature;
 }
 
 void CScene::Start()
@@ -252,11 +283,6 @@ void CScene::Update(float elapsed_time)
 	}
 }
 
-bool CScene::ProcessInput(UCHAR* pKeysBuffer)
-{
-	return(false);
-}
-
 void CScene::Render(GameCamera* pCamera)
 {
 	d3dTaskList->SetGraphicsRootSignature(d3dShaderParameters);
@@ -268,8 +294,7 @@ void CScene::Render(GameCamera* pCamera)
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	d3dTaskList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress);
-	// Lights
-
+	
 	for (auto& instance : myInstances)
 	{
 		instance->UpdateTransform(NULL);
@@ -305,4 +330,9 @@ bool CScene::OnKeyboardEvent(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM l
 		break;
 	}
 	return(false);
+}
+
+bool CScene::OnWindowsEvent(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	return false;
 }

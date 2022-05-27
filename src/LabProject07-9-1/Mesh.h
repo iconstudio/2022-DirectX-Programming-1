@@ -2,31 +2,21 @@
 
 class CMesh
 {
-public:
-	CMesh() { }
-    virtual ~CMesh() { }
-
-private:
-	int								m_nReferences = 0;
-
-public:
-	void AddRef() { m_nReferences++; }
-	void Release() { if (--m_nReferences <= 0) delete this; }
-
-	virtual void ReleaseUploadBuffers() { }
-
 protected:
-	D3D12_PRIMITIVE_TOPOLOGY		m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	UINT							m_nSlot = 0;
-	UINT							m_nVertices = 0;
-	UINT							m_nOffset = 0;
+	UINT m_nSlot = 0;
+	UINT m_nVertices = 0;
+	UINT m_nOffset = 0;
 
-	UINT							m_nType = 0;
+	D3D12_PRIMITIVE_TOPOLOGY typePrimitives = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	UINT m_nType = 0;
 
 public:
-	UINT GetType() { return(m_nType); }
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList) { }
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet) { }
+	virtual void ReleaseUploadBuffers() {}
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList) {}
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet) {}
+
+	UINT GetType() { return m_nType; }
 };
 
 #define VERTEXT_POSITION			0x01
@@ -36,7 +26,7 @@ public:
 class CMeshLoadInfo
 {
 public:
-	CMeshLoadInfo() { }
+	CMeshLoadInfo();
 	~CMeshLoadInfo();
 
 public:
