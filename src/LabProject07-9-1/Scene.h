@@ -1,9 +1,10 @@
 #pragma once
+#include "TaggedObject.hpp"
 #include "Shader.h"
 #include "Player.h"
 #include "Light.hpp"
 
-class CScene
+class CScene : public TaggedObject
 {
 public:
 	CScene(GameFramework& framework, const char* name);
@@ -25,8 +26,6 @@ public:
 	// 렌더링
 	void Render(GameCamera* pCamera = nullptr);
 
-	// 이름 얻기
-	virtual const std::string& GetName() const noexcept;
 	ID3D12RootSignature* GetGraphicsRootSignature();
 	ID3D12RootSignature const* GetGraphicsRootSignature() const;
 
@@ -44,9 +43,6 @@ private:
 	ID3D12RootSignature* CreateGraphicsRootSignature();
 	virtual void CreateShaderVariables();
 
-	const std::string myName;
-
-	GameFramework& myFramework;
 	ID3D12Device* d3dDevice;
 	ID3D12GraphicsCommandList* d3dTaskList;
 	ID3D12RootSignature* d3dShaderParameters;

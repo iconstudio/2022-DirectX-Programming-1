@@ -1,8 +1,9 @@
+#include "pch.hpp"
 #include "stdafx.h"
 #include "Scene.h"
 
 CScene::CScene(GameFramework& framework, const char* name)
-	: myFramework(framework), myName(name)
+	: TaggedObject(framework, name)
 	, d3dDevice(nullptr), d3dTaskList(nullptr), d3dShaderParameters(nullptr)
 {}
 
@@ -163,11 +164,6 @@ void CScene::UpdateShaderVariables()
 	memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
 
 	memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
-}
-
-const std::string& CScene::GetName() const noexcept
-{
-	return myName;
 }
 
 ID3D12RootSignature* CScene::GetGraphicsRootSignature()
