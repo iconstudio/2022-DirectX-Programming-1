@@ -1,6 +1,9 @@
+#include "pch.hpp"
 #include "stdafx.h"
 #include "GameFramework.h"
+#include "Pipeline.hpp"
 #include "GameScenes.hpp"
+#include "Player.h"
 
 GameFramework::GameFramework(unsigned int width, unsigned int height)
 	: frameWidth(width), frameHeight(height)
@@ -454,6 +457,15 @@ void GameFramework::Start()
 	CleanupBuilds();
 }
 
+void GameFramework::BuildMaterials()
+{
+
+}
+
+void GameFramework::BuildPipeline()
+{
+}
+
 void GameFramework::BuildStages()
 {
 	RegisterScene(SceneIntro(*this));
@@ -715,9 +727,9 @@ void GameFramework::OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 
 void GameFramework::OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
 {
-	if (m_pScene)
+	if (currentScene)
 	{
-		m_pScene->OnKeyboardEvent(hwnd, msg, key, state);
+		currentScene->OnKeyboardEvent(hwnd, msg, key, state);
 	}
 
 	switch (msg)
@@ -810,6 +822,169 @@ bool GameFramework::D3DAssert(HRESULT valid, const char* error)
 	{
 		return true;
 	}
+}
+
+shared_ptr<GameObject> GameFramework::LoadModel(const char* name, const char* path)
+{
+	FILE* stream = NULL;
+	fopen_s(&stream, path, "rb");
+	rewind(stream);
+
+	char token[64]{};
+	GameObject* result = nullptr;
+
+	while (true)
+	{
+		ZeroMemory(token, sizeof(token));
+		ReadStringFromFile(stream, token);
+
+		if (!strcmp(token, "<Hierarchy>:"))
+		{
+			result = LoadFrameHierarchy(stream);
+		}
+		else if (!strcmp(token, "</Hierarchy>"))
+		{
+			break;
+		}
+	}
+
+	if (!result)
+	{
+		throw "모델링 불러오기 실패!";
+	}
+
+	auto ptr = shared_ptr<GameObject>(result);
+	myModels.insert(make_pair(name, ptr));
+
+#ifdef _WITH_DEBUG_FRAME_HIERARCHY
+	TCHAR pstrDebug[256] = { 0 };
+	_stprintf_s(pstrDebug, 256, _T("Frame Hierarchy\n"));
+	OutputDebugString(pstrDebug);
+
+	result->PrintFrameInfo();
+#endif
+
+	return ptr;
+}
+
+shared_ptr<GameObject> GameFramework::GetModel(const char* name)
+{
+	return myModels.find(name)->second;
+}
+
+GameObject* GameFramework::LoadFrameHierarchy(FILE* stream, GameObject* root)
+{
+	char token[64]{};
+
+	UINT nReads = 0;
+	int nFrame = 0;
+
+	for (; ; )
+	{
+		ZeroMemory(token, sizeof(token));
+		ReadStringFromFile(stream, token);
+
+		if (!strcmp(token, "<Frame>:"))
+		{
+			root = new GameObject();
+
+			nFrame = ::ReadIntegerFromFile(stream);
+			::ReadStringFromFile(stream, root->m_pstrFrameName);
+		}
+		else if (!strcmp(token, "<Transform>:"))
+		{
+			XMFLOAT3 xmf3Position, xmf3Rotation, xmf3Scale;
+			XMFLOAT4 xmf4Rotation;
+			nReads = (UINT)::fread(&xmf3Position, sizeof(float), 3, stream);
+			nReads = (UINT)::fread(&xmf3Rotation, sizeof(float), 3, stream); //Euler Angle
+			nReads = (UINT)::fread(&xmf3Scale, sizeof(float), 3, stream);
+			nReads = (UINT)::fread(&xmf4Rotation, sizeof(float), 4, stream); //Quaternion
+		}
+		else if (!strcmp(token, "<TransformMatrix>:"))
+		{
+			nReads = (UINT)::fread(&root->m_xmf4x4Transform, sizeof(float), 16, stream);
+		}
+		else if (!strcmp(token, "<Mesh>:"))
+		{
+			CMeshLoadInfo* pMeshInfo = LoadMeshInfoFromFile(stream);
+
+			if (pMeshInfo)
+			{
+				CMesh* pMesh = NULL;
+				if (pMeshInfo->m_nType & VERTEXT_NORMAL)
+				{
+					pMesh = new CMeshIlluminatedFromFile(myDevice, myCommandList, pMeshInfo);
+				}
+				if (pMesh) root->SetMesh(pMesh);
+				delete pMeshInfo;
+			}
+		}
+		else if (!strcmp(token, "<Materials>:"))
+		{
+			auto materials = LoadRawMaterials(stream);
+			auto raw_count = materials.size();
+
+			if (0 < raw_count)
+			{
+				root->m_nMaterials = raw_count;
+				root->m_ppMaterials = new CMaterial * [raw_count];
+
+				for (int i = 0; i < raw_count; i++)
+				{
+					const auto& raw_mat = materials.at(i);
+
+					root->m_ppMaterials[i] = NULL;
+
+					auto* mat = new CMaterial(raw_mat);
+
+					if (root->GetMeshType() & VERTEXT_NORMAL)
+					{
+						//mat->SetShader(myIlluminationShader);
+					}
+
+					root->SetMaterial(i, mat);
+				}
+			}
+		}
+		else if (!strcmp(token, "<Children>:"))
+		{
+			int nChilds = ReadIntegerFromFile(stream);
+			if (0 < nChilds)
+			{
+				GameObject* child = nullptr, * child_sib = nullptr;
+				for (int i = 0; i < nChilds; i++)
+				{
+					child = LoadFrameHierarchy(stream);
+
+					if (child)
+					{
+						root->SetChild(child);
+					}
+#ifdef _WITH_DEBUG_RUNTIME_FRAME_HIERARCHY
+					TCHAR pstrDebug[256] = { 0 };
+					_stprintf_s(pstrDebug, 256, _T("(Child Frame: %p) (Parent Frame: %p)\n"), child, root);
+					OutputDebugString(pstrDebug);
+#endif
+				}
+			}
+		}
+		else if (!strcmp(token, "</Frame>"))
+		{
+			break;
+		}
+	}
+
+	return(root);
+}
+
+RawMaterial* GameFramework::LoadMaterial(FILE* stream)
+{
+	return nullptr;
+}
+
+CMaterial* GameFramework::CreateMaterial(RawMaterial* origin)
+{
+	return nullptr;
 }
 
 void GameFramework::ResetCmdAllocator()

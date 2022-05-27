@@ -1,13 +1,9 @@
+#include "pch.hpp"
 #include "stdafx.h"
 #include "Object.h"
 #include "Material.hpp"
 #include "Shader.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
 GameObject::GameObject()
 {
 	m_xmf4x4Transform = Matrix4x4::Identity();
@@ -18,15 +14,21 @@ GameObject::~GameObject()
 {
 	if (m_ppMaterials) delete[] m_ppMaterials;
 }
+
 void GameObject::SetChild(GameObject* pChild, bool bReferenceUpdate)
 {
 	if (pChild)
 	{
 		pChild->m_pParent = this;
 	}
+
 	if (myChild)
 	{
-		if (pChild) pChild->mySibling = myChild->mySibling;
+		if (pChild)
+		{
+			pChild->mySibling = myChild->mySibling;
+		}
+
 		myChild->mySibling = pChild;
 	}
 	else
@@ -91,7 +93,7 @@ GameObject* GameObject::FindFrame(const char* pstrFrameName)
 	return(NULL);
 }
 
-void GameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, GameCamera* pCamera)
+void GameObject::Render(PtrGrpCommandList  pd3dCommandList, GameCamera* pCamera)
 {
 	OnPrepareRender();
 
@@ -119,20 +121,20 @@ void GameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, GameCamera* 
 	if (myChild) myChild->Render(pd3dCommandList, pCamera);
 }
 
-void GameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void GameObject::CreateShaderVariables(PtrDevice pd3dDevice, PtrGrpCommandList  pd3dCommandList)
 {}
 
-void GameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+void GameObject::UpdateShaderVariables(PtrGrpCommandList  pd3dCommandList)
 {}
 
-void GameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World)
+void GameObject::UpdateShaderVariable(PtrGrpCommandList  pd3dCommandList, XMFLOAT4X4* pxmf4x4World)
 {
 	XMFLOAT4X4 xmf4x4World;
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 }
 
-void GameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, CMaterial* pMaterial)
+void GameObject::UpdateShaderVariable(PtrGrpCommandList  pd3dCommandList, CMaterial* pMaterial)
 {}
 
 void GameObject::ReleaseShaderVariables()
@@ -244,195 +246,6 @@ void GameObject::Rotate(XMFLOAT4* pxmf4Quaternion)
 	UpdateTransform(NULL);
 }
 
-CMeshLoadInfo* GameObject::LoadMeshInfoFromFile(FILE* pInFile)
-{
-	char pstrToken[64] = { '\0' };
-	UINT nReads = 0;
-
-	int nPositions = 0, nColors = 0, nNormals = 0, nIndices = 0, nSubMeshes = 0, nSubIndices = 0;
-
-	CMeshLoadInfo* pMeshInfo = new CMeshLoadInfo;
-
-	pMeshInfo->m_nVertices = ::ReadIntegerFromFile(pInFile);
-	::ReadStringFromFile(pInFile, pMeshInfo->m_pstrMeshName);
-
-	for (; ; )
-	{
-		::ReadStringFromFile(pInFile, pstrToken);
-
-		if (!strcmp(pstrToken, "<Bounds>:"))
-		{
-			nReads = (UINT)::fread(&(pMeshInfo->m_xmf3AABBCenter), sizeof(XMFLOAT3), 1, pInFile);
-			nReads = (UINT)::fread(&(pMeshInfo->m_xmf3AABBExtents), sizeof(XMFLOAT3), 1, pInFile);
-		}
-		else if (!strcmp(pstrToken, "<Positions>:"))
-		{
-			nPositions = ::ReadIntegerFromFile(pInFile);
-			if (nPositions > 0)
-			{
-				pMeshInfo->m_nType |= VERTEXT_POSITION;
-				pMeshInfo->m_pxmf3Positions = new XMFLOAT3[nPositions];
-				nReads = (UINT)::fread(pMeshInfo->m_pxmf3Positions, sizeof(XMFLOAT3), nPositions, pInFile);
-			}
-		}
-		else if (!strcmp(pstrToken, "<Colors>:"))
-		{
-			nColors = ::ReadIntegerFromFile(pInFile);
-			if (nColors > 0)
-			{
-				pMeshInfo->m_nType |= VERTEXT_COLOR;
-				pMeshInfo->m_pxmf4Colors = new XMFLOAT4[nColors];
-				nReads = (UINT)::fread(pMeshInfo->m_pxmf4Colors, sizeof(XMFLOAT4), nColors, pInFile);
-			}
-		}
-		else if (!strcmp(pstrToken, "<Normals>:"))
-		{
-			nNormals = ::ReadIntegerFromFile(pInFile);
-			if (nNormals > 0)
-			{
-				pMeshInfo->m_nType |= VERTEXT_NORMAL;
-				pMeshInfo->m_pxmf3Normals = new XMFLOAT3[nNormals];
-				nReads = (UINT)::fread(pMeshInfo->m_pxmf3Normals, sizeof(XMFLOAT3), nNormals, pInFile);
-			}
-		}
-		else if (!strcmp(pstrToken, "<Indices>:"))
-		{
-			nIndices = ::ReadIntegerFromFile(pInFile);
-			if (nIndices > 0)
-			{
-				pMeshInfo->m_pnIndices = new UINT[nIndices];
-				nReads = (UINT)::fread(pMeshInfo->m_pnIndices, sizeof(int), nIndices, pInFile);
-			}
-		}
-		else if (!strcmp(pstrToken, "<SubMeshes>:"))
-		{
-			pMeshInfo->m_nSubMeshes = ::ReadIntegerFromFile(pInFile);
-			if (pMeshInfo->m_nSubMeshes > 0)
-			{
-				pMeshInfo->m_pnSubSetIndices = new int[pMeshInfo->m_nSubMeshes];
-				pMeshInfo->m_ppnSubSetIndices = new UINT * [pMeshInfo->m_nSubMeshes];
-				for (int i = 0; i < pMeshInfo->m_nSubMeshes; i++)
-				{
-					::ReadStringFromFile(pInFile, pstrToken);
-					if (!strcmp(pstrToken, "<SubMesh>:"))
-					{
-						int nIndex = ::ReadIntegerFromFile(pInFile);
-						pMeshInfo->m_pnSubSetIndices[i] = ::ReadIntegerFromFile(pInFile);
-						if (pMeshInfo->m_pnSubSetIndices[i] > 0)
-						{
-							pMeshInfo->m_ppnSubSetIndices[i] = new UINT[pMeshInfo->m_pnSubSetIndices[i]];
-							nReads = (UINT)::fread(pMeshInfo->m_ppnSubSetIndices[i], sizeof(int), pMeshInfo->m_pnSubSetIndices[i], pInFile);
-						}
-
-					}
-				}
-			}
-		}
-		else if (!strcmp(pstrToken, "</Mesh>"))
-		{
-			break;
-		}
-	}
-	return(pMeshInfo);
-}
-
-GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FILE* pInFile)
-{
-	char pstrToken[64] = { '\0' };
-	UINT nReads = 0;
-
-	int nFrame = 0;
-
-	GameObject* pGameObject = NULL;
-
-	for (; ; )
-	{
-		::ReadStringFromFile(pInFile, pstrToken);
-		if (!strcmp(pstrToken, "<Frame>:"))
-		{
-			pGameObject = new GameObject();
-
-			nFrame = ::ReadIntegerFromFile(pInFile);
-			::ReadStringFromFile(pInFile, pGameObject->m_pstrFrameName);
-		}
-		else if (!strcmp(pstrToken, "<Transform>:"))
-		{
-			XMFLOAT3 xmf3Position, xmf3Rotation, xmf3Scale;
-			XMFLOAT4 xmf4Rotation;
-			nReads = (UINT)::fread(&xmf3Position, sizeof(float), 3, pInFile);
-			nReads = (UINT)::fread(&xmf3Rotation, sizeof(float), 3, pInFile); //Euler Angle
-			nReads = (UINT)::fread(&xmf3Scale, sizeof(float), 3, pInFile);
-			nReads = (UINT)::fread(&xmf4Rotation, sizeof(float), 4, pInFile); //Quaternion
-		}
-		else if (!strcmp(pstrToken, "<TransformMatrix>:"))
-		{
-			nReads = (UINT)::fread(&pGameObject->m_xmf4x4Transform, sizeof(float), 16, pInFile);
-		}
-		else if (!strcmp(pstrToken, "<Mesh>:"))
-		{
-			CMeshLoadInfo* pMeshInfo = pGameObject->LoadMeshInfoFromFile(pInFile);
-			if (pMeshInfo)
-			{
-				CMesh* pMesh = NULL;
-				if (pMeshInfo->m_nType & VERTEXT_NORMAL)
-				{
-					pMesh = new CMeshIlluminatedFromFile(pd3dDevice, pd3dCommandList, pMeshInfo);
-				}
-				if (pMesh) pGameObject->SetMesh(pMesh);
-				delete pMeshInfo;
-			}
-		}
-		else if (!strcmp(pstrToken, "<Materials>:"))
-		{
-			auto materials = LoadMaterialsInfoFromFile(pd3dDevice, pd3dCommandList, pInFile);
-			auto mat_count = materials.size();
-
-			if (0 < mat_count)
-			{
-				pGameObject->m_nMaterials = mat_count;
-				pGameObject->m_ppMaterials = new CMaterial * [mat_count];
-
-				for (int i = 0; i < mat_count; i++)
-				{
-					pGameObject->m_ppMaterials[i] = NULL;
-
-					auto* mat = new CMaterial();
-
-					auto* mat_color = new CMaterialColors(&materials[i]);
-
-					mat->SetMaterialColors(mat_color);
-
-					if (pGameObject->GetMeshType() & VERTEXT_NORMAL) mat->SetIlluminatedShader();
-
-					pGameObject->SetMaterial(i, mat);
-				}
-			}
-		}
-		else if (!strcmp(pstrToken, "<Children>:"))
-		{
-			int nChilds = ::ReadIntegerFromFile(pInFile);
-			if (0 < nChilds)
-			{
-				for (int i = 0; i < nChilds; i++)
-				{
-					GameObject* pChild = GameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pInFile);
-					if (pChild) pGameObject->SetChild(pChild);
-#ifdef _WITH_DEBUG_RUNTIME_FRAME_HIERARCHY
-					TCHAR pstrDebug[256] = { 0 };
-					_stprintf_s(pstrDebug, 256, _T("(Child Frame: %p) (Parent Frame: %p)\n"), pChild, pGameObject);
-					OutputDebugString(pstrDebug);
-#endif
-				}
-			}
-		}
-		else if (!strcmp(pstrToken, "</Frame>"))
-		{
-			break;
-		}
-	}
-	return(pGameObject);
-}
-
 void GameObject::PrintFrameInfo(GameObject* parent)
 {
 	TCHAR pstrDebug[256] = { 0 };
@@ -449,40 +262,6 @@ void GameObject::PrintFrameInfo(GameObject* parent)
 	{
 		myChild->PrintFrameInfo(this);
 	}
-}
-
-GameObject* GameObject::LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName)
-{
-	FILE* pInFile = NULL;
-	::fopen_s(&pInFile, pstrFileName, "rb");
-	::rewind(pInFile);
-
-	GameObject* pGameObject = NULL;
-	char pstrToken[64] = { '\0' };
-
-	for (; ; )
-	{
-		::ReadStringFromFile(pInFile, pstrToken);
-
-		if (!strcmp(pstrToken, "<Hierarchy>:"))
-		{
-			pGameObject = GameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pInFile);
-		}
-		else if (!strcmp(pstrToken, "</Hierarchy>"))
-		{
-			break;
-		}
-	}
-
-#ifdef _WITH_DEBUG_FRAME_HIERARCHY
-	TCHAR pstrDebug[256] = { 0 };
-	_stprintf_s(pstrDebug, 256, _T("Frame Hierarchy\n"));
-	OutputDebugString(pstrDebug);
-
-	pGameObject->PrintFrameInfo();
-#endif
-
-	return(pGameObject);
 }
 
 void GameObject::PrintFrameInfo(GameObject* pParent)
@@ -506,7 +285,7 @@ void CRotatingObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	GameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
-void CRotatingObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, GameCamera* pCamera)
+void CRotatingObject::Render(PtrGrpCommandList  pd3dCommandList, GameCamera* pCamera)
 {
 	GameObject::Render(pd3dCommandList, pCamera);
 }

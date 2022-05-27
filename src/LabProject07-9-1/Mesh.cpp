@@ -1,3 +1,4 @@
+#include "pch.hpp"
 #include "stdafx.h"
 #include "Mesh.h"
 
@@ -20,7 +21,7 @@ CMeshLoadInfo::~CMeshLoadInfo()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CMeshFromFile::CMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, CMeshLoadInfo *pMeshInfo)
+CMeshFromFile::CMeshFromFile(PtrDevice pd3dDevice, PtrGrpCommandList pd3dCommandList, CMeshLoadInfo *pMeshInfo)
 {
 	m_nVertices = pMeshInfo->m_nVertices;
 	m_nType = pMeshInfo->m_nType;
@@ -87,7 +88,7 @@ void CMeshFromFile::ReleaseUploadBuffers()
 	}
 }
 
-void CMeshFromFile::Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet)
+void CMeshFromFile::Render(PtrGrpCommandList pd3dCommandList, int nSubSet)
 {
 	pd3dCommandList->IASetPrimitiveTopology(typePrimitives);
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
@@ -104,7 +105,7 @@ void CMeshFromFile::Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubS
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CMeshIlluminatedFromFile::CMeshIlluminatedFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, CMeshLoadInfo *pMeshInfo) : CMeshFromFile::CMeshFromFile(pd3dDevice, pd3dCommandList, pMeshInfo)
+CMeshIlluminatedFromFile::CMeshIlluminatedFromFile(PtrDevice pd3dDevice, PtrGrpCommandList pd3dCommandList, CMeshLoadInfo *pMeshInfo) : CMeshFromFile::CMeshFromFile(pd3dDevice, pd3dCommandList, pMeshInfo)
 {
 	m_pd3dNormalBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pMeshInfo->m_pxmf3Normals, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dNormalUploadBuffer);
 
@@ -126,7 +127,7 @@ void CMeshIlluminatedFromFile::ReleaseUploadBuffers()
 	m_pd3dNormalUploadBuffer = NULL;
 }
 
-void CMeshIlluminatedFromFile::Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet)
+void CMeshIlluminatedFromFile::Render(PtrGrpCommandList pd3dCommandList, int nSubSet)
 {
 	pd3dCommandList->IASetPrimitiveTopology(typePrimitives);
 	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[2] = { m_d3dPositionBufferView, m_d3dNormalBufferView };

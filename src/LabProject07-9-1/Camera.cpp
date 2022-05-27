@@ -106,7 +106,7 @@ void GameCamera::RegenerateViewMatrix()
 	m_xmf4x4View._43 = -Vector3::DotProduct(m_xmf3Position, m_xmf3Look);
 }
 
-void GameCamera::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
+void GameCamera::CreateShaderVariables(PtrDevice pd3dDevice, PtrGrpCommandList pd3dCommandList)
 {
 	UINT ncbElementBytes = ((sizeof(VS_CB_CAMERA_INFO) + 255) & ~255); //256�� ���
 	m_pd3dcbCamera = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
@@ -114,7 +114,7 @@ void GameCamera::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsC
 	m_pd3dcbCamera->Map(0, NULL, (void **)&m_pcbMappedCamera);
 }
 
-void GameCamera::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
+void GameCamera::UpdateShaderVariables(PtrGrpCommandList pd3dCommandList)
 {
 	XMFLOAT4X4 xmf4x4View;
 	XMStoreFloat4x4(&xmf4x4View, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4View)));
@@ -139,7 +139,7 @@ void GameCamera::ReleaseShaderVariables()
 	}
 }
 
-void GameCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList *pd3dCommandList)
+void GameCamera::SetViewportsAndScissorRects(PtrGrpCommandList pd3dCommandList)
 {
 	pd3dCommandList->RSSetViewports(1, &m_d3dViewport);
 	pd3dCommandList->RSSetScissorRects(1, &m_d3dScissorRect);

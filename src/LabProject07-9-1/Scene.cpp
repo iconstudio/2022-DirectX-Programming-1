@@ -1,6 +1,7 @@
 #include "pch.hpp"
 #include "stdafx.h"
 #include "Scene.h"
+#include "GameFramework.h"
 
 CScene::CScene(GameFramework& framework, const char* name)
 	: TaggedObject(framework, name)
@@ -18,7 +19,7 @@ CScene::~CScene()
 	if (m_pLights) delete[] m_pLights;
 }
 
-void CScene::Awake(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list)
+void CScene::Awake(PtrDevice device, PtrGrpCommandList  cmd_list)
 {
 	d3dDevice = device;
 	d3dTaskList = cmd_list;
@@ -30,12 +31,12 @@ void CScene::Build()
 {
 	d3dShaderParameters = CreateGraphicsRootSignature();
 
-	CMaterial::PrepareShaders(d3dDevice, d3dTaskList, d3dShaderParameters);
+	myIlluminationShader= make_unique<CIlluminatedShader>();
+	myIlluminationShader->CreateShader(d3dDevice, d3dTaskList, d3dShaderParameters);
+	myIlluminationShader->CreateShaderVariables(d3dDevice, d3dTaskList);
 
-	//
-	m_xmf4GlobalAmbient = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
+	globalAmbientLight = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
 
-	//
 	m_nLights = 4;
 	m_pLights = new CLight[m_nLights];
 	::ZeroMemory(m_pLights, sizeof(CLight) * m_nLights);
@@ -85,11 +86,11 @@ void CScene::Build()
 	myInstances.clear();
 
 	// Apache
-	GameObject* pApacheModel = GameObject::LoadGeometryFromFile(d3dDevice, d3dTaskList, d3dShaderParameters, "Model/Rock.bin");
+	auto pApacheModel = myFramework.LoadModel("Apache", "Model/Rock.bin");
 	CApacheObject* pApacheObject = NULL;
 
 	pApacheObject = new CApacheObject();
-	pApacheObject->SetChild(pApacheModel, true);
+	pApacheObject->SetChild(pApacheModel.get(), true);
 	pApacheObject->OnInitialize();
 	pApacheObject->SetPosition(+130.0f, 0.0f, 160.0f);
 	pApacheObject->SetScale(10.5f, 10.5f, 10.5f);
@@ -97,7 +98,7 @@ void CScene::Build()
 	myInstances.emplace_back(pApacheObject);
 	
 	pApacheObject = new CApacheObject();
-	pApacheObject->SetChild(pApacheModel, true);
+	pApacheObject->SetChild(pApacheModel.get(), true);
 	pApacheObject->OnInitialize();
 	pApacheObject->SetPosition(-75.0f, 0.0f, 80.0f);
 	pApacheObject->SetScale(10.5f, 10.5f, 10.5f);
@@ -105,11 +106,11 @@ void CScene::Build()
 	myInstances.emplace_back(pApacheObject);
 
 	// Gunship
-	GameObject* pGunshipModel = GameObject::LoadGeometryFromFile(d3dDevice, d3dTaskList, d3dShaderParameters, "Model/PoliceCar.bin");
+	auto pGunshipModel = myFramework.LoadModel("Police Car", "Model/PoliceCar.bin");
 	CGunshipObject* pGunshipObject = NULL;
 
 	pGunshipObject = new CGunshipObject();
-	pGunshipObject->SetChild(pGunshipModel, true);
+	pGunshipObject->SetChild(pGunshipModel.get(), true);
 	pGunshipObject->OnInitialize();
 	pGunshipObject->SetPosition(135.0f, 40.0f, 220.0f);
 	pGunshipObject->SetScale(8.5f, 8.5f, 8.5f);
@@ -117,11 +118,11 @@ void CScene::Build()
 	myInstances.emplace_back(pGunshipObject);
 
 	// SuperCobra
-	GameObject* pSuperCobraModel = GameObject::LoadGeometryFromFile(d3dDevice, d3dTaskList, d3dShaderParameters, "Model/Cactus.bin");
+	auto pSuperCobraModel = myFramework.LoadModel("Cactus", "Model/Cactus.bin");
 	CSuperCobraObject* pSuperCobraObject = NULL;
 
 	pSuperCobraObject = new CSuperCobraObject();
-	pSuperCobraObject->SetChild(pSuperCobraModel, true);
+	pSuperCobraObject->SetChild(pSuperCobraModel.get(), true);
 	pSuperCobraObject->OnInitialize();
 	pSuperCobraObject->SetPosition(95.0f, 50.0f, 50.0f);
 	pSuperCobraObject->SetScale(9.5f, 9.5f, 9.5f);
@@ -129,11 +130,11 @@ void CScene::Build()
 	myInstances.emplace_back(pSuperCobraObject);
 
 	// Mi24
-	GameObject* pMi24Model = GameObject::LoadGeometryFromFile(d3dDevice, d3dTaskList, d3dShaderParameters, "Model/RallyCar.bin");
+	auto pMi24Model = myFramework.LoadModel("Rally Car", "Model/RallyCar.bin");
 	CMi24Object* pMi24Object = NULL;
 
 	pMi24Object = new CMi24Object();
-	pMi24Object->SetChild(pMi24Model, true);
+	pMi24Object->SetChild(pMi24Model.get(), true);
 	pMi24Object->OnInitialize();
 	pMi24Object->SetPosition(-95.0f, 50.0f, 50.0f);
 	pMi24Object->SetScale(4.5f, 4.5f, 4.5f);
@@ -161,7 +162,7 @@ void CScene::UpdateShaderVariables()
 {
 	memcpy(m_pcbMappedLights->m_pLights, m_pLights, sizeof(CLight) * m_nLights);
 
-	memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
+	memcpy(&m_pcbMappedLights->globalAmbientLight, &globalAmbientLight, sizeof(XMFLOAT4));
 
 	memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
 }

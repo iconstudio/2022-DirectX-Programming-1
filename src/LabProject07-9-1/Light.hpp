@@ -21,6 +21,6 @@ public:
 struct LIGHTS
 {
 	CLight					m_pLights[MAX_LIGHTS];
-	XMFLOAT4				m_xmf4GlobalAmbient;
+	XMFLOAT4				globalAmbientLight;
 	int						m_nLights;
 };

@@ -1,5 +1,4 @@
 #pragma once
-#include "Player.h"
 #include "Scene.h"
 
 class GameFramework
@@ -18,6 +17,8 @@ public:
 
 	// 게임 콘텐츠 초기화
 	void Start();
+	void BuildMaterials();
+	void BuildPipeline();
 	void BuildStages();
 	void BuildWorld();
 	void BuildParticles();
@@ -25,6 +26,10 @@ public:
 	void BuildTerrains();
 	void BuildObjects();
 	void CleanupBuilds();
+
+	// 에셋 불러오기
+	shared_ptr<GameObject> LoadModel(const char* name, const char* path);
+	shared_ptr<GameObject> GetModel(const char* name);
 
 	// 갱신
 	void Update(float elapsed_time);
@@ -55,6 +60,10 @@ public:
 
 private:
 	bool D3DAssert(HRESULT valid, const char* error);
+
+	GameObject* LoadFrameHierarchy(FILE* stream, GameObject* root = nullptr);
+	RawMaterial* LoadMaterial(FILE* stream);
+	CMaterial* CreateMaterial(RawMaterial* origin);
 
 	void ResetCmdAllocator();
 	void ResetCmdList(ID3D12PipelineState* pipeline = nullptr);
@@ -89,9 +98,9 @@ private:
 
 	IDXGIFactory4* myFactory;
 	IDXGISwapChain3* mySwapChain;
-	ID3D12Device* myDevice;
+	PtrDevice myDevice;
 
-	ID3D12GraphicsCommandList* myCommandList;
+	PtrGrpCommandList  myCommandList;
 	ID3D12CommandQueue* myCommandQueue;
 	ID3D12CommandAllocator* myCommandAlloc;
 
@@ -116,6 +125,10 @@ private:
 	std::unordered_map<std::string, shared_ptr<CScene>> myScenes;
 	std::vector<shared_ptr<CScene>> myStages;
 	std::vector<shared_ptr<CScene>>::iterator myStageIterator;
+
+	std::unordered_map<const char*, shared_ptr<GameObject>> myModels;
+	std::unordered_map<const char*, shared_ptr<CMaterial>> myMaterials;
+	std::unordered_map<const char*, shared_ptr<CShader>> myShaders;
 
 	shared_ptr<GameCamera> m_pCamera;
 };

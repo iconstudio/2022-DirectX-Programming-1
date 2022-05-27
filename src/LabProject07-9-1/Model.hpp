@@ -1,5 +1,5 @@
 #pragma once
+#include "Object.h"
 
-class Model
+class Model : public GameObject
 {};
-

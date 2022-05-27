@@ -1,52 +1,40 @@
 #pragma once
+#include "Shader.h"
 
 class RawMaterial
 {
 public:
-	XMFLOAT4 m_xmf4AlbedoColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	XMFLOAT4 m_xmf4EmissiveColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	XMFLOAT4 m_xmf4SpecularColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	RawMaterial();
+	virtual ~RawMaterial();
+
+	UINT myType;
+
+	XMFLOAT4 m_xmf4Ambient;
+	XMFLOAT4 m_xmf4AlbedoColor;
+	XMFLOAT4 m_xmf4EmissiveColor;
+	XMFLOAT4 m_xmf4SpecularColor;
 
 	float m_fGlossiness = 0.0f;
 	float m_fSmoothness = 0.0f;
 	float m_fSpecularHighlight = 0.0f;
 	float m_fMetallic = 0.0f;
 	float m_fGlossyReflection = 0.0f;
-
-	UINT m_nType = 0x00;
-};
-
-class CMaterialColors
-{
-public:
-	CMaterialColors() {}
-	CMaterialColors(RawMaterial* pMaterialInfo);
-	virtual ~CMaterialColors() {}
-
-	XMFLOAT4						m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	XMFLOAT4						m_xmf4Diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	XMFLOAT4						m_xmf4Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f); //(r,g,b,a=power)
-	XMFLOAT4						m_xmf4Emissive = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 };
 
 class CMaterial
 {
 public:
-	CMaterial();
+	CMaterial(const RawMaterial& raw);
+	CMaterial(RawMaterial&& raw);
 	virtual ~CMaterial();
 
-	void SetMaterialColors(CMaterialColors* pMaterialColors);
 	void SetShader(CShader* pShader);
-	void SetIlluminatedShader() { SetShader(m_pIlluminatedShader); }
+	void UpdateShaderVariable(PtrGrpCommandList  pd3dCommandList);
 
-	void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList);
+	XMFLOAT4 m_xmf4Ambient;
+	XMFLOAT4 m_xmf4Diffuse;
+	XMFLOAT4 m_xmf4Specular;
+	XMFLOAT4 m_xmf4Emissive;
 
 	CShader* m_pShader = NULL;
-	CMaterialColors* m_pMaterialColors = NULL;
-
-protected:
-	static CShader* m_pIlluminatedShader;
-
-public:
-	static void CMaterial::PrepareShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 };

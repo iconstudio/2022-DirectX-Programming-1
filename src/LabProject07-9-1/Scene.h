@@ -11,7 +11,7 @@ public:
 	virtual ~CScene();
 
 	// 초기화
-	void Awake(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list);
+	void Awake(PtrDevice device, PtrGrpCommandList  cmd_list);
 	virtual void Build();
 
 	// 시작
@@ -43,16 +43,17 @@ private:
 	ID3D12RootSignature* CreateGraphicsRootSignature();
 	virtual void CreateShaderVariables();
 
-	ID3D12Device* d3dDevice;
-	ID3D12GraphicsCommandList* d3dTaskList;
+	PtrDevice d3dDevice;
+	PtrGrpCommandList  d3dTaskList;
 	ID3D12RootSignature* d3dShaderParameters;
+	unique_ptr<CShader> myIlluminationShader;
 
 	std::vector<shared_ptr<GameObject>> myInstances;
 
 	CLight* m_pLights = NULL;
 	int m_nLights = 0;
 
-	XMFLOAT4 m_xmf4GlobalAmbient;
+	XMFLOAT4 globalAmbientLight;
 	ID3D12Resource* m_pd3dcbLights = NULL;
 	LIGHTS* m_pcbMappedLights = NULL;
 

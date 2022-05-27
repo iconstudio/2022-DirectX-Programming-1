@@ -17,21 +17,23 @@ public:
 
 	void SetChild(GameObject* pChild, bool bReferenceUpdate = false);
 
-	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
+	virtual void BuildMaterials(PtrDevice pd3dDevice, PtrGrpCommandList  pd3dCommandList) {}
 
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	virtual void OnPrepareRender() {}
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, GameCamera* pCamera = NULL);
+	virtual void Render(PtrGrpCommandList  pd3dCommandList, GameCamera* pCamera = NULL);
 
-	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void CreateShaderVariables(PtrDevice pd3dDevice, PtrGrpCommandList  pd3dCommandList);
+	virtual void UpdateShaderVariables(PtrGrpCommandList  pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, CMaterial* pMaterial);
+	virtual void UpdateShaderVariable(PtrGrpCommandList  pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
+	virtual void UpdateShaderVariable(PtrGrpCommandList  pd3dCommandList, CMaterial* pMaterial);
 
 	virtual void ReleaseUploadBuffers();
+
+	void PrintFrameInfo(GameObject* parent = nullptr);
 
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();
@@ -70,15 +72,6 @@ public:
 	GameObject* m_pParent = NULL;
 	GameObject* myChild = NULL;
 	GameObject* mySibling = NULL;
-
-public:
-	static CMeshLoadInfo* LoadMeshInfoFromFile(FILE* pInFile);
-
-	static GameObject* LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FILE* pInFile);
-	static GameObject* LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName);
-
-private:
-	void PrintFrameInfo(GameObject* parent = nullptr);
 };
 
 class CRotatingObject : public GameObject
@@ -96,7 +89,7 @@ public:
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
 
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, GameCamera* pCamera = NULL);
+	virtual void Render(PtrGrpCommandList  pd3dCommandList, GameCamera* pCamera = NULL);
 };
 
 class CRevolvingObject : public GameObject
