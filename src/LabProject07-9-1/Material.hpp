@@ -73,5 +73,5 @@ protected:
 	static Pipeline* m_pIlluminatedShader;
 
 public:
-	static void CMaterial::PrepareShaders(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* signature);
+	static void PrepareShaders(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* signature);
 };

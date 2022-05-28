@@ -167,6 +167,21 @@ void CScene::UpdateShaderVariables()
 	memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
 }
 
+const std::string& CScene::GetName() const noexcept
+{
+	return myName;
+}
+
+ID3D12RootSignature* CScene::GetGraphicsRootSignature()
+{
+	return d3dShaderParameters;
+}
+
+ID3D12RootSignature const* CScene::GetGraphicsRootSignature() const
+{
+	return d3dShaderParameters;
+}
+
 void CScene::ReleaseShaderVariables()
 {
 	if (m_pd3dcbLights)

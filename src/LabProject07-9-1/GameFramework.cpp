@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 #include "GameScenes.hpp"
+#include "Shader.h"
+#include "Player.h"
+
+Pipeline* CMaterial::m_pIlluminatedShader = NULL;
 
 GameFramework::GameFramework(unsigned int width, unsigned int height)
 	: frameWidth(width), frameHeight(height)
@@ -17,10 +21,14 @@ GameFramework::GameFramework(unsigned int width, unsigned int height)
 #ifdef _DEBUG
 	, myDebugController(nullptr)
 #endif //  _DEBUG
-	, m_pScene(nullptr), m_pPlayer(nullptr)
+	, myScenes(), myStages(), myStageIterator(), currentScene(nullptr)
+	, m_pPlayer(nullptr), m_pCamera(nullptr)
 {
 	ZeroMemory(resSwapChainBackBuffers, sizeof(resSwapChainBackBuffers));
 	ZeroMemory(myBarriers, sizeof(myBarriers));
+
+	myScenes.reserve(10);
+	myStages.reserve(10);
 
 	auto& barrier_render = myBarriers[0];
 	barrier_render.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -448,33 +456,54 @@ void GameFramework::Start()
 
 	WaitForGpuComplete();
 
-	if (m_pScene) m_pScene->ReleaseUploadBuffers();
-	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
+	CleanupBuilds();
 }
 
 void GameFramework::BuildStages()
 {
-	m_pScene = new CScene(*this, "Scene");
+	auto room_intro = RegisterStage(StageIntro(*this));
+	auto room_main = RegisterStage(StageMain(*this));
+	auto room_game = RegisterStage(StageGame(*this));
+	auto room_complete = RegisterStage(StageGameEnd(*this));
+	auto room_credit = RegisterStage(StageCredit(*this));
+	
+	AddStage(room_intro);
+	AddStage(room_main);
+	AddStage(room_game);
+	AddStage(room_complete);
+	AddStage(room_credit);
+	JumpToStage(0);
 
-	if (m_pScene)
+	for (auto& stage_pair : myScenes)
 	{
-		m_pScene->Awake(myWindow, myDevice, myCommandList);
+		auto& scene = stage_pair.second;
+
+		if (scene)
+		{
+			scene->Awake(myWindow, myDevice, myCommandList);
+		}
+		else
+		{
+			throw "잘못된 스테이지가 있음!";
+		}
 	}
 }
 
 void GameFramework::BuildWorld()
-{}
+{
+
+}
 
 void GameFramework::BuildParticles()
 {}
 
 void GameFramework::BuildPlayer()
 {
-	auto pAirplanePlayer = new CAirplanePlayer(myDevice, myCommandList, m_pScene->GetGraphicsRootSignature());
+	auto pAirplanePlayer = new CAirplanePlayer(myDevice, myCommandList, currentScene->GetGraphicsRootSignature());
 	pAirplanePlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, -3.0f));
 	pAirplanePlayer->m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
 
-	m_pScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
+	currentScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
 	m_pCamera = m_pPlayer->GetCamera();
 }
 
@@ -484,23 +513,36 @@ void GameFramework::BuildTerrains()
 void GameFramework::BuildObjects()
 {}
 
+void GameFramework::CleanupBuilds()
+{
+	if (currentScene)
+	{
+		currentScene->ReleaseUploadBuffers();
+	}
+
+	if (m_pPlayer)
+	{
+		m_pPlayer->ReleaseUploadBuffers();
+	}
+}
+
 void GameFramework::Update(float elapsed_time)
 {
 	static UCHAR pKeysBuffer[256];
 	const auto input = GetKeyboardState(pKeysBuffer);
 
-	if (m_pScene)
+	if (currentScene)
 	{
-		m_pScene->ProcessInput(pKeysBuffer);
+		currentScene->ProcessInput(pKeysBuffer);
 	}
 
 	if (TRUE == input)
 	{
 	}
 
-	if (m_pScene)
+	if (currentScene)
 	{
-		m_pScene->Update(elapsed_time);
+		currentScene->Update(elapsed_time);
 	}
 
 	m_pPlayer->Animate(elapsed_time, NULL);
@@ -528,9 +570,9 @@ void GameFramework::Render()
 {
 	PrepareRendering();
 
-	if (m_pScene)
+	if (currentScene)
 	{
-		m_pScene->Render(m_pCamera);
+		currentScene->Render(m_pCamera);
 	}
 
 #ifdef _WITH_PLAYER_TOP
@@ -589,16 +631,81 @@ void GameFramework::WaitForGpuComplete()
 	}
 }
 
-shared_ptr<CScene> GameFramework::RegisterStage(CScene&& stage)
+template<typename SceneType>
+	requires(std::is_base_of_v<CScene, SceneType>)
+constexpr shared_ptr<CScene> GameFramework::RegisterStage(SceneType&& stage)
 {
-	auto ptr = shared_ptr<CScene>(&stage);
+	auto handle = shared_ptr<SceneType>(std::forward<SceneType*>(new SceneType(stage)));
+	auto ptr = std::static_pointer_cast<CScene>(handle);
+
 	myScenes.try_emplace(ptr->myName, ptr);
+
 	return ptr;
 }
 
 void GameFramework::AddStage(const shared_ptr<CScene>& stage)
 {
 	myStages.push_back(stage);
+}
+
+bool GameFramework::JumpToStage(const size_t index)
+{
+	if (0 <= index && index < myStages.size())
+	{
+		myStageIterator = myStages.begin() + index;
+
+		const auto& target = GetStage(index);
+		if (currentScene)
+		{
+			currentScene->Reset();
+		}
+
+		currentScene = target;
+		currentScene->Start();
+
+		return true;
+	}
+
+	return false;
+}
+
+bool GameFramework::JumpToStage(const std::vector<shared_ptr<CScene>>::iterator it)
+{
+	myStageIterator = it;
+
+	if (currentScene)
+	{
+		currentScene->Reset();
+	}
+	currentScene = *myStageIterator;
+	currentScene->Start();
+
+	return nullptr != currentScene;
+}
+
+bool GameFramework::JumpToNextStage()
+{
+	if (myStages.end() != myStageIterator)
+	{
+		return JumpToStage(myStageIterator + 1);
+	}
+
+	return false;
+}
+
+shared_ptr<CScene> GameFramework::GetStage(const size_t index) const
+{
+	return myStages.at(index);
+}
+
+shared_ptr<CScene> GameFramework::GetNextStage() const
+{
+	return *(myStageIterator + 1);
+}
+
+shared_ptr<CScene> GameFramework::GetCurrentScene() const
+{
+	return currentScene;
 }
 
 void GameFramework::ToggleFullscreen()
@@ -665,9 +772,9 @@ void GameFramework::ToggleFullscreen()
 
 void GameFramework::OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 {
-	if (m_pScene)
+	if (currentScene)
 	{
-		m_pScene->OnMouseEvent(hwnd, msg, btn, info);
+		currentScene->OnMouseEvent(hwnd, msg, btn, info);
 	}
 
 	switch (msg)
@@ -705,9 +812,9 @@ void GameFramework::OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 
 void GameFramework::OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
 {
-	if (m_pScene)
+	if (currentScene)
 	{
-		m_pScene->OnKeyboardEvent(hwnd, msg, key, state);
+		currentScene->OnKeyboardEvent(hwnd, msg, key, state);
 	}
 
 	switch (msg)

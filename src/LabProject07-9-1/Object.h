@@ -9,7 +9,6 @@ public:
 	GameObject();
 	virtual ~GameObject();
 
-public:
 	void SetMesh(CMesh* pMesh);
 	void SetShader(Pipeline* pShader);
 	void SetShader(int nMaterial, Pipeline* pShader);
@@ -76,7 +75,7 @@ public:
 	static CMeshLoadInfo* LoadRawMesh(FILE* pInFile);
 
 	static GameObject* LoadFrameHierarchyFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* signature, FILE* pInFile);
-	static GameObject* LoadGeometryFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* signature, char* pstrFileName);
+	static GameObject* LoadGeometryFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* signature, const char* pstrFileName);
 
 	static void PrintFrameInfo(GameObject* pGameObject, GameObject* pParent);
 };

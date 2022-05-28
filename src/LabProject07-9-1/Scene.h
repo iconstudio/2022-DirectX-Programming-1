@@ -31,9 +31,10 @@ public:
 	void Render(GameCamera* pCamera = nullptr);
 
 	// 이름 얻기
-	virtual const char* GetName() const noexcept { return "Scene"; };
+	virtual const std::string& GetName() const noexcept;
 	// 파이프라인의 쉐이더 서명 얻기
-	ID3D12RootSignature* GetGraphicsRootSignature() { return(d3dShaderParameters); }
+	ID3D12RootSignature* GetGraphicsRootSignature();
+	ID3D12RootSignature const* GetGraphicsRootSignature() const;
 
 	//
 	virtual void ReleaseShaderVariables();

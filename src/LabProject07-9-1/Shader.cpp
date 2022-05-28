@@ -34,7 +34,7 @@ ShaderBlob Pipeline::CreatePixelShader()
 	return(d3dShaderByteCode);
 }
 
-ShaderBlob Pipeline::CompileShaderFromFile(WCHAR *pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob **ppd3dShaderBlob)
+ShaderBlob Pipeline::CompileShaderFromFile(const WCHAR *pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob **ppd3dShaderBlob)
 {
 	UINT nCompileFlags = 0;
 #if defined(_DEBUG)
@@ -63,7 +63,7 @@ ShaderBlob Pipeline::CompileShaderFromFile(WCHAR *pszFileName, LPCSTR pszShaderN
 #include <sstream>
 #endif
 
-ShaderBlob Pipeline::ReadCompiledShaderFromFile(WCHAR *pszFileName, ID3DBlob **ppd3dShaderBlob)
+ShaderBlob Pipeline::ReadCompiledShaderFromFile(const WCHAR *pszFileName, ID3DBlob **ppd3dShaderBlob)
 {
 	UINT nReadBytes = 0;
 #ifdef _WITH_WFOPEN

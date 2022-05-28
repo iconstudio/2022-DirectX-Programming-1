@@ -1,5 +1,4 @@
 #pragma once
-#include "Player.h"
 #include "Scene.h"
 
 class GameFramework
@@ -24,6 +23,7 @@ public:
 	void BuildPlayer();
 	void BuildTerrains();
 	void BuildObjects();
+	void CleanupBuilds();
 
 	// 갱신
 	void Update(float elapsed_time);
@@ -37,9 +37,18 @@ public:
 	void WaitForGpuComplete();
 
 	// 스테이지 등록
-	shared_ptr<CScene> RegisterStage(CScene&& stage);
-	// 스테이지 순서에 추가
+	template<typename SceneType>
+		requires(std::is_base_of_v<CScene, SceneType>)
+	constexpr shared_ptr<CScene> RegisterStage(SceneType&& stage);
 	void AddStage(const shared_ptr<CScene>& stage);
+
+	bool JumpToStage(const size_t index);
+	bool JumpToStage(const std::vector<shared_ptr<CScene>>::iterator it);
+	bool JumpToNextStage();
+
+	shared_ptr<CScene> GetStage(const size_t index) const;
+	shared_ptr<CScene> GetNextStage() const;
+	shared_ptr<CScene> GetCurrentScene() const;
 
 	// 전체화면 전환
 	void ToggleFullscreen();
@@ -112,8 +121,9 @@ private:
 
 	std::unordered_map<std::string, shared_ptr<CScene>> myScenes;
 	std::vector<shared_ptr<CScene>> myStages;
+	std::vector<shared_ptr<CScene>>::iterator myStageIterator;
+	shared_ptr<CScene> currentScene;
 
-	CScene* m_pScene = NULL;
-	CPlayer* m_pPlayer = NULL;
-	GameCamera* m_pCamera = NULL;
+	CPlayer* m_pPlayer;
+	GameCamera* m_pCamera;
 };

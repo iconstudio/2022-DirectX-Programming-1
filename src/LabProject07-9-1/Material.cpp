@@ -2,6 +2,13 @@
 #include "Material.hpp"
 #include "Shader.h"
 
+RawMaterial::RawMaterial(const UINT type)
+	: myType(type)
+{}
+
+RawMaterial::~RawMaterial()
+{}
+
 CMaterialColors::CMaterialColors(RawMaterial* pMaterialInfo)
 {
 	m_xmf4Diffuse = pMaterialInfo->m_xmf4AlbedoColor;
@@ -9,8 +16,6 @@ CMaterialColors::CMaterialColors(RawMaterial* pMaterialInfo)
 	m_xmf4Specular.w = (pMaterialInfo->m_fGlossiness * 255.0f);
 	m_xmf4Emissive = pMaterialInfo->m_xmf4EmissiveColor;
 }
-
-Pipeline* CMaterial::m_pIlluminatedShader = NULL;
 
 CMaterial::CMaterial()
 {}
@@ -49,10 +54,3 @@ void CMaterial::PrepareShaders(ID3D12Device* device, ID3D12GraphicsCommandList* 
 	m_pIlluminatedShader->CreateShader(device, cmd_list, signature);
 	m_pIlluminatedShader->CreateShaderVariables(device, cmd_list);
 }
-
-RawMaterial::RawMaterial(const UINT type)
-	: myType(type)
-{}
-
-RawMaterial::~RawMaterial()
-{}

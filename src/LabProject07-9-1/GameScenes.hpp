@@ -1,27 +1,32 @@
 #pragma once
 #include "Scene.h"
 
-class SceneIntro : public CScene
+class StageIntro : public CScene
 {
 public:
+	StageIntro(GameFramework& framework);
 };
 
-class SceneMain : public CScene
+class StageMain : public CScene
 {
 public:
+	StageMain(GameFramework& framework);
 };
 
-class SceneGame : public CScene
+class StageGame : public CScene
 {
 public:
+	StageGame(GameFramework& framework);
 };
 
-class SceneGameEnd : public CScene
+class StageGameEnd : public CScene
 {
 public:
+	StageGameEnd(GameFramework& framework);
 };
 
-class SceneCredit : public CScene
+class StageCredit : public CScene
 {
 public:
+	StageCredit(GameFramework& framework);
 };

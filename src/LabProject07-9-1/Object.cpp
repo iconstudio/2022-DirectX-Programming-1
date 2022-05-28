@@ -468,7 +468,7 @@ GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* device, ID3D12G
 				}
 
 				root->m_nMaterials = pMaterialsInfo->m_nMaterials;
-				root->m_ppMaterials = new CMaterial*[pMaterialsInfo->m_nMaterials];
+				root->m_ppMaterials = new CMaterial * [pMaterialsInfo->m_nMaterials];
 
 				for (int i = 0; i < pMaterialsInfo->m_nMaterials; i++)
 				{
@@ -521,7 +521,7 @@ void GameObject::PrintFrameInfo(GameObject* root, GameObject* pParent)
 	if (root->myChild) GameObject::PrintFrameInfo(root->myChild, root);
 }
 
-GameObject* GameObject::LoadGeometryFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* signature, char* pstrFileName)
+GameObject* GameObject::LoadGeometryFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* signature, const char* pstrFileName)
 {
 	FILE* pInFile = NULL;
 	::fopen_s(&pInFile, pstrFileName, "rb");
