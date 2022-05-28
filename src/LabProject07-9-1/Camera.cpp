@@ -22,7 +22,7 @@ GameCamera::GameCamera()
 	m_pPlayer = NULL;
 }
 
-GameCamera::GameCamera(GameCamera *pCamera)
+GameCamera::GameCamera(GameCamera* pCamera)
 {
 	if (pCamera)
 	{
@@ -50,8 +50,7 @@ GameCamera::GameCamera(GameCamera *pCamera)
 }
 
 GameCamera::~GameCamera()
-{ 
-}
+{}
 
 void GameCamera::SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight, float fMinZ, float fMaxZ)
 {
@@ -106,15 +105,15 @@ void GameCamera::RegenerateViewMatrix()
 	m_xmf4x4View._43 = -Vector3::DotProduct(m_xmf3Position, m_xmf3Look);
 }
 
-void GameCamera::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
+void GameCamera::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	UINT ncbElementBytes = ((sizeof(VS_CB_CAMERA_INFO) + 255) & ~255); //256�� ���
 	m_pd3dcbCamera = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
-	m_pd3dcbCamera->Map(0, NULL, (void **)&m_pcbMappedCamera);
+	m_pd3dcbCamera->Map(0, NULL, (void**)&m_pcbMappedCamera);
 }
 
-void GameCamera::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
+void GameCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	XMFLOAT4X4 xmf4x4View;
 	XMStoreFloat4x4(&xmf4x4View, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4View)));
@@ -139,7 +138,7 @@ void GameCamera::ReleaseShaderVariables()
 	}
 }
 
-void GameCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList *pd3dCommandList)
+void GameCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pd3dCommandList->RSSetViewports(1, &m_d3dViewport);
 	pd3dCommandList->RSSetScissorRects(1, &m_d3dScissorRect);
@@ -148,7 +147,7 @@ void GameCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList *pd3dComm
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CSpaceShipCamera
 
-CSpaceShipCamera::CSpaceShipCamera(GameCamera *pCamera) : GameCamera(pCamera)
+CSpaceShipCamera::CSpaceShipCamera(GameCamera* pCamera) : GameCamera(pCamera)
 {
 	m_nMode = SPACESHIP_CAMERA;
 }
@@ -193,7 +192,7 @@ void CSpaceShipCamera::Rotate(float x, float y, float z)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CFirstPersonCamera
 
-CFirstPersonCamera::CFirstPersonCamera(GameCamera *pCamera) : GameCamera(pCamera)
+CFirstPersonCamera::CFirstPersonCamera(GameCamera* pCamera) : GameCamera(pCamera)
 {
 	m_nMode = FIRST_PERSON_CAMERA;
 	if (pCamera)
@@ -242,7 +241,7 @@ void CFirstPersonCamera::Rotate(float x, float y, float z)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CThirdPersonCamera
 
-CThirdPersonCamera::CThirdPersonCamera(GameCamera *pCamera) : GameCamera(pCamera)
+CThirdPersonCamera::CThirdPersonCamera(GameCamera* pCamera) : GameCamera(pCamera)
 {
 	m_nMode = THIRD_PERSON_CAMERA;
 	if (pCamera)

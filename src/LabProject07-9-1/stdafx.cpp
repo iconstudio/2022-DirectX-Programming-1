@@ -6,83 +6,148 @@
 
 UINT gnCbvSrvDescriptorIncrementSize = 32;
 
-ID3D12Resource *CreateBufferResource(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, void *pData, UINT nBytes, D3D12_HEAP_TYPE d3dHeapType, D3D12_RESOURCE_STATES d3dResourceStates, ID3D12Resource **ppd3dUploadBuffer)
+ID3D12Resource* CreateBufferResource(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, void* data, UINT data_sz, D3D12_HEAP_TYPE type, D3D12_RESOURCE_STATES states, ID3D12Resource** upload_buffer)
 {
-	ID3D12Resource *pd3dBuffer = NULL;
+	ID3D12Resource* result = nullptr;
 
-	D3D12_HEAP_PROPERTIES d3dHeapPropertiesDesc;
-	::ZeroMemory(&d3dHeapPropertiesDesc, sizeof(D3D12_HEAP_PROPERTIES));
-	d3dHeapPropertiesDesc.Type = d3dHeapType;
-	d3dHeapPropertiesDesc.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-	d3dHeapPropertiesDesc.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-	d3dHeapPropertiesDesc.CreationNodeMask = 1;
-	d3dHeapPropertiesDesc.VisibleNodeMask = 1;
+	// 모든 것을 다렉에서 알아서 해주는 힙
+	D3D12_HEAP_PROPERTIES heap_property{};
+	ZeroMemory(&heap_property, sizeof(heap_property));
 
-	D3D12_RESOURCE_DESC d3dResourceDesc;
-	::ZeroMemory(&d3dResourceDesc, sizeof(D3D12_RESOURCE_DESC));
-	d3dResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	d3dResourceDesc.Alignment = 0;
-	d3dResourceDesc.Width = nBytes;
-	d3dResourceDesc.Height = 1;
-	d3dResourceDesc.DepthOrArraySize = 1;
-	d3dResourceDesc.MipLevels = 1;
-	d3dResourceDesc.Format = DXGI_FORMAT_UNKNOWN;
-	d3dResourceDesc.SampleDesc.Count = 1;
-	d3dResourceDesc.SampleDesc.Quality = 0;
-	d3dResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	d3dResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+	heap_property.Type = type;
+	heap_property.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+	heap_property.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+	heap_property.CreationNodeMask = 1;
+	heap_property.VisibleNodeMask = 1;
 
-	D3D12_RESOURCE_STATES d3dResourceInitialStates = D3D12_RESOURCE_STATE_COPY_DEST;
-	if (d3dHeapType == D3D12_HEAP_TYPE_UPLOAD) d3dResourceInitialStates = D3D12_RESOURCE_STATE_GENERIC_READ;
-	else if (d3dHeapType == D3D12_HEAP_TYPE_READBACK) d3dResourceInitialStates = D3D12_RESOURCE_STATE_COPY_DEST;
+	D3D12_RESOURCE_DESC res_desc{};
+	ZeroMemory(&res_desc, sizeof(res_desc));
 
-	HRESULT hResult = pd3dDevice->CreateCommittedResource(&d3dHeapPropertiesDesc, D3D12_HEAP_FLAG_NONE, &d3dResourceDesc, d3dResourceInitialStates, NULL, __uuidof(ID3D12Resource), (void **)&pd3dBuffer);
+	res_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+	res_desc.Alignment = 0;
+	res_desc.Width = data_sz;
+	res_desc.Height = 1;
+	res_desc.DepthOrArraySize = 1;
+	res_desc.MipLevels = 1;
+	res_desc.Format = DXGI_FORMAT_UNKNOWN;
+	res_desc.SampleDesc.Count = 1;
+	res_desc.SampleDesc.Quality = 0;
+	res_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+	res_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-	if (pData)
+	auto init_state = D3D12_RESOURCE_STATE_COPY_DEST;
+	if (type == D3D12_HEAP_TYPE_UPLOAD)
 	{
-		switch (d3dHeapType)
+		init_state = D3D12_RESOURCE_STATE_GENERIC_READ;
+	}
+	else if (type == D3D12_HEAP_TYPE_READBACK)
+	{
+		init_state = D3D12_RESOURCE_STATE_COPY_DEST;
+	}
+
+	auto uuid = __uuidof(ID3D12Resource);
+	auto place = reinterpret_cast<void**>(&result);
+
+	auto valid = device->CreateCommittedResource(&heap_property, D3D12_HEAP_FLAG_NONE, &res_desc, init_state, NULL, uuid, place);
+	if (FAILED(valid))
+	{
+		throw "자원 생성 실패!";
+	}
+
+	if (data)
+	{
+		switch (type)
 		{
-		case D3D12_HEAP_TYPE_DEFAULT:
-		{
-			if (ppd3dUploadBuffer)
+			case D3D12_HEAP_TYPE_DEFAULT:
 			{
-				d3dHeapPropertiesDesc.Type = D3D12_HEAP_TYPE_UPLOAD;
-				pd3dDevice->CreateCommittedResource(&d3dHeapPropertiesDesc, D3D12_HEAP_FLAG_NONE, &d3dResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, __uuidof(ID3D12Resource), (void **)ppd3dUploadBuffer);
+				if (upload_buffer)
+				{
+					heap_property.Type = D3D12_HEAP_TYPE_UPLOAD;
 
-				D3D12_RANGE d3dReadRange = { 0, 0 };
-				UINT8 *pBufferDataBegin = NULL;
-				(*ppd3dUploadBuffer)->Map(0, &d3dReadRange, (void **)&pBufferDataBegin);
-				memcpy(pBufferDataBegin, pData, nBytes);
-				(*ppd3dUploadBuffer)->Unmap(0, NULL);
+					D3D12_CLEAR_VALUE clear_value{};
+					ZeroMemory(&clear_value, sizeof(clear_value));
 
-				pd3dCommandList->CopyResource(pd3dBuffer, *ppd3dUploadBuffer);
+					clear_value.Format = DXGI_FORMAT_UNKNOWN;
 
-				D3D12_RESOURCE_BARRIER d3dResourceBarrier;
-				::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
-				d3dResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-				d3dResourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				d3dResourceBarrier.Transition.pResource = pd3dBuffer;
-				d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-				d3dResourceBarrier.Transition.StateAfter = d3dResourceStates;
-				d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-				pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
+					uuid = __uuidof(ID3D12Resource);
+					place = reinterpret_cast<void**>(upload_buffer);
+					const auto op = D3D12_RESOURCE_STATE_GENERIC_READ;
+					valid = device->CreateCommittedResource(&heap_property
+						, D3D12_HEAP_FLAG_NONE
+						, &res_desc, op
+						, NULL
+						, uuid, place);
+
+					if (FAILED(valid))
+					{
+						throw "GPU에서 읽은 내용으로 메모리 할당 실패!";
+					}
+
+					// 알아서 읽는다.
+					D3D12_RANGE d3dReadRange = { 0, 0 };
+					UINT8* pBufferDataBegin = nullptr;
+
+					auto& mapped_buffer = *upload_buffer;
+					if (!mapped_buffer)
+					{
+						throw "자원 버퍼가 만들어지지 않음!";
+					}
+
+					place = reinterpret_cast<void**>(&pBufferDataBegin);
+					valid = mapped_buffer->Map(0, &d3dReadRange, place);
+					if (FAILED(valid))
+					{
+						throw "읽을 자원의 정보를 얻어오지 못함!";
+					}
+
+					memcpy(pBufferDataBegin, data, data_sz);
+					mapped_buffer->Unmap(0, NULL);
+
+					// 읽어온 자원을 CPU 메모리로 복사
+					cmd_list->CopyResource(result, *upload_buffer);
+
+					// 복사가 끝날 때 까지 접근 금지
+					D3D12_RESOURCE_BARRIER barrier;
+					ZeroMemory(&barrier, sizeof(barrier));
+
+					barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+					barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+					barrier.Transition.pResource = result;
+					barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+					barrier.Transition.StateAfter = states;
+					barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+
+					cmd_list->ResourceBarrier(1, &barrier);
+				}
 			}
 			break;
-		}
-		case D3D12_HEAP_TYPE_UPLOAD:
-		{
-			D3D12_RANGE d3dReadRange = { 0, 0 };
-			UINT8 *pBufferDataBegin = NULL;
-			pd3dBuffer->Map(0, &d3dReadRange, (void **)&pBufferDataBegin);
-			memcpy(pBufferDataBegin, pData, nBytes);
-			pd3dBuffer->Unmap(0, NULL);
+
+			// CPU에서 GPU로 업로드
+			case D3D12_HEAP_TYPE_UPLOAD:
+			{
+				D3D12_RANGE d3dReadRange = { 0, 0 };
+				UINT8* pBufferDataBegin = NULL;
+
+				place = reinterpret_cast<void**>(&pBufferDataBegin);
+				valid = result->Map(0, &d3dReadRange, place);
+				if (FAILED(valid))
+				{
+					throw "읽을 자원의 정보를 얻어오지 못함!";
+				}
+
+				memcpy(pBufferDataBegin, data, data_sz);
+				result->Unmap(0, NULL);
+			}
 			break;
-		}
-		case D3D12_HEAP_TYPE_READBACK:
+
+			// 읽기
+			case D3D12_HEAP_TYPE_READBACK:
+			{}
 			break;
 		}
 	}
-	return(pd3dBuffer);
+
+	return result;
 }
 
 DESC_HANDLE operator+(const DESC_HANDLE& handle, const size_t increment)
