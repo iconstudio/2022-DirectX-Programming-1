@@ -3,15 +3,10 @@
 #include "Material.hpp"
 #include "Shader.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
 GameObject::GameObject()
 {
-	m_xmf4x4Transform = Matrix4x4::Identity();
-	m_xmf4x4World = Matrix4x4::Identity();
+	localTransform = Matrix4x4::Identity();
+	worldTransform = Matrix4x4::Identity();
 }
 
 GameObject::~GameObject()
@@ -27,6 +22,7 @@ GameObject::~GameObject()
 	}
 	if (m_ppMaterials) delete[] m_ppMaterials;
 }
+
 void GameObject::SetChild(GameObject* pChild, bool bReferenceUpdate)
 {
 	if (pChild)
@@ -81,7 +77,7 @@ void GameObject::SetMaterial(int nMaterial, CMaterial* pMaterial)
 void GameObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
 	if (mySibling) mySibling->Animate(fTimeElapsed, pxmf4x4Parent);
-	if (myChild) myChild->Animate(fTimeElapsed, &m_xmf4x4World);
+	if (myChild) myChild->Animate(fTimeElapsed, &worldTransform);
 }
 
 GameObject* GameObject::FindFrame(const char* pstrFrameName)
@@ -112,7 +108,7 @@ void GameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, GameCamera* 
 {
 	OnPrepareRender();
 
-	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+	UpdateShaderVariable(pd3dCommandList, &worldTransform);
 
 	if (m_nMaterials > 0)
 	{
@@ -165,17 +161,17 @@ void GameObject::ReleaseUploadBuffers()
 
 void GameObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
-	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4Transform, *pxmf4x4Parent) : m_xmf4x4Transform;
+	worldTransform = (pxmf4x4Parent) ? Matrix4x4::Multiply(localTransform, *pxmf4x4Parent) : localTransform;
 
 	if (mySibling) mySibling->UpdateTransform(pxmf4x4Parent);
-	if (myChild) myChild->UpdateTransform(&m_xmf4x4World);
+	if (myChild) myChild->UpdateTransform(&worldTransform);
 }
 
 void GameObject::SetPosition(float x, float y, float z)
 {
-	m_xmf4x4Transform._41 = x;
-	m_xmf4x4Transform._42 = y;
-	m_xmf4x4Transform._43 = z;
+	localTransform._41 = x;
+	localTransform._42 = y;
+	localTransform._43 = z;
 
 	UpdateTransform(NULL);
 }
@@ -188,29 +184,29 @@ void GameObject::SetPosition(XMFLOAT3 xmf3Position)
 void GameObject::SetScale(float x, float y, float z)
 {
 	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
-	m_xmf4x4Transform = Matrix4x4::Multiply(mtxScale, m_xmf4x4Transform);
+	localTransform = Matrix4x4::Multiply(mtxScale, localTransform);
 
 	UpdateTransform(NULL);
 }
 
 XMFLOAT3 GameObject::GetPosition()
 {
-	return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43));
+	return(XMFLOAT3(worldTransform._41, worldTransform._42, worldTransform._43));
 }
 
 XMFLOAT3 GameObject::GetLook()
 {
-	return(Vector3::Normalize(XMFLOAT3(m_xmf4x4World._31, m_xmf4x4World._32, m_xmf4x4World._33)));
+	return(Vector3::Normalize(XMFLOAT3(worldTransform._31, worldTransform._32, worldTransform._33)));
 }
 
 XMFLOAT3 GameObject::GetUp()
 {
-	return(Vector3::Normalize(XMFLOAT3(m_xmf4x4World._21, m_xmf4x4World._22, m_xmf4x4World._23)));
+	return(Vector3::Normalize(XMFLOAT3(worldTransform._21, worldTransform._22, worldTransform._23)));
 }
 
 XMFLOAT3 GameObject::GetRight()
 {
-	return(Vector3::Normalize(XMFLOAT3(m_xmf4x4World._11, m_xmf4x4World._12, m_xmf4x4World._13)));
+	return(Vector3::Normalize(XMFLOAT3(worldTransform._11, worldTransform._12, worldTransform._13)));
 }
 
 void GameObject::MoveStrafe(float fDistance)
@@ -240,7 +236,7 @@ void GameObject::MoveForward(float fDistance)
 void GameObject::Rotate(float fPitch, float fYaw, float fRoll)
 {
 	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(fPitch), XMConvertToRadians(fYaw), XMConvertToRadians(fRoll));
-	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
+	localTransform = Matrix4x4::Multiply(mtxRotate, localTransform);
 
 	UpdateTransform(NULL);
 }
@@ -248,7 +244,7 @@ void GameObject::Rotate(float fPitch, float fYaw, float fRoll)
 void GameObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
 {
 	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(pxmf3Axis), XMConvertToRadians(fAngle));
-	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
+	localTransform = Matrix4x4::Multiply(mtxRotate, localTransform);
 
 	UpdateTransform(NULL);
 }
@@ -256,7 +252,7 @@ void GameObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
 void GameObject::Rotate(XMFLOAT4* pxmf4Quaternion)
 {
 	XMMATRIX mtxRotate = XMMatrixRotationQuaternion(XMLoadFloat4(pxmf4Quaternion));
-	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
+	localTransform = Matrix4x4::Multiply(mtxRotate, localTransform);
 
 	UpdateTransform(NULL);
 }
@@ -472,7 +468,7 @@ GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3
 		}
 		else if (!strcmp(pstrToken, "<TransformMatrix>:"))
 		{
-			nReads = (UINT)::fread(&pGameObject->m_xmf4x4Transform, sizeof(float), 16, pInFile);
+			nReads = (UINT)::fread(&pGameObject->localTransform, sizeof(float), 16, pInFile);
 		}
 		else if (!strcmp(pstrToken, "<Mesh>:"))
 		{
@@ -618,7 +614,7 @@ CRevolvingObject::~CRevolvingObject()
 void CRevolvingObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
 	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3RevolutionAxis), XMConvertToRadians(m_fRevolutionSpeed * fTimeElapsed));
-	m_xmf4x4Transform = Matrix4x4::Multiply(m_xmf4x4Transform, mtxRotate);
+	localTransform = Matrix4x4::Multiply(localTransform, mtxRotate);
 
 	GameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
@@ -639,12 +635,12 @@ void CHellicopterObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	if (m_pMainRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
-		m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
+		m_pMainRotorFrame->localTransform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->localTransform);
 	}
 	if (m_pTailRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
-		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
+		m_pTailRotorFrame->localTransform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->localTransform);
 	}
 
 	GameObject::Animate(fTimeElapsed, pxmf4x4Parent);
@@ -669,12 +665,12 @@ void CApacheObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	if (m_pMainRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
-		m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
+		m_pMainRotorFrame->localTransform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->localTransform);
 	}
 	if (m_pTailRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
-		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
+		m_pTailRotorFrame->localTransform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->localTransform);
 	}
 
 	GameObject::Animate(fTimeElapsed, pxmf4x4Parent);

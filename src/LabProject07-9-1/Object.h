@@ -64,8 +64,8 @@ public:
 	int m_nMaterials = 0;
 	CMaterial** m_ppMaterials = NULL;
 
-	XMFLOAT4X4 m_xmf4x4Transform;
-	XMFLOAT4X4 m_xmf4x4World;
+	XMFLOAT4X4 localTransform;
+	XMFLOAT4X4 worldTransform;
 
 	GameObject* m_pParent = NULL;
 	GameObject* myChild = NULL;

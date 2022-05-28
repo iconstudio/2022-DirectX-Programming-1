@@ -211,10 +211,10 @@ GameCamera *CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMo
 
 void CPlayer::OnPrepareRender()
 {
-	m_xmf4x4Transform._11 = m_xmf3Right.x; m_xmf4x4Transform._12 = m_xmf3Right.y; m_xmf4x4Transform._13 = m_xmf3Right.z;
-	m_xmf4x4Transform._21 = m_xmf3Up.x; m_xmf4x4Transform._22 = m_xmf3Up.y; m_xmf4x4Transform._23 = m_xmf3Up.z;
-	m_xmf4x4Transform._31 = m_xmf3Look.x; m_xmf4x4Transform._32 = m_xmf3Look.y; m_xmf4x4Transform._33 = m_xmf3Look.z;
-	m_xmf4x4Transform._41 = m_xmf3Position.x; m_xmf4x4Transform._42 = m_xmf3Position.y; m_xmf4x4Transform._43 = m_xmf3Position.z;
+	localTransform._11 = m_xmf3Right.x; localTransform._12 = m_xmf3Right.y; localTransform._13 = m_xmf3Right.z;
+	localTransform._21 = m_xmf3Up.x; localTransform._22 = m_xmf3Up.y; localTransform._23 = m_xmf3Up.z;
+	localTransform._31 = m_xmf3Look.x; localTransform._32 = m_xmf3Look.y; localTransform._33 = m_xmf3Look.z;
+	localTransform._41 = m_xmf3Position.x; localTransform._42 = m_xmf3Position.y; localTransform._43 = m_xmf3Position.z;
 
 	UpdateTransform(NULL);
 }
@@ -234,7 +234,7 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, GameCamera *pCa
 
 CAirplanePlayer::CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
 {
-	m_pCamera = ChangeCamera(/*SPACESHIP_CAMERA*/THIRD_PERSON_CAMERA, 10.0f);
+	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 10.0f);
 
 //	GameObject *pGameObject = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Apache.bin");
 	GameObject *pGameObject = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Gunship.bin");
@@ -266,12 +266,12 @@ void CAirplanePlayer::Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent)
 	if (m_pMainRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
-		m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
+		m_pMainRotorFrame->localTransform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->localTransform);
 	}
 	if (m_pTailRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
-		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
+		m_pTailRotorFrame->localTransform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->localTransform);
 	}
 
 	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
