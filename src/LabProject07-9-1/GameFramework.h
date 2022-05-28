@@ -46,6 +46,7 @@ public:
 	bool JumpToStage(const std::vector<shared_ptr<CScene>>::iterator it);
 	bool JumpToNextStage();
 
+	shared_ptr<CScene> GetScene(const char* name) const;
 	shared_ptr<CScene> GetStage(const size_t index) const;
 	shared_ptr<CScene> GetNextStage() const;
 	shared_ptr<CScene> GetCurrentScene() const;

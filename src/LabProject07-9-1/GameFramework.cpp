@@ -592,20 +592,7 @@ void GameFramework::Render()
 
 	WaitForGpuComplete();
 
-#ifdef _WITH_PRESENT_PARAMETERS
-	DXGI_PRESENT_PARAMETERS dxgiPresentParameters;
-	dxgiPresentParameters.DirtyRectsCount = 0;
-	dxgiPresentParameters.pDirtyRects = NULL;
-	dxgiPresentParameters.pScrollRect = NULL;
-	dxgiPresentParameters.pScrollOffset = NULL;
-	mySwapChain->Present1(1, 0, &dxgiPresentParameters);
-#else
-#ifdef _WITH_SYNCH_SWAPCHAIN
-	mySwapChain->Present(1, 0);
-#else
 	mySwapChain->Present(0, 0);
-#endif
-#endif
 
 	AfterRendering();
 }
@@ -691,6 +678,11 @@ bool GameFramework::JumpToNextStage()
 	}
 
 	return false;
+}
+
+shared_ptr<CScene> GameFramework::GetScene(const char* name) const
+{
+	return myScenes.find(name)->second;
 }
 
 shared_ptr<CScene> GameFramework::GetStage(const size_t index) const

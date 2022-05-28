@@ -51,6 +51,7 @@ using ShaderBlob = D3D12_SHADER_BYTECODE;
 
 class GameCamera;
 class GameObject;
+enum class COLLISION_TAGS;
 
 class Car;
 class Player;

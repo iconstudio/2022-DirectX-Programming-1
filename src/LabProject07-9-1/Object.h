@@ -70,6 +70,8 @@ public:
 	GameObject* myChild = NULL;
 	GameObject* mySibling = NULL;
 
+	unique_ptr<BoundingOrientedBox> myCollider;
+
 public:
 	static RawMaterialsBox* LoadRawMaterials(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, FILE* pInFile);
 	static CMeshLoadInfo* LoadRawMesh(FILE* pInFile);
@@ -169,4 +171,9 @@ public:
 
 public:
 	virtual void OnInitialize();
+};
+
+enum class COLLISION_TAGS
+{
+
 };
