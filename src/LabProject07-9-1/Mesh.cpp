@@ -1,12 +1,9 @@
-//-----------------------------------------------------------------------------
-// File: GameObject.cpp
-//-----------------------------------------------------------------------------
-
 #include "stdafx.h"
 #include "Mesh.h"
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
-//
+CMeshLoadInfo::CMeshLoadInfo()
+{}
+
 CMeshLoadInfo::~CMeshLoadInfo()
 {
 	if (m_pxmf3Positions) delete[] m_pxmf3Positions;
@@ -92,7 +89,7 @@ void CMeshFromFile::ReleaseUploadBuffers()
 
 void CMeshFromFile::Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet)
 {
-	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+	pd3dCommandList->IASetPrimitiveTopology(typePrimitives);
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
 	if ((m_nSubMeshes > 0) && (nSubSet < m_nSubMeshes))
 	{
@@ -131,7 +128,7 @@ void CMeshIlluminatedFromFile::ReleaseUploadBuffers()
 
 void CMeshIlluminatedFromFile::Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet)
 {
-	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+	pd3dCommandList->IASetPrimitiveTopology(typePrimitives);
 	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[2] = { m_d3dPositionBufferView, m_d3dNormalBufferView };
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, 2, pVertexBufferViews);
 	if ((m_nSubMeshes > 0) && (nSubSet < m_nSubMeshes))

@@ -24,6 +24,7 @@ public:
 	void BuildPlayer();
 	void BuildTerrains();
 	void BuildObjects();
+	void CleanupBuilds();
 
 	// 갱신
 	void Update(float elapsed_time);
@@ -36,11 +37,15 @@ public:
 	// 동기화
 	void WaitForGpuComplete();
 
-	// 스테이지 등록
-	shared_ptr<CScene> RegisterStage(CScene&& stage);
+	// 장면 등록
+	template<typename SceneType>
+	shared_ptr<CScene> RegisterScene(SceneType&& scene);
 	// 스테이지 순서에 추가
 	void AddStage(const shared_ptr<CScene>& stage);
-
+	shared_ptr<CScene> GetCurrentScene() const;
+	shared_ptr<CScene> GetLastScene() const;
+	shared_ptr<CScene> PeekScene() const;
+	void PopScene();
 
 	// 전체화면 전환
 	void ToggleFullscreen();
@@ -52,14 +57,11 @@ public:
 private:
 	bool D3DAssert(HRESULT valid, const char* error);
 
-	//
 	void ResetCmdAllocator();
 	void ResetCmdList(ID3D12PipelineState* pipeline = nullptr);
 	void CloseCmdList();
 	void ExecuteCmdList(ID3D12CommandList* list[], UINT count);
 
-	//
-	DESC_HANDLE& AddtoDescriptor(DESC_HANDLE& handle, const size_t increment);
 	DESC_HANDLE GetRTVHandle() const;
 	DESC_HANDLE GetDSVHandle() const;
 	void ClearRenderTargetView(DESC_HANDLE& handle, D3D12_RECT* erase_rects = nullptr, size_t erase_count = 0);
@@ -111,9 +113,8 @@ private:
 	ID3D12Debug* myDebugController;
 #endif
 
-	CScene* m_pScene = NULL;
-	CPlayer* m_pPlayer = NULL;
-	GameCamera* m_pCamera = NULL;
-
-	POINT m_ptOldCursorPos;
+	shared_ptr<CScene> currentScene, lastScene;
+	std::unordered_map<std::string, shared_ptr<CScene>> myScenes;
+	std::vector<shared_ptr<CScene>> myStages;
+	std::vector<shared_ptr<CScene>>::iterator myStageIterator;
 };

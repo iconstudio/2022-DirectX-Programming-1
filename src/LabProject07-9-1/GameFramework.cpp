@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GameFramework.h"
+#include "GameScenes.hpp"
 
 GameFramework::GameFramework(unsigned int width, unsigned int height)
 	: frameWidth(width), frameHeight(height)
@@ -16,10 +17,14 @@ GameFramework::GameFramework(unsigned int width, unsigned int height)
 #ifdef _DEBUG
 	, myDebugController(nullptr)
 #endif //  _DEBUG
-	, m_pScene(nullptr), m_pPlayer(nullptr)
+	, currentScene(nullptr), lastScene(nullptr)
+	, myScenes(), myStages(), myStageIterator()
 {
 	ZeroMemory(resSwapChainBackBuffers, sizeof(resSwapChainBackBuffers));
 	ZeroMemory(myBarriers, sizeof(myBarriers));
+
+	myScenes.reserve(10);
+	myStages.reserve(10);
 
 	auto& barrier_render = myBarriers[0];
 	barrier_render.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -40,6 +45,8 @@ GameFramework::GameFramework(unsigned int width, unsigned int height)
 
 GameFramework::~GameFramework()
 {
+	WaitForGpuComplete();
+
 	CloseHandle(eventFence);
 
 	if (myDepthStencilBuffer) myDepthStencilBuffer->Release();
@@ -437,30 +444,50 @@ void GameFramework::Start()
 	BuildPlayer();
 	BuildTerrains();
 	BuildObjects();
-
 	CloseCmdList();
+
+	// 인덱스 버퍼, 정점 버퍼, 루트 서명, 쉐이더 파이프라인 생성
 	ID3D12CommandList* cmd_lists[] = { myCommandList };
 	ExecuteCmdList(cmd_lists, std::size(cmd_lists));
 
-	WaitForGpuComplete();
-
-	if (m_pScene) m_pScene->ReleaseUploadBuffers();
-	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
+	CleanupBuilds();
 }
 
 void GameFramework::BuildStages()
 {
-	m_pScene = new CScene("Scene");
-
-	if (m_pScene)
-	{
-		m_pScene->Awake(myDevice, myCommandList);
-		m_pScene->BuildObjects();
-	}
+	auto room_intro = RegisterScene(SceneIntro(*this));
+	auto room_main = RegisterScene(SceneMain(*this));
+	auto room_game = RegisterScene(SceneGame(*this));
+	auto room_complete = RegisterScene(SceneGameEnd(*this));
+	auto room_credit = RegisterScene(SceneCredit(*this));
+	
+	AddStage(room_intro);
+	AddStage(room_main);
+	AddStage(room_game);
+	AddStage(room_complete);
+	AddStage(room_credit);
 }
 
 void GameFramework::BuildWorld()
 {
+	for (auto& stage_pair : myScenes)
+	{
+		auto& scene = stage_pair.second;
+		if (scene)
+		{
+			scene->Awake(myDevice, myCommandList);
+		}
+		else
+		{
+			throw "잘못된 장면이 들어가 있음!";
+		}
+	}
+
+	myStageIterator = myStages.begin();
+	if (!currentScene)
+	{
+		currentScene = PeekScene();
+	}
 }
 
 void GameFramework::BuildParticles()
@@ -468,67 +495,38 @@ void GameFramework::BuildParticles()
 
 void GameFramework::BuildPlayer()
 {
-	auto pAirplanePlayer = new CAirplanePlayer(myDevice, myCommandList, m_pScene->GetGraphicsRootSignature());
+	//*
+	auto pAirplanePlayer = new CAirplanePlayer(myDevice, myCommandList, currentScene->GetGraphicsRootSignature());
 	pAirplanePlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
-	m_pScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
-	m_pCamera = m_pPlayer->GetCamera();
+	currentScene->m_pPlayer = pAirplanePlayer;
+	currentScene->m_pCamera = pAirplanePlayer->GetCamera();
+	//currentScene->camera = ptr;
+	//*/
 }
 
 void GameFramework::BuildTerrains()
 {}
 
 void GameFramework::BuildObjects()
+{}
+
+void GameFramework::CleanupBuilds()
 {
+	WaitForGpuComplete();
+
+	for (auto& scene : myScenes)
+	{
+		scene.second->ReleaseUploadBuffers();
+	}
 }
 
 void GameFramework::Update(float elapsed_time)
 {
-	static UCHAR pKeysBuffer[256];
-	bool bProcessedByScene = false;
-	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
-
-	if (!bProcessedByScene)
+	if (currentScene)
 	{
-		DWORD dwDirection = 0;
-		if (pKeysBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
-		if (pKeysBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
-		if (pKeysBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT;
-		if (pKeysBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT;
-		if (pKeysBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
-		if (pKeysBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
-
-		float cxDelta = 0.0f, cyDelta = 0.0f;
-		POINT ptCursorPos;
-		if (GetCapture() == myWindow)
-		{
-			SetCursor(NULL);
-			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
-			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-		}
-
-		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
-		{
-			if (cxDelta || cyDelta)
-			{
-				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-				else
-					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
-			}
-			if (dwDirection) m_pPlayer->Move(dwDirection, 1.5f, true);
-		}
+		currentScene->Update(elapsed_time);
 	}
-
-	if (m_pScene)
-	{
-		m_pScene->Update(elapsed_time);
-	}
-
-	m_pPlayer->Animate(elapsed_time, NULL);
-	m_pPlayer->Update(elapsed_time);
 }
 
 void GameFramework::PrepareRendering()
@@ -539,7 +537,7 @@ void GameFramework::PrepareRendering()
 
 	auto cpu_rtv_handle = GetRTVHandle();
 	auto frame_ptr = static_cast<size_t>(indexFrameBuffer * szRtvDescIncrements);
-	AddtoDescriptor(cpu_rtv_handle, frame_ptr);
+	cpu_rtv_handle += frame_ptr;
 	ClearRenderTargetView(cpu_rtv_handle);
 
 	auto cpu_dsv_handle = GetDSVHandle();
@@ -552,12 +550,10 @@ void GameFramework::Render()
 {
 	PrepareRendering();
 
-	if (m_pScene) m_pScene->Render(m_pCamera);
-
-#ifdef _WITH_PLAYER_TOP
-	myCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-#endif
-	if (m_pPlayer) m_pPlayer->Render(myCommandList, m_pCamera);
+	if (currentScene)
+	{
+		currentScene->Render(currentScene->m_pCamera);
+	}
 
 	SetBarrier(barrierRender);
 
@@ -601,9 +597,41 @@ void GameFramework::WaitForGpuComplete()
 	if (myRenderFence->GetCompletedValue() < signal)
 	{
 		SetFenceEvent(eventFence, signal);
-		
+
 		WaitForSingleObject(eventFence, INFINITE);
 	}
+}
+
+template<typename SceneType>
+shared_ptr<CScene> GameFramework::RegisterScene(SceneType&& stage)
+{
+	auto forwarded = new SceneType(std::forward<SceneType>(stage));
+	auto ptr = shared_ptr<CScene>(forwarded);
+	myScenes.try_emplace(ptr->GetName(), ptr);
+
+	return ptr;
+}
+
+void GameFramework::AddStage(const shared_ptr<CScene>& stage)
+{
+	if (lastScene)
+	{
+
+	}
+
+	lastScene = stage;
+
+	myStages.push_back(stage);
+}
+
+shared_ptr<CScene> GameFramework::GetCurrentScene() const
+{
+	return currentScene;
+}
+
+shared_ptr<CScene> GameFramework::GetLastScene() const
+{
+	return lastScene;
 }
 
 void GameFramework::ToggleFullscreen()
@@ -670,9 +698,9 @@ void GameFramework::ToggleFullscreen()
 
 void GameFramework::OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 {
-	if (m_pScene)
+	if (currentScene)
 	{
-		m_pScene->OnMouseEvent(hwnd, msg, btn, info);
+		currentScene->OnMouseEvent(hwnd, msg, btn, info);
 	}
 
 	switch (msg)
@@ -681,7 +709,6 @@ void GameFramework::OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 		case WM_RBUTTONDOWN:
 		{
 			SetCapture(hwnd);
-			GetCursorPos(&m_ptOldCursorPos);
 		}
 		break;
 
@@ -704,9 +731,9 @@ void GameFramework::OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 
 void GameFramework::OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
 {
-	if (m_pScene)
+	if (currentScene)
 	{
-		m_pScene->OnKeyboardEvent(hwnd, msg, key, state);
+		currentScene->OnKeyboardEvent(hwnd, msg, key, state);
 	}
 
 	switch (msg)
@@ -728,7 +755,6 @@ void GameFramework::OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM stat
 				case VK_F2:
 				case VK_F3:
 				{
-					m_pCamera = m_pPlayer->ChangeCamera((DWORD)(key - VK_F1 + 1), 0);
 				}
 
 				break;
@@ -775,6 +801,19 @@ LRESULT CALLBACK GameFramework::OnWindowsEvent(HWND hWnd, UINT nMessageID, WPARA
 	return(0);
 }
 
+shared_ptr<CScene> GameFramework::PeekScene() const
+{
+	return *myStageIterator;
+}
+
+void GameFramework::PopScene()
+{
+	if (myStages.end() != myStageIterator)
+	{
+		myStageIterator++;
+	}
+}
+
 bool GameFramework::D3DAssert(HRESULT valid, const char* error)
 {
 	if (FAILED(valid))
@@ -809,12 +848,6 @@ void GameFramework::CloseCmdList()
 void GameFramework::ExecuteCmdList(ID3D12CommandList* list[], UINT count)
 {
 	myCommandQueue->ExecuteCommandLists(count, list);
-}
-
-DESC_HANDLE& GameFramework::AddtoDescriptor(DESC_HANDLE& handle, const size_t increment)
-{
-	handle.ptr += increment;
-	return handle;
 }
 
 DESC_HANDLE GameFramework::GetRTVHandle() const

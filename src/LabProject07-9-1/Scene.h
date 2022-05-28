@@ -1,21 +1,18 @@
 #pragma once
+#include "TaggedObject.hpp"
 #include "Shader.h"
 #include "Player.h"
 #include "Light.hpp"
 
-class CScene
+class CScene : public TaggedObject
 {
 public:
-	CScene(const char* name);
-	~CScene();
+	CScene(GameFramework& framework, const char* name);
+	virtual ~CScene();
 
 	// 초기화
-	virtual void Awake(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list);
-	virtual void CreateShaderVariables();
-	virtual void UpdateShaderVariables();
-	virtual void ReleaseShaderVariables();
-	virtual void BuildDefaultLightsAndMaterials();
-	virtual void BuildObjects();
+	void Awake(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list);
+	virtual void Build();
 
 	// 시작
 	virtual void Start();
@@ -24,41 +21,40 @@ public:
 
 	// 갱신
 	virtual void Update(float time_elapsed);
-	bool ProcessInput(UCHAR* pKeysBuffer);
+	virtual void UpdateShaderVariables();
 
-	virtual const char* GetName() const noexcept { return 0; };
-
-	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
-	ID3D12RootSignature* GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
-
+	// 렌더링
 	void Render(GameCamera* pCamera = nullptr);
 
-	void ReleaseUploadBuffers();
+	ID3D12RootSignature* GetGraphicsRootSignature();
+	ID3D12RootSignature const* GetGraphicsRootSignature() const;
 
-	bool OnMouseEvent(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
-	bool OnKeyboardEvent(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
+	//
+	virtual void ReleaseUploadBuffers();
+	virtual void ReleaseShaderVariables();
+
+	bool OnMouseEvent(HWND hWnd, UINT msg, WPARAM btn, LPARAM info);
+	bool OnKeyboardEvent(HWND hWnd, UINT msg, WPARAM key, LPARAM state);
+	bool OnWindowsEvent(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
 	CPlayer* m_pPlayer = NULL;
 
-public:
-	const char* myName;
+private:
+	ID3D12RootSignature* CreateGraphicsRootSignature();
+	virtual void CreateShaderVariables();
 
 	ID3D12Device* d3dDevice;
 	ID3D12GraphicsCommandList* d3dTaskList;
+	ID3D12RootSignature* d3dShaderParameters;
 
-	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
-
-	GameObject** m_ppGameObjects = NULL;
-	int							m_nGameObjects = 0;
-
+	std::vector<shared_ptr<GameObject>> myInstances;
 
 	CLight* m_pLights = NULL;
-	int							m_nLights = 0;
+	int m_nLights = 0;
 
-	XMFLOAT4					m_xmf4GlobalAmbient;
-
+	XMFLOAT4 m_xmf4GlobalAmbient;
 	ID3D12Resource* m_pd3dcbLights = NULL;
 	LIGHTS* m_pcbMappedLights = NULL;
 
-	float						m_fElapsedTime = 0.0f;
+	float lastDeltaTime = 0.0f;
 };
