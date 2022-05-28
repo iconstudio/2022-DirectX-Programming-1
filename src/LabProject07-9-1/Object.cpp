@@ -104,11 +104,11 @@ GameObject* GameObject::FindFrame(const char* pstrFrameName)
 	return(NULL);
 }
 
-void GameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, GameCamera* pCamera)
+void GameObject::Render(ID3D12GraphicsCommandList* cmd_list, GameCamera* pCamera)
 {
 	OnPrepareRender();
 
-	UpdateShaderVariable(pd3dCommandList, &worldTransform);
+	UpdateShaderVariable(cmd_list, &worldTransform);
 
 	if (m_nMaterials > 0)
 	{
@@ -118,34 +118,34 @@ void GameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, GameCamera* 
 			{
 				if (m_ppMaterials[i]->m_pShader)
 				{
-					m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+					m_ppMaterials[i]->m_pShader->Render(cmd_list, pCamera);
 				}
 
-				m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+				m_ppMaterials[i]->UpdateShaderVariable(cmd_list);
 			}
 
-			if (m_pMesh) m_pMesh->Render(pd3dCommandList, i);
+			if (m_pMesh) m_pMesh->Render(cmd_list, i);
 		}
 	}
 
-	if (mySibling) mySibling->Render(pd3dCommandList, pCamera);
-	if (myChild) myChild->Render(pd3dCommandList, pCamera);
+	if (mySibling) mySibling->Render(cmd_list, pCamera);
+	if (myChild) myChild->Render(cmd_list, pCamera);
 }
 
-void GameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void GameObject::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list)
 {}
 
-void GameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+void GameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* cmd_list)
 {}
 
-void GameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World)
+void GameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* cmd_list, XMFLOAT4X4* pxmf4x4World)
 {
 	XMFLOAT4X4 xmf4x4World;
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+	cmd_list->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 }
 
-void GameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, CMaterial* pMaterial)
+void GameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* cmd_list, CMaterial* pMaterial)
 {}
 
 void GameObject::ReleaseShaderVariables()
@@ -378,7 +378,7 @@ CMeshLoadInfo* GameObject::LoadMeshInfoFromFile(FILE* pInFile)
 	return(pMeshInfo);
 }
 
-MATERIALSLOADINFO* GameObject::LoadMaterialsInfoFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile)
+MATERIALSLOADINFO* GameObject::LoadMaterialsInfoFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, FILE* pInFile)
 {
 	char pstrToken[64] = { '\0' };
 	UINT nReads = 0;
@@ -438,7 +438,7 @@ MATERIALSLOADINFO* GameObject::LoadMaterialsInfoFromFile(ID3D12Device* pd3dDevic
 	return(pMaterialsInfo);
 }
 
-GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FILE* pInFile)
+GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* pd3dGraphicsRootSignature, FILE* pInFile)
 {
 	char pstrToken[64] = { '\0' };
 	UINT nReads = 0;
@@ -478,7 +478,7 @@ GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3
 				CMesh* pMesh = NULL;
 				if (pMeshInfo->m_nType & VERTEXT_NORMAL)
 				{
-					pMesh = new CMeshIlluminatedFromFile(pd3dDevice, pd3dCommandList, pMeshInfo);
+					pMesh = new CMeshIlluminatedFromFile(device, cmd_list, pMeshInfo);
 				}
 				if (pMesh) pGameObject->SetMesh(pMesh);
 				delete pMeshInfo;
@@ -486,7 +486,7 @@ GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3
 		}
 		else if (!strcmp(pstrToken, "<Materials>:"))
 		{
-			MATERIALSLOADINFO* pMaterialsInfo = pGameObject->LoadMaterialsInfoFromFile(pd3dDevice, pd3dCommandList, pInFile);
+			MATERIALSLOADINFO* pMaterialsInfo = pGameObject->LoadMaterialsInfoFromFile(device, cmd_list, pInFile);
 			if (pMaterialsInfo && (pMaterialsInfo->m_nMaterials > 0))
 			{
 				pGameObject->m_nMaterials = pMaterialsInfo->m_nMaterials;
@@ -514,7 +514,7 @@ GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3
 			{
 				for (int i = 0; i < nChilds; i++)
 				{
-					GameObject* pChild = GameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pInFile);
+					GameObject* pChild = GameObject::LoadFrameHierarchyFromFile(device, cmd_list, pd3dGraphicsRootSignature, pInFile);
 					if (pChild) pGameObject->SetChild(pChild);
 #ifdef _WITH_DEBUG_RUNTIME_FRAME_HIERARCHY
 					TCHAR pstrDebug[256] = { 0 };
@@ -543,7 +543,7 @@ void GameObject::PrintFrameInfo(GameObject* pGameObject, GameObject* pParent)
 	if (pGameObject->myChild) GameObject::PrintFrameInfo(pGameObject->myChild, pGameObject);
 }
 
-GameObject* GameObject::LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName)
+GameObject* GameObject::LoadGeometryFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName)
 {
 	FILE* pInFile = NULL;
 	::fopen_s(&pInFile, pstrFileName, "rb");
@@ -558,7 +558,7 @@ GameObject* GameObject::LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12Gra
 
 		if (!strcmp(pstrToken, "<Hierarchy>:"))
 		{
-			pGameObject = GameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pInFile);
+			pGameObject = GameObject::LoadFrameHierarchyFromFile(device, cmd_list, pd3dGraphicsRootSignature, pInFile);
 		}
 		else if (!strcmp(pstrToken, "</Hierarchy>"))
 		{
@@ -595,9 +595,9 @@ void CRotatingObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	GameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
-void CRotatingObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, GameCamera* pCamera)
+void CRotatingObject::Render(ID3D12GraphicsCommandList* cmd_list, GameCamera* pCamera)
 {
-	GameObject::Render(pd3dCommandList, pCamera);
+	GameObject::Render(cmd_list, pCamera);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

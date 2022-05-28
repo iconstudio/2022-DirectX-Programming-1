@@ -55,7 +55,7 @@ private:
 	void ResetCmdAllocator();
 	void ResetCmdList(ID3D12PipelineState* pipeline = nullptr);
 	void CloseCmdList();
-	void ExecuteCmdList(ID3D12CommandList* list[], UINT count);
+	void ExecuteCmdList(ID3D12CommandList* list[], size_t count);
 
 	//
 	DESC_HANDLE& AddtoDescriptor(DESC_HANDLE& handle, const size_t increment);

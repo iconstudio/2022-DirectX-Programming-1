@@ -72,11 +72,11 @@ public:
 	void SetShader(CShader* pShader);
 	void SetIlluminatedShader() { SetShader(m_pIlluminatedShader); }
 
-	void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList);
+	void UpdateShaderVariable(ID3D12GraphicsCommandList* cmd_list);
 
 protected:
 	static CShader* m_pIlluminatedShader;
 
 public:
-	static void CMaterial::PrepareShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	static void CMaterial::PrepareShaders(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* pd3dGraphicsRootSignature);
 };

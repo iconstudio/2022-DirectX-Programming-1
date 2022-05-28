@@ -17,19 +17,19 @@ public:
 
 	void SetChild(GameObject* pChild, bool bReferenceUpdate = false);
 
-	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
+	virtual void BuildMaterials(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list) {}
 
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	virtual void OnPrepareRender() {}
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, GameCamera* pCamera = NULL);
+	virtual void Render(ID3D12GraphicsCommandList* cmd_list, GameCamera* pCamera = NULL);
 
-	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* cmd_list);
 	virtual void ReleaseShaderVariables();
 
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, CMaterial* pMaterial);
+	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* cmd_list, XMFLOAT4X4* pxmf4x4World);
+	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* cmd_list, CMaterial* pMaterial);
 
 	virtual void ReleaseUploadBuffers();
 
@@ -72,11 +72,11 @@ public:
 	GameObject* mySibling = NULL;
 
 public:
-	static MATERIALSLOADINFO* LoadMaterialsInfoFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
+	static MATERIALSLOADINFO* LoadMaterialsInfoFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, FILE* pInFile);
 	static CMeshLoadInfo* LoadMeshInfoFromFile(FILE* pInFile);
 
-	static GameObject* LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FILE* pInFile);
-	static GameObject* LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName);
+	static GameObject* LoadFrameHierarchyFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* pd3dGraphicsRootSignature, FILE* pInFile);
+	static GameObject* LoadGeometryFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName);
 
 	static void PrintFrameInfo(GameObject* pGameObject, GameObject* pParent);
 };
@@ -96,7 +96,7 @@ public:
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
 
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, GameCamera* pCamera = NULL);
+	virtual void Render(ID3D12GraphicsCommandList* cmd_list, GameCamera* pCamera = NULL);
 };
 
 class CRevolvingObject : public GameObject

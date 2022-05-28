@@ -41,6 +41,8 @@ GameFramework::GameFramework(unsigned int width, unsigned int height)
 
 GameFramework::~GameFramework()
 {
+	WaitForGpuComplete();
+
 	CloseHandle(eventFence);
 
 	if (myDepthStencilBuffer) myDepthStencilBuffer->Release();
@@ -438,8 +440,9 @@ void GameFramework::Start()
 	BuildPlayer();
 	BuildTerrains();
 	BuildObjects();
-
 	CloseCmdList();
+
+	// 3D 객체, 인덱스 버퍼, 업로드 힙, 파이프라인과 쉐이더 생성
 	ID3D12CommandList* cmd_lists[] = { myCommandList };
 	ExecuteCmdList(cmd_lists, std::size(cmd_lists));
 
@@ -484,10 +487,14 @@ void GameFramework::BuildObjects()
 void GameFramework::Update(float elapsed_time)
 {
 	static UCHAR pKeysBuffer[256];
-	bool bProcessedByScene = false;
-	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
+	const auto input = GetKeyboardState(pKeysBuffer);
 
-	if (!bProcessedByScene)
+	if (m_pScene)
+	{
+		m_pScene->ProcessInput(pKeysBuffer);
+	}
+
+	if (TRUE == input)
 	{
 		DWORD dwDirection = 0;
 		if (pKeysBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
@@ -517,7 +524,11 @@ void GameFramework::Update(float elapsed_time)
 				else
 					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 			}
-			if (dwDirection) m_pPlayer->Move(dwDirection, 1.5f, true);
+
+			if (dwDirection)
+			{
+				m_pPlayer->Move(dwDirection, 1.5f, true);
+			}
 		}
 	}
 
@@ -746,7 +757,7 @@ void GameFramework::OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM stat
 				case VK_F2:
 				case VK_F3:
 				{
-					m_pCamera = m_pPlayer->ChangeCamera((DWORD)(key - VK_F1 + 1), 0);
+					m_pCamera = m_pPlayer->ChangeCamera((DWORD)(key - VK_F1 + 1), 1.0f);
 				}
 
 				break;
@@ -824,7 +835,7 @@ void GameFramework::CloseCmdList()
 		, "명령어 리스트의 닫기 실패");
 }
 
-void GameFramework::ExecuteCmdList(ID3D12CommandList* list[], UINT count)
+void GameFramework::ExecuteCmdList(ID3D12CommandList* list[], size_t count)
 {
 	myCommandQueue->ExecuteCommandLists(count, list);
 }
@@ -850,7 +861,7 @@ inline void GameFramework::ClearRenderTargetView(DESC_HANDLE& handle
 {
 	myCommandList->ClearRenderTargetView(handle
 		, frameBasisColour
-		, erase_count, erase_rects);
+		, static_cast<UINT>(erase_count), erase_rects);
 }
 
 void GameFramework::ClearDepthStencilView(DESC_HANDLE& handle
@@ -860,7 +871,7 @@ void GameFramework::ClearDepthStencilView(DESC_HANDLE& handle
 	myCommandList->ClearDepthStencilView(handle
 		, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL
 		, depth, stencil
-		, erase_count, erase_rects);
+		, static_cast<UINT>(erase_count), erase_rects);
 }
 
 void GameFramework::ReadyOutputMerger(DESC_HANDLE& rtv, DESC_HANDLE& dsv)

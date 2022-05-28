@@ -23,12 +23,12 @@ CMeshLoadInfo::~CMeshLoadInfo()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CMeshFromFile::CMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, CMeshLoadInfo *pMeshInfo)
+CMeshFromFile::CMeshFromFile(ID3D12Device *device, ID3D12GraphicsCommandList *cmd_list, CMeshLoadInfo *pMeshInfo)
 {
 	m_nVertices = pMeshInfo->m_nVertices;
 	m_nType = pMeshInfo->m_nType;
 
-	m_pd3dPositionBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pMeshInfo->m_pxmf3Positions, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
+	m_pd3dPositionBuffer = ::CreateBufferResource(device, cmd_list, pMeshInfo->m_pxmf3Positions, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
 
 	m_d3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
 	m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
@@ -46,7 +46,7 @@ CMeshFromFile::CMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 		for (int i = 0; i < m_nSubMeshes; i++)
 		{
 			m_pnSubSetIndices[i] = pMeshInfo->m_pnSubSetIndices[i];
-			m_ppd3dSubSetIndexBuffers[i] = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pMeshInfo->m_ppnSubSetIndices[i], sizeof(UINT) * m_pnSubSetIndices[i], D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_ppd3dSubSetIndexUploadBuffers[i]);
+			m_ppd3dSubSetIndexBuffers[i] = ::CreateBufferResource(device, cmd_list, pMeshInfo->m_ppnSubSetIndices[i], sizeof(UINT) * m_pnSubSetIndices[i], D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_ppd3dSubSetIndexUploadBuffers[i]);
 
 			m_pd3dSubSetIndexBufferViews[i].BufferLocation = m_ppd3dSubSetIndexBuffers[i]->GetGPUVirtualAddress();
 			m_pd3dSubSetIndexBufferViews[i].Format = DXGI_FORMAT_R32_UINT;
@@ -90,26 +90,26 @@ void CMeshFromFile::ReleaseUploadBuffers()
 	}
 }
 
-void CMeshFromFile::Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet)
+void CMeshFromFile::Render(ID3D12GraphicsCommandList *cmd_list, int nSubSet)
 {
-	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
-	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
+	cmd_list->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+	cmd_list->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
 	if ((m_nSubMeshes > 0) && (nSubSet < m_nSubMeshes))
 	{
-		pd3dCommandList->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));
-		pd3dCommandList->DrawIndexedInstanced(m_pnSubSetIndices[nSubSet], 1, 0, 0, 0);
+		cmd_list->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));
+		cmd_list->DrawIndexedInstanced(m_pnSubSetIndices[nSubSet], 1, 0, 0, 0);
 	}
 	else
 	{
-		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
+		cmd_list->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
 	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CMeshIlluminatedFromFile::CMeshIlluminatedFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, CMeshLoadInfo *pMeshInfo) : CMeshFromFile::CMeshFromFile(pd3dDevice, pd3dCommandList, pMeshInfo)
+CMeshIlluminatedFromFile::CMeshIlluminatedFromFile(ID3D12Device *device, ID3D12GraphicsCommandList *cmd_list, CMeshLoadInfo *pMeshInfo) : CMeshFromFile::CMeshFromFile(device, cmd_list, pMeshInfo)
 {
-	m_pd3dNormalBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pMeshInfo->m_pxmf3Normals, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dNormalUploadBuffer);
+	m_pd3dNormalBuffer = ::CreateBufferResource(device, cmd_list, pMeshInfo->m_pxmf3Normals, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dNormalUploadBuffer);
 
 	m_d3dNormalBufferView.BufferLocation = m_pd3dNormalBuffer->GetGPUVirtualAddress();
 	m_d3dNormalBufferView.StrideInBytes = sizeof(XMFLOAT3);
@@ -129,18 +129,18 @@ void CMeshIlluminatedFromFile::ReleaseUploadBuffers()
 	m_pd3dNormalUploadBuffer = NULL;
 }
 
-void CMeshIlluminatedFromFile::Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet)
+void CMeshIlluminatedFromFile::Render(ID3D12GraphicsCommandList *cmd_list, int nSubSet)
 {
-	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+	cmd_list->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[2] = { m_d3dPositionBufferView, m_d3dNormalBufferView };
-	pd3dCommandList->IASetVertexBuffers(m_nSlot, 2, pVertexBufferViews);
+	cmd_list->IASetVertexBuffers(m_nSlot, 2, pVertexBufferViews);
 	if ((m_nSubMeshes > 0) && (nSubSet < m_nSubMeshes))
 	{
-		pd3dCommandList->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));
-		pd3dCommandList->DrawIndexedInstanced(m_pnSubSetIndices[nSubSet], 1, 0, 0, 0);
+		cmd_list->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));
+		cmd_list->DrawIndexedInstanced(m_pnSubSetIndices[nSubSet], 1, 0, 0, 0);
 	}
 	else
 	{
-		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
+		cmd_list->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
 	}
 }

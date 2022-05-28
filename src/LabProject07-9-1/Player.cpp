@@ -32,12 +32,12 @@ CPlayer::~CPlayer()
 	if (m_pCamera) delete m_pCamera;
 }
 
-void CPlayer::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
+void CPlayer::CreateShaderVariables(ID3D12Device *device, ID3D12GraphicsCommandList *cmd_list)
 {
-	if (m_pCamera) m_pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	if (m_pCamera) m_pCamera->CreateShaderVariables(device, cmd_list);
 }
 
-void CPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
+void CPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList *cmd_list)
 {
 }
 
@@ -219,25 +219,25 @@ void CPlayer::OnPrepareRender()
 	UpdateTransform(NULL);
 }
 
-void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, GameCamera *pCamera)
+void CPlayer::Render(ID3D12GraphicsCommandList *cmd_list, GameCamera *pCamera)
 {
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
 
 	if (nCameraMode == THIRD_PERSON_CAMERA)
 	{
-		GameObject::Render(pd3dCommandList, pCamera);
+		GameObject::Render(cmd_list, pCamera);
 	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CAirplanePlayer
 
-CAirplanePlayer::CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
+CAirplanePlayer::CAirplanePlayer(ID3D12Device *device, ID3D12GraphicsCommandList *cmd_list, ID3D12RootSignature *pd3dGraphicsRootSignature)
 {
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 10.0f);
 
-//	GameObject *pGameObject = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Apache.bin");
-	GameObject *pGameObject = GameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Gunship.bin");
+//	GameObject *pGameObject = GameObject::LoadGeometryFromFile(device, cmd_list, pd3dGraphicsRootSignature, "Model/Apache.bin");
+	GameObject *pGameObject = GameObject::LoadGeometryFromFile(device, cmd_list, pd3dGraphicsRootSignature, "Model/Gunship.bin");
 
 	pGameObject->Rotate(15.0f, 0.0f, 0.0f);
 	pGameObject->SetScale(8.5f, 8.5f, 8.5f);
@@ -245,7 +245,7 @@ CAirplanePlayer::CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 
 	OnInitialize();
 
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	CreateShaderVariables(device, cmd_list);
 }
 
 CAirplanePlayer::~CAirplanePlayer()

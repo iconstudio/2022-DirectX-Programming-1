@@ -25,8 +25,8 @@ protected:
 
 public:
 	UINT GetType() { return(m_nType); }
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList) { }
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet) { }
+	virtual void Render(ID3D12GraphicsCommandList *cmd_list) { }
+	virtual void Render(ID3D12GraphicsCommandList *cmd_list, int nSubSet) { }
 };
 
 #define VERTEXT_POSITION			0x01
@@ -63,7 +63,7 @@ public:
 class CMeshFromFile : public CMesh
 {
 public:
-	CMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, CMeshLoadInfo *pMeshInfo);
+	CMeshFromFile(ID3D12Device *device, ID3D12GraphicsCommandList *cmd_list, CMeshLoadInfo *pMeshInfo);
 	virtual ~CMeshFromFile();
 
 public:
@@ -82,13 +82,13 @@ protected:
 	D3D12_INDEX_BUFFER_VIEW			*m_pd3dSubSetIndexBufferViews = NULL;
 
 public:
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet);
+	virtual void Render(ID3D12GraphicsCommandList *cmd_list, int nSubSet);
 };
 
 class CMeshIlluminatedFromFile : public CMeshFromFile
 {
 public:
-	CMeshIlluminatedFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, CMeshLoadInfo *pMeshInfo);
+	CMeshIlluminatedFromFile(ID3D12Device *device, ID3D12GraphicsCommandList *cmd_list, CMeshLoadInfo *pMeshInfo);
 	virtual ~CMeshIlluminatedFromFile();
 
 	virtual void ReleaseUploadBuffers();
@@ -99,5 +99,5 @@ protected:
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dNormalBufferView;
 
 public:
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet);
+	virtual void Render(ID3D12GraphicsCommandList *cmd_list, int nSubSet);
 };

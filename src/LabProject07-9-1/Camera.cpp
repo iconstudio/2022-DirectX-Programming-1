@@ -105,15 +105,15 @@ void GameCamera::RegenerateViewMatrix()
 	m_xmf4x4View._43 = -Vector3::DotProduct(m_xmf3Position, m_xmf3Look);
 }
 
-void GameCamera::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void GameCamera::CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list)
 {
-	UINT ncbElementBytes = ((sizeof(VS_CB_CAMERA_INFO) + 255) & ~255); //256ï¿½ï¿½ ï¿½ï¿½ï¿½
-	m_pd3dcbCamera = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	UINT ncbElementBytes = ((sizeof(VS_CB_CAMERA_INFO) + 255) & ~255); //256ï¿½ï¿½ ï¿½ï¿½ï¿?
+	m_pd3dcbCamera = ::CreateBufferResource(device, cmd_list, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dcbCamera->Map(0, NULL, (void**)&m_pcbMappedCamera);
 }
 
-void GameCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+void GameCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* cmd_list)
 {
 	XMFLOAT4X4 xmf4x4View;
 	XMStoreFloat4x4(&xmf4x4View, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4View)));
@@ -126,7 +126,7 @@ void GameCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 	::memcpy(&m_pcbMappedCamera->m_xmf3Position, &m_xmf3Position, sizeof(XMFLOAT3));
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(0, d3dGpuVirtualAddress);
+	cmd_list->SetGraphicsRootConstantBufferView(0, d3dGpuVirtualAddress);
 }
 
 void GameCamera::ReleaseShaderVariables()
@@ -138,10 +138,10 @@ void GameCamera::ReleaseShaderVariables()
 	}
 }
 
-void GameCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommandList)
+void GameCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList* cmd_list)
 {
-	pd3dCommandList->RSSetViewports(1, &m_d3dViewport);
-	pd3dCommandList->RSSetScissorRects(1, &m_d3dScissorRect);
+	cmd_list->RSSetViewports(1, &m_d3dViewport);
+	cmd_list->RSSetScissorRects(1, &m_d3dScissorRect);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////

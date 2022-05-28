@@ -35,17 +35,17 @@ void CMaterial::SetMaterialColors(CMaterialColors* pMaterialColors)
 	if (m_pMaterialColors) m_pMaterialColors->AddRef();
 }
 
-void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList)
+void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList* cmd_list)
 {
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &(m_pMaterialColors->m_xmf4Ambient), 16);
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &(m_pMaterialColors->m_xmf4Diffuse), 20);
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &(m_pMaterialColors->m_xmf4Specular), 24);
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &(m_pMaterialColors->m_xmf4Emissive), 28);
+	cmd_list->SetGraphicsRoot32BitConstants(1, 4, &(m_pMaterialColors->m_xmf4Ambient), 16);
+	cmd_list->SetGraphicsRoot32BitConstants(1, 4, &(m_pMaterialColors->m_xmf4Diffuse), 20);
+	cmd_list->SetGraphicsRoot32BitConstants(1, 4, &(m_pMaterialColors->m_xmf4Specular), 24);
+	cmd_list->SetGraphicsRoot32BitConstants(1, 4, &(m_pMaterialColors->m_xmf4Emissive), 28);
 }
 
-void CMaterial::PrepareShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+void CMaterial::PrepareShaders(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	m_pIlluminatedShader = new CIlluminatedShader();
-	m_pIlluminatedShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	m_pIlluminatedShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	m_pIlluminatedShader->CreateShader(device, cmd_list, pd3dGraphicsRootSignature);
+	m_pIlluminatedShader->CreateShaderVariables(device, cmd_list);
 }
