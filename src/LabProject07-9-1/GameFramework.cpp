@@ -451,7 +451,7 @@ void GameFramework::Start()
 
 void GameFramework::BuildStages()
 {
-	m_pScene = new CScene("Scene");
+	m_pScene = new CScene(*this, "Scene");
 
 	if (m_pScene)
 	{

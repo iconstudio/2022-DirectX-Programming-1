@@ -1,7 +1,8 @@
 #pragma once
 
-struct MATERIALLOADINFO
+class RawMaterial
 {
+public:
 	XMFLOAT4						m_xmf4AlbedoColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	XMFLOAT4						m_xmf4EmissiveColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	XMFLOAT4						m_xmf4SpecularColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -23,17 +24,18 @@ struct MATERIALLOADINFO
 	//char							m_pstrDetailNormalMapName[64] = { '\0' };
 };
 
-struct MATERIALSLOADINFO
+class MATERIALSLOADINFO
 {
+public:
 	int								m_nMaterials = 0;
-	MATERIALLOADINFO* m_pMaterials = NULL;
+	RawMaterial* m_pMaterials = NULL;
 };
 
 class CMaterialColors
 {
 public:
 	CMaterialColors() {}
-	CMaterialColors(MATERIALLOADINFO* pMaterialInfo);
+	CMaterialColors(RawMaterial* pMaterialInfo);
 	virtual ~CMaterialColors() {}
 
 private:

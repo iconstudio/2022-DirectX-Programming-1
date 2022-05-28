@@ -392,7 +392,7 @@ MATERIALSLOADINFO* GameObject::LoadMaterialsInfoFromFile(ID3D12Device* pd3dDevic
 	MATERIALSLOADINFO* pMaterialsInfo = new MATERIALSLOADINFO;
 
 	pMaterialsInfo->m_nMaterials = ::ReadIntegerFromFile(pInFile);
-	pMaterialsInfo->m_pMaterials = new MATERIALLOADINFO[pMaterialsInfo->m_nMaterials];
+	pMaterialsInfo->m_pMaterials = new RawMaterial[pMaterialsInfo->m_nMaterials];
 
 	for (; ; )
 	{

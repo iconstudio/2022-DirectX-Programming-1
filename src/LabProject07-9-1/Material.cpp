@@ -2,7 +2,7 @@
 #include "Material.hpp"
 #include "Shader.h"
 
-CMaterialColors::CMaterialColors(MATERIALLOADINFO* pMaterialInfo)
+CMaterialColors::CMaterialColors(RawMaterial* pMaterialInfo)
 {
 	m_xmf4Diffuse = pMaterialInfo->m_xmf4AlbedoColor;
 	m_xmf4Specular = pMaterialInfo->m_xmf4SpecularColor; //(r,g,b,a=power)
