@@ -1,8 +1,8 @@
 #pragma once
-#include "TaggedObject.hpp"
 #include "Shader.h"
 #include "Player.h"
 #include "Light.hpp"
+#include "TaggedObject.hpp"
 
 class CScene : public TaggedObject
 {
@@ -11,7 +11,7 @@ public:
 	virtual ~CScene();
 
 	// 초기화
-	void Awake(PtrDevice device, PtrGrpCommandList  cmd_list);
+	virtual void Awake(PtrDevice device, PtrGrpCommandList cmd_list);
 	virtual void Build();
 
 	// 시작
@@ -24,10 +24,7 @@ public:
 	virtual void UpdateShaderVariables();
 
 	// 렌더링
-	void Render(GameCamera* pCamera = nullptr);
-
-	ID3D12RootSignature* GetGraphicsRootSignature();
-	ID3D12RootSignature const* GetGraphicsRootSignature() const;
+	virtual void Render(GameCamera* pCamera = nullptr);
 
 	//
 	virtual void ReleaseUploadBuffers();
@@ -40,13 +37,10 @@ public:
 	CPlayer* m_pPlayer = NULL;
 
 private:
-	ID3D12RootSignature* CreateGraphicsRootSignature();
 	virtual void CreateShaderVariables();
 
 	PtrDevice d3dDevice;
-	PtrGrpCommandList  d3dTaskList;
-	ID3D12RootSignature* d3dShaderParameters;
-	unique_ptr<CShader> myIlluminationShader;
+	PtrGrpCommandList d3dTaskList;
 
 	std::vector<shared_ptr<GameObject>> myInstances;
 

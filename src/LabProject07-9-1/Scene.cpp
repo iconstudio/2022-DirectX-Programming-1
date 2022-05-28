@@ -5,21 +5,17 @@
 
 CScene::CScene(GameFramework& framework, const char* name)
 	: TaggedObject(framework, name)
-	, d3dDevice(nullptr), d3dTaskList(nullptr), d3dShaderParameters(nullptr)
+	, d3dDevice(nullptr), d3dTaskList(nullptr)
 {}
 
 CScene::~CScene()
 {
-	if (d3dShaderParameters)
-	{
-		d3dShaderParameters->Release();
-	}
 	ReleaseShaderVariables();
 
 	if (m_pLights) delete[] m_pLights;
 }
 
-void CScene::Awake(PtrDevice device, PtrGrpCommandList  cmd_list)
+void CScene::Awake(PtrDevice device, PtrGrpCommandList cmd_list)
 {
 	d3dDevice = device;
 	d3dTaskList = cmd_list;
@@ -29,11 +25,10 @@ void CScene::Awake(PtrDevice device, PtrGrpCommandList  cmd_list)
 
 void CScene::Build()
 {
-	d3dShaderParameters = CreateGraphicsRootSignature();
-
-	myIlluminationShader= make_unique<CIlluminatedShader>();
-	myIlluminationShader->CreateShader(d3dDevice, d3dTaskList, d3dShaderParameters);
-	myIlluminationShader->CreateShaderVariables(d3dDevice, d3dTaskList);
+	if (!d3dDevice)
+	{
+		throw "프레임워크에서 D3D 장치를 먼저 설정해야함!";
+	}
 
 	globalAmbientLight = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
 
@@ -96,7 +91,7 @@ void CScene::Build()
 	pApacheObject->SetScale(10.5f, 10.5f, 10.5f);
 	pApacheObject->Rotate(0.0f, 90.0f, 0.0f);
 	myInstances.emplace_back(pApacheObject);
-	
+
 	pApacheObject = new CApacheObject();
 	pApacheObject->SetChild(pApacheModel.get(), true);
 	pApacheObject->OnInitialize();
@@ -167,16 +162,6 @@ void CScene::UpdateShaderVariables()
 	memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
 }
 
-ID3D12RootSignature* CScene::GetGraphicsRootSignature()
-{
-	return d3dShaderParameters;
-}
-
-ID3D12RootSignature const* CScene::GetGraphicsRootSignature() const
-{
-	return d3dShaderParameters;
-}
-
 void CScene::ReleaseShaderVariables()
 {
 	if (m_pd3dcbLights)
@@ -192,67 +177,6 @@ void CScene::ReleaseUploadBuffers()
 	{
 		instance->ReleaseUploadBuffers();
 	}
-}
-
-ID3D12RootSignature* CScene::CreateGraphicsRootSignature()
-{
-	D3D12_ROOT_PARAMETER pd3dRootParameters[3]{};
-
-	// register(b1)
-	pd3dRootParameters[0].Descriptor.ShaderRegister = 1; //Camera
-	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
-	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
-	// register(b2)
-	pd3dRootParameters[1].Constants.ShaderRegister = 2; // GameObject
-	pd3dRootParameters[1].Constants.RegisterSpace = 0;
-	pd3dRootParameters[1].Constants.Num32BitValues = 32; // 최대 32개
-	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
-	// register(b4)
-	pd3dRootParameters[2].Descriptor.ShaderRegister = 4; //Lights
-	pd3dRootParameters[2].Descriptor.RegisterSpace = 0;
-	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
-	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
-
-	D3D12_ROOT_SIGNATURE_DESC rootsignature_desc{};
-	::ZeroMemory(&rootsignature_desc, sizeof(D3D12_ROOT_SIGNATURE_DESC));
-
-	rootsignature_desc.NumParameters = std::size(pd3dRootParameters);
-	rootsignature_desc.pParameters = pd3dRootParameters;
-	rootsignature_desc.NumStaticSamplers = 0;
-	rootsignature_desc.pStaticSamplers = nullptr;
-	rootsignature_desc.Flags = d3dRootSignatureFlags;
-
-	ID3DBlob* pd3dSignatureBlob = nullptr;
-	ID3DBlob* pd3dErrorBlob = nullptr;
-	D3D12SerializeRootSignature(&rootsignature_desc, D3D_ROOT_SIGNATURE_VERSION_1, &pd3dSignatureBlob, &pd3dErrorBlob);
-
-	ID3D12RootSignature* root_signature = nullptr;
-
-	UINT gpu_mask = 0;
-	void* blob = pd3dSignatureBlob->GetBufferPointer();
-	size_t blob_size = pd3dSignatureBlob->GetBufferSize();
-
-	auto uuid = __uuidof(ID3D12RootSignature);
-	void** place = reinterpret_cast<void**>(&root_signature);
-	d3dDevice->CreateRootSignature(gpu_mask, blob, blob_size, uuid, place);
-
-	if (pd3dSignatureBlob)
-	{
-		pd3dSignatureBlob->Release();
-	}
-
-	if (pd3dErrorBlob)
-	{
-		pd3dErrorBlob->Release();
-	}
-
-	return  root_signature;
 }
 
 void CScene::Start()
@@ -282,16 +206,14 @@ void CScene::Update(float elapsed_time)
 
 void CScene::Render(GameCamera* pCamera)
 {
-	d3dTaskList->SetGraphicsRootSignature(d3dShaderParameters);
-
 	pCamera->SetViewportsAndScissorRects(d3dTaskList);
 	pCamera->UpdateShaderVariables(d3dTaskList);
 
 	UpdateShaderVariables();
 
-	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
-	d3dTaskList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress);
-	
+	auto lights_address = m_pd3dcbLights->GetGPUVirtualAddress();
+	d3dTaskList->SetGraphicsRootConstantBufferView(2, lights_address);
+
 	for (auto& instance : myInstances)
 	{
 		instance->UpdateTransform(NULL);

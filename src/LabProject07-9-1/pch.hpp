@@ -13,7 +13,6 @@ class CMesh;
 class CMeshLoadInfo;
 class CMaterial;
 class RawMaterial;
-class CShader;
 class CLight;
 
 class GameCamera;
@@ -59,19 +58,21 @@ constexpr XMFLOAT4 DefaultAmient = { 0.2f, 0.2f, 0.2f, 1.0f };
 
 extern UINT gnCbvSrvDescriptorIncrementSize;
 
+ShaderHandle CreateEmptyShaderHandle();
+
 extern CMeshLoadInfo* LoadMeshInfoFromFile(FILE* stream);
 
 extern std::vector<RawMaterial> LoadRawMaterials(FILE* stream);
 
 extern ID3D12Resource* CreateBufferResource(PtrDevice device
-	, PtrGrpCommandList  pd3dCommandList
+	, PtrGrpCommandList pd3dCommandList
 	, void* pData, UINT nBytes
 	, D3D12_HEAP_TYPE d3dHeapType = D3D12_HEAP_TYPE_UPLOAD
 	, D3D12_RESOURCE_STATES d3dResourceStates = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
 	, ID3D12Resource** ppd3dUploadBuffer = NULL);
 
 extern ID3D12Resource* CreateTextureResourceFromDDSFile(PtrDevice device
-	, PtrGrpCommandList  cmd_list
+	, PtrGrpCommandList cmd_list
 	, wchar_t* pszFileName
 	, ID3D12Resource** ppd3dUploadBuffer
 	, D3D12_RESOURCE_STATES d3dResourceStates = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);

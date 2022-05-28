@@ -84,8 +84,11 @@
     <ClInclude Include="TaggedObject.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Pipeline.hpp">
+    <ClInclude Include="GamePipeline.hpp">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Pipeline.hpp">
+      <Filter>헤더 파일\Contents</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -131,9 +134,6 @@
     <ClCompile Include="pch.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="GameScenes.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Model.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -142,6 +142,12 @@
     </ClCompile>
     <ClCompile Include="Pipeline.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="GamePipeline.cpp">
+      <Filter>소스 파일\Contents</Filter>
+    </ClCompile>
+    <ClCompile Include="GameScenes.cpp">
+      <Filter>소스 파일\Contents</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

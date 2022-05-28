@@ -1,5 +1,6 @@
 #pragma once
 #include "Shader.h"
+#include "Pipeline.hpp"
 
 class RawMaterial
 {
@@ -24,17 +25,17 @@ public:
 class CMaterial
 {
 public:
-	CMaterial(const RawMaterial& raw);
-	CMaterial(RawMaterial&& raw);
+	CMaterial(Pipeline& pipeline);
+	CMaterial(Pipeline& pipeline, const RawMaterial& raw);
+	CMaterial(Pipeline& pipeline, RawMaterial&& raw);
 	virtual ~CMaterial();
 
-	void SetShader(CShader* pShader);
-	void UpdateShaderVariable(PtrGrpCommandList  pd3dCommandList);
+	void UpdateShaderVariable(PtrGrpCommandList pd3dCommandList);
 
 	XMFLOAT4 m_xmf4Ambient;
 	XMFLOAT4 m_xmf4Diffuse;
 	XMFLOAT4 m_xmf4Specular;
 	XMFLOAT4 m_xmf4Emissive;
-
-	CShader* m_pShader = NULL;
+	
+	Pipeline& myPipeline;
 };

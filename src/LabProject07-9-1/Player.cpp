@@ -270,7 +270,7 @@ void CPlayer::Render(PtrGrpCommandList pd3dCommandList, GameCamera *pCamera)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CAirplanePlayer
 
-CAirplanePlayer::CAirplanePlayer(PtrDevice pd3dDevice, PtrGrpCommandList pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
+CAirplanePlayer::CAirplanePlayer(PtrDevice pd3dDevice, PtrGrpCommandList pd3dCommandList, PtrSignature pd3dGraphicsRootSignature)
 {
 	m_pCamera = ChangeCamera(/*SPACESHIP_CAMERA*/THIRD_PERSON_CAMERA, 0.0f);
 

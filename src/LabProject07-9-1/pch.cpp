@@ -7,6 +7,15 @@ char token[64]{};
 
 UINT gnCbvSrvDescriptorIncrementSize = 32;
 
+ShaderHandle CreateEmptyShaderHandle()
+{
+	ShaderHandle bytecodes{};
+	bytecodes.BytecodeLength = 0;
+	bytecodes.pShaderBytecode = NULL;
+
+	return bytecodes;
+}
+
 CMeshLoadInfo* LoadMeshInfoFromFile(FILE* stream)
 {
 	char pstrToken[64] = { '\0' };
@@ -191,7 +200,7 @@ std::vector<RawMaterial> LoadRawMaterials(FILE* stream)
 	return result;
 }
 
-ID3D12Resource* CreateBufferResource(PtrDevice pd3dDevice, PtrGrpCommandList  pd3dCommandList, void* pData, UINT nBytes, D3D12_HEAP_TYPE d3dHeapType, D3D12_RESOURCE_STATES d3dResourceStates, ID3D12Resource** ppd3dUploadBuffer)
+ID3D12Resource* CreateBufferResource(PtrDevice pd3dDevice, PtrGrpCommandList pd3dCommandList, void* pData, UINT nBytes, D3D12_HEAP_TYPE d3dHeapType, D3D12_RESOURCE_STATES d3dResourceStates, ID3D12Resource** ppd3dUploadBuffer)
 {
 	ID3D12Resource* pd3dBuffer = NULL;
 

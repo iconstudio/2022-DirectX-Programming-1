@@ -42,22 +42,6 @@ void GameObject::SetMesh(CMesh* pMesh)
 	m_pMesh = pMesh;
 }
 
-void GameObject::SetShader(CShader* pShader)
-{
-	m_nMaterials = 1;
-	m_ppMaterials = new CMaterial * [m_nMaterials];
-	m_ppMaterials[0] = new CMaterial();
-	m_ppMaterials[0]->SetShader(pShader);
-}
-
-void GameObject::SetShader(int nMaterial, CShader* pShader)
-{
-	if (m_ppMaterials[nMaterial])
-	{
-		m_ppMaterials[nMaterial]->SetShader(pShader);
-	}
-}
-
 void GameObject::SetMaterial(int nMaterial, CMaterial* pMaterial)
 {
 	m_ppMaterials[nMaterial] = pMaterial;
@@ -93,7 +77,7 @@ GameObject* GameObject::FindFrame(const char* pstrFrameName)
 	return(NULL);
 }
 
-void GameObject::Render(PtrGrpCommandList  pd3dCommandList, GameCamera* pCamera)
+void GameObject::Render(PtrGrpCommandList pd3dCommandList, GameCamera* pCamera)
 {
 	OnPrepareRender();
 
@@ -105,15 +89,16 @@ void GameObject::Render(PtrGrpCommandList  pd3dCommandList, GameCamera* pCamera)
 		{
 			if (m_ppMaterials[i])
 			{
-				if (m_ppMaterials[i]->m_pShader)
-				{
-					m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
-				}
+				auto& pipeline = m_ppMaterials[i]->myPipeline;
+				pipeline.PrepareRendering(pd3dCommandList, 0);
 
 				m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
 			}
 
-			if (m_pMesh) m_pMesh->Render(pd3dCommandList, i);
+			if (m_pMesh)
+			{
+				m_pMesh->Render(pd3dCommandList, i);
+			}
 		}
 	}
 
@@ -121,20 +106,21 @@ void GameObject::Render(PtrGrpCommandList  pd3dCommandList, GameCamera* pCamera)
 	if (myChild) myChild->Render(pd3dCommandList, pCamera);
 }
 
-void GameObject::CreateShaderVariables(PtrDevice pd3dDevice, PtrGrpCommandList  pd3dCommandList)
+void GameObject::CreateShaderVariables(PtrDevice pd3dDevice, PtrGrpCommandList pd3dCommandList)
 {}
 
-void GameObject::UpdateShaderVariables(PtrGrpCommandList  pd3dCommandList)
+void GameObject::UpdateShaderVariables(PtrGrpCommandList pd3dCommandList)
 {}
 
-void GameObject::UpdateShaderVariable(PtrGrpCommandList  pd3dCommandList, XMFLOAT4X4* pxmf4x4World)
+void GameObject::UpdateShaderVariable(PtrGrpCommandList pd3dCommandList, XMFLOAT4X4* pxmf4x4World)
 {
 	XMFLOAT4X4 xmf4x4World;
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
+
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 }
 
-void GameObject::UpdateShaderVariable(PtrGrpCommandList  pd3dCommandList, CMaterial* pMaterial)
+void GameObject::UpdateShaderVariable(PtrGrpCommandList pd3dCommandList, CMaterial* pMaterial)
 {}
 
 void GameObject::ReleaseShaderVariables()
@@ -285,7 +271,7 @@ void CRotatingObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	GameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
-void CRotatingObject::Render(PtrGrpCommandList  pd3dCommandList, GameCamera* pCamera)
+void CRotatingObject::Render(PtrGrpCommandList pd3dCommandList, GameCamera* pCamera)
 {
 	GameObject::Render(pd3dCommandList, pCamera);
 }

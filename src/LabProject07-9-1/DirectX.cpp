@@ -1,3 +1,4 @@
+#include "pch.hpp"
 #include "stdafx.h"
 #include "DirectX.hpp"
 #include "GameFramework.h"

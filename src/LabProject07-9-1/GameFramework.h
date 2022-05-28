@@ -1,5 +1,5 @@
 #pragma once
-#include "Scene.h"
+#include "GamePipeline.hpp"
 
 class GameFramework
 {
@@ -69,6 +69,7 @@ private:
 	void ResetCmdList(ID3D12PipelineState* pipeline = nullptr);
 	void CloseCmdList();
 	void ExecuteCmdList(ID3D12CommandList* list[], UINT count);
+	void Present();
 
 	DESC_HANDLE GetRTVHandle() const;
 	DESC_HANDLE GetDSVHandle() const;
@@ -90,19 +91,20 @@ private:
 	int frameHeight;
 	const float frameBasisColour[4];
 
-	bool isAntiAliasingEnabled;
-	UINT levelAntiAliasing;
-	UINT indexFrameBuffer;
-
-	static const UINT numberFrameBuffers = 2;
+	DefaultPipeline myPipeline;
 
 	IDXGIFactory4* myFactory;
 	IDXGISwapChain3* mySwapChain;
 	PtrDevice myDevice;
 
-	PtrGrpCommandList  myCommandList;
+	PtrGrpCommandList myCommandList;
 	ID3D12CommandQueue* myCommandQueue;
 	ID3D12CommandAllocator* myCommandAlloc;
+
+	static const UINT numberFrameBuffers = 2;
+	bool isAntiAliasingEnabled;
+	UINT levelAntiAliasing;
+	UINT indexFrameBuffer;
 
 	ID3D12Resource* resSwapChainBackBuffers[numberFrameBuffers];
 	D3D12_RESOURCE_BARRIER myBarriers[numberFrameBuffers];
@@ -128,7 +130,6 @@ private:
 
 	std::unordered_map<const char*, shared_ptr<GameObject>> myModels;
 	std::unordered_map<const char*, shared_ptr<CMaterial>> myMaterials;
-	std::unordered_map<const char*, shared_ptr<CShader>> myShaders;
 
 	shared_ptr<GameCamera> m_pCamera;
 };

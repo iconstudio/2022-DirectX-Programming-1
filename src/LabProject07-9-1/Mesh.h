@@ -13,8 +13,8 @@ protected:
 public:
 	virtual void ReleaseUploadBuffers() {}
 
-	virtual void Render(PtrGrpCommandList  pd3dCommandList) {}
-	virtual void Render(PtrGrpCommandList  pd3dCommandList, int nSubSet) {}
+	virtual void Render(PtrGrpCommandList pd3dCommandList) {}
+	virtual void Render(PtrGrpCommandList pd3dCommandList, int nSubSet) {}
 
 	UINT GetType() { return m_nType; }
 };

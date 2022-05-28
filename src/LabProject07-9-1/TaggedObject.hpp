@@ -1,4 +1,5 @@
 #pragma once
+#include "GameFramework.h"
 
 class TaggedObject
 {

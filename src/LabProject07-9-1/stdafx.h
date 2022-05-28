@@ -24,11 +24,13 @@
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 using DESC_HANDLE = D3D12_CPU_DESCRIPTOR_HANDLE;
-using ShaderBlob = D3D12_SHADER_BYTECODE;
+using PipelineDesc = D3D12_GRAPHICS_PIPELINE_STATE_DESC;
+using ShaderHandle = D3D12_SHADER_BYTECODE;
 using PtrDevice = ID3D12Device*;
 using PtrCommandList = ID3D12CommandList*;
 using PtrGrpCommandList = ID3D12GraphicsCommandList*;
 using PtrCommandQueue = ID3D12CommandQueue*;
+using PtrSignature = ID3D12RootSignature*;
 
 #include <wrl.h>
 #include <shellapi.h>

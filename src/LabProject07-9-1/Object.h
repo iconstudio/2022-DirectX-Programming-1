@@ -3,6 +3,8 @@
 #include "Material.hpp"
 #include "Camera.h"
 
+class CMaterial;
+
 class GameObject
 {
 public:
@@ -11,25 +13,23 @@ public:
 
 public:
 	void SetMesh(CMesh* pMesh);
-	void SetShader(CShader* pShader);
-	void SetShader(int nMaterial, CShader* pShader);
 	void SetMaterial(int nMaterial, CMaterial* pMaterial);
 
 	void SetChild(GameObject* pChild, bool bReferenceUpdate = false);
 
-	virtual void BuildMaterials(PtrDevice pd3dDevice, PtrGrpCommandList  pd3dCommandList) {}
+	virtual void BuildMaterials(PtrDevice pd3dDevice, PtrGrpCommandList pd3dCommandList) {}
 
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	virtual void OnPrepareRender() {}
-	virtual void Render(PtrGrpCommandList  pd3dCommandList, GameCamera* pCamera = NULL);
+	virtual void Render(PtrGrpCommandList pd3dCommandList, GameCamera* pCamera = NULL);
 
-	virtual void CreateShaderVariables(PtrDevice pd3dDevice, PtrGrpCommandList  pd3dCommandList);
-	virtual void UpdateShaderVariables(PtrGrpCommandList  pd3dCommandList);
+	virtual void CreateShaderVariables(PtrDevice pd3dDevice, PtrGrpCommandList pd3dCommandList);
+	virtual void UpdateShaderVariables(PtrGrpCommandList pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 
-	virtual void UpdateShaderVariable(PtrGrpCommandList  pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
-	virtual void UpdateShaderVariable(PtrGrpCommandList  pd3dCommandList, CMaterial* pMaterial);
+	virtual void UpdateShaderVariable(PtrGrpCommandList pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
+	virtual void UpdateShaderVariable(PtrGrpCommandList pd3dCommandList, CMaterial* pMaterial);
 
 	virtual void ReleaseUploadBuffers();
 
@@ -89,7 +89,7 @@ public:
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
 
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
-	virtual void Render(PtrGrpCommandList  pd3dCommandList, GameCamera* pCamera = NULL);
+	virtual void Render(PtrGrpCommandList pd3dCommandList, GameCamera* pCamera = NULL);
 };
 
 class CRevolvingObject : public GameObject

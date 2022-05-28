@@ -14,11 +14,16 @@ RawMaterial::RawMaterial()
 RawMaterial::~RawMaterial()
 {}
 
-CMaterial::CMaterial(const RawMaterial& raw)
-	: CMaterial(RawMaterial(raw))
+CMaterial::CMaterial(Pipeline& pipeline)
+	: myPipeline(pipeline)
 {}
 
-CMaterial::CMaterial(RawMaterial&& raw)
+CMaterial::CMaterial(Pipeline& pipeline, const RawMaterial& raw)
+	: CMaterial(pipeline, RawMaterial(raw))
+{}
+
+CMaterial::CMaterial(Pipeline& pipeline, RawMaterial&& raw)
+	: CMaterial(pipeline)
 {
 	m_xmf4Ambient = std::forward<XMFLOAT4>(raw.m_xmf4Ambient);
 	m_xmf4Diffuse = std::forward<XMFLOAT4>(raw.m_xmf4AlbedoColor);
@@ -28,17 +33,11 @@ CMaterial::CMaterial(RawMaterial&& raw)
 }
 
 CMaterial::~CMaterial()
-{
-}
+{}
 
-void CMaterial::SetShader(CShader* pShader)
+void CMaterial::UpdateShaderVariable(PtrGrpCommandList cmd_list)
 {
-	m_pShader = pShader;
-}
-
-void CMaterial::UpdateShaderVariable(PtrGrpCommandList  cmd_list)
-{
-	// register(b1)
+	// cbv
 	cmd_list->SetGraphicsRoot32BitConstants(1, 4, &(m_xmf4Ambient), 16);
 	cmd_list->SetGraphicsRoot32BitConstants(1, 4, &(m_xmf4Diffuse), 20);
 	cmd_list->SetGraphicsRoot32BitConstants(1, 4, &(m_xmf4Specular), 24);

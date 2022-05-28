@@ -1,6 +1,7 @@
 #include "pch.hpp"
 #include "stdafx.h"
 #include "GameFramework.h"
+#include "Scene.h"
 #include "Pipeline.hpp"
 #include "GameScenes.hpp"
 #include "Player.h"
@@ -8,11 +9,12 @@
 GameFramework::GameFramework(unsigned int width, unsigned int height)
 	: frameWidth(width), frameHeight(height)
 	, frameBasisColour{ 0.0f, 0.125f, 0.3f, 1.0f }
-	, isAntiAliasingEnabled(false), levelAntiAliasing(0)
-	, indexFrameBuffer(0)
+	, myPipeline()
 	, myFactory(nullptr), myDevice(nullptr)
 	, myRenderFence(nullptr), myFences(), eventFence(NULL)
 	, myCommandList(nullptr), myCommandQueue(nullptr), myCommandAlloc(nullptr)
+	, isAntiAliasingEnabled(false), levelAntiAliasing(0)
+	, indexFrameBuffer(0)
 	, mySwapChain(nullptr), resSwapChainBackBuffers(), myBarriers()
 	, heapRtvDesc(nullptr), szRtvDescIncrements(0)
 	, myDepthStencilBuffer(nullptr)
@@ -100,6 +102,8 @@ void GameFramework::Awake(HINSTANCE hInstance, HWND hMainWnd)
 	CreateSwapChain();
 	CreateRenderTargetViews();
 	CreateDepthStencilView();
+
+	myPipeline.Awake(myDevice, myCommandList);
 }
 
 void GameFramework::CreateDirect3DDevice()
@@ -464,13 +468,21 @@ void GameFramework::BuildMaterials()
 
 void GameFramework::BuildPipeline()
 {
+	auto vs = myPipeline.CreateVertexShader("VertexShader.hlsl");
+	myPipeline.Attach(vs);
+
+	auto ps = myPipeline.CreatePixelShader("PixelShader.hlsl");
+	myPipeline.Attach(ps);
+
+	myPipeline.Start(vs, ps);
 }
 
 void GameFramework::BuildStages()
 {
 	RegisterScene(SceneIntro(*this));
 	RegisterScene(SceneMain(*this));
-	RegisterScene(SceneGame(*this));
+	auto game_scene = RegisterScene(SceneGame(*this));
+
 	RegisterScene(SceneGameEnd(*this));
 	RegisterScene(SceneCredit(*this));
 
@@ -541,6 +553,13 @@ void GameFramework::PrepareRendering()
 	auto cpu_dsv_handle = GetDSVHandle();
 	ClearDepthStencilView(cpu_dsv_handle);
 
+	const auto& signature = myPipeline.GetGraphicsRootSignature();
+	if (!signature)
+	{
+		throw "파이프라인에서 루트 서명을 먼저 설정해야함!";
+	}
+	myCommandList->SetGraphicsRootSignature(signature);
+
 	ReadyOutputMerger(cpu_rtv_handle, cpu_dsv_handle);
 }
 
@@ -561,20 +580,7 @@ void GameFramework::Render()
 
 	WaitForGpuComplete();
 
-#ifdef _WITH_PRESENT_PARAMETERS
-	DXGI_PRESENT_PARAMETERS dxgiPresentParameters;
-	dxgiPresentParameters.DirtyRectsCount = 0;
-	dxgiPresentParameters.pDirtyRects = NULL;
-	dxgiPresentParameters.pScrollRect = NULL;
-	dxgiPresentParameters.pScrollOffset = NULL;
-	mySwapChain->Present1(1, 0, &dxgiPresentParameters);
-#else
-#ifdef _WITH_SYNCH_SWAPCHAIN
-	mySwapChain->Present(1, 0);
-#else
 	mySwapChain->Present(0, 0);
-#endif
-#endif
 
 	AfterRendering();
 }
@@ -935,7 +941,7 @@ GameObject* GameFramework::LoadFrameHierarchy(FILE* stream, GameObject* root)
 
 					root->m_ppMaterials[i] = NULL;
 
-					auto* mat = new CMaterial(raw_mat);
+					auto* mat = new CMaterial(myPipeline, raw_mat);
 
 					if (root->GetMeshType() & VERTEXT_NORMAL)
 					{
@@ -1009,6 +1015,9 @@ void GameFramework::ExecuteCmdList(ID3D12CommandList* list[], UINT count)
 {
 	myCommandQueue->ExecuteCommandLists(count, list);
 }
+
+void GameFramework::Present()
+{}
 
 DESC_HANDLE GameFramework::GetRTVHandle() const
 {
