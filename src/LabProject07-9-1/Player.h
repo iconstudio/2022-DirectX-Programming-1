@@ -84,7 +84,7 @@ public:
 class CAirplanePlayer : public CPlayer
 {
 public:
-	CAirplanePlayer(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	CAirplanePlayer(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* signature);
 	virtual ~CAirplanePlayer();
 
 	GameObject* m_pMainRotorFrame = NULL;

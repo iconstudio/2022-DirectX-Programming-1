@@ -232,12 +232,12 @@ void CPlayer::Render(ID3D12GraphicsCommandList *cmd_list, GameCamera *pCamera)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CAirplanePlayer
 
-CAirplanePlayer::CAirplanePlayer(ID3D12Device *device, ID3D12GraphicsCommandList *cmd_list, ID3D12RootSignature *pd3dGraphicsRootSignature)
+CAirplanePlayer::CAirplanePlayer(ID3D12Device *device, ID3D12GraphicsCommandList *cmd_list, ID3D12RootSignature *signature)
 {
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 10.0f);
 
-//	GameObject *pGameObject = GameObject::LoadGeometryFromFile(device, cmd_list, pd3dGraphicsRootSignature, "Model/Apache.bin");
-	GameObject *pGameObject = GameObject::LoadGeometryFromFile(device, cmd_list, pd3dGraphicsRootSignature, "Model/Gunship.bin");
+//	GameObject *pGameObject = GameObject::LoadGeometryFromFile(device, cmd_list, signature, "Model/Apache.bin");
+	GameObject *pGameObject = GameObject::LoadGeometryFromFile(device, cmd_list, signature, "Model/Gunship.bin");
 
 	pGameObject->Rotate(15.0f, 0.0f, 0.0f);
 	pGameObject->SetScale(8.5f, 8.5f, 8.5f);

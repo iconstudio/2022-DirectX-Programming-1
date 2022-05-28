@@ -6,6 +6,31 @@
 
 UINT gnCbvSrvDescriptorIncrementSize = 32;
 
+int ReadIntegerFromFile(FILE* file)
+{
+	int nValue = 0;
+	UINT nReads = (UINT)::fread(&nValue, sizeof(int), 1, file);
+	return(nValue);
+}
+
+float ReadFloatFromFile(FILE* file)
+{
+	float fValue = 0;
+	UINT nReads = (UINT)::fread(&fValue, sizeof(float), 1, file);
+	return(fValue);
+}
+
+BYTE ReadStringFromFile(FILE* file, char* token)
+{
+	BYTE nStrLength = 0;
+	UINT nReads = 0;
+	nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, file);
+	nReads = (UINT)::fread(token, sizeof(char), nStrLength, file);
+	token[nStrLength] = '\0';
+
+	return(nStrLength);
+}
+
 ID3D12Resource* CreateBufferResource(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, void* data, UINT data_sz, D3D12_HEAP_TYPE type, D3D12_RESOURCE_STATES states, ID3D12Resource** upload_buffer)
 {
 	ID3D12Resource* result = nullptr;

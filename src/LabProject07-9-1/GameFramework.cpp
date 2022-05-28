@@ -458,7 +458,7 @@ void GameFramework::BuildStages()
 
 	if (m_pScene)
 	{
-		m_pScene->Awake(myDevice, myCommandList);
+		m_pScene->Awake(myWindow, myDevice, myCommandList);
 	}
 }
 
@@ -496,40 +496,6 @@ void GameFramework::Update(float elapsed_time)
 
 	if (TRUE == input)
 	{
-		DWORD dwDirection = 0;
-		if (pKeysBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
-		if (pKeysBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
-		if (pKeysBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT;
-		if (pKeysBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT;
-		if (pKeysBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
-		if (pKeysBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
-
-		float cxDelta = 0.0f, cyDelta = 0.0f;
-		POINT ptCursorPos;
-		if (GetCapture() == myWindow)
-		{
-			SetCursor(NULL);
-			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
-			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-		}
-
-		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
-		{
-			if (cxDelta || cyDelta)
-			{
-				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-				else
-					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
-			}
-
-			if (dwDirection)
-			{
-				m_pPlayer->Move(dwDirection, 1.5f, true);
-			}
-		}
 	}
 
 	if (m_pScene)
@@ -600,7 +566,7 @@ void GameFramework::Render()
 #endif
 
 	AfterRendering();
-	}
+}
 
 void GameFramework::AfterRendering()
 {
@@ -707,22 +673,28 @@ void GameFramework::OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 	switch (msg)
 	{
 		case WM_LBUTTONDOWN:
+		{
+		}
+		break;
+
 		case WM_RBUTTONDOWN:
 		{
-			SetCapture(hwnd);
-			GetCursorPos(&m_ptOldCursorPos);
 		}
 		break;
 
 		case WM_LBUTTONUP:
+		{
+		}
+		break;
+
 		case WM_RBUTTONUP:
 		{
-			ReleaseCapture();
 		}
 		break;
 
 		case WM_MOUSEMOVE:
-		{}
+		{
+		}
 		break;
 
 		default:

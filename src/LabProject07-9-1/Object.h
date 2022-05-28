@@ -11,8 +11,8 @@ public:
 
 public:
 	void SetMesh(CMesh* pMesh);
-	void SetShader(CShader* pShader);
-	void SetShader(int nMaterial, CShader* pShader);
+	void SetShader(Pipeline* pShader);
+	void SetShader(int nMaterial, Pipeline* pShader);
 	void SetMaterial(int nMaterial, CMaterial* pMaterial);
 
 	void SetChild(GameObject* pChild, bool bReferenceUpdate = false);
@@ -72,11 +72,11 @@ public:
 	GameObject* mySibling = NULL;
 
 public:
-	static MATERIALSLOADINFO* LoadMaterialsInfoFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, FILE* pInFile);
-	static CMeshLoadInfo* LoadMeshInfoFromFile(FILE* pInFile);
+	static RawMaterialsBox* LoadRawMaterials(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, FILE* pInFile);
+	static CMeshLoadInfo* LoadRawMesh(FILE* pInFile);
 
-	static GameObject* LoadFrameHierarchyFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* pd3dGraphicsRootSignature, FILE* pInFile);
-	static GameObject* LoadGeometryFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName);
+	static GameObject* LoadFrameHierarchyFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* signature, FILE* pInFile);
+	static GameObject* LoadGeometryFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* signature, char* pstrFileName);
 
 	static void PrintFrameInfo(GameObject* pGameObject, GameObject* pParent);
 };

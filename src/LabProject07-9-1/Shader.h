@@ -2,11 +2,11 @@
 #include "Object.h"
 #include "Camera.h"
 
-class CShader
+class Pipeline
 {
 public:
-	CShader();
-	virtual ~CShader();
+	Pipeline();
+	virtual ~Pipeline();
 
 private:
 	int								m_nReferences = 0;
@@ -26,7 +26,7 @@ public:
 	ShaderBlob CompileShaderFromFile(WCHAR *pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob **ppd3dShaderBlob);
 	ShaderBlob ReadCompiledShaderFromFile(WCHAR *pszFileName, ID3DBlob **ppd3dShaderBlob=NULL);
 
-	virtual void CreateShader(ID3D12Device *device, ID3D12GraphicsCommandList *cmd_list, ID3D12RootSignature *pd3dGraphicsRootSignature);
+	virtual void CreateShader(ID3D12Device *device, ID3D12GraphicsCommandList *cmd_list, ID3D12RootSignature *signature);
 
 	virtual void CreateShaderVariables(ID3D12Device *device, ID3D12GraphicsCommandList *cmd_list);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *cmd_list);
@@ -50,7 +50,7 @@ protected:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-class CIlluminatedShader : public CShader
+class CIlluminatedShader : public Pipeline
 {
 public:
 	CIlluminatedShader();
@@ -60,7 +60,7 @@ public:
 	virtual ShaderBlob CreateVertexShader();
 	virtual ShaderBlob CreatePixelShader();
 
-	virtual void CreateShader(ID3D12Device *device, ID3D12GraphicsCommandList *cmd_list, ID3D12RootSignature *pd3dGraphicsRootSignature);
+	virtual void CreateShader(ID3D12Device *device, ID3D12GraphicsCommandList *cmd_list, ID3D12RootSignature *signature);
 
 	virtual void Render(ID3D12GraphicsCommandList *cmd_list, GameCamera *pCamera, int nPipelineState = 0);
 };

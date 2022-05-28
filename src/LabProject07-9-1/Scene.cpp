@@ -3,6 +3,7 @@
 
 CScene::CScene(GameFramework& framework, const char* name)
 	: myFramework(framework), myName(name)
+	, myWindow(NULL)
 	, d3dDevice(nullptr), d3dTaskList(nullptr), d3dShaderParameters(nullptr)
 {}
 
@@ -17,8 +18,9 @@ CScene::~CScene()
 	if (m_pLights) delete[] m_pLights;
 }
 
-void CScene::Awake(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list)
+void CScene::Awake(HWND hwnd, ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list)
 {
+	myWindow = hwnd;
 	d3dDevice = device;
 	d3dTaskList = cmd_list;
 
@@ -184,7 +186,7 @@ void CScene::ReleaseUploadBuffers()
 
 ID3D12RootSignature* CScene::CreateGraphicsRootSignature()
 {
-	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
+	ID3D12RootSignature* signature = NULL;
 
 	D3D12_ROOT_PARAMETER pd3dRootParameters[3]{};
 
@@ -219,12 +221,12 @@ ID3D12RootSignature* CScene::CreateGraphicsRootSignature()
 	ID3DBlob* pd3dSignatureBlob = NULL;
 	ID3DBlob* pd3dErrorBlob = NULL;
 	D3D12SerializeRootSignature(&d3dRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &pd3dSignatureBlob, &pd3dErrorBlob);
-	d3dDevice->CreateRootSignature(0, pd3dSignatureBlob->GetBufferPointer(), pd3dSignatureBlob->GetBufferSize(), __uuidof(ID3D12RootSignature), (void**)&pd3dGraphicsRootSignature);
+	d3dDevice->CreateRootSignature(0, pd3dSignatureBlob->GetBufferPointer(), pd3dSignatureBlob->GetBufferSize(), __uuidof(ID3D12RootSignature), (void**)&signature);
 
 	if (pd3dSignatureBlob) pd3dSignatureBlob->Release();
 	if (pd3dErrorBlob) pd3dErrorBlob->Release();
 
-	return(pd3dGraphicsRootSignature);
+	return(signature);
 }
 
 void CScene::Start()
@@ -254,7 +256,43 @@ void CScene::Update(float elapsed_time)
 
 bool CScene::ProcessInput(UCHAR* pKeysBuffer)
 {
-	return(false);
+	DWORD dwDirection = 0;
+	if (pKeysBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
+	if (pKeysBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
+	if (pKeysBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT;
+	if (pKeysBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT;
+	if (pKeysBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
+	if (pKeysBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
+
+	float cxDelta = 0.0f, cyDelta = 0.0f;
+	POINT ptCursorPos;
+
+	if (GetCapture() == myWindow)
+	{
+		SetCursor(NULL);
+		GetCursorPos(&ptCursorPos);
+		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
+		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
+		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+	}
+
+	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+	{
+		if (cxDelta || cyDelta)
+		{
+			if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+				m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+			else
+				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+		}
+
+		if (dwDirection)
+		{
+			m_pPlayer->Move(dwDirection, 1.5f, true);
+		}
+	}
+
+	return false;
 }
 
 void CScene::Render(GameCamera* pCamera)
@@ -277,32 +315,61 @@ void CScene::Render(GameCamera* pCamera)
 	}
 }
 
-bool CScene::OnMouseEvent(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+bool CScene::OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 {
-	return(false);
+	switch (msg)
+	{
+		case WM_LBUTTONDOWN:
+		case WM_RBUTTONDOWN:
+		{
+			SetCapture(hwnd);
+			GetCursorPos(&m_ptOldCursorPos);
+		}
+		break;
+
+		case WM_LBUTTONUP:
+		case WM_RBUTTONUP:
+		{
+			ReleaseCapture();
+		}
+		break;
+
+		case WM_MOUSEMOVE:
+		{}
+		break;
+
+		default:
+		{}
+		break;
+	}
+
+	return false;
 }
 
-bool CScene::OnKeyboardEvent(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+bool CScene::OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
 {
 	auto& something = myInstances.at(0);
 
-	switch (nMessageID)
+	switch (msg)
 	{
 		case WM_KEYDOWN:
-		switch (wParam)
 		{
-			case 'W': something->MoveForward(+1.0f); break;
-			case 'S': something->MoveForward(-1.0f); break;
-			case 'A': something->MoveStrafe(-1.0f); break;
-			case 'D': something->MoveStrafe(+1.0f); break;
-			case 'Q': something->MoveUp(+1.0f); break;
-			case 'R': something->MoveUp(-1.0f); break;
-			default:
+			switch (key)
+			{
+				case 'W': something->MoveForward(+1.0f); break;
+				case 'S': something->MoveForward(-1.0f); break;
+				case 'A': something->MoveStrafe(-1.0f); break;
+				case 'D': something->MoveStrafe(+1.0f); break;
+				case 'Q': something->MoveUp(+1.0f); break;
+				case 'R': something->MoveUp(-1.0f); break;
+			}
 			break;
 		}
-		break;
+
 		default:
+		{}
 		break;
 	}
-	return(false);
+
+	return false;
 }

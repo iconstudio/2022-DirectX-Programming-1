@@ -10,8 +10,9 @@ public:
 	virtual ~CScene();
 
 	// √ ±‚»≠
-	void Awake(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list);
+	void Awake(HWND hwnd, ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list);
 	virtual void Build();
+
 	ID3D12RootSignature* CreateGraphicsRootSignature();
 	virtual void CreateShaderVariables();
 	virtual void ReleaseUploadBuffers();
@@ -37,8 +38,8 @@ public:
 	//
 	virtual void ReleaseShaderVariables();
 
-	bool OnMouseEvent(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
-	bool OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+	bool OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info);
+	bool OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM state);
 
 	CPlayer* m_pPlayer = NULL;
 
@@ -46,12 +47,13 @@ public:
 	const std::string myName;
 
 	GameFramework& myFramework;
+
+	HWND myWindow;
 	ID3D12Device* d3dDevice;
 	ID3D12GraphicsCommandList* d3dTaskList;
 	ID3D12RootSignature* d3dShaderParameters;
 
 	std::vector<shared_ptr<GameObject>> myInstances;
-	//GameObject** m_ppGameObjects = NULL;
 
 	CLight* m_pLights = NULL;
 	int m_nLights = 0;
@@ -61,5 +63,6 @@ public:
 	ID3D12Resource* m_pd3dcbLights = NULL;
 	LIGHTS* m_pcbMappedLights = NULL;
 
+	POINT m_ptOldCursorPos;
 	float lastDeltaTime = 0.0f;
 };

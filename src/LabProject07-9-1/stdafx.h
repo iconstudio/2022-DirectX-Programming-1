@@ -45,7 +45,7 @@ class GameFramework;
 class CScene;
 
 class CMaterial;
-class CShader;
+class Pipeline;
 class CLight;
 using ShaderBlob = D3D12_SHADER_BYTECODE;
 
@@ -55,7 +55,6 @@ class GameObject;
 class Car;
 class Player;
 
-//#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
 #define FRAME_BUFFER_WIDTH		800
 #define FRAME_BUFFER_HEIGHT		600
 
@@ -81,15 +80,21 @@ class Player;
 
 #include "Arithmetics.hpp"
 
+//#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
 //#define _WITH_CB_GAMEOBJECT_32BIT_CONSTANTS
 //#define _WITH_CB_GAMEOBJECT_ROOT_DESCRIPTOR
 #define _WITH_CB_WORLD_MATRIX_DESCRIPTOR_TABLE
+#define _WITH_DEBUG_FRAME_HIERARCHY
 
 extern UINT gnCbvSrvDescriptorIncrementSize;
 
+int ReadIntegerFromFile(FILE* file);
+float ReadFloatFromFile(FILE* file);
+BYTE ReadStringFromFile(FILE* file, char* token);
+
 extern ID3D12Resource* CreateBufferResource(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, void* pData, UINT nBytes, D3D12_HEAP_TYPE d3dHeapType = D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATES d3dResourceStates = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, ID3D12Resource** ppd3dUploadBuffer = NULL);
 
-extern ID3D12Resource* CreateTextureResourceFromDDSFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, wchar_t* pszFileName, ID3D12Resource** ppd3dUploadBuffer, D3D12_RESOURCE_STATES d3dResourceStates = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+//extern ID3D12Resource* CreateTextureResourceFromDDSFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, wchar_t* pszFileName, ID3D12Resource** ppd3dUploadBuffer, D3D12_RESOURCE_STATES d3dResourceStates = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 DESC_HANDLE operator+(const DESC_HANDLE& handle, const size_t increment);
 DESC_HANDLE operator+(DESC_HANDLE&& handle, const size_t increment);

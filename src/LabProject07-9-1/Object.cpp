@@ -47,7 +47,7 @@ void GameObject::SetMesh(CMesh* pMesh)
 	if (m_pMesh) m_pMesh->AddRef();
 }
 
-void GameObject::SetShader(CShader* pShader)
+void GameObject::SetShader(Pipeline* pShader)
 {
 	m_nMaterials = 1;
 	m_ppMaterials = new CMaterial * [m_nMaterials];
@@ -55,7 +55,7 @@ void GameObject::SetShader(CShader* pShader)
 	m_ppMaterials[0]->SetShader(pShader);
 }
 
-void GameObject::SetShader(int nMaterial, CShader* pShader)
+void GameObject::SetShader(int nMaterial, Pipeline* pShader)
 {
 	if (m_ppMaterials[nMaterial])
 	{
@@ -259,36 +259,9 @@ void GameObject::Rotate(XMFLOAT4* pxmf4Quaternion)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-int ReadIntegerFromFile(FILE* pInFile)
+CMeshLoadInfo* GameObject::LoadRawMesh(FILE* pInFile)
 {
-	int nValue = 0;
-	UINT nReads = (UINT)::fread(&nValue, sizeof(int), 1, pInFile);
-	return(nValue);
-}
-
-float ReadFloatFromFile(FILE* pInFile)
-{
-	float fValue = 0;
-	UINT nReads = (UINT)::fread(&fValue, sizeof(float), 1, pInFile);
-	return(fValue);
-}
-
-BYTE ReadStringFromFile(FILE* pInFile, char* pstrToken)
-{
-	BYTE nStrLength = 0;
-	UINT nReads = 0;
-	nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pInFile);
-	nReads = (UINT)::fread(pstrToken, sizeof(char), nStrLength, pInFile);
-	pstrToken[nStrLength] = '\0';
-
-	return(nStrLength);
-}
-
-#define _WITH_DEBUG_FRAME_HIERARCHY
-
-CMeshLoadInfo* GameObject::LoadMeshInfoFromFile(FILE* pInFile)
-{
-	char pstrToken[64] = { '\0' };
+	char token[64] = { '\0' };
 	UINT nReads = 0;
 
 	int nPositions = 0, nColors = 0, nNormals = 0, nIndices = 0, nSubMeshes = 0, nSubIndices = 0;
@@ -300,14 +273,14 @@ CMeshLoadInfo* GameObject::LoadMeshInfoFromFile(FILE* pInFile)
 
 	for (; ; )
 	{
-		::ReadStringFromFile(pInFile, pstrToken);
+		::ReadStringFromFile(pInFile, token);
 
-		if (!strcmp(pstrToken, "<Bounds>:"))
+		if (!strcmp(token, "<Bounds>:"))
 		{
 			nReads = (UINT)::fread(&(pMeshInfo->m_xmf3AABBCenter), sizeof(XMFLOAT3), 1, pInFile);
 			nReads = (UINT)::fread(&(pMeshInfo->m_xmf3AABBExtents), sizeof(XMFLOAT3), 1, pInFile);
 		}
-		else if (!strcmp(pstrToken, "<Positions>:"))
+		else if (!strcmp(token, "<Positions>:"))
 		{
 			nPositions = ::ReadIntegerFromFile(pInFile);
 			if (nPositions > 0)
@@ -317,7 +290,7 @@ CMeshLoadInfo* GameObject::LoadMeshInfoFromFile(FILE* pInFile)
 				nReads = (UINT)::fread(pMeshInfo->m_pxmf3Positions, sizeof(XMFLOAT3), nPositions, pInFile);
 			}
 		}
-		else if (!strcmp(pstrToken, "<Colors>:"))
+		else if (!strcmp(token, "<Colors>:"))
 		{
 			nColors = ::ReadIntegerFromFile(pInFile);
 			if (nColors > 0)
@@ -327,7 +300,7 @@ CMeshLoadInfo* GameObject::LoadMeshInfoFromFile(FILE* pInFile)
 				nReads = (UINT)::fread(pMeshInfo->m_pxmf4Colors, sizeof(XMFLOAT4), nColors, pInFile);
 			}
 		}
-		else if (!strcmp(pstrToken, "<Normals>:"))
+		else if (!strcmp(token, "<Normals>:"))
 		{
 			nNormals = ::ReadIntegerFromFile(pInFile);
 			if (nNormals > 0)
@@ -337,7 +310,7 @@ CMeshLoadInfo* GameObject::LoadMeshInfoFromFile(FILE* pInFile)
 				nReads = (UINT)::fread(pMeshInfo->m_pxmf3Normals, sizeof(XMFLOAT3), nNormals, pInFile);
 			}
 		}
-		else if (!strcmp(pstrToken, "<Indices>:"))
+		else if (!strcmp(token, "<Indices>:"))
 		{
 			nIndices = ::ReadIntegerFromFile(pInFile);
 			if (nIndices > 0)
@@ -346,7 +319,7 @@ CMeshLoadInfo* GameObject::LoadMeshInfoFromFile(FILE* pInFile)
 				nReads = (UINT)::fread(pMeshInfo->m_pnIndices, sizeof(int), nIndices, pInFile);
 			}
 		}
-		else if (!strcmp(pstrToken, "<SubMeshes>:"))
+		else if (!strcmp(token, "<SubMeshes>:"))
 		{
 			pMeshInfo->m_nSubMeshes = ::ReadIntegerFromFile(pInFile);
 			if (pMeshInfo->m_nSubMeshes > 0)
@@ -355,8 +328,8 @@ CMeshLoadInfo* GameObject::LoadMeshInfoFromFile(FILE* pInFile)
 				pMeshInfo->m_ppnSubSetIndices = new UINT * [pMeshInfo->m_nSubMeshes];
 				for (int i = 0; i < pMeshInfo->m_nSubMeshes; i++)
 				{
-					::ReadStringFromFile(pInFile, pstrToken);
-					if (!strcmp(pstrToken, "<SubMesh>:"))
+					::ReadStringFromFile(pInFile, token);
+					if (!strcmp(token, "<SubMesh>:"))
 					{
 						int nIndex = ::ReadIntegerFromFile(pInFile);
 						pMeshInfo->m_pnSubSetIndices[i] = ::ReadIntegerFromFile(pInFile);
@@ -370,7 +343,7 @@ CMeshLoadInfo* GameObject::LoadMeshInfoFromFile(FILE* pInFile)
 				}
 			}
 		}
-		else if (!strcmp(pstrToken, "</Mesh>"))
+		else if (!strcmp(token, "</Mesh>"))
 		{
 			break;
 		}
@@ -378,59 +351,59 @@ CMeshLoadInfo* GameObject::LoadMeshInfoFromFile(FILE* pInFile)
 	return(pMeshInfo);
 }
 
-MATERIALSLOADINFO* GameObject::LoadMaterialsInfoFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, FILE* pInFile)
+RawMaterialsBox* GameObject::LoadRawMaterials(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, FILE* pInFile)
 {
-	char pstrToken[64] = { '\0' };
+	char token[64] = { '\0' };
 	UINT nReads = 0;
 
 	int nMaterial = 0;
 
-	MATERIALSLOADINFO* pMaterialsInfo = new MATERIALSLOADINFO;
+	RawMaterialsBox* pMaterialsInfo = new RawMaterialsBox;
 
 	pMaterialsInfo->m_nMaterials = ::ReadIntegerFromFile(pInFile);
 	pMaterialsInfo->m_pMaterials = new RawMaterial[pMaterialsInfo->m_nMaterials];
 
 	for (; ; )
 	{
-		::ReadStringFromFile(pInFile, pstrToken);
+		::ReadStringFromFile(pInFile, token);
 
-		if (!strcmp(pstrToken, "<Material>:"))
+		if (!strcmp(token, "<Material>:"))
 		{
 			nMaterial = ::ReadIntegerFromFile(pInFile);
 		}
-		else if (!strcmp(pstrToken, "<AlbedoColor>:"))
+		else if (!strcmp(token, "<AlbedoColor>:"))
 		{
 			nReads = (UINT)::fread(&(pMaterialsInfo->m_pMaterials[nMaterial].m_xmf4AlbedoColor), sizeof(float), 4, pInFile);
 		}
-		else if (!strcmp(pstrToken, "<EmissiveColor>:"))
+		else if (!strcmp(token, "<EmissiveColor>:"))
 		{
 			nReads = (UINT)::fread(&(pMaterialsInfo->m_pMaterials[nMaterial].m_xmf4EmissiveColor), sizeof(float), 4, pInFile);
 		}
-		else if (!strcmp(pstrToken, "<SpecularColor>:"))
+		else if (!strcmp(token, "<SpecularColor>:"))
 		{
 			nReads = (UINT)::fread(&(pMaterialsInfo->m_pMaterials[nMaterial].m_xmf4SpecularColor), sizeof(float), 4, pInFile);
 		}
-		else if (!strcmp(pstrToken, "<Glossiness>:"))
+		else if (!strcmp(token, "<Glossiness>:"))
 		{
 			nReads = (UINT)::fread(&(pMaterialsInfo->m_pMaterials[nMaterial].m_fGlossiness), sizeof(float), 1, pInFile);
 		}
-		else if (!strcmp(pstrToken, "<Smoothness>:"))
+		else if (!strcmp(token, "<Smoothness>:"))
 		{
 			nReads = (UINT)::fread(&(pMaterialsInfo->m_pMaterials[nMaterial].m_fSmoothness), sizeof(float), 1, pInFile);
 		}
-		else if (!strcmp(pstrToken, "<Metallic>:"))
+		else if (!strcmp(token, "<Metallic>:"))
 		{
 			nReads = (UINT)::fread(&(pMaterialsInfo->m_pMaterials[nMaterial].m_fSpecularHighlight), sizeof(float), 1, pInFile);
 		}
-		else if (!strcmp(pstrToken, "<SpecularHighlight>:"))
+		else if (!strcmp(token, "<SpecularHighlight>:"))
 		{
 			nReads = (UINT)::fread(&(pMaterialsInfo->m_pMaterials[nMaterial].m_fMetallic), sizeof(float), 1, pInFile);
 		}
-		else if (!strcmp(pstrToken, "<GlossyReflection>:"))
+		else if (!strcmp(token, "<GlossyReflection>:"))
 		{
 			nReads = (UINT)::fread(&(pMaterialsInfo->m_pMaterials[nMaterial].m_fGlossyReflection), sizeof(float), 1, pInFile);
 		}
-		else if (!strcmp(pstrToken, "</Materials>"))
+		else if (!strcmp(token, "</Materials>"))
 		{
 			break;
 		}
@@ -438,26 +411,26 @@ MATERIALSLOADINFO* GameObject::LoadMaterialsInfoFromFile(ID3D12Device* device, I
 	return(pMaterialsInfo);
 }
 
-GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* pd3dGraphicsRootSignature, FILE* pInFile)
+GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* signature, FILE* pInFile)
 {
-	char pstrToken[64] = { '\0' };
+	char token[64] = { '\0' };
 	UINT nReads = 0;
 
 	int nFrame = 0;
 
-	GameObject* pGameObject = NULL;
+	GameObject* root = nullptr;
 
 	for (; ; )
 	{
-		::ReadStringFromFile(pInFile, pstrToken);
-		if (!strcmp(pstrToken, "<Frame>:"))
+		::ReadStringFromFile(pInFile, token);
+		if (!strcmp(token, "<Frame>:"))
 		{
-			pGameObject = new GameObject();
+			root = new GameObject();
 
 			nFrame = ::ReadIntegerFromFile(pInFile);
-			::ReadStringFromFile(pInFile, pGameObject->m_pstrFrameName);
+			::ReadStringFromFile(pInFile, root->m_pstrFrameName);
 		}
-		else if (!strcmp(pstrToken, "<Transform>:"))
+		else if (!strcmp(token, "<Transform>:"))
 		{
 			XMFLOAT3 xmf3Position, xmf3Rotation, xmf3Scale;
 			XMFLOAT4 xmf4Rotation;
@@ -466,13 +439,13 @@ GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* device, ID3D12G
 			nReads = (UINT)::fread(&xmf3Scale, sizeof(float), 3, pInFile);
 			nReads = (UINT)::fread(&xmf4Rotation, sizeof(float), 4, pInFile); //Quaternion
 		}
-		else if (!strcmp(pstrToken, "<TransformMatrix>:"))
+		else if (!strcmp(token, "<TransformMatrix>:"))
 		{
-			nReads = (UINT)::fread(&pGameObject->localTransform, sizeof(float), 16, pInFile);
+			nReads = (UINT)::fread(&root->localTransform, sizeof(float), 16, pInFile);
 		}
-		else if (!strcmp(pstrToken, "<Mesh>:"))
+		else if (!strcmp(token, "<Mesh>:"))
 		{
-			CMeshLoadInfo* pMeshInfo = pGameObject->LoadMeshInfoFromFile(pInFile);
+			CMeshLoadInfo* pMeshInfo = root->LoadRawMesh(pInFile);
 			if (pMeshInfo)
 			{
 				CMesh* pMesh = NULL;
@@ -480,87 +453,92 @@ GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* device, ID3D12G
 				{
 					pMesh = new CMeshIlluminatedFromFile(device, cmd_list, pMeshInfo);
 				}
-				if (pMesh) pGameObject->SetMesh(pMesh);
+				if (pMesh) root->SetMesh(pMesh);
 				delete pMeshInfo;
 			}
 		}
-		else if (!strcmp(pstrToken, "<Materials>:"))
+		else if (!strcmp(token, "<Materials>:"))
 		{
-			MATERIALSLOADINFO* pMaterialsInfo = pGameObject->LoadMaterialsInfoFromFile(device, cmd_list, pInFile);
+			RawMaterialsBox* pMaterialsInfo = root->LoadRawMaterials(device, cmd_list, pInFile);
 			if (pMaterialsInfo && (pMaterialsInfo->m_nMaterials > 0))
 			{
-				pGameObject->m_nMaterials = pMaterialsInfo->m_nMaterials;
-				pGameObject->m_ppMaterials = new CMaterial * [pMaterialsInfo->m_nMaterials];
+				if (!root)
+				{
+					throw "메쉬를 불러오는 중에 객체가 생성되지 않는 문제 발생!";
+				}
+
+				root->m_nMaterials = pMaterialsInfo->m_nMaterials;
+				root->m_ppMaterials = new CMaterial*[pMaterialsInfo->m_nMaterials];
 
 				for (int i = 0; i < pMaterialsInfo->m_nMaterials; i++)
 				{
-					pGameObject->m_ppMaterials[i] = NULL;
+					root->m_ppMaterials[i] = NULL;
 
 					CMaterial* pMaterial = new CMaterial();
 
 					CMaterialColors* pMaterialColors = new CMaterialColors(&pMaterialsInfo->m_pMaterials[i]);
 					pMaterial->SetMaterialColors(pMaterialColors);
 
-					if (pGameObject->GetMeshType() & VERTEXT_NORMAL) pMaterial->SetIlluminatedShader();
+					if (root->GetMeshType() & VERTEXT_NORMAL) pMaterial->SetIlluminatedShader();
 
-					pGameObject->SetMaterial(i, pMaterial);
+					root->SetMaterial(i, pMaterial);
 				}
 			}
 		}
-		else if (!strcmp(pstrToken, "<Children>:"))
+		else if (!strcmp(token, "<Children>:"))
 		{
 			int nChilds = ::ReadIntegerFromFile(pInFile);
 			if (nChilds > 0)
 			{
 				for (int i = 0; i < nChilds; i++)
 				{
-					GameObject* pChild = GameObject::LoadFrameHierarchyFromFile(device, cmd_list, pd3dGraphicsRootSignature, pInFile);
-					if (pChild) pGameObject->SetChild(pChild);
+					GameObject* pChild = GameObject::LoadFrameHierarchyFromFile(device, cmd_list, signature, pInFile);
+					if (pChild) root->SetChild(pChild);
 #ifdef _WITH_DEBUG_RUNTIME_FRAME_HIERARCHY
 					TCHAR pstrDebug[256] = { 0 };
-					_stprintf_s(pstrDebug, 256, _T("(Child Frame: %p) (Parent Frame: %p)\n"), pChild, pGameObject);
+					_stprintf_s(pstrDebug, 256, _T("(Child Frame: %p) (Parent Frame: %p)\n"), pChild, root);
 					OutputDebugString(pstrDebug);
 #endif
 				}
 			}
 		}
-		else if (!strcmp(pstrToken, "</Frame>"))
+		else if (!strcmp(token, "</Frame>"))
 		{
 			break;
 		}
 	}
-	return(pGameObject);
+	return(root);
 }
 
-void GameObject::PrintFrameInfo(GameObject* pGameObject, GameObject* pParent)
+void GameObject::PrintFrameInfo(GameObject* root, GameObject* pParent)
 {
 	TCHAR pstrDebug[256] = { 0 };
 
-	_stprintf_s(pstrDebug, 256, _T("(Frame: %p) (Parent: %p)\n"), pGameObject, pParent);
+	_stprintf_s(pstrDebug, 256, _T("(Frame: %p) (Parent: %p)\n"), root, pParent);
 	OutputDebugString(pstrDebug);
 
-	if (pGameObject->mySibling) GameObject::PrintFrameInfo(pGameObject->mySibling, pParent);
-	if (pGameObject->myChild) GameObject::PrintFrameInfo(pGameObject->myChild, pGameObject);
+	if (root->mySibling) GameObject::PrintFrameInfo(root->mySibling, pParent);
+	if (root->myChild) GameObject::PrintFrameInfo(root->myChild, root);
 }
 
-GameObject* GameObject::LoadGeometryFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName)
+GameObject* GameObject::LoadGeometryFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* signature, char* pstrFileName)
 {
 	FILE* pInFile = NULL;
 	::fopen_s(&pInFile, pstrFileName, "rb");
 	::rewind(pInFile);
 
-	GameObject* pGameObject = NULL;
-	char pstrToken[64] = { '\0' };
+	GameObject* root = NULL;
+	char token[64] = { '\0' };
 
 	for (; ; )
 	{
-		::ReadStringFromFile(pInFile, pstrToken);
+		::ReadStringFromFile(pInFile, token);
 
-		if (!strcmp(pstrToken, "<Hierarchy>:"))
+		if (!strcmp(token, "<Hierarchy>:"))
 		{
-			pGameObject = GameObject::LoadFrameHierarchyFromFile(device, cmd_list, pd3dGraphicsRootSignature, pInFile);
+			root = GameObject::LoadFrameHierarchyFromFile(device, cmd_list, signature, pInFile);
 		}
-		else if (!strcmp(pstrToken, "</Hierarchy>"))
+		else if (!strcmp(token, "</Hierarchy>"))
 		{
 			break;
 		}
@@ -571,10 +549,10 @@ GameObject* GameObject::LoadGeometryFromFile(ID3D12Device* device, ID3D12Graphic
 	_stprintf_s(pstrDebug, 256, _T("Frame Hierarchy\n"));
 	OutputDebugString(pstrDebug);
 
-	GameObject::PrintFrameInfo(pGameObject, NULL);
+	GameObject::PrintFrameInfo(root, NULL);
 #endif
 
-	return(pGameObject);
+	return(root);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

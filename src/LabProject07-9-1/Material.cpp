@@ -10,7 +10,7 @@ CMaterialColors::CMaterialColors(RawMaterial* pMaterialInfo)
 	m_xmf4Emissive = pMaterialInfo->m_xmf4EmissiveColor;
 }
 
-CShader* CMaterial::m_pIlluminatedShader = NULL;
+Pipeline* CMaterial::m_pIlluminatedShader = NULL;
 
 CMaterial::CMaterial()
 {}
@@ -21,7 +21,7 @@ CMaterial::~CMaterial()
 	if (m_pMaterialColors) m_pMaterialColors->Release();
 }
 
-void CMaterial::SetShader(CShader* pShader)
+void CMaterial::SetShader(Pipeline* pShader)
 {
 	if (m_pShader) m_pShader->Release();
 	m_pShader = pShader;
@@ -43,9 +43,16 @@ void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList* cmd_list)
 	cmd_list->SetGraphicsRoot32BitConstants(1, 4, &(m_pMaterialColors->m_xmf4Emissive), 28);
 }
 
-void CMaterial::PrepareShaders(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* pd3dGraphicsRootSignature)
+void CMaterial::PrepareShaders(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* signature)
 {
 	m_pIlluminatedShader = new CIlluminatedShader();
-	m_pIlluminatedShader->CreateShader(device, cmd_list, pd3dGraphicsRootSignature);
+	m_pIlluminatedShader->CreateShader(device, cmd_list, signature);
 	m_pIlluminatedShader->CreateShaderVariables(device, cmd_list);
 }
+
+RawMaterial::RawMaterial(const UINT type)
+	: myType(type)
+{}
+
+RawMaterial::~RawMaterial()
+{}
