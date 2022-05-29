@@ -96,6 +96,7 @@ void CScene::Build()
 	pApacheObject->Rotate(0.0f, 90.0f, 0.0f);
 	myInstances.emplace_back(pApacheObject);
 	
+	//
 	pApacheObject = new CApacheObject();
 	pApacheObject->SetChild(pApacheModel, true);
 	pApacheObject->OnInitialize();
@@ -251,7 +252,7 @@ ID3D12RootSignature* CScene::CreateGraphicsRootSignature()
 		pd3dErrorBlob->Release();
 	}
 
-	return  root_signature;
+	return root_signature;
 }
 
 void CScene::Start()
@@ -271,6 +272,8 @@ void CScene::Update(float elapsed_time)
 	{
 		instance->Animate(elapsed_time, nullptr);
 	}
+
+	m_pPlayer->Update(elapsed_time);
 
 	if (m_pLights)
 	{
@@ -296,6 +299,9 @@ void CScene::Render(GameCamera* pCamera)
 		instance->UpdateTransform(NULL);
 		instance->Render(d3dTaskList, pCamera);
 	}
+
+	m_pPlayer->OnPrepareRender();
+	m_pPlayer->Render(d3dTaskList);
 }
 
 bool CScene::OnMouseEvent(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -303,14 +309,14 @@ bool CScene::OnMouseEvent(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lPar
 	return(false);
 }
 
-bool CScene::OnKeyboardEvent(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+bool CScene::OnKeyboardEvent(HWND hWnd, UINT nMessageID, WPARAM key, LPARAM lParam)
 {
 	auto& something = myInstances.at(0);
 
 	switch (nMessageID)
 	{
 		case WM_KEYDOWN:
-		switch (wParam)
+		switch (key)
 		{
 			case 'W': something->MoveForward(+1.0f); break;
 			case 'S': something->MoveForward(-1.0f); break;
@@ -318,6 +324,15 @@ bool CScene::OnKeyboardEvent(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM l
 			case 'D': something->MoveStrafe(+1.0f); break;
 			case 'Q': something->MoveUp(+1.0f); break;
 			case 'R': something->MoveUp(-1.0f); break;
+
+			case VK_F1:
+			case VK_F2:
+			case VK_F3:
+			{
+				m_pCamera = m_pPlayer->ChangeCamera((DWORD)(key - VK_F1 + 1), 0);
+			}
+			break;
+
 			default:
 			break;
 		}

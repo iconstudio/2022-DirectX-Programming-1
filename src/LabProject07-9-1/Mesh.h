@@ -10,6 +10,13 @@ protected:
 	D3D12_PRIMITIVE_TOPOLOGY typePrimitives = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT m_nType = 0;
 
+private:
+	int								m_nReferences = 0;
+
+public:
+	void AddRef() { m_nReferences++; }
+	void Release() { if (--m_nReferences <= 0) delete this; }
+
 public:
 	virtual void ReleaseUploadBuffers() {}
 

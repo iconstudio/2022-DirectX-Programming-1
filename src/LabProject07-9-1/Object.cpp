@@ -69,13 +69,11 @@ void GameObject::SetShader(int nMaterial, CShader* pShader)
 
 void GameObject::SetMaterial(int nMaterial, CMaterial* pMaterial)
 {
-	if (m_ppMaterials[nMaterial])
-		m_ppMaterials[nMaterial]->Release();
+	//if (m_ppMaterials[nMaterial])m_ppMaterials[nMaterial]->Release();
 
 	m_ppMaterials[nMaterial] = pMaterial;
 
-	if (m_ppMaterials[nMaterial])
-		m_ppMaterials[nMaterial]->AddRef();
+	//if (m_ppMaterials[nMaterial])m_ppMaterials[nMaterial]->AddRef();
 }
 
 void GameObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
@@ -389,10 +387,10 @@ MATERIALSLOADINFO* GameObject::LoadMaterialsInfoFromFile(ID3D12Device* pd3dDevic
 
 	int nMaterial = 0;
 
-	MATERIALSLOADINFO* pMaterialsInfo = new MATERIALSLOADINFO;
+	auto pMaterialsInfo = new MATERIALSLOADINFO();
 
 	pMaterialsInfo->m_nMaterials = ::ReadIntegerFromFile(pInFile);
-	pMaterialsInfo->m_pMaterials = new MATERIALLOADINFO[pMaterialsInfo->m_nMaterials];
+	pMaterialsInfo->m_pMaterials = new RawMaterial[pMaterialsInfo->m_nMaterials];
 
 	for (; ; )
 	{
@@ -490,7 +488,7 @@ GameObject* GameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3
 		}
 		else if (!strcmp(pstrToken, "<Materials>:"))
 		{
-			MATERIALSLOADINFO* pMaterialsInfo = pGameObject->LoadMaterialsInfoFromFile(pd3dDevice, pd3dCommandList, pInFile);
+			auto pMaterialsInfo = pGameObject->LoadMaterialsInfoFromFile(pd3dDevice, pd3dCommandList, pInFile);
 			if (pMaterialsInfo && (pMaterialsInfo->m_nMaterials > 0))
 			{
 				pGameObject->m_nMaterials = pMaterialsInfo->m_nMaterials;

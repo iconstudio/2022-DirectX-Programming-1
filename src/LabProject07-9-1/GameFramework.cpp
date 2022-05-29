@@ -470,24 +470,6 @@ void GameFramework::BuildStages()
 
 void GameFramework::BuildWorld()
 {
-	for (auto& stage_pair : myScenes)
-	{
-		auto& scene = stage_pair.second;
-		if (scene)
-		{
-			scene->Awake(myDevice, myCommandList);
-		}
-		else
-		{
-			throw "잘못된 장면이 들어가 있음!";
-		}
-	}
-
-	myStageIterator = myStages.begin();
-	if (!currentScene)
-	{
-		currentScene = PeekScene();
-	}
 }
 
 void GameFramework::BuildParticles()
@@ -513,6 +495,25 @@ void GameFramework::BuildObjects()
 
 void GameFramework::CleanupBuilds()
 {
+	for (auto& stage_pair : myScenes)
+	{
+		auto& scene = stage_pair.second;
+		if (scene)
+		{
+			scene->Awake(myDevice, myCommandList);
+		}
+		else
+		{
+			throw "잘못된 장면이 들어가 있음!";
+		}
+	}
+
+	myStageIterator = myStages.begin();
+	if (!currentScene)
+	{
+		currentScene = PeekScene();
+	}
+
 	WaitForGpuComplete();
 
 	for (auto& scene : myScenes)
@@ -537,7 +538,7 @@ void GameFramework::PrepareRendering()
 
 	auto cpu_rtv_handle = GetRTVHandle();
 	auto frame_ptr = static_cast<size_t>(indexFrameBuffer * szRtvDescIncrements);
-	cpu_rtv_handle += frame_ptr;
+	cpu_rtv_handle.ptr += frame_ptr;
 	ClearRenderTargetView(cpu_rtv_handle);
 
 	auto cpu_dsv_handle = GetDSVHandle();

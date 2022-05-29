@@ -38,6 +38,7 @@ public:
 	bool OnWindowsEvent(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 
 	CPlayer* m_pPlayer = NULL;
+	GameCamera* m_pCamera = NULL;
 
 private:
 	ID3D12RootSignature* CreateGraphicsRootSignature();
