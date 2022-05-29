@@ -1,8 +1,11 @@
 #include "stdafx.h"
 #include "GameFramework.h"
-#include "GameScenes.hpp"
+#include "StageIntro.hpp"
+#include "StageMain.hpp"
+#include "StageGame.hpp"
+#include "StageGameEnd.hpp"
+#include "StageCredit.hpp"
 #include "Shader.h"
-#include "Model.hpp"
 
 Pipeline* CMaterial::m_pIlluminatedShader = NULL;
 

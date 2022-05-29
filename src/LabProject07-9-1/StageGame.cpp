@@ -1,186 +1,11 @@
 #include "stdafx.h"
-#include "GameScenes.hpp"
-
-StageIntro::StageIntro(GameFramework& framework, HWND hwnd)
-	: Scene(framework, hwnd, "Intro")
-{}
-
-void StageIntro::Awake(P3DDevice device, P3DGrpCommandList cmd_list)
-{
-	Scene::Awake(device, cmd_list);
-}
-
-void StageIntro::Start()
-{
-	Scene::Start();
-}
-
-void StageIntro::Reset()
-{
-	Scene::Reset();
-}
-
-void StageIntro::Update(float elapsed_time)
-{
-	Scene::Update(elapsed_time);
-}
-
-void StageIntro::Render()
-{
-	Scene::Render();
-}
-
-void StageIntro::RenderUI(HDC surface)
-{
-	Scene::RenderUI(surface);
-}
-
-void StageIntro::OnAwake()
-{}
-
-void StageIntro::OnInialized()
-{}
-
-void StageIntro::OnUpdate()
-{}
-
-void StageIntro::OnRender()
-{}
-
-void StageIntro::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
-{}
-
-void StageIntro::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
-{
-	switch (msg)
-	{
-		case WM_LBUTTONDOWN:
-		{
-		}
-		break;
-
-		case WM_RBUTTONDOWN:
-		{
-		}
-		break;
-
-		case WM_LBUTTONUP:
-		{
-		}
-		break;
-
-		case WM_RBUTTONUP:
-		{
-		}
-		break;
-
-		case WM_MOUSEMOVE:
-		{
-		}
-		break;
-
-		default:
-		{}
-		break;
-	}
-}
-
-void StageIntro::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
-{}
-
-StageMain::StageMain(GameFramework& framework, HWND hwnd)
-	: Scene(framework, hwnd, "Main")
-{}
-
-void StageMain::Awake(P3DDevice device, P3DGrpCommandList cmd_list)
-{
-	Scene::Awake(device, cmd_list);
-}
-
-void StageMain::Start()
-{
-	Scene::Start();
-}
-
-void StageMain::Reset()
-{
-	Scene::Reset();
-}
-
-void StageMain::Update(float elapsed_time)
-{
-	Scene::Update(elapsed_time);
-}
-
-void StageMain::Render()
-{
-	Scene::Render();
-}
-
-void StageMain::RenderUI(HDC surface)
-{
-	Scene::RenderUI(surface);
-}
-
-void StageMain::OnAwake()
-{}
-
-void StageMain::OnInialized()
-{}
-
-void StageMain::OnUpdate()
-{}
-
-void StageMain::OnRender()
-{}
-
-void StageMain::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
-{}
-
-void StageMain::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
-{
-	switch (msg)
-	{
-		case WM_LBUTTONDOWN:
-		{
-		}
-		break;
-
-		case WM_RBUTTONDOWN:
-		{
-		}
-		break;
-
-		case WM_LBUTTONUP:
-		{
-		}
-		break;
-
-		case WM_RBUTTONUP:
-		{
-		}
-		break;
-
-		case WM_MOUSEMOVE:
-		{
-		}
-		break;
-
-		default:
-		{}
-		break;
-	}
-}
-
-void StageMain::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
-{
-}
+#include "StageGame.hpp"
 
 StageGame::StageGame(GameFramework& framework, HWND hwnd)
 	: IlluminatedScene(framework, hwnd, "Game")
 {}
 
-bool StageGame::ProcessInput(UCHAR* pKeysBuffer)
+void StageGame::ProcessInput(UCHAR* pKeysBuffer)
 {
 	DWORD dwDirection = 0;
 	if (pKeysBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
@@ -217,8 +42,6 @@ bool StageGame::ProcessInput(UCHAR* pKeysBuffer)
 			myPlayer->Move(dwDirection, 1.5f, true);
 		}
 	}
-
-	return false;
 }
 
 void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmd_list)
@@ -426,180 +249,34 @@ void StageGame::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 
 void StageGame::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
 {
-}
+	auto& something = myInstances.at(0);
 
-StageGameEnd::StageGameEnd(GameFramework& framework, HWND hwnd)
-	: Scene(framework, hwnd, "Complete")
-{}
-
-void StageGameEnd::Awake(P3DDevice device, P3DGrpCommandList cmd_list)
-{
-	Scene::Awake(device, cmd_list);
-}
-
-void StageGameEnd::Start()
-{
-	Scene::Start();
-}
-
-void StageGameEnd::Reset()
-{
-	Scene::Reset();
-}
-
-void StageGameEnd::Update(float elapsed_time)
-{
-	Scene::Update(elapsed_time);
-}
-
-void StageGameEnd::Render()
-{
-	Scene::Render();
-}
-
-void StageGameEnd::RenderUI(HDC surface)
-{
-	Scene::RenderUI(surface);
-}
-
-void StageGameEnd::OnAwake()
-{}
-
-void StageGameEnd::OnInialized()
-{}
-
-void StageGameEnd::OnUpdate()
-{}
-
-void StageGameEnd::OnRender()
-{}
-
-void StageGameEnd::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
-{}
-
-void StageGameEnd::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
-{
 	switch (msg)
 	{
-		case WM_LBUTTONDOWN:
+		case WM_KEYDOWN:
 		{
-		}
-		break;
+			switch (key)
+			{
+				case VK_F1:
+				case VK_F2:
+				case VK_F3:
+				{
+					myCamera = myPlayer->ChangeCamera((DWORD)(key - VK_F1 + 1), 1.0f);
+				}
+				break;
 
-		case WM_RBUTTONDOWN:
-		{
+				case 'W': something->MoveForward(+1.0f); break;
+				case 'S': something->MoveForward(-1.0f); break;
+				case 'A': something->MoveStrafe(-1.0f); break;
+				case 'D': something->MoveStrafe(+1.0f); break;
+				case 'Q': something->MoveUp(+1.0f); break;
+				case 'R': something->MoveUp(-1.0f); break;
+			}
+			break;
 		}
-		break;
-
-		case WM_LBUTTONUP:
-		{
-		}
-		break;
-
-		case WM_RBUTTONUP:
-		{
-		}
-		break;
-
-		case WM_MOUSEMOVE:
-		{
-		}
-		break;
 
 		default:
 		{}
 		break;
 	}
-}
-
-void StageGameEnd::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
-{
-}
-
-StageCredit::StageCredit(GameFramework& framework, HWND hwnd)
-	: Scene(framework, hwnd, "Credit")
-{}
-
-void StageCredit::Awake(P3DDevice device, P3DGrpCommandList cmd_list)
-{
-	Scene::Awake(device, cmd_list);
-}
-
-void StageCredit::Start()
-{
-	Scene::Start();
-}
-
-void StageCredit::Reset()
-{
-	Scene::Reset();
-}
-
-void StageCredit::Update(float elapsed_time)
-{
-	Scene::Update(elapsed_time);
-}
-
-void StageCredit::Render()
-{
-	Scene::Render();
-}
-
-void StageCredit::RenderUI(HDC surface)
-{
-	Scene::RenderUI(surface);
-}
-
-void StageCredit::OnAwake()
-{}
-
-void StageCredit::OnInialized()
-{}
-
-void StageCredit::OnUpdate()
-{}
-
-void StageCredit::OnRender()
-{}
-
-void StageCredit::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
-{}
-
-void StageCredit::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
-{
-	switch (msg)
-	{
-		case WM_LBUTTONDOWN:
-		{
-		}
-		break;
-
-		case WM_RBUTTONDOWN:
-		{
-		}
-		break;
-
-		case WM_LBUTTONUP:
-		{
-		}
-		break;
-
-		case WM_RBUTTONUP:
-		{
-		}
-		break;
-
-		case WM_MOUSEMOVE:
-		{
-		}
-		break;
-
-		default:
-		{}
-		break;
-	}
-}
-
-void StageCredit::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
-{
 }

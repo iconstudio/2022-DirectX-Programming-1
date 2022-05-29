@@ -31,6 +31,12 @@
     <Filter Include="헤더 파일\Generals">
       <UniqueIdentifier>{b29b328e-723d-4677-8f12-479acc150def}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\Contents\Stages">
+      <UniqueIdentifier>{e2866af2-b704-4e05-ba10-c50c3a1ad4c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Contents\Stages">
+      <UniqueIdentifier>{7fbc34aa-37db-4316-a4b6-a59478f0a56c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -44,9 +50,6 @@
     </ClInclude>
     <ClInclude Include="DirectX.hpp">
       <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="GameScenes.hpp">
-      <Filter>헤더 파일\Contents</Filter>
     </ClInclude>
     <ClInclude Include="Terrains.hpp">
       <Filter>헤더 파일\Contents</Filter>
@@ -96,6 +99,21 @@
     <ClInclude Include="stdafx.h">
       <Filter>헤더 파일\Generals</Filter>
     </ClInclude>
+    <ClInclude Include="StageCredit.hpp">
+      <Filter>헤더 파일\Contents\Stages</Filter>
+    </ClInclude>
+    <ClInclude Include="StageGame.hpp">
+      <Filter>헤더 파일\Contents\Stages</Filter>
+    </ClInclude>
+    <ClInclude Include="StageGameEnd.hpp">
+      <Filter>헤더 파일\Contents\Stages</Filter>
+    </ClInclude>
+    <ClInclude Include="StageIntro.hpp">
+      <Filter>헤더 파일\Contents\Stages</Filter>
+    </ClInclude>
+    <ClInclude Include="StageMain.hpp">
+      <Filter>헤더 파일\Contents\Stages</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -137,9 +155,6 @@
     <ClCompile Include="pch.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="GameScenes.cpp">
-      <Filter>소스 파일\Contents</Filter>
-    </ClCompile>
     <ClCompile Include="Model.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -151,6 +166,21 @@
     </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>소스 파일\Contents</Filter>
+    </ClCompile>
+    <ClCompile Include="StageCredit.cpp">
+      <Filter>소스 파일\Contents\Stages</Filter>
+    </ClCompile>
+    <ClCompile Include="StageGame.cpp">
+      <Filter>소스 파일\Contents\Stages</Filter>
+    </ClCompile>
+    <ClCompile Include="StageGameEnd.cpp">
+      <Filter>소스 파일\Contents\Stages</Filter>
+    </ClCompile>
+    <ClCompile Include="StageIntro.cpp">
+      <Filter>소스 파일\Contents\Stages</Filter>
+    </ClCompile>
+    <ClCompile Include="StageMain.cpp">
+      <Filter>소스 파일\Contents\Stages</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

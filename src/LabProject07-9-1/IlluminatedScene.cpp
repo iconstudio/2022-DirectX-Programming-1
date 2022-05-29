@@ -53,6 +53,8 @@ void IlluminatedScene::Update(float elapsed_time)
 
 void IlluminatedScene::Render()
 {
+	Scene::Render();
+
 	if (!myCamera)
 	{
 		throw "장면에 카메라가 없음!";
@@ -83,7 +85,9 @@ void IlluminatedScene::Render()
 }
 
 void IlluminatedScene::RenderUI(HDC surface)
-{}
+{
+	Scene::RenderUI(surface);
+}
 
 void IlluminatedScene::OnAwake()
 {
@@ -266,38 +270,7 @@ void IlluminatedScene::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 }
 
 void IlluminatedScene::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
-{
-	auto& something = myInstances.at(0);
-
-	switch (msg)
-	{
-		case WM_KEYDOWN:
-		{
-			switch (key)
-			{
-				case VK_F1:
-				case VK_F2:
-				case VK_F3:
-				{
-					myCamera = myPlayer->ChangeCamera((DWORD)(key - VK_F1 + 1), 1.0f);
-				}
-				break;
-
-				case 'W': something->MoveForward(+1.0f); break;
-				case 'S': something->MoveForward(-1.0f); break;
-				case 'A': something->MoveStrafe(-1.0f); break;
-				case 'D': something->MoveStrafe(+1.0f); break;
-				case 'Q': something->MoveUp(+1.0f); break;
-				case 'R': something->MoveUp(-1.0f); break;
-			}
-			break;
-		}
-
-		default:
-		{}
-		break;
-	}
-}
+{}
 
 void IlluminatedScene::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {}
