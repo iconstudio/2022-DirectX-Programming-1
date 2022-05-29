@@ -13,24 +13,22 @@ public:
 	void SetShader(Pipeline* pShader);
 	void SetShader(int nMaterial, Pipeline* pShader);
 	void SetMaterial(int nMaterial, CMaterial* pMaterial);
+	void Attach(GameObject* pChild, bool bReferenceUpdate = false);
 
-	void SetChild(GameObject* pChild, bool bReferenceUpdate = false);
+	virtual void BuildMaterials(P3DDevice device, P3DGrpCommandList cmd_list);
+	virtual void ReleaseUploadBuffers();
 
-	virtual void BuildMaterials(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list) {}
-
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	// °»½Å
+	virtual void Animate(float time_elapsed, XMFLOAT4X4* parent = nullptr);
 
 	virtual void OnPrepareRender() {}
-	virtual void Render(ID3D12GraphicsCommandList* cmd_list, GameCamera* pCamera = NULL);
+	virtual void Render(P3DGrpCommandList cmd_list, GameCamera* pCamera = NULL);
 
-	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list);
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* cmd_list);
-	virtual void ReleaseShaderVariables();
-
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* cmd_list, XMFLOAT4X4* pxmf4x4World);
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* cmd_list, CMaterial* pMaterial);
-
-	virtual void ReleaseUploadBuffers();
+	virtual void InitializeUniforms(P3DDevice device, P3DGrpCommandList cmd_list);
+	virtual void UpdateUniforms(P3DGrpCommandList cmd_list);
+	virtual void UpdateUniforms(P3DGrpCommandList cmd_list, XMFLOAT4X4* pxmf4x4World);
+	virtual void UpdateUniforms(P3DGrpCommandList cmd_list, CMaterial* pMaterial);
+	virtual void ReleaseUniforms();
 
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();
@@ -73,11 +71,11 @@ public:
 	unique_ptr<BoundingOrientedBox> myCollider;
 
 public:
-	static RawMaterialsBox* LoadRawMaterials(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, FILE* pInFile);
+	static RawMaterialsBox* LoadRawMaterials(P3DDevice device, P3DGrpCommandList cmd_list, FILE* pInFile);
 	static CMeshLoadInfo* LoadRawMesh(FILE* pInFile);
 
-	static GameObject* LoadFrameHierarchyFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* signature, FILE* pInFile);
-	static GameObject* LoadGeometryFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* signature, const char* pstrFileName);
+	static GameObject* LoadFrameHierarchyFromFile(P3DDevice device, P3DGrpCommandList cmd_list, ID3D12RootSignature* signature, FILE* pInFile);
+	static GameObject* LoadGeometryFromFile(P3DDevice device, P3DGrpCommandList cmd_list, ID3D12RootSignature* signature, const char* pstrFileName);
 
 	static void PrintFrameInfo(GameObject* pGameObject, GameObject* pParent);
 };
@@ -97,7 +95,7 @@ public:
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
 
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
-	virtual void Render(ID3D12GraphicsCommandList* cmd_list, GameCamera* pCamera = NULL);
+	virtual void Render(P3DGrpCommandList cmd_list, GameCamera* pCamera = NULL);
 };
 
 class CRevolvingObject : public GameObject
@@ -128,7 +126,7 @@ protected:
 	GameObject* m_pTailRotorFrame = NULL;
 
 public:
-	virtual void OnInitialize();
+	virtual void Awake();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 };
 
@@ -139,7 +137,7 @@ public:
 	virtual ~CApacheObject();
 
 public:
-	virtual void OnInitialize();
+	virtual void Awake();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 };
 
@@ -150,7 +148,7 @@ public:
 	virtual ~CGunshipObject();
 
 public:
-	virtual void OnInitialize();
+	virtual void Awake();
 };
 
 class CSuperCobraObject : public CHellicopterObject
@@ -160,7 +158,7 @@ public:
 	virtual ~CSuperCobraObject();
 
 public:
-	virtual void OnInitialize();
+	virtual void Awake();
 };
 
 class CMi24Object : public CHellicopterObject
@@ -170,7 +168,7 @@ public:
 	virtual ~CMi24Object();
 
 public:
-	virtual void OnInitialize();
+	virtual void Awake();
 };
 
 enum class COLLISION_TAGS

@@ -3,9 +3,9 @@
 #include "GameFramework.h"
 #include "Timer.h"
 
-#define MAX_LOADSTRING 100
-
 HINSTANCE appInstance;
+
+constexpr int MAX_LOADSTRING = 100;
 WCHAR captionTitle[MAX_LOADSTRING];
 WCHAR captionClass[MAX_LOADSTRING];
 WCHAR captionFrame[MAX_LOADSTRING];
@@ -30,7 +30,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance
 	ZeroMemory(captionClass, sizeof(captionClass));
 
 	LoadString(hInstance, IDS_APP_TITLE, captionTitle, MAX_LOADSTRING);
-	LoadString(hInstance, IDC_LABPROJECT0791, captionClass, MAX_LOADSTRING);
+	LoadString(hInstance, IDC_APP_CLASS, captionClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
 
 	if (!InitInstance(hInstance, nCmdShow))
@@ -55,7 +55,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance
 		gameFramework.Render();
 	}
 
-	return((int)msg.wParam);
+	gameFramework.WaitForGpuComplete();
+
+	return static_cast<int>(msg.wParam);
 }
 
 ATOM MyRegisterClass(HINSTANCE instance)
@@ -69,14 +71,14 @@ ATOM MyRegisterClass(HINSTANCE instance)
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = instance;
-	wcex.hIcon = ::LoadIcon(instance, MAKEINTRESOURCE(IDI_LABPROJECT0791));
-	wcex.hCursor = ::LoadCursor(NULL, IDC_ARROW);
+	wcex.hIcon = LoadIcon(instance, MAKEINTRESOURCE(IDI_APP_ICON));
+	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wcex.lpszMenuName = NULL;//MAKEINTRESOURCE(IDC_LABPROJECT0791);
+	wcex.lpszMenuName = NULL;
 	wcex.lpszClassName = captionClass;
-	wcex.hIconSm = ::LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
-	return ::RegisterClassEx(&wcex);
+	return RegisterClassEx(&wcex);
 }
 
 BOOL InitInstance(HINSTANCE instance, int cmd_show)
@@ -87,14 +89,20 @@ BOOL InitInstance(HINSTANCE instance, int cmd_show)
 	DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_BORDER;
 	AdjustWindowRect(&rc, style, FALSE);
 
-	HWND hMainWnd = CreateWindow(captionClass, captionTitle, style, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, instance, NULL);
+	HWND hMainWnd = CreateWindow(captionClass, captionTitle, style
+		, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top
+		, NULL, NULL
+		, instance, NULL);
 
-	if (!hMainWnd) return(FALSE);
+	if (!hMainWnd)
+	{
+		return FALSE;
+	}
 
-	::ShowWindow(hMainWnd, cmd_show);
-	::UpdateWindow(hMainWnd);
+	ShowWindow(hMainWnd, cmd_show);
+	UpdateWindow(hMainWnd);
 
-	return(TRUE);
+	return TRUE;
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)

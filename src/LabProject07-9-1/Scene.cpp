@@ -3,8 +3,9 @@
 
 CScene::CScene(GameFramework& framework, const char* name)
 	: myFramework(framework), myName(name)
-	, myWindow(NULL)
+	, myWindow(NULL), posCursor{ 0, 0 }
 	, d3dDevice(nullptr), d3dTaskList(nullptr), d3dShaderParameters(nullptr)
+	, m_xmf4GlobalAmbient(XMFLOAT4())
 {}
 
 CScene::~CScene()
@@ -13,12 +14,12 @@ CScene::~CScene()
 	{
 		d3dShaderParameters->Release();
 	}
-	ReleaseShaderVariables();
+	ReleaseUniforms();
 
 	if (m_pLights) delete[] m_pLights;
 }
 
-void CScene::Awake(HWND hwnd, ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list)
+void CScene::Awake(HWND hwnd, P3DDevice device, P3DGrpCommandList cmd_list)
 {
 	myWindow = hwnd;
 	d3dDevice = device;
@@ -90,16 +91,16 @@ void CScene::Build()
 	CApacheObject* pApacheObject = NULL;
 
 	pApacheObject = new CApacheObject();
-	pApacheObject->SetChild(pApacheModel, true);
-	pApacheObject->OnInitialize();
+	pApacheObject->Attach(pApacheModel, true);
+	pApacheObject->Awake();
 	pApacheObject->SetPosition(+130.0f, 0.0f, 160.0f);
 	pApacheObject->SetScale(10.5f, 10.5f, 10.5f);
 	pApacheObject->Rotate(0.0f, 90.0f, 0.0f);
 	myInstances.emplace_back(pApacheObject);
-	
+
 	pApacheObject = new CApacheObject();
-	pApacheObject->SetChild(pApacheModel, true);
-	pApacheObject->OnInitialize();
+	pApacheObject->Attach(pApacheModel, true);
+	pApacheObject->Awake();
 	pApacheObject->SetPosition(-75.0f, 0.0f, 80.0f);
 	pApacheObject->SetScale(10.5f, 10.5f, 10.5f);
 	pApacheObject->Rotate(0.0f, -90.0f, 0.0f);
@@ -110,8 +111,8 @@ void CScene::Build()
 	CGunshipObject* pGunshipObject = NULL;
 
 	pGunshipObject = new CGunshipObject();
-	pGunshipObject->SetChild(pGunshipModel, true);
-	pGunshipObject->OnInitialize();
+	pGunshipObject->Attach(pGunshipModel, true);
+	pGunshipObject->Awake();
 	pGunshipObject->SetPosition(135.0f, 40.0f, 220.0f);
 	pGunshipObject->SetScale(8.5f, 8.5f, 8.5f);
 	pGunshipObject->Rotate(0.0f, -90.0f, 0.0f);
@@ -122,8 +123,8 @@ void CScene::Build()
 	CSuperCobraObject* pSuperCobraObject = NULL;
 
 	pSuperCobraObject = new CSuperCobraObject();
-	pSuperCobraObject->SetChild(pSuperCobraModel, true);
-	pSuperCobraObject->OnInitialize();
+	pSuperCobraObject->Attach(pSuperCobraModel, true);
+	pSuperCobraObject->Awake();
 	pSuperCobraObject->SetPosition(95.0f, 50.0f, 50.0f);
 	pSuperCobraObject->SetScale(9.5f, 9.5f, 9.5f);
 	pSuperCobraObject->Rotate(0.0f, -90.0f, 0.0f);
@@ -134,17 +135,17 @@ void CScene::Build()
 	CMi24Object* pMi24Object = NULL;
 
 	pMi24Object = new CMi24Object();
-	pMi24Object->SetChild(pMi24Model, true);
-	pMi24Object->OnInitialize();
+	pMi24Object->Attach(pMi24Model, true);
+	pMi24Object->Awake();
 	pMi24Object->SetPosition(-95.0f, 50.0f, 50.0f);
 	pMi24Object->SetScale(4.5f, 4.5f, 4.5f);
 	pMi24Object->Rotate(0.0f, -90.0f, 0.0f);
 	myInstances.emplace_back(pMi24Object);
 
-	CreateShaderVariables();
+	InitializeUniforms();
 }
 
-void CScene::CreateShaderVariables()
+void CScene::InitializeUniforms()
 {
 	// 256의 배수
 	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255);
@@ -158,7 +159,7 @@ void CScene::CreateShaderVariables()
 	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
 }
 
-void CScene::UpdateShaderVariables()
+void CScene::UpdateUniforms()
 {
 	memcpy(m_pcbMappedLights->m_pLights, m_pLights, sizeof(CLight) * m_nLights);
 
@@ -182,7 +183,7 @@ ID3D12RootSignature const* CScene::GetGraphicsRootSignature() const
 	return d3dShaderParameters;
 }
 
-void CScene::ReleaseShaderVariables()
+void CScene::ReleaseUniforms()
 {
 	if (m_pd3dcbLights)
 	{
@@ -203,54 +204,80 @@ ID3D12RootSignature* CScene::CreateGraphicsRootSignature()
 {
 	ID3D12RootSignature* signature = NULL;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[3]{};
+	D3D12_ROOT_PARAMETER shader_params[3]{};
+	ZeroMemory(&shader_params, sizeof(shader_params));
 
-	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[0].Descriptor.ShaderRegister = 1; //Camera
-	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
-	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	// 메모리 배열
+	shader_params[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	shader_params[0].Descriptor.ShaderRegister = 1; //Camera
+	shader_params[0].Descriptor.RegisterSpace = 0;
+	shader_params[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[1].Constants.Num32BitValues = 32;
-	pd3dRootParameters[1].Constants.ShaderRegister = 2; //GameObject
+	// 상수 (x, y, z, w) * 64개
+	shader_params[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	shader_params[1].Constants.Num32BitValues = 32;
+	shader_params[1].Constants.ShaderRegister = 2; //GameObject
 
-	pd3dRootParameters[1].Constants.RegisterSpace = 0;
-	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	shader_params[1].Constants.RegisterSpace = 0;
+	shader_params[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[2].Descriptor.ShaderRegister = 4; //Lights
-	pd3dRootParameters[2].Descriptor.RegisterSpace = 0;
-	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	// 메모리 배열
+	shader_params[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	shader_params[2].Descriptor.ShaderRegister = 4; //Lights
+	shader_params[2].Descriptor.RegisterSpace = 0;
+	shader_params[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
+	// 정점 쉐이더, 픽셀 쉐이더, 입력 조립기, 출력 병합기 
+	auto flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 
-	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
-	::ZeroMemory(&d3dRootSignatureDesc, sizeof(D3D12_ROOT_SIGNATURE_DESC));
+	D3D12_ROOT_SIGNATURE_DESC signature_desc;
+	ZeroMemory(&signature_desc, sizeof(signature_desc));
 
-	d3dRootSignatureDesc.NumParameters = _countof(pd3dRootParameters);
-	d3dRootSignatureDesc.pParameters = pd3dRootParameters;
-	d3dRootSignatureDesc.NumStaticSamplers = 0;
-	d3dRootSignatureDesc.pStaticSamplers = NULL;
-	d3dRootSignatureDesc.Flags = d3dRootSignatureFlags;
+	signature_desc.NumParameters = _countof(shader_params);
+	signature_desc.pParameters = shader_params;
+	signature_desc.NumStaticSamplers = 0; // 텍스처
+	signature_desc.pStaticSamplers = NULL;
+	signature_desc.Flags = flags;
 
-	ID3DBlob* pd3dSignatureBlob = NULL;
-	ID3DBlob* pd3dErrorBlob = NULL;
-	D3D12SerializeRootSignature(&d3dRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &pd3dSignatureBlob, &pd3dErrorBlob);
-	d3dDevice->CreateRootSignature(0, pd3dSignatureBlob->GetBufferPointer(), pd3dSignatureBlob->GetBufferSize(), __uuidof(ID3D12RootSignature), (void**)&signature);
+	ID3DBlob* signature_blob = nullptr;
+	ID3DBlob* error_blob = nullptr;
 
-	if (pd3dSignatureBlob) pd3dSignatureBlob->Release();
-	if (pd3dErrorBlob) pd3dErrorBlob->Release();
+	auto valid = D3D12SerializeRootSignature(&signature_desc
+		, D3D_ROOT_SIGNATURE_VERSION_1, &signature_blob
+		, &error_blob);
+	if (FAILED(valid))
+	{
+		throw "루트 서명의 메모리를 할당하지 못함!";
+	}
 
-	return(signature);
+	UINT gpu_mask = 0;
+	auto uuid = __uuidof(ID3D12RootSignature);
+	auto place = reinterpret_cast<void**>(&signature);
+	valid = d3dDevice->CreateRootSignature(gpu_mask
+		, signature_blob->GetBufferPointer(), signature_blob->GetBufferSize()
+		, uuid, place);
+	if (FAILED(valid))
+	{
+		throw "루트 서명을 셍성하지 못함!";
+	}
+
+	if (signature_blob)
+	{
+		signature_blob->Release();
+	}
+
+	if (error_blob)
+	{
+		error_blob->Release();
+	}
+
+	return signature;
 }
 
 void CScene::Start()
 {}
 
 void CScene::Reset()
-{}
-
-void CScene::Restart()
 {}
 
 void CScene::Update(float elapsed_time)
@@ -262,7 +289,7 @@ void CScene::Update(float elapsed_time)
 		instance->Animate(elapsed_time, nullptr);
 	}
 
-	if (m_pLights)
+	if (m_pLights && m_pPlayer)
 	{
 		m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
 		m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
@@ -286,9 +313,9 @@ bool CScene::ProcessInput(UCHAR* pKeysBuffer)
 	{
 		SetCursor(NULL);
 		GetCursorPos(&ptCursorPos);
-		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
-		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+		cxDelta = (float)(ptCursorPos.x - posCursor.x) / 3.0f;
+		cyDelta = (float)(ptCursorPos.y - posCursor.y) / 3.0f;
+		SetCursorPos(posCursor.x, posCursor.y);
 	}
 
 	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
@@ -315,9 +342,9 @@ void CScene::Render(GameCamera* pCamera)
 	d3dTaskList->SetGraphicsRootSignature(d3dShaderParameters);
 
 	pCamera->SetViewportsAndScissorRects(d3dTaskList);
-	pCamera->UpdateShaderVariables(d3dTaskList);
+	pCamera->UpdateUniforms(d3dTaskList);
 
-	UpdateShaderVariables();
+	UpdateUniforms();
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
 	d3dTaskList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress);
@@ -330,7 +357,7 @@ void CScene::Render(GameCamera* pCamera)
 	}
 }
 
-bool CScene::OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
+void CScene::OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 {
 	switch (msg)
 	{
@@ -338,7 +365,7 @@ bool CScene::OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 		case WM_RBUTTONDOWN:
 		{
 			SetCapture(hwnd);
-			GetCursorPos(&m_ptOldCursorPos);
+			GetCursorPos(&posCursor);
 		}
 		break;
 
@@ -357,11 +384,9 @@ bool CScene::OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 		{}
 		break;
 	}
-
-	return false;
 }
 
-bool CScene::OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
+void CScene::OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
 {
 	auto& something = myInstances.at(0);
 
@@ -385,6 +410,4 @@ bool CScene::OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
 		{}
 		break;
 	}
-
-	return false;
 }

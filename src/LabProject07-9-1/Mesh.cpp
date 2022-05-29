@@ -21,13 +21,12 @@ CMeshLoadInfo::~CMeshLoadInfo()
 	if (m_ppnSubSetIndices) delete[] m_ppnSubSetIndices;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
-//
-CMeshFromFile::CMeshFromFile(ID3D12Device *device, ID3D12GraphicsCommandList *cmd_list, CMeshLoadInfo *pMeshInfo)
+CMeshFromFile::CMeshFromFile(P3DDevice device, P3DGrpCommandList cmd_list, CMeshLoadInfo *pMeshInfo)
 {
 	m_nVertices = pMeshInfo->m_nVertices;
 	m_nType = pMeshInfo->m_nType;
 
+	// 서술자 & 서술자 힙이 필요없다.
 	m_pd3dPositionBuffer = ::CreateBufferResource(device, cmd_list, pMeshInfo->m_pxmf3Positions, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
 
 	m_d3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
@@ -90,9 +89,9 @@ void CMeshFromFile::ReleaseUploadBuffers()
 	}
 }
 
-void CMeshFromFile::Render(ID3D12GraphicsCommandList *cmd_list, int nSubSet)
+void CMeshFromFile::Render(P3DGrpCommandList cmd_list, int nSubSet)
 {
-	cmd_list->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+	cmd_list->IASetPrimitiveTopology(typePrimitive);
 	cmd_list->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
 	if ((m_nSubMeshes > 0) && (nSubSet < m_nSubMeshes))
 	{
@@ -107,7 +106,7 @@ void CMeshFromFile::Render(ID3D12GraphicsCommandList *cmd_list, int nSubSet)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CMeshIlluminatedFromFile::CMeshIlluminatedFromFile(ID3D12Device *device, ID3D12GraphicsCommandList *cmd_list, CMeshLoadInfo *pMeshInfo) : CMeshFromFile::CMeshFromFile(device, cmd_list, pMeshInfo)
+CMeshIlluminatedFromFile::CMeshIlluminatedFromFile(P3DDevice device, P3DGrpCommandList cmd_list, CMeshLoadInfo *pMeshInfo) : CMeshFromFile::CMeshFromFile(device, cmd_list, pMeshInfo)
 {
 	m_pd3dNormalBuffer = ::CreateBufferResource(device, cmd_list, pMeshInfo->m_pxmf3Normals, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dNormalUploadBuffer);
 
@@ -129,11 +128,12 @@ void CMeshIlluminatedFromFile::ReleaseUploadBuffers()
 	m_pd3dNormalUploadBuffer = NULL;
 }
 
-void CMeshIlluminatedFromFile::Render(ID3D12GraphicsCommandList *cmd_list, int nSubSet)
+void CMeshIlluminatedFromFile::Render(P3DGrpCommandList cmd_list, int nSubSet)
 {
-	cmd_list->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
+	cmd_list->IASetPrimitiveTopology(typePrimitive);
 	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[2] = { m_d3dPositionBufferView, m_d3dNormalBufferView };
 	cmd_list->IASetVertexBuffers(m_nSlot, 2, pVertexBufferViews);
+
 	if ((m_nSubMeshes > 0) && (nSubSet < m_nSubMeshes))
 	{
 		cmd_list->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));

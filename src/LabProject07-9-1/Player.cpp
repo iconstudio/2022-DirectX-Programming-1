@@ -27,23 +27,29 @@ CPlayer::CPlayer()
 
 CPlayer::~CPlayer()
 {
-	ReleaseShaderVariables();
+	ReleaseUniforms();
 
-	if (m_pCamera) delete m_pCamera;
+	if (m_pCamera)
+	{
+		delete m_pCamera;
+	}
 }
 
-void CPlayer::CreateShaderVariables(ID3D12Device *device, ID3D12GraphicsCommandList *cmd_list)
+void CPlayer::InitializeUniforms(P3DDevice device, P3DGrpCommandList cmd_list)
 {
-	if (m_pCamera) m_pCamera->CreateShaderVariables(device, cmd_list);
+	if (m_pCamera)
+	{
+		m_pCamera->InitializeUniforms(device, cmd_list);
+	}
 }
 
-void CPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList *cmd_list)
+void CPlayer::UpdateUniforms(P3DGrpCommandList cmd_list)
 {
 }
 
-void CPlayer::ReleaseShaderVariables()
+void CPlayer::ReleaseUniforms()
 {
-	if (m_pCamera) m_pCamera->ReleaseShaderVariables();
+	if (m_pCamera) m_pCamera->ReleaseUniforms();
 }
 
 void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
@@ -219,7 +225,7 @@ void CPlayer::OnPrepareRender()
 	UpdateTransform(NULL);
 }
 
-void CPlayer::Render(ID3D12GraphicsCommandList *cmd_list, GameCamera *pCamera)
+void CPlayer::Render(P3DGrpCommandList cmd_list, GameCamera *pCamera)
 {
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
 
@@ -232,7 +238,7 @@ void CPlayer::Render(ID3D12GraphicsCommandList *cmd_list, GameCamera *pCamera)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CAirplanePlayer
 
-CAirplanePlayer::CAirplanePlayer(ID3D12Device *device, ID3D12GraphicsCommandList *cmd_list, ID3D12RootSignature *signature)
+CAirplanePlayer::CAirplanePlayer(P3DDevice device, P3DGrpCommandList cmd_list, ID3D12RootSignature *signature)
 {
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 10.0f);
 
@@ -241,18 +247,18 @@ CAirplanePlayer::CAirplanePlayer(ID3D12Device *device, ID3D12GraphicsCommandList
 
 	pGameObject->Rotate(15.0f, 0.0f, 0.0f);
 	pGameObject->SetScale(8.5f, 8.5f, 8.5f);
-	SetChild(pGameObject, true);
+	Attach(pGameObject, true);
 
-	OnInitialize();
+	Awake();
 
-	CreateShaderVariables(device, cmd_list);
+	InitializeUniforms(device, cmd_list);
 }
 
 CAirplanePlayer::~CAirplanePlayer()
 {
 }
 
-void CAirplanePlayer::OnInitialize()
+void CAirplanePlayer::Awake()
 {
 //	m_pMainRotorFrame = FindFrame("rotor");
 //	m_pTailRotorFrame = FindFrame("black_m_7");

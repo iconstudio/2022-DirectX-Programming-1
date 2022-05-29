@@ -31,7 +31,11 @@ BYTE ReadStringFromFile(FILE* file, char* token)
 	return(nStrLength);
 }
 
-ID3D12Resource* CreateBufferResource(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, void* data, UINT data_sz, D3D12_HEAP_TYPE type, D3D12_RESOURCE_STATES states, ID3D12Resource** upload_buffer)
+ID3D12Resource* CreateBufferResource(P3DDevice device, P3DGrpCommandList cmd_list
+	, void* data, UINT data_sz
+	, D3D12_HEAP_TYPE type
+	, D3D12_RESOURCE_STATES states
+	, ID3D12Resource** upload_buffer)
 {
 	ID3D12Resource* result = nullptr;
 

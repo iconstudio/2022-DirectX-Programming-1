@@ -451,7 +451,7 @@ void GameFramework::Start()
 	CloseCmdList();
 
 	// 3D 객체, 인덱스 버퍼, 업로드 힙, 파이프라인과 쉐이더 생성
-	ID3D12CommandList* cmd_lists[] = { myCommandList };
+	P3DCommandList cmd_lists[] = { myCommandList };
 	ExecuteCmdList(cmd_lists, std::size(cmd_lists));
 
 	WaitForGpuComplete();
@@ -587,7 +587,7 @@ void GameFramework::Render()
 	SetBarrier(barrierRender);
 
 	CloseCmdList();
-	ID3D12CommandList* cmd_lists[] = { myCommandList };
+	P3DCommandList cmd_lists[] = { myCommandList };
 	ExecuteCmdList(cmd_lists, std::size(cmd_lists));
 
 	WaitForGpuComplete();
@@ -906,7 +906,7 @@ void GameFramework::CloseCmdList()
 		, "명령어 리스트의 닫기 실패");
 }
 
-void GameFramework::ExecuteCmdList(ID3D12CommandList* list[], size_t count)
+void GameFramework::ExecuteCmdList(P3DCommandList list[], size_t count)
 {
 	myCommandQueue->ExecuteCommandLists(count, list);
 }

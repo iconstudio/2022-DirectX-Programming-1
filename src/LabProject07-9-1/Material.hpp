@@ -67,11 +67,11 @@ public:
 	void SetShader(Pipeline* pShader);
 	void SetIlluminatedShader() { SetShader(m_pIlluminatedShader); }
 
-	void UpdateShaderVariable(ID3D12GraphicsCommandList* cmd_list);
+	void UpdateUniforms(P3DGrpCommandList cmd_list);
 
 protected:
 	static Pipeline* m_pIlluminatedShader;
 
 public:
-	static void PrepareShaders(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* signature);
+	static void PrepareShaders(P3DDevice device, P3DGrpCommandList cmd_list, ID3D12RootSignature* signature);
 };

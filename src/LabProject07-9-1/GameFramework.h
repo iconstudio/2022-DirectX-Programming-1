@@ -65,7 +65,7 @@ private:
 	void ResetCmdAllocator();
 	void ResetCmdList(ID3D12PipelineState* pipeline = nullptr);
 	void CloseCmdList();
-	void ExecuteCmdList(ID3D12CommandList* list[], size_t count);
+	void ExecuteCmdList(P3DCommandList list[], size_t count);
 
 	//
 	DESC_HANDLE& AddtoDescriptor(DESC_HANDLE& handle, const size_t increment);
@@ -97,9 +97,9 @@ private:
 
 	IDXGIFactory4* myFactory;
 	IDXGISwapChain3* mySwapChain;
-	ID3D12Device* myDevice;
+	P3DDevice myDevice;
 
-	ID3D12GraphicsCommandList* myCommandList;
+	P3DGrpCommandList myCommandList;
 	ID3D12CommandQueue* myCommandQueue;
 	ID3D12CommandAllocator* myCommandAlloc;
 

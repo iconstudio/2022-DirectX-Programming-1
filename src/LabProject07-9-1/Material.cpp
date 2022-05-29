@@ -40,7 +40,7 @@ void CMaterial::SetMaterialColors(CMaterialColors* pMaterialColors)
 	if (m_pMaterialColors) m_pMaterialColors->AddRef();
 }
 
-void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList* cmd_list)
+void CMaterial::UpdateUniforms(P3DGrpCommandList cmd_list)
 {
 	cmd_list->SetGraphicsRoot32BitConstants(1, 4, &(m_pMaterialColors->m_xmf4Ambient), 16);
 	cmd_list->SetGraphicsRoot32BitConstants(1, 4, &(m_pMaterialColors->m_xmf4Diffuse), 20);
@@ -48,9 +48,9 @@ void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList* cmd_list)
 	cmd_list->SetGraphicsRoot32BitConstants(1, 4, &(m_pMaterialColors->m_xmf4Emissive), 28);
 }
 
-void CMaterial::PrepareShaders(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* signature)
+void CMaterial::PrepareShaders(P3DDevice device, P3DGrpCommandList cmd_list, ID3D12RootSignature* signature)
 {
 	m_pIlluminatedShader = new CIlluminatedShader();
 	m_pIlluminatedShader->CreateShader(device, cmd_list, signature);
-	m_pIlluminatedShader->CreateShaderVariables(device, cmd_list);
+	m_pIlluminatedShader->InitializeUniforms(device, cmd_list);
 }

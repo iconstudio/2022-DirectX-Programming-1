@@ -78,6 +78,12 @@
     <ClInclude Include="GameScenes.hpp">
       <Filter>헤더 파일\Contents</Filter>
     </ClInclude>
+    <ClInclude Include="Model.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrains.hpp">
+      <Filter>헤더 파일\Contents</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -125,6 +131,12 @@
     <ClCompile Include="GameScenes.cpp">
       <Filter>소스 파일\Contents</Filter>
     </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Terrains.cpp">
+      <Filter>소스 파일\Contents</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LabProject07-9-1.rc">
@@ -136,6 +148,9 @@
       <Filter>리소스 파일</Filter>
     </Image>
     <Image Include="LabProject07-9-1.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="icon.ico">
       <Filter>리소스 파일</Filter>
     </Image>
   </ItemGroup>

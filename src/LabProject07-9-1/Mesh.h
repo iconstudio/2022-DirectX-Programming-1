@@ -7,7 +7,7 @@ public:
     virtual ~CMesh() { }
 
 private:
-	int								m_nReferences = 0;
+	int m_nReferences = 0;
 
 public:
 	void AddRef() { m_nReferences++; }
@@ -16,7 +16,7 @@ public:
 	virtual void ReleaseUploadBuffers() { }
 
 protected:
-	D3D12_PRIMITIVE_TOPOLOGY		m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	D3D12_PRIMITIVE_TOPOLOGY		typePrimitive = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT							m_nSlot = 0;
 	UINT							m_nVertices = 0;
 	UINT							m_nOffset = 0;
@@ -25,8 +25,8 @@ protected:
 
 public:
 	UINT GetType() { return(m_nType); }
-	virtual void Render(ID3D12GraphicsCommandList *cmd_list) { }
-	virtual void Render(ID3D12GraphicsCommandList *cmd_list, int nSubSet) { }
+	virtual void Render(P3DGrpCommandList cmd_list) { }
+	virtual void Render(P3DGrpCommandList cmd_list, int nSubSet) { }
 };
 
 #define VERTEXT_POSITION			0x01
@@ -63,7 +63,7 @@ public:
 class CMeshFromFile : public CMesh
 {
 public:
-	CMeshFromFile(ID3D12Device *device, ID3D12GraphicsCommandList *cmd_list, CMeshLoadInfo *pMeshInfo);
+	CMeshFromFile(P3DDevice device, P3DGrpCommandList cmd_list, CMeshLoadInfo *pMeshInfo);
 	virtual ~CMeshFromFile();
 
 public:
@@ -82,13 +82,13 @@ protected:
 	D3D12_INDEX_BUFFER_VIEW			*m_pd3dSubSetIndexBufferViews = NULL;
 
 public:
-	virtual void Render(ID3D12GraphicsCommandList *cmd_list, int nSubSet);
+	virtual void Render(P3DGrpCommandList cmd_list, int nSubSet);
 };
 
 class CMeshIlluminatedFromFile : public CMeshFromFile
 {
 public:
-	CMeshIlluminatedFromFile(ID3D12Device *device, ID3D12GraphicsCommandList *cmd_list, CMeshLoadInfo *pMeshInfo);
+	CMeshIlluminatedFromFile(P3DDevice device, P3DGrpCommandList cmd_list, CMeshLoadInfo *pMeshInfo);
 	virtual ~CMeshIlluminatedFromFile();
 
 	virtual void ReleaseUploadBuffers();
@@ -99,5 +99,5 @@ protected:
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dNormalBufferView;
 
 public:
-	virtual void Render(ID3D12GraphicsCommandList *cmd_list, int nSubSet);
+	virtual void Render(P3DGrpCommandList cmd_list, int nSubSet);
 };

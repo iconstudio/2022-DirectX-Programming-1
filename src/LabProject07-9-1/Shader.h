@@ -26,17 +26,17 @@ public:
 	ShaderBlob CompileShaderFromFile(const  WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob);
 	ShaderBlob ReadCompiledShaderFromFile(const WCHAR* pszFileName, ID3DBlob** ppd3dShaderBlob = NULL);
 
-	virtual void CreateShader(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* signature);
+	virtual void CreateShader(P3DDevice device, P3DGrpCommandList cmd_list, ID3D12RootSignature* signature);
 
-	virtual void CreateShaderVariables(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list);
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* cmd_list);
-	virtual void ReleaseShaderVariables();
+	virtual void InitializeUniforms(P3DDevice device, P3DGrpCommandList cmd_list);
+	virtual void UpdateUniforms(P3DGrpCommandList cmd_list);
+	virtual void ReleaseUniforms();
 
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* cmd_list, XMFLOAT4X4* pxmf4x4World);
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* cmd_list, CMaterialColors* pMaterialColors);
+	virtual void UpdateUniforms(P3DGrpCommandList cmd_list, XMFLOAT4X4* pxmf4x4World);
+	virtual void UpdateUniforms(P3DGrpCommandList cmd_list, CMaterialColors* pMaterialColors);
 
-	virtual void OnPrepareRender(ID3D12GraphicsCommandList* cmd_list, int nPipelineState = 0);
-	virtual void Render(ID3D12GraphicsCommandList* cmd_list, GameCamera* pCamera, int nPipelineState = 0);
+	virtual void OnPrepareRender(P3DGrpCommandList cmd_list, int nPipelineState = 0);
+	virtual void Render(P3DGrpCommandList cmd_list, GameCamera* pCamera, int nPipelineState = 0);
 
 protected:
 	ID3DBlob* m_pd3dVertexShaderBlob = NULL;
@@ -60,8 +60,8 @@ public:
 	virtual ShaderBlob CreateVertexShader();
 	virtual ShaderBlob CreatePixelShader();
 
-	virtual void CreateShader(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, ID3D12RootSignature* signature);
+	virtual void CreateShader(P3DDevice device, P3DGrpCommandList cmd_list, ID3D12RootSignature* signature);
 
-	virtual void Render(ID3D12GraphicsCommandList* cmd_list, GameCamera* pCamera, int nPipelineState = 0);
+	virtual void Render(P3DGrpCommandList cmd_list, GameCamera* pCamera, int nPipelineState = 0);
 };
 

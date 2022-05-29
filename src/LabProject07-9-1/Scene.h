@@ -3,6 +3,20 @@
 #include "Player.h"
 #include "Light.hpp"
 
+class Scene
+{
+public:
+	Scene(GameFramework& framework, const char* name);
+	virtual ~Scene();
+
+	virtual void Awake(HWND hwnd, P3DDevice device, P3DGrpCommandList cmd_list) = 0;
+
+	virtual void Start() = 0;
+	virtual void Reset() = 0;
+	virtual void Update(float time_elapsed) = 0;
+	virtual void Render(GameCamera* pCamera = nullptr) = 0;
+};
+
 class CScene
 {
 public:
@@ -10,21 +24,20 @@ public:
 	virtual ~CScene();
 
 	// 초기화
-	void Awake(HWND hwnd, ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list);
+	void Awake(HWND hwnd, P3DDevice device, P3DGrpCommandList cmd_list);
 	virtual void Build();
 
-	ID3D12RootSignature* CreateGraphicsRootSignature();
-	virtual void CreateShaderVariables();
+	virtual ID3D12RootSignature* CreateGraphicsRootSignature();
+	virtual void InitializeUniforms();
 	virtual void ReleaseUploadBuffers();
 
 	// 시작
 	virtual void Start();
 	virtual void Reset();
-	virtual void Restart();
 
 	// 갱신
 	virtual void Update(float time_elapsed);
-	virtual void UpdateShaderVariables();
+	virtual void UpdateUniforms();
 	virtual bool ProcessInput(UCHAR* pKeysBuffer);
 
 	// 렌더링
@@ -36,11 +49,12 @@ public:
 	ID3D12RootSignature* GetGraphicsRootSignature();
 	ID3D12RootSignature const* GetGraphicsRootSignature() const;
 
-	//
-	virtual void ReleaseShaderVariables();
+	// 메모리 해제
+	virtual void ReleaseUniforms();
 
-	bool OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info);
-	bool OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM state);
+	// 이벤트
+	virtual void OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info) = 0;
+	virtual void OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM state) = 0;
 
 	CPlayer* m_pPlayer = NULL;
 
@@ -50,8 +64,8 @@ public:
 	GameFramework& myFramework;
 
 	HWND myWindow;
-	ID3D12Device* d3dDevice;
-	ID3D12GraphicsCommandList* d3dTaskList;
+	P3DDevice d3dDevice;
+	P3DGrpCommandList d3dTaskList;
 	ID3D12RootSignature* d3dShaderParameters;
 
 	std::vector<shared_ptr<GameObject>> myInstances;
@@ -64,6 +78,6 @@ public:
 	ID3D12Resource* m_pd3dcbLights = NULL;
 	LIGHTS* m_pcbMappedLights = NULL;
 
-	POINT m_ptOldCursorPos;
+	POINT posCursor;
 	float lastDeltaTime = 0.0f;
 };
