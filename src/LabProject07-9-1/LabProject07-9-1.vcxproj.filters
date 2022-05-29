@@ -117,6 +117,12 @@
     <ClInclude Include="Transformer.hpp">
       <Filter>헤더 파일\Generals</Filter>
     </ClInclude>
+    <ClInclude Include="GameObject.hpp">
+      <Filter>헤더 파일\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Obstacles.hpp">
+      <Filter>헤더 파일\Contents</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -187,6 +193,9 @@
     </ClCompile>
     <ClCompile Include="Transformer.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Obstacles.cpp">
+      <Filter>소스 파일\Contents</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
