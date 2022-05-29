@@ -6,6 +6,7 @@
 #include "StageGameEnd.hpp"
 #include "StageCredit.hpp"
 #include "Shader.h"
+#include "Model.hpp"
 
 Pipeline* CMaterial::m_pIlluminatedShader = NULL;
 
@@ -24,11 +25,13 @@ GameFramework::GameFramework(unsigned int width, unsigned int height)
 #ifdef _DEBUG
 	, myDebugController(nullptr)
 #endif //  _DEBUG
+	, myModels()
 	, myScenes(), myStages(), myStageIterator(), currentScene()
 {
 	ZeroMemory(resSwapChainBackBuffers, sizeof(resSwapChainBackBuffers));
 	ZeroMemory(myBarriers, sizeof(myBarriers));
 
+	myModels.reserve(10);
 	myScenes.reserve(10);
 	myStages.reserve(10);
 
@@ -444,6 +447,7 @@ void GameFramework::CreateDepthStencilView()
 void GameFramework::Start()
 {
 	ResetCmdList();
+	BuildAssets();
 	BuildStages();
 	BuildWorld();
 	BuildParticles();
@@ -461,13 +465,23 @@ void GameFramework::Start()
 	CleanupBuilds();
 }
 
+void GameFramework::BuildAssets()
+{
+	auto model_rallycar = RegisterModel("Model/RallyCar.bin", "RallyCar");
+	auto model_policecar = RegisterModel("Model/PoliceCar.bin", "PoliceCar");
+	auto model_rock1 = RegisterModel("Model/Rock.bin", "Rock1");
+	auto model_rock2 = RegisterModel("Model/Rock2.bin", "Rock2");
+	auto model_tree = RegisterModel("Model/Tree.bin", "Tree");
+	auto model_cactus = RegisterModel("Model/Cactus.bin", "Rock");
+}
+
 void GameFramework::BuildStages()
 {
-	auto room_intro = RegisterStage(StageIntro(*this, myWindow));
-	auto room_main = RegisterStage(StageMain(*this, myWindow));
-	auto room_game = RegisterStage(StageGame(*this, myWindow));
-	auto room_complete = RegisterStage(StageGameEnd(*this, myWindow));
-	auto room_credit = RegisterStage(StageCredit(*this, myWindow));
+	auto room_intro = RegisterScene(StageIntro(*this, myWindow));
+	auto room_main = RegisterScene(StageMain(*this, myWindow));
+	auto room_game = RegisterScene(StageGame(*this, myWindow));
+	auto room_complete = RegisterScene(StageGameEnd(*this, myWindow));
+	auto room_credit = RegisterScene(StageCredit(*this, myWindow));
 	
 	//AddStage(room_intro);
 	//AddStage(room_main);
@@ -607,7 +621,7 @@ void GameFramework::WaitForGpuComplete()
 
 template<typename SceneType>
 	requires(std::is_base_of_v<Scene, SceneType>)
-constexpr shared_ptr<Scene> GameFramework::RegisterStage(SceneType&& stage)
+constexpr shared_ptr<Scene> GameFramework::RegisterScene(SceneType&& stage)
 {
 	auto handle = shared_ptr<SceneType>(std::forward<SceneType*>(new SceneType(stage)));
 	auto ptr = std::static_pointer_cast<Scene>(handle);
@@ -667,6 +681,16 @@ bool GameFramework::JumpToNextStage()
 	return false;
 }
 
+shared_ptr<Model> GameFramework::RegisterModel(const char* path, const char* name)
+{
+	auto handle = Model::Load(myDevice, myCommandList, path);
+	auto ptr = shared_ptr<Model>(handle);
+
+	myModels.insert({ name, ptr });
+
+	return ptr;
+}
+
 weak_ptr<Scene> GameFramework::GetScene(const char* name) const
 {
 	return myScenes.find(name)->second;
@@ -685,6 +709,11 @@ weak_ptr<Scene> GameFramework::GetNextStage() const
 weak_ptr<Scene> GameFramework::GetCurrentScene() const
 {
 	return currentScene;
+}
+
+weak_ptr<Model> GameFramework::GetModel(const char* name) const
+{
+	return myModels.find(name)->second;
 }
 
 void GameFramework::ToggleFullscreen()

@@ -18,6 +18,7 @@ public:
 
 	// 게임 콘텐츠 초기화
 	void Start();
+	void BuildAssets();
 	void BuildStages();
 	void BuildWorld();
 	void BuildParticles();
@@ -38,20 +39,23 @@ public:
 	// 동기화
 	void WaitForGpuComplete();
 
-	// 스테이지 등록
-	template<typename SceneType>
-		requires(std::is_base_of_v<Scene, SceneType>)
-	constexpr shared_ptr<Scene> RegisterStage(SceneType&& stage);
-	void AddStage(const shared_ptr<Scene>& stage);
+	// 장면 등록
+	template<typename SceneType> requires(std::is_base_of_v<Scene, SceneType>)
+	constexpr shared_ptr<Scene> RegisterScene(SceneType&& stage);
 
+	// 스테이지 등록
+	void AddStage(const shared_ptr<Scene>& stage);
 	bool JumpToStage(const size_t index);
 	bool JumpToStage(const std::vector<shared_ptr<Scene>>::iterator it);
 	bool JumpToNextStage();
+
+	shared_ptr<Model> RegisterModel(const char* path, const char* name);
 
 	weak_ptr<Scene> GetScene(const char* name) const;
 	weak_ptr<Scene> GetStage(const size_t index) const;
 	weak_ptr<Scene> GetNextStage() const;
 	weak_ptr<Scene> GetCurrentScene() const;
+	weak_ptr<Model> GetModel(const char* name) const;
 
 	// 전체화면 전환
 	void ToggleFullscreen();
@@ -123,6 +127,7 @@ private:
 #endif
 
 	std::unordered_map<std::string, shared_ptr<Model>> myModels;
+
 	std::unordered_map<std::string, shared_ptr<Scene>> myScenes;
 	std::vector<shared_ptr<Scene>> myStages;
 	std::vector<shared_ptr<Scene>>::iterator myStageIterator;
