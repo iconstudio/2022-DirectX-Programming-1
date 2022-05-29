@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Player.h"
 #include "Shader.h"
+#include "Model.hpp"
 
 CPlayer::CPlayer()
 {
@@ -263,8 +264,8 @@ CAirplanePlayer::CAirplanePlayer(P3DDevice device, P3DGrpCommandList cmd_list, P
 {
 	myCamera = ChangeCamera(THIRD_PERSON_CAMERA, 10.0f);
 
-//	GameObject *pGameObject = GameObject::LoadGeometryFromFile(device, cmd_list, signature, "Model/Apache.bin");
-	GameObject* pGameObject = GameObject::LoadGeometryFromFile(device, cmd_list, signature, "Model/Gunship.bin");
+	//auto pGameObject = Model::Load(device, cmd_list, "Model/Apache.bin");
+	auto pGameObject = Model::Load(device, cmd_list, "Model/Gunship.bin");
 
 	pGameObject->Rotate(15.0f, 0.0f, 0.0f);
 	pGameObject->SetScale(8.5f, 8.5f, 8.5f);
