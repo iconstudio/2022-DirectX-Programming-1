@@ -33,6 +33,7 @@ public:
 	void Render();
 	void PrepareRendering();
 	void AfterRendering();
+	void RenderUI(HDC surface) const;
 
 	// µø±‚»≠
 	void WaitForGpuComplete();

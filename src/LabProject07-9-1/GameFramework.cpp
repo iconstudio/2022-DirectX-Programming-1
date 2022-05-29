@@ -584,6 +584,14 @@ void GameFramework::AfterRendering()
 	WaitForGpuComplete();
 }
 
+void GameFramework::RenderUI(HDC surface) const
+{
+	if (currentScene)
+	{
+		currentScene->RenderUI(surface);
+	}
+}
+
 void GameFramework::WaitForGpuComplete()
 {
 	const auto signal = ++myFences[indexFrameBuffer];
