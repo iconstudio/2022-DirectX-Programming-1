@@ -2,7 +2,7 @@
 #include "GameFramework.h"
 #include "GameScenes.hpp"
 #include "Shader.h"
-#include "Player.h"
+#include "Model.hpp"
 
 Pipeline* CMaterial::m_pIlluminatedShader = NULL;
 
@@ -21,7 +21,7 @@ GameFramework::GameFramework(unsigned int width, unsigned int height)
 #ifdef _DEBUG
 	, myDebugController(nullptr)
 #endif //  _DEBUG
-	, myScenes(), myStages(), myStageIterator(), currentScene(nullptr)
+	, myScenes(), myStages(), myStageIterator(), currentScene()
 {
 	ZeroMemory(resSwapChainBackBuffers, sizeof(resSwapChainBackBuffers));
 	ZeroMemory(myBarriers, sizeof(myBarriers));
@@ -623,7 +623,7 @@ bool GameFramework::JumpToStage(const size_t index)
 			currentScene->Reset();
 		}
 
-		currentScene = target;
+		currentScene = target.lock();
 		currentScene->Start();
 
 		return true;
@@ -656,22 +656,22 @@ bool GameFramework::JumpToNextStage()
 	return false;
 }
 
-shared_ptr<Scene> GameFramework::GetScene(const char* name) const
+weak_ptr<Scene> GameFramework::GetScene(const char* name) const
 {
 	return myScenes.find(name)->second;
 }
 
-shared_ptr<Scene> GameFramework::GetStage(const size_t index) const
+weak_ptr<Scene> GameFramework::GetStage(const size_t index) const
 {
 	return myStages.at(index);
 }
 
-shared_ptr<Scene> GameFramework::GetNextStage() const
+weak_ptr<Scene> GameFramework::GetNextStage() const
 {
 	return *(myStageIterator + 1);
 }
 
-shared_ptr<Scene> GameFramework::GetCurrentScene() const
+weak_ptr<Scene> GameFramework::GetCurrentScene() const
 {
 	return currentScene;
 }
@@ -743,38 +743,6 @@ void GameFramework::OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 	if (currentScene)
 	{
 		currentScene->OnMouse(hwnd, msg, btn, info);
-	}
-
-	switch (msg)
-	{
-		case WM_LBUTTONDOWN:
-		{
-		}
-		break;
-
-		case WM_RBUTTONDOWN:
-		{
-		}
-		break;
-
-		case WM_LBUTTONUP:
-		{
-		}
-		break;
-
-		case WM_RBUTTONUP:
-		{
-		}
-		break;
-
-		case WM_MOUSEMOVE:
-		{
-		}
-		break;
-
-		default:
-		{}
-		break;
 	}
 }
 

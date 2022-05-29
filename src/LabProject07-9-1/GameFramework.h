@@ -46,10 +46,10 @@ public:
 	bool JumpToStage(const std::vector<shared_ptr<Scene>>::iterator it);
 	bool JumpToNextStage();
 
-	shared_ptr<Scene> GetScene(const char* name) const;
-	shared_ptr<Scene> GetStage(const size_t index) const;
-	shared_ptr<Scene> GetNextStage() const;
-	shared_ptr<Scene> GetCurrentScene() const;
+	weak_ptr<Scene> GetScene(const char* name) const;
+	weak_ptr<Scene> GetStage(const size_t index) const;
+	weak_ptr<Scene> GetNextStage() const;
+	weak_ptr<Scene> GetCurrentScene() const;
 
 	// 전체화면 전환
 	void ToggleFullscreen();
@@ -120,6 +120,7 @@ private:
 	ID3D12Debug* myDebugController;
 #endif
 
+	std::unordered_map<std::string, shared_ptr<Model>> myModels;
 	std::unordered_map<std::string, shared_ptr<Scene>> myScenes;
 	std::vector<shared_ptr<Scene>> myStages;
 	std::vector<shared_ptr<Scene>>::iterator myStageIterator;
