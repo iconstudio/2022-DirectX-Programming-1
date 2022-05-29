@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.hpp"
 #include "StageGameEnd.hpp"
 
 StageGameEnd::StageGameEnd(GameFramework& framework, HWND hwnd)

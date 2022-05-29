@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.hpp"
 #include "DirectX.hpp"
 #include "GameFramework.h"
 #include "Timer.h"

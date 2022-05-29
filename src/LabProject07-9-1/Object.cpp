@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.hpp"
 #include "Object.h"
 #include "Material.hpp"
 #include "Shader.h"

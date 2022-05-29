@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.hpp"
 #include "StageGame.hpp"
 #include "GameFramework.h"
 
@@ -187,7 +187,10 @@ void StageGame::OnAwake()
 	myInstances.emplace_back(pMi24Object);
 
 	auto pAirplanePlayer = new CAirplanePlayer(d3dDevice, d3dTaskList, GetRootSignature());
+	pAirplanePlayer->Attach(model_rallycar.get(), true);
+	pAirplanePlayer->Rotate(15.0f, 0.0f, 0.0f);
 	pAirplanePlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, -3.0f));
+	pAirplanePlayer->SetScale(4.5f, 4.5f, 4.5f);
 	pAirplanePlayer->m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
 
 	myPlayer = pAirplanePlayer;

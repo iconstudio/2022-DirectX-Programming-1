@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.hpp"
 #include "Player.h"
 #include "Shader.h"
 #include "Model.hpp"
@@ -263,13 +263,6 @@ void CPlayer::Render(P3DGrpCommandList cmd_list, GameCamera* pCamera)
 CAirplanePlayer::CAirplanePlayer(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature)
 {
 	myCamera = ChangeCamera(THIRD_PERSON_CAMERA, 10.0f);
-
-	//auto pGameObject = Model::Load(device, cmd_list, "Model/Apache.bin");
-	auto pGameObject = Model::Load(device, cmd_list, "Model/Gunship.bin");
-
-	pGameObject->Rotate(15.0f, 0.0f, 0.0f);
-	pGameObject->SetScale(8.5f, 8.5f, 8.5f);
-	Attach(pGameObject, true);
 
 	Awake();
 

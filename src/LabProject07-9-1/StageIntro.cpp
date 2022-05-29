@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.hpp"
 #include "StageIntro.hpp"
 
 StageIntro::StageIntro(GameFramework& framework, HWND hwnd)

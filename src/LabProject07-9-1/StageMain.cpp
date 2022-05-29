@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.hpp"
 #include "StageMain.hpp"
 
 StageMain::StageMain(GameFramework& framework, HWND hwnd)

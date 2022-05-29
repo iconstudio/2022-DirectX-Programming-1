@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.hpp"
 #include "StageCredit.hpp"
 
 StageCredit::StageCredit(GameFramework& framework, HWND hwnd)

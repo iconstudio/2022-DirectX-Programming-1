@@ -22,6 +22,11 @@
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 using DESC_HANDLE = D3D12_CPU_DESCRIPTOR_HANDLE;
+using ShaderBlob = D3D12_SHADER_BYTECODE;
+using P3DDevice = ID3D12Device*;
+using P3DCommandList = ID3D12CommandList*;
+using P3DGrpCommandList = ID3D12GraphicsCommandList*;
+using P3DSignature = ID3D12RootSignature*;
 
 #include <wrl.h>
 #include <shellapi.h>

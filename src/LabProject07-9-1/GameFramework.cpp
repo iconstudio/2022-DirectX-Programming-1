@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.hpp"
 #include "GameFramework.h"
 #include "StageIntro.hpp"
 #include "StageMain.hpp"
@@ -540,9 +540,9 @@ void GameFramework::BuildPipeline()
 
 	myRootSignature = signature;
 
-	m_pIlluminatedShader = new CIlluminatedShader();
-	m_pIlluminatedShader->CreateShader(myDevice, myCommandList, myRootSignature);
-	m_pIlluminatedShader->InitializeUniforms(myDevice, myCommandList);
+	myDefaultShader = new CIlluminatedShader();
+	myDefaultShader->CreateShader(myDevice, myCommandList, myRootSignature);
+	myDefaultShader->InitializeUniforms(myDevice, myCommandList);
 }
 
 void GameFramework::BuildAssets()
@@ -764,7 +764,7 @@ bool GameFramework::JumpToNextStage()
 
 shared_ptr<Model> GameFramework::RegisterModel(const char* path, const char* name)
 {
-	auto handle = Model::Load(myDevice, myCommandList, path);
+	auto handle = Model::Load(myDevice, myCommandList, myDefaultShader, path);
 	auto ptr = shared_ptr<Model>(handle);
 
 	myModels.insert({ name, ptr });

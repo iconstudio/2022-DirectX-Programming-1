@@ -65,7 +65,6 @@ public:
 
 	void SetMaterialColors(CMaterialColors* pMaterialColors);
 	void SetShader(Pipeline* pShader);
-	void SetIlluminatedShader() { SetShader(m_pIlluminatedShader); }
 
 	void UpdateUniforms(P3DGrpCommandList cmd_list);
 };

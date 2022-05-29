@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.hpp"
 #include "Scene.h"
 #include "Shader.h"
 #include "Player.h"

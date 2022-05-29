@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.hpp"
 #include "IlluminatedScene.hpp"
 
 IlluminatedScene::IlluminatedScene(GameFramework& framework, HWND hwnd, const char* name)

@@ -1,7 +1,10 @@
-#include "stdafx.h"
+#include "pch.hpp"
 #include "Model.hpp"
 
-Model* Model::Load(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, const char* pstrFileName)
+Model* Model::Load(ID3D12Device* device
+	, ID3D12GraphicsCommandList* cmd_list
+	, Pipeline* pipeline
+	, const char* pstrFileName)
 {
 	FILE* pInFile = NULL;
 	fopen_s(&pInFile, pstrFileName, "rb");
@@ -21,7 +24,7 @@ Model* Model::Load(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, co
 
 		if (!strcmp(token, "<Hierarchy>:"))
 		{
-			root = Model::LoadFrameHierarchyFromFile(device, cmd_list, pInFile);
+			root = Model::LoadFrameHierarchyFromFile(device, cmd_list, pipeline, pInFile);
 		}
 		else if (!strcmp(token, "</Hierarchy>"))
 		{
@@ -192,7 +195,10 @@ RawMaterialsBox* Model::LoadRawMaterials(ID3D12Device* device, ID3D12GraphicsCom
 	return(pMaterialsInfo);
 }
 
-Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, FILE* pInFile)
+Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
+	, ID3D12GraphicsCommandList* cmd_list
+	, Pipeline* pipeline
+	, FILE* pInFile)
 {
 	char token[64] = { '\0' };
 	UINT nReads = 0;
@@ -262,7 +268,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device, ID3D12GraphicsCom
 
 					if (root->GetMeshType() & VERTEXT_NORMAL)
 					{
-						pMaterial->SetIlluminatedShader();
+						pMaterial->SetShader(pipeline);
 					}
 
 					root->SetMaterial(i, pMaterial);
@@ -276,7 +282,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device, ID3D12GraphicsCom
 			{
 				for (int i = 0; i < nChilds; i++)
 				{
-					Model* pChild = Model::LoadFrameHierarchyFromFile(device, cmd_list, pInFile);
+					auto pChild = Model::LoadFrameHierarchyFromFile(device, cmd_list, pipeline, pInFile);
 
 					if (pChild)
 					{
