@@ -764,6 +764,8 @@ void GameFramework::OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM stat
 			{
 				case VK_ESCAPE:
 				{
+					WaitForGpuComplete();
+
 					PostQuitMessage(0);
 				}
 				break;
