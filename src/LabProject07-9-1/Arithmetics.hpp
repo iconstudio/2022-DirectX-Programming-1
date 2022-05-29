@@ -327,6 +327,29 @@ namespace Matrix4x4
 		return result;
 	}
 
+	inline XMFLOAT4X4 RotationYawPitchRoll(float pitch, float yaw, float roll)
+	{
+		XMFLOAT4X4 result{};
+
+		const auto rad_pitch = XMConvertToRadians(pitch);
+		const auto rad_yaw = XMConvertToRadians(yaw);
+		const auto rad_roll = XMConvertToRadians(roll);
+		const auto rot = XMMatrixRotationRollPitchYaw(rad_pitch, rad_yaw, rad_roll);
+		XMStoreFloat4x4(&result, rot);
+
+		return result;
+	}
+
+	inline XMFLOAT4X4 RotationAxis(const XMFLOAT3 axis, float angle)
+	{
+		XMFLOAT4X4 result{};
+
+		const auto rot = XMMatrixRotationAxis(XMLoadFloat3(&axis), XMConvertToRadians(angle));
+		XMStoreFloat4x4(&result, rot);
+
+		return result;
+	}
+
 	inline XMFLOAT4X4 PerspectiveFovLH(float fov_y, float aspect, float znear, float zfar)
 	{
 		XMFLOAT4X4 result{};
@@ -337,7 +360,9 @@ namespace Matrix4x4
 		return result;
 	}
 
-	inline XMFLOAT4X4 LookAtLH(XMFLOAT3&& eye_pos, XMFLOAT3&& lookat, XMFLOAT3&& up)
+	inline XMFLOAT4X4 LookAtLH(XMFLOAT3&& eye_pos
+		, XMFLOAT3&& lookat
+		, XMFLOAT3&& up)
 	{
 		XMFLOAT4X4 result{};
 
@@ -350,14 +375,32 @@ namespace Matrix4x4
 		return result;
 	}
 
-	inline XMFLOAT4X4 LookAtLH(const XMFLOAT3& eye_pos, const XMFLOAT3& lookat, const XMFLOAT3& up)
+	inline XMFLOAT4X4 LookAtLH(const XMFLOAT3& eye_pos
+		, const XMFLOAT3& lookat
+		, const XMFLOAT3& up)
 	{
 		return LookAtLH(XMFLOAT3(eye_pos), XMFLOAT3(lookat), XMFLOAT3(up));
 	}
 
-	inline XMFLOAT4X4 LookAtLH(XMFLOAT3&& eye_pos, const XMFLOAT3& lookat, const XMFLOAT3& up)
+	inline XMFLOAT4X4 LookAtLH(XMFLOAT3&& eye_pos
+		, const XMFLOAT3& lookat
+		, const XMFLOAT3& up)
 	{
 		return LookAtLH(std::forward<XMFLOAT3>(eye_pos), XMFLOAT3(lookat), XMFLOAT3(up));
+	}
+
+	inline XMFLOAT4X4 LookToLH(const XMFLOAT3 eye_pos
+		, const XMFLOAT3 look_pos
+		, const XMFLOAT3 up_dir)
+	{
+		XMFLOAT4X4 result{};
+
+		const auto eye = XMLoadFloat3(&eye_pos);
+		const auto look = XMLoadFloat3(&look_pos);
+		const auto up = XMLoadFloat3(&up_dir);
+		XMStoreFloat4x4(&result, XMMatrixLookToLH(eye, look, up));
+
+		return result;
 	}
 }
 

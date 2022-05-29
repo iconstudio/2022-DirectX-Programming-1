@@ -55,6 +55,7 @@ using P3DCommandList = ID3D12CommandList*;
 using P3DGrpCommandList = ID3D12GraphicsCommandList*;
 using P3DSignature = ID3D12RootSignature*;
 
+class Transformer;
 class GameCamera;
 class GameObject;
 enum class COLLISION_TAGS;

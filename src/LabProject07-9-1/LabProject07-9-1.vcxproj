@@ -172,6 +172,7 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Terrains.hpp" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="Transformer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Arithmetics.cpp" />
@@ -201,6 +202,7 @@
     </ClCompile>
     <ClCompile Include="Terrains.cpp" />
     <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="Transformer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LabProject07-9-1.rc" />
