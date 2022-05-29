@@ -53,7 +53,7 @@ public:
 	virtual ~CMaterial();
 
 private:
-	int								m_nReferences = 0;
+	int m_nReferences = 0;
 
 public:
 	void AddRef() { m_nReferences++; }

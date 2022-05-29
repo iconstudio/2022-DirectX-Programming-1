@@ -28,16 +28,32 @@ CMaterial::~CMaterial()
 
 void CMaterial::SetShader(Pipeline* pShader)
 {
-	if (m_pShader) m_pShader->Release();
+	if (m_pShader)
+	{
+		m_pShader->Release();
+	}
+
 	m_pShader = pShader;
-	if (m_pShader) m_pShader->AddRef();
+
+	if (m_pShader)
+	{
+		m_pShader->AddRef();
+	}
 }
 
 void CMaterial::SetMaterialColors(CMaterialColors* pMaterialColors)
 {
-	if (m_pMaterialColors) m_pMaterialColors->Release();
+	if (m_pMaterialColors)
+	{
+		m_pMaterialColors->Release();
+	}
+
 	m_pMaterialColors = pMaterialColors;
-	if (m_pMaterialColors) m_pMaterialColors->AddRef();
+
+	if (m_pMaterialColors)
+	{
+		m_pMaterialColors->AddRef();
+	}
 }
 
 void CMaterial::UpdateUniforms(P3DGrpCommandList cmd_list)

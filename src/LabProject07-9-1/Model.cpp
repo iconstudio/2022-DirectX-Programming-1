@@ -249,7 +249,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device, ID3D12GraphicsCom
 				}
 
 				root->m_nMaterials = pMaterialsInfo->m_nMaterials;
-				root->m_ppMaterials = new CMaterial * [pMaterialsInfo->m_nMaterials];
+				root->m_ppMaterials = new CMaterial*[pMaterialsInfo->m_nMaterials];
 
 				for (int i = 0; i < pMaterialsInfo->m_nMaterials; i++)
 				{
@@ -260,7 +260,10 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device, ID3D12GraphicsCom
 					CMaterialColors* pMaterialColors = new CMaterialColors(&pMaterialsInfo->m_pMaterials[i]);
 					pMaterial->SetMaterialColors(pMaterialColors);
 
-					if (root->GetMeshType() & VERTEXT_NORMAL) pMaterial->SetIlluminatedShader();
+					if (root->GetMeshType() & VERTEXT_NORMAL)
+					{
+						pMaterial->SetIlluminatedShader();
+					}
 
 					root->SetMaterial(i, pMaterial);
 				}

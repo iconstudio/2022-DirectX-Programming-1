@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "IlluminatedScene.hpp"
 
+Pipeline* CMaterial::m_pIlluminatedShader = nullptr;
+
 IlluminatedScene::IlluminatedScene(GameFramework& framework, HWND hwnd, const char* name)
 	: Scene(framework, hwnd, name)
 	, m_xmf4GlobalAmbient(XMFLOAT4(1, 1, 1, 1))

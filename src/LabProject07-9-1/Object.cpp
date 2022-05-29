@@ -60,7 +60,7 @@ void GameObject::SetMesh(CMesh* pMesh)
 void GameObject::SetShader(Pipeline* pipeline)
 {
 	m_nMaterials = 1;
-	m_ppMaterials = new CMaterial * [m_nMaterials];
+	m_ppMaterials = new CMaterial*[m_nMaterials];
 	m_ppMaterials[0] = new CMaterial();
 	m_ppMaterials[0]->SetShader(pipeline);
 }

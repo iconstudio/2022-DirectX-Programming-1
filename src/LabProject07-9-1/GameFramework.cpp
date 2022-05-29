@@ -8,8 +8,6 @@
 #include "Shader.h"
 #include "Model.hpp"
 
-Pipeline* CMaterial::m_pIlluminatedShader = NULL;
-
 GameFramework::GameFramework(unsigned int width, unsigned int height)
 	: frameWidth(width), frameHeight(height)
 	, frameBasisColour{ 0.0f, 0.125f, 0.3f, 1.0f }
