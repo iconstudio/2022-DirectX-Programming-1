@@ -114,7 +114,7 @@ P3DSignature const Scene::GetRootSignature() const
 
 P3DSignature Scene::CreateGraphicsRootSignature()
 {
-	return P3DSignature();
+	return nullptr;
 }
 
 void Scene::InitializeUniforms()
