@@ -8,8 +8,6 @@
 #include "Shader.h"
 #include "Model.hpp"
 
-Pipeline* CMaterial::m_pIlluminatedShader = nullptr;
-
 GameFramework::GameFramework(unsigned int width, unsigned int height)
 	: frameWidth(width), frameHeight(height)
 	, frameBasisColour{ 0.0f, 0.125f, 0.3f, 1.0f }
@@ -527,7 +525,7 @@ void GameFramework::BuildPipeline()
 		, uuid, place);
 	if (FAILED(valid))
 	{
-		throw "루트 서명을 셍성하지 못함!";
+		throw "루트 서명을 생성하지 못함!";
 	}
 
 	if (signature_blob)
@@ -542,7 +540,9 @@ void GameFramework::BuildPipeline()
 
 	myRootSignature = signature;
 
-	CMaterial::PrepareShaders(myDevice, myCommandList, myRootSignature);
+	m_pIlluminatedShader = new CIlluminatedShader();
+	m_pIlluminatedShader->CreateShader(myDevice, myCommandList, myRootSignature);
+	m_pIlluminatedShader->InitializeUniforms(myDevice, myCommandList);
 }
 
 void GameFramework::BuildAssets()

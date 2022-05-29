@@ -68,10 +68,4 @@ public:
 	void SetIlluminatedShader() { SetShader(m_pIlluminatedShader); }
 
 	void UpdateUniforms(P3DGrpCommandList cmd_list);
-
-protected:
-	static Pipeline* m_pIlluminatedShader;
-
-public:
-	static void PrepareShaders(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature);
 };

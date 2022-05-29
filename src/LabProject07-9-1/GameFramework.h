@@ -134,4 +134,6 @@ private:
 	std::vector<shared_ptr<Scene>> myStages;
 	std::vector<shared_ptr<Scene>>::iterator myStageIterator;
 	shared_ptr<Scene> currentScene;
+	
+	Pipeline* m_pIlluminatedShader;
 };
