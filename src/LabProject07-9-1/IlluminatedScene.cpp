@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "IlluminatedScene.hpp"
 
-Pipeline* CMaterial::m_pIlluminatedShader = nullptr;
-
 IlluminatedScene::IlluminatedScene(GameFramework& framework, HWND hwnd, const char* name)
 	: Scene(framework, hwnd, name)
 	, m_xmf4GlobalAmbient(XMFLOAT4(1, 1, 1, 1))
@@ -91,7 +89,7 @@ void IlluminatedScene::RenderUI(HDC surface)
 
 void IlluminatedScene::OnAwake()
 {
-	CMaterial::PrepareShaders(d3dDevice, d3dTaskList, mySignature);
+	//CMaterial::PrepareShaders(d3dDevice, d3dTaskList, mySignature);
 }
 
 void IlluminatedScene::OnInialized()
@@ -168,7 +166,7 @@ void IlluminatedScene::ReleaseUploadBuffers()
 
 P3DSignature IlluminatedScene::CreateGraphicsRootSignature()
 {
-	P3DSignature signature = NULL;
+	P3DSignature signature = nullptr;
 
 	D3D12_ROOT_PARAMETER shader_params[3]{};
 	ZeroMemory(&shader_params, sizeof(shader_params));

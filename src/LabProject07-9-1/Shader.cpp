@@ -10,14 +10,20 @@ Pipeline::~Pipeline()
 
 	if (m_ppd3dPipelineStates)
 	{
-		for (int i = 0; i < m_nPipelineStates; i++) if (m_ppd3dPipelineStates[i]) m_ppd3dPipelineStates[i]->Release();
+		for (int i = 0; i < m_nPipelineStates; i++)
+		{
+			if (m_ppd3dPipelineStates[i])
+			{
+				m_ppd3dPipelineStates[i]->Release();
+			}
+		}
 		delete[] m_ppd3dPipelineStates;
 	}
 }
 
 ShaderBlob Pipeline::CreateVertexShader()
 {
-	ShaderBlob d3dShaderByteCode;
+	ShaderBlob d3dShaderByteCode{};
 	d3dShaderByteCode.BytecodeLength = 0;
 	d3dShaderByteCode.pShaderBytecode = NULL;
 
@@ -26,7 +32,7 @@ ShaderBlob Pipeline::CreateVertexShader()
 
 ShaderBlob Pipeline::CreatePixelShader()
 {
-	ShaderBlob d3dShaderByteCode;
+	ShaderBlob d3dShaderByteCode{};
 	d3dShaderByteCode.BytecodeLength = 0;
 	d3dShaderByteCode.pShaderBytecode = NULL;
 
@@ -280,7 +286,7 @@ ShaderBlob CIlluminatedShader::CreatePixelShader()
 void CIlluminatedShader::CreateShader(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature)
 {
 	m_nPipelineStates = 2;
-	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
+	m_ppd3dPipelineStates = new ID3D12PipelineState*[m_nPipelineStates];
 
 	Pipeline::CreateShader(device, cmd_list, signature);
 

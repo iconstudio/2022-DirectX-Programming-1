@@ -18,6 +18,7 @@ public:
 
 	// ∞‘¿” ƒ‹≈Ÿ√˜ √ ±‚»≠
 	void Start();
+	void BuildPipeline();
 	void BuildAssets();
 	void BuildStages();
 	void BuildWorld();
@@ -108,6 +109,7 @@ private:
 	P3DGrpCommandList myCommandList;
 	ID3D12CommandQueue* myCommandQueue;
 	ID3D12CommandAllocator* myCommandAlloc;
+	P3DSignature myRootSignature;
 
 	ID3D12Resource* resSwapChainBackBuffers[numberFrameBuffers];
 	D3D12_RESOURCE_BARRIER myBarriers[numberFrameBuffers];

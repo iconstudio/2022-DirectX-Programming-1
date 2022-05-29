@@ -15,11 +15,6 @@ Scene::Scene(GameFramework& framework, HWND hwnd, const char* name)
 
 Scene::~Scene()
 {
-	if (mySignature)
-	{
-		mySignature->Release();
-	}
-
 	ReleaseUniforms();
 }
 
@@ -28,7 +23,7 @@ void Scene::Awake(P3DDevice device, P3DGrpCommandList cmd_list)
 	d3dDevice = device;
 	d3dTaskList = cmd_list;
 
-	mySignature = CreateGraphicsRootSignature();
+	//mySignature = CreateGraphicsRootSignature();
 
 	OnAwake();
 

@@ -115,7 +115,7 @@
       <Filter>헤더 파일\Contents\Stages</Filter>
     </ClInclude>
     <ClInclude Include="Transformer.hpp">
-      <Filter>헤더 파일</Filter>
+      <Filter>헤더 파일\Generals</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

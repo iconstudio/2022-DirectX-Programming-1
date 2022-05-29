@@ -8,6 +8,8 @@
 #include "Shader.h"
 #include "Model.hpp"
 
+Pipeline* CMaterial::m_pIlluminatedShader = nullptr;
+
 GameFramework::GameFramework(unsigned int width, unsigned int height)
 	: frameWidth(width), frameHeight(height)
 	, frameBasisColour{ 0.0f, 0.125f, 0.3f, 1.0f }
@@ -16,6 +18,7 @@ GameFramework::GameFramework(unsigned int width, unsigned int height)
 	, myFactory(nullptr), myDevice(nullptr)
 	, myRenderFence(nullptr), myFences(), eventFence(NULL)
 	, myCommandList(nullptr), myCommandQueue(nullptr), myCommandAlloc(nullptr)
+	, myRootSignature(nullptr)
 	, mySwapChain(nullptr), resSwapChainBackBuffers(), myBarriers()
 	, heapRtvDesc(nullptr), szRtvDescIncrements(0)
 	, myDepthStencilBuffer(nullptr)
@@ -72,6 +75,11 @@ GameFramework::~GameFramework()
 	{
 		mySwapChain->SetFullscreenState(FALSE, NULL);
 		mySwapChain->Release();
+	}
+
+	if (myRootSignature)
+	{
+		myRootSignature->Release();
 	}
 
 	if (myCommandAlloc) myCommandAlloc->Release();
@@ -445,6 +453,7 @@ void GameFramework::CreateDepthStencilView()
 void GameFramework::Start()
 {
 	ResetCmdList();
+	BuildPipeline();
 	BuildAssets();
 	BuildStages();
 	BuildWorld();
@@ -461,6 +470,78 @@ void GameFramework::Start()
 	WaitForGpuComplete();
 
 	CleanupBuilds();
+}
+
+void GameFramework::BuildPipeline()
+{
+	P3DSignature signature = nullptr;
+
+	D3D12_ROOT_PARAMETER shader_params[3]{};
+	ZeroMemory(&shader_params, sizeof(shader_params));
+
+	shader_params[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	shader_params[0].Descriptor.ShaderRegister = 1; // Camera
+	shader_params[0].Descriptor.RegisterSpace = 0;
+	shader_params[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	shader_params[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	shader_params[1].Constants.Num32BitValues = 32;
+	shader_params[1].Constants.ShaderRegister = 2; // GameObject
+
+	shader_params[1].Constants.RegisterSpace = 0;
+	shader_params[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	shader_params[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	shader_params[2].Descriptor.ShaderRegister = 4; // Lights
+	shader_params[2].Descriptor.RegisterSpace = 0;
+	shader_params[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	// 정점 쉐이더, 픽셀 쉐이더, 입력 조립기, 출력 병합기 
+	auto flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
+
+	D3D12_ROOT_SIGNATURE_DESC signature_desc;
+	ZeroMemory(&signature_desc, sizeof(signature_desc));
+
+	signature_desc.NumParameters = _countof(shader_params);
+	signature_desc.pParameters = shader_params;
+	signature_desc.NumStaticSamplers = 0; // 텍스처
+	signature_desc.pStaticSamplers = NULL;
+	signature_desc.Flags = flags;
+
+	ID3DBlob* signature_blob = nullptr;
+	ID3DBlob* error_blob = nullptr;
+
+	auto valid = D3D12SerializeRootSignature(&signature_desc
+		, D3D_ROOT_SIGNATURE_VERSION_1, &signature_blob
+		, &error_blob);
+	if (FAILED(valid))
+	{
+		throw "루트 서명의 메모리를 할당하지 못함!";
+	}
+
+	UINT gpu_mask = 0;
+	auto uuid = __uuidof(ID3D12RootSignature);
+	auto place = reinterpret_cast<void**>(&signature);
+	valid = myDevice->CreateRootSignature(gpu_mask
+		, signature_blob->GetBufferPointer(), signature_blob->GetBufferSize()
+		, uuid, place);
+	if (FAILED(valid))
+	{
+		throw "루트 서명을 셍성하지 못함!";
+	}
+
+	if (signature_blob)
+	{
+		signature_blob->Release();
+	}
+
+	if (error_blob)
+	{
+		error_blob->Release();
+	}
+
+	myRootSignature = signature;
+	CMaterial::PrepareShaders(myDevice, myCommandList, myRootSignature);
 }
 
 void GameFramework::BuildAssets()

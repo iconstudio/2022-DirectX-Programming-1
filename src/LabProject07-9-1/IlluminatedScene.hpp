@@ -43,5 +43,4 @@ protected:
 
 	ID3D12Resource* m_pd3dcbLights = NULL;
 	StaticLights* myStaticLights = NULL;
-
 };
