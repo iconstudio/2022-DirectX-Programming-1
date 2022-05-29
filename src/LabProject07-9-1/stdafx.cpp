@@ -87,6 +87,7 @@ ID3D12Resource* CreateBufferResource(P3DDevice device, P3DGrpCommandList cmd_lis
 	{
 		switch (type)
 		{
+			// 정적인 정점의 정보
 			case D3D12_HEAP_TYPE_DEFAULT:
 			{
 				if (upload_buffer)
