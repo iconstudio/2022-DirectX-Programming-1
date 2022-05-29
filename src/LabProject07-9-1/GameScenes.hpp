@@ -1,52 +1,113 @@
 #pragma once
 #include "Scene.h"
+#include "IlluminatedScene.hpp"
 
-class StageIntro : public CScene
+class StageIntro : public Scene
 {
 public:
-	StageIntro(GameFramework& framework);
+	StageIntro(GameFramework& framework, HWND hwnd);
 
-	// CScene을(를) 통해 상속됨
-	void OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info) override;
-	void OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM state) override;
+	void Awake(P3DDevice device, P3DGrpCommandList cmd_list) override;
+	void Start() override;
+	void Reset() override;
+	void Update(float elapsed_time) override;
+	void Render() override;
+	void RenderUI(HDC surface) override;
+
+	void OnAwake() override;
+	virtual void OnInialized() override;
+	void OnUpdate() override;
+	void OnRender() override;
+
+	void OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info) override;
+	void OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state) override;
+	void OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) override;
 };
 
-class StageMain : public CScene
+class StageMain : public Scene
 {
 public:
-	StageMain(GameFramework& framework);
+	StageMain(GameFramework& framework, HWND hwnd);
 
-	// CScene을(를) 통해 상속됨
-	void OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info) override;
-	void OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM state) override;
+	void Awake(P3DDevice device, P3DGrpCommandList cmd_list) override;
+	void Start() override;
+	void Reset() override;
+	void Update(float elapsed_time) override;
+	void Render() override;
+	void RenderUI(HDC surface) override;
+
+	void OnAwake() override;
+	void OnInialized() override;
+	void OnUpdate() override;
+	void OnRender() override;
+
+	void OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info) override;
+	void OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state) override;
+	void OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) override;
 };
 
-class StageGame : public CScene
+class StageGame : public IlluminatedScene
 {
 public:
-	StageGame(GameFramework& framework);
+	StageGame(GameFramework& framework, HWND hwnd);
 
-	// CScene을(를) 통해 상속됨
-	void OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info) override;
-	void OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM state) override;
+	void Awake(P3DDevice device, P3DGrpCommandList cmd_list) override;
+	void Start() override;
+	void Reset() override;
+	void Update(float elapsed_time) override;
+	void Render() override;
+	void RenderUI(HDC surface) override;
+
+	void OnAwake() override;
+	void OnInialized() override;
+	void OnUpdate() override;
+	void OnRender() override;
+
+	void OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info) override;
+	void OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state) override;
+	void OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) override;
 };
 
-class StageGameEnd : public CScene
+class StageGameEnd : public Scene
 {
 public:
-	StageGameEnd(GameFramework& framework);
+	StageGameEnd(GameFramework& framework, HWND hwnd);
 
-	// CScene을(를) 통해 상속됨
-	void OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info) override;
-	void OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM state) override;
+	void Awake(P3DDevice device, P3DGrpCommandList cmd_list) override;
+	void Start() override;
+	void Reset() override;
+	void Update(float elapsed_time) override;
+	void Render() override;
+	void RenderUI(HDC surface) override;
+
+	void OnAwake() override;
+	void OnInialized() override;
+	void OnUpdate() override;
+	void OnRender() override;
+
+	void OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info) override;
+	void OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state) override;
+	void OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) override;
 };
 
-class StageCredit : public CScene
+class StageCredit : public Scene
 {
 public:
-	StageCredit(GameFramework& framework);
+	StageCredit(GameFramework& framework, HWND hwnd);
 
-	// CScene을(를) 통해 상속됨
-	void OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info) override;
-	void OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM state) override;
+	void Awake(P3DDevice device, P3DGrpCommandList cmd_list) override;
+	void Start() override;
+	void Reset() override;
+	void Update(float elapsed_time) override;
+	void Render() override;
+	void RenderUI(HDC surface) override;
+
+	void OnAwake() override;
+	void OnInialized() override;
+	void OnUpdate() override;
+	void OnRender() override;
+
+	void OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info) override;
+	void OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state) override;
+	void OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) override;
 };

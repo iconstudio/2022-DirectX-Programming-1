@@ -36,7 +36,7 @@ protected:
 	D3D12_VIEWPORT					m_d3dViewport;
 	D3D12_RECT						m_d3dScissorRect;
 
-	CPlayer							*m_pPlayer = NULL;
+	CPlayer							*myPlayer = NULL;
 
 	ID3D12Resource					*m_pd3dcbCamera = NULL;
 	VS_CB_CAMERA_INFO				*m_pcbMappedCamera = NULL;
@@ -61,8 +61,8 @@ public:
 
 	virtual void SetViewportsAndScissorRects(P3DGrpCommandList cmd_list);
 
-	void SetPlayer(CPlayer *pPlayer) { m_pPlayer = pPlayer; }
-	CPlayer *GetPlayer() { return(m_pPlayer); }
+	void SetPlayer(CPlayer *pPlayer) { myPlayer = pPlayer; }
+	CPlayer *GetPlayer() { return(myPlayer); }
 
 	void SetMode(DWORD nMode) { m_nMode = nMode; }
 	DWORD GetMode() { return(m_nMode); }

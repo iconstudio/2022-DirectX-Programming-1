@@ -31,7 +31,7 @@ public:
 	LPVOID						m_pPlayerUpdatedContext;
 	LPVOID						m_pCameraUpdatedContext;
 
-	GameCamera* m_pCamera = NULL;
+	GameCamera* myCamera = NULL;
 
 public:
 	CPlayer();
@@ -54,8 +54,8 @@ public:
 	float GetPitch() const { return(m_fPitch); }
 	float GetRoll() const { return(m_fRoll); }
 
-	GameCamera* GetCamera() { return(m_pCamera); }
-	void SetCamera(GameCamera* pCamera) { m_pCamera = pCamera; }
+	GameCamera* GetCamera() { return(myCamera); }
+	void SetCamera(GameCamera* pCamera) { myCamera = pCamera; }
 
 	void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
 	void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false);
@@ -84,7 +84,7 @@ public:
 class CAirplanePlayer : public CPlayer
 {
 public:
-	CAirplanePlayer(P3DDevice device, P3DGrpCommandList cmd_list, ID3D12RootSignature* signature);
+	CAirplanePlayer(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature);
 	virtual ~CAirplanePlayer();
 
 	GameObject* m_pMainRotorFrame = NULL;

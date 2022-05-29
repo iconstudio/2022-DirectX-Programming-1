@@ -38,25 +38,25 @@ public:
 
 	// 스테이지 등록
 	template<typename SceneType>
-		requires(std::is_base_of_v<CScene, SceneType>)
-	constexpr shared_ptr<CScene> RegisterStage(SceneType&& stage);
-	void AddStage(const shared_ptr<CScene>& stage);
+		requires(std::is_base_of_v<Scene, SceneType>)
+	constexpr shared_ptr<Scene> RegisterStage(SceneType&& stage);
+	void AddStage(const shared_ptr<Scene>& stage);
 
 	bool JumpToStage(const size_t index);
-	bool JumpToStage(const std::vector<shared_ptr<CScene>>::iterator it);
+	bool JumpToStage(const std::vector<shared_ptr<Scene>>::iterator it);
 	bool JumpToNextStage();
 
-	shared_ptr<CScene> GetScene(const char* name) const;
-	shared_ptr<CScene> GetStage(const size_t index) const;
-	shared_ptr<CScene> GetNextStage() const;
-	shared_ptr<CScene> GetCurrentScene() const;
+	shared_ptr<Scene> GetScene(const char* name) const;
+	shared_ptr<Scene> GetStage(const size_t index) const;
+	shared_ptr<Scene> GetNextStage() const;
+	shared_ptr<Scene> GetCurrentScene() const;
 
 	// 전체화면 전환
 	void ToggleFullscreen();
 
 	void OnMouseEvent(HWND hWnd, UINT msg, WPARAM btn, LPARAM info);
 	void OnKeyboardEvent(HWND hWnd, UINT msg, WPARAM key, LPARAM state);
-	LRESULT CALLBACK OnWindowsEvent(HWND, UINT msg, WPARAM wp, LPARAM lp);
+	void OnWindowsEvent(HWND, UINT msg, WPARAM wp, LPARAM lp);
 
 private:
 	bool D3DAssert(HRESULT valid, const char* error);
@@ -120,11 +120,8 @@ private:
 	ID3D12Debug* myDebugController;
 #endif
 
-	std::unordered_map<std::string, shared_ptr<CScene>> myScenes;
-	std::vector<shared_ptr<CScene>> myStages;
-	std::vector<shared_ptr<CScene>>::iterator myStageIterator;
-	shared_ptr<CScene> currentScene;
-
-	CPlayer* m_pPlayer;
-	GameCamera* m_pCamera;
+	std::unordered_map<std::string, shared_ptr<Scene>> myScenes;
+	std::vector<shared_ptr<Scene>> myStages;
+	std::vector<shared_ptr<Scene>>::iterator myStageIterator;
+	shared_ptr<Scene> currentScene;
 };

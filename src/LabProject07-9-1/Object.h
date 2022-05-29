@@ -74,8 +74,8 @@ public:
 	static RawMaterialsBox* LoadRawMaterials(P3DDevice device, P3DGrpCommandList cmd_list, FILE* pInFile);
 	static CMeshLoadInfo* LoadRawMesh(FILE* pInFile);
 
-	static GameObject* LoadFrameHierarchyFromFile(P3DDevice device, P3DGrpCommandList cmd_list, ID3D12RootSignature* signature, FILE* pInFile);
-	static GameObject* LoadGeometryFromFile(P3DDevice device, P3DGrpCommandList cmd_list, ID3D12RootSignature* signature, const char* pstrFileName);
+	static GameObject* LoadFrameHierarchyFromFile(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature, FILE* pInFile);
+	static GameObject* LoadGeometryFromFile(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature, const char* pstrFileName);
 
 	static void PrintFrameInfo(GameObject* pGameObject, GameObject* pParent);
 };

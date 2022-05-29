@@ -34,7 +34,7 @@ public:
 	virtual ~CMaterialColors() {}
 
 private:
-	int								m_nReferences = 0;
+	int m_nReferences = 0;
 
 public:
 	void AddRef() { m_nReferences++; }
@@ -73,5 +73,5 @@ protected:
 	static Pipeline* m_pIlluminatedShader;
 
 public:
-	static void PrepareShaders(P3DDevice device, P3DGrpCommandList cmd_list, ID3D12RootSignature* signature);
+	static void PrepareShaders(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature);
 };

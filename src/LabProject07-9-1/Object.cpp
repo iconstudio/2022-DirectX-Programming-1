@@ -412,7 +412,7 @@ RawMaterialsBox* GameObject::LoadRawMaterials(P3DDevice device, P3DGrpCommandLis
 	return(pMaterialsInfo);
 }
 
-GameObject* GameObject::LoadFrameHierarchyFromFile(P3DDevice device, P3DGrpCommandList cmd_list, ID3D12RootSignature* signature, FILE* pInFile)
+GameObject* GameObject::LoadFrameHierarchyFromFile(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature, FILE* pInFile)
 {
 	char token[64] = { '\0' };
 	UINT nReads = 0;
@@ -522,7 +522,7 @@ void GameObject::PrintFrameInfo(GameObject* root, GameObject* pParent)
 	if (root->myChild) GameObject::PrintFrameInfo(root->myChild, root);
 }
 
-GameObject* GameObject::LoadGeometryFromFile(P3DDevice device, P3DGrpCommandList cmd_list, ID3D12RootSignature* signature, const char* pstrFileName)
+GameObject* GameObject::LoadGeometryFromFile(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature, const char* pstrFileName)
 {
 	FILE* pInFile = NULL;
 	::fopen_s(&pInFile, pstrFileName, "rb");

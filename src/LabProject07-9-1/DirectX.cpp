@@ -125,20 +125,37 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 		case WM_ACTIVATE:
 		{
 			if (LOWORD(wp) == WA_INACTIVE)
+			{
 				gameTimer.Stop();
+			}
 			else
+			{
 				gameTimer.Start();
+			}
 		}
+		//[[fallthrough]]
 		case WM_SIZE:
+		{
+			gameFramework.OnWindowsEvent(hwnd, msg, wp, lp);
+		}
+		break;
+
 		case WM_LBUTTONDOWN:
 		case WM_LBUTTONUP:
 		case WM_RBUTTONDOWN:
 		case WM_RBUTTONUP:
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONUP:
 		case WM_MOUSEMOVE:
+		{
+			gameFramework.OnMouseEvent(hwnd, msg, wp, lp);
+		}
+		break;
+
 		case WM_KEYDOWN:
 		case WM_KEYUP:
 		{
-			gameFramework.OnWindowsEvent(hwnd, msg, wp, lp);
+			gameFramework.OnKeyboardEvent(hwnd, msg, wp, lp);
 		}
 		break;
 

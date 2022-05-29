@@ -22,7 +22,6 @@ GameFramework::GameFramework(unsigned int width, unsigned int height)
 	, myDebugController(nullptr)
 #endif //  _DEBUG
 	, myScenes(), myStages(), myStageIterator(), currentScene(nullptr)
-	, m_pPlayer(nullptr), m_pCamera(nullptr)
 {
 	ZeroMemory(resSwapChainBackBuffers, sizeof(resSwapChainBackBuffers));
 	ZeroMemory(myBarriers, sizeof(myBarriers));
@@ -461,14 +460,14 @@ void GameFramework::Start()
 
 void GameFramework::BuildStages()
 {
-	auto room_intro = RegisterStage(StageIntro(*this));
-	auto room_main = RegisterStage(StageMain(*this));
-	auto room_game = RegisterStage(StageGame(*this));
-	auto room_complete = RegisterStage(StageGameEnd(*this));
-	auto room_credit = RegisterStage(StageCredit(*this));
+	auto room_intro = RegisterStage(StageIntro(*this, myWindow));
+	auto room_main = RegisterStage(StageMain(*this, myWindow));
+	auto room_game = RegisterStage(StageGame(*this, myWindow));
+	auto room_complete = RegisterStage(StageGameEnd(*this, myWindow));
+	auto room_credit = RegisterStage(StageCredit(*this, myWindow));
 	
-	AddStage(room_intro);
-	AddStage(room_main);
+	//AddStage(room_intro);
+	//AddStage(room_main);
 	AddStage(room_game);
 	AddStage(room_complete);
 	AddStage(room_credit);
@@ -480,7 +479,7 @@ void GameFramework::BuildStages()
 
 		if (scene)
 		{
-			scene->Awake(myWindow, myDevice, myCommandList);
+			scene->Awake(myDevice, myCommandList);
 		}
 		else
 		{
@@ -499,12 +498,6 @@ void GameFramework::BuildParticles()
 
 void GameFramework::BuildPlayer()
 {
-	auto pAirplanePlayer = new CAirplanePlayer(myDevice, myCommandList, currentScene->GetGraphicsRootSignature());
-	pAirplanePlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, -3.0f));
-	pAirplanePlayer->m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
-
-	currentScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
-	m_pCamera = m_pPlayer->GetCamera();
 }
 
 void GameFramework::BuildTerrains()
@@ -517,12 +510,7 @@ void GameFramework::CleanupBuilds()
 {
 	if (currentScene)
 	{
-		currentScene->ReleaseUploadBuffers();
-	}
-
-	if (m_pPlayer)
-	{
-		m_pPlayer->ReleaseUploadBuffers();
+		currentScene->OnInialized();
 	}
 }
 
@@ -533,7 +521,7 @@ void GameFramework::Update(float elapsed_time)
 
 	if (currentScene)
 	{
-		currentScene->ProcessInput(pKeysBuffer);
+		//currentScene->ProcessInput(pKeysBuffer);
 	}
 
 	if (TRUE == input)
@@ -544,9 +532,6 @@ void GameFramework::Update(float elapsed_time)
 	{
 		currentScene->Update(elapsed_time);
 	}
-
-	m_pPlayer->Animate(elapsed_time, NULL);
-	m_pPlayer->Update(elapsed_time);
 }
 
 void GameFramework::PrepareRendering()
@@ -572,16 +557,7 @@ void GameFramework::Render()
 
 	if (currentScene)
 	{
-		currentScene->Render(m_pCamera);
-	}
-
-#ifdef _WITH_PLAYER_TOP
-	myCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-#endif
-
-	if (m_pPlayer)
-	{
-		m_pPlayer->Render(myCommandList, m_pCamera);
+		currentScene->Render();
 	}
 
 	SetBarrier(barrierRender);
@@ -619,18 +595,18 @@ void GameFramework::WaitForGpuComplete()
 }
 
 template<typename SceneType>
-	requires(std::is_base_of_v<CScene, SceneType>)
-constexpr shared_ptr<CScene> GameFramework::RegisterStage(SceneType&& stage)
+	requires(std::is_base_of_v<Scene, SceneType>)
+constexpr shared_ptr<Scene> GameFramework::RegisterStage(SceneType&& stage)
 {
 	auto handle = shared_ptr<SceneType>(std::forward<SceneType*>(new SceneType(stage)));
-	auto ptr = std::static_pointer_cast<CScene>(handle);
+	auto ptr = std::static_pointer_cast<Scene>(handle);
 
-	myScenes.try_emplace(ptr->myName, ptr);
+	myScenes.try_emplace(ptr->GetName(), ptr);
 
 	return ptr;
 }
 
-void GameFramework::AddStage(const shared_ptr<CScene>& stage)
+void GameFramework::AddStage(const shared_ptr<Scene>& stage)
 {
 	myStages.push_back(stage);
 }
@@ -656,7 +632,7 @@ bool GameFramework::JumpToStage(const size_t index)
 	return false;
 }
 
-bool GameFramework::JumpToStage(const std::vector<shared_ptr<CScene>>::iterator it)
+bool GameFramework::JumpToStage(const std::vector<shared_ptr<Scene>>::iterator it)
 {
 	myStageIterator = it;
 
@@ -680,22 +656,22 @@ bool GameFramework::JumpToNextStage()
 	return false;
 }
 
-shared_ptr<CScene> GameFramework::GetScene(const char* name) const
+shared_ptr<Scene> GameFramework::GetScene(const char* name) const
 {
 	return myScenes.find(name)->second;
 }
 
-shared_ptr<CScene> GameFramework::GetStage(const size_t index) const
+shared_ptr<Scene> GameFramework::GetStage(const size_t index) const
 {
 	return myStages.at(index);
 }
 
-shared_ptr<CScene> GameFramework::GetNextStage() const
+shared_ptr<Scene> GameFramework::GetNextStage() const
 {
 	return *(myStageIterator + 1);
 }
 
-shared_ptr<CScene> GameFramework::GetCurrentScene() const
+shared_ptr<Scene> GameFramework::GetCurrentScene() const
 {
 	return currentScene;
 }
@@ -766,7 +742,7 @@ void GameFramework::OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 {
 	if (currentScene)
 	{
-		currentScene->OnMouseEvent(hwnd, msg, btn, info);
+		currentScene->OnMouse(hwnd, msg, btn, info);
 	}
 
 	switch (msg)
@@ -806,7 +782,7 @@ void GameFramework::OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM stat
 {
 	if (currentScene)
 	{
-		currentScene->OnKeyboardEvent(hwnd, msg, key, state);
+		currentScene->OnKeyboard(hwnd, msg, key, state);
 	}
 
 	switch (msg)
@@ -822,15 +798,7 @@ void GameFramework::OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM stat
 				break;
 
 				case VK_RETURN:
-				break;
-
-				case VK_F1:
-				case VK_F2:
-				case VK_F3:
-				{
-					m_pCamera = m_pPlayer->ChangeCamera((DWORD)(key - VK_F1 + 1), 1.0f);
-				}
-
+				{}
 				break;
 
 				case VK_F9:
@@ -840,9 +808,11 @@ void GameFramework::OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM stat
 				break;
 
 				case VK_F5:
+				{}
 				break;
 
 				default:
+				{}
 				break;
 			}
 		}
@@ -854,25 +824,19 @@ void GameFramework::OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM stat
 	}
 }
 
-LRESULT CALLBACK GameFramework::OnWindowsEvent(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+void GameFramework::OnWindowsEvent(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	switch (nMessageID)
+	if (currentScene)
+	{
+		currentScene->OnWindows(hwnd, msg, wp, lp);
+	}
+
+	switch (msg)
 	{
 		case WM_SIZE:
-		break;
-		case WM_LBUTTONDOWN:
-		case WM_RBUTTONDOWN:
-		case WM_LBUTTONUP:
-		case WM_RBUTTONUP:
-		case WM_MOUSEMOVE:
-		OnMouseEvent(hWnd, nMessageID, wParam, lParam);
-		break;
-		case WM_KEYDOWN:
-		case WM_KEYUP:
-		OnKeyboardEvent(hWnd, nMessageID, wParam, lParam);
+		{}
 		break;
 	}
-	return(0);
 }
 
 bool GameFramework::D3DAssert(HRESULT valid, const char* error)
@@ -908,7 +872,7 @@ void GameFramework::CloseCmdList()
 
 void GameFramework::ExecuteCmdList(P3DCommandList list[], size_t count)
 {
-	myCommandQueue->ExecuteCommandLists(count, list);
+	myCommandQueue->ExecuteCommandLists(static_cast<UINT>(count), list);
 }
 
 DESC_HANDLE& GameFramework::AddtoDescriptor(DESC_HANDLE& handle, const size_t increment)

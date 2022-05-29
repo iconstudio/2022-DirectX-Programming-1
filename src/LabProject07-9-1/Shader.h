@@ -26,7 +26,7 @@ public:
 	ShaderBlob CompileShaderFromFile(const  WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob);
 	ShaderBlob ReadCompiledShaderFromFile(const WCHAR* pszFileName, ID3DBlob** ppd3dShaderBlob = NULL);
 
-	virtual void CreateShader(P3DDevice device, P3DGrpCommandList cmd_list, ID3D12RootSignature* signature);
+	virtual void CreateShader(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature);
 
 	virtual void InitializeUniforms(P3DDevice device, P3DGrpCommandList cmd_list);
 	virtual void UpdateUniforms(P3DGrpCommandList cmd_list);
@@ -60,7 +60,7 @@ public:
 	virtual ShaderBlob CreateVertexShader();
 	virtual ShaderBlob CreatePixelShader();
 
-	virtual void CreateShader(P3DDevice device, P3DGrpCommandList cmd_list, ID3D12RootSignature* signature);
+	virtual void CreateShader(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature);
 
 	virtual void Render(P3DGrpCommandList cmd_list, GameCamera* pCamera, int nPipelineState = 0);
 };

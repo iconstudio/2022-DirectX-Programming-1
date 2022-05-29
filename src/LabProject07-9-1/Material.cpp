@@ -48,7 +48,7 @@ void CMaterial::UpdateUniforms(P3DGrpCommandList cmd_list)
 	cmd_list->SetGraphicsRoot32BitConstants(1, 4, &(m_pMaterialColors->m_xmf4Emissive), 28);
 }
 
-void CMaterial::PrepareShaders(P3DDevice device, P3DGrpCommandList cmd_list, ID3D12RootSignature* signature)
+void CMaterial::PrepareShaders(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature)
 {
 	m_pIlluminatedShader = new CIlluminatedShader();
 	m_pIlluminatedShader->CreateShader(device, cmd_list, signature);
