@@ -26,8 +26,6 @@ public:
 	virtual void OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state) override;
 	virtual void OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) override;
 
-	virtual bool ProcessInput(UCHAR* pKeysBuffer);
-
 	CPlayer* myPlayer = nullptr;
 
 protected:

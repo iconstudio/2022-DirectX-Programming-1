@@ -60,9 +60,8 @@ void IlluminatedScene::Render()
 
 	OnRender();
 
-	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
-	d3dTaskList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress);
-	// Lights
+	auto gpu_lights_address = m_pd3dcbLights->GetGPUVirtualAddress();
+	d3dTaskList->SetGraphicsRootConstantBufferView(2, gpu_lights_address);
 
 	for (auto& instance : myInstances)
 	{
@@ -110,49 +109,10 @@ void IlluminatedScene::OnRender()
 	UpdateUniforms();
 }
 
-bool IlluminatedScene::ProcessInput(UCHAR* pKeysBuffer)
-{
-	DWORD dwDirection = 0;
-	if (pKeysBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
-	if (pKeysBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
-	if (pKeysBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT;
-	if (pKeysBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT;
-	if (pKeysBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
-	if (pKeysBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
-
-	float cxDelta = 0.0f, cyDelta = 0.0f;
-	POINT ptCursorPos;
-
-	if (GetCapture() == handleWindow)
-	{
-		SetCursor(NULL);
-		GetCursorPos(&ptCursorPos);
-		cxDelta = (float)(ptCursorPos.x - posCursor.x) / 3.0f;
-		cyDelta = (float)(ptCursorPos.y - posCursor.y) / 3.0f;
-		SetCursorPos(posCursor.x, posCursor.y);
-	}
-
-	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
-	{
-		if (cxDelta || cyDelta)
-		{
-			if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-				myPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-			else
-				myPlayer->Rotate(cyDelta, cxDelta, 0.0f);
-		}
-
-		if (dwDirection)
-		{
-			myPlayer->Move(dwDirection, 1.5f, true);
-		}
-	}
-
-	return false;
-}
-
 void IlluminatedScene::InitializeUniforms()
 {
+	Scene::InitializeUniforms();
+
 	// 256의 배수
 	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255);
 
@@ -172,6 +132,8 @@ void IlluminatedScene::InitializeUniforms()
 
 void IlluminatedScene::UpdateUniforms()
 {
+	Scene::UpdateUniforms();
+
 	memcpy(m_pcbMappedLights->m_pLights, m_pLights, sizeof(CLight) * m_nLights);
 
 	memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
@@ -181,6 +143,8 @@ void IlluminatedScene::UpdateUniforms()
 
 void IlluminatedScene::ReleaseUniforms()
 {
+	Scene::ReleaseUniforms();
+
 	if (m_pd3dcbLights)
 	{
 		m_pd3dcbLights->Unmap(0, NULL);
@@ -207,21 +171,21 @@ P3DSignature IlluminatedScene::CreateGraphicsRootSignature()
 
 	// 메모리 배열
 	shader_params[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	shader_params[0].Descriptor.ShaderRegister = 1; //Camera
+	shader_params[0].Descriptor.ShaderRegister = 1; // Camera
 	shader_params[0].Descriptor.RegisterSpace = 0;
 	shader_params[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	// 상수 (x, y, z, w) * 64개
+	// 상수 32개
 	shader_params[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	shader_params[1].Constants.Num32BitValues = 32;
-	shader_params[1].Constants.ShaderRegister = 2; //GameObject
+	shader_params[1].Constants.ShaderRegister = 2; // GameObject
 
 	shader_params[1].Constants.RegisterSpace = 0;
 	shader_params[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	// 메모리 배열
 	shader_params[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	shader_params[2].Descriptor.ShaderRegister = 4; //Lights
+	shader_params[2].Descriptor.ShaderRegister = 4; // Lights
 	shader_params[2].Descriptor.RegisterSpace = 0;
 	shader_params[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
