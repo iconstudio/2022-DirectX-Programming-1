@@ -11,7 +11,6 @@ public:
 	void Reset() override;
 	void Update(float elapsed_time) override;
 	void Render() override;
-	void RenderUI(HDC surface) override;
 
 	void OnAwake() override;
 	void OnInialized() override;

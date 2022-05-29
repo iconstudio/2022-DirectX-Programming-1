@@ -9,6 +9,7 @@ Scene::Scene(GameFramework& framework, HWND hwnd, const char* name)
 	, myFramework(framework), handleWindow(hwnd)
 	, d3dDevice(nullptr), d3dTaskList(nullptr)
 	, mySignature(nullptr)
+	, myBackgroundColor()
 	, posCursor{ 0, 0 }
 	, lastDeltaTime(0.0f)
 {}
@@ -48,9 +49,6 @@ void Scene::Render()
 	OnRender();
 }
 
-void Scene::RenderUI(HDC surface)
-{}
-
 void Scene::SetCamera(GameCamera* cam)
 {
 	myCamera = cam;
@@ -64,6 +62,14 @@ void Scene::SetRootSignature(P3DSignature signature)
 	}
 
 	mySignature = signature;
+}
+
+void Scene::SetBackgroundColor(const float colors[4])
+{
+	myBackgroundColor[0] = colors[0];
+	myBackgroundColor[1] = colors[1];
+	myBackgroundColor[2] = colors[2];
+	myBackgroundColor[3] = colors[3];
 }
 
 GameObject* Scene::AddInstance(const shared_ptr<GameObject>& inst)

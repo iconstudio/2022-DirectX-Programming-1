@@ -108,9 +108,6 @@
     <ClInclude Include="StageGameEnd.hpp">
       <Filter>헤더 파일\Contents\Stages</Filter>
     </ClInclude>
-    <ClInclude Include="StageIntro.hpp">
-      <Filter>헤더 파일\Contents\Stages</Filter>
-    </ClInclude>
     <ClInclude Include="StageMain.hpp">
       <Filter>헤더 파일\Contents\Stages</Filter>
     </ClInclude>
@@ -183,9 +180,6 @@
       <Filter>소스 파일\Contents\Stages</Filter>
     </ClCompile>
     <ClCompile Include="StageGameEnd.cpp">
-      <Filter>소스 파일\Contents\Stages</Filter>
-    </ClCompile>
-    <ClCompile Include="StageIntro.cpp">
       <Filter>소스 파일\Contents\Stages</Filter>
     </ClCompile>
     <ClCompile Include="StageMain.cpp">

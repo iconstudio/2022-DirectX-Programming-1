@@ -11,7 +11,6 @@ public:
 	void Reset() override;
 	void Update(float elapsed_time) override;
 	void Render() override;
-	void RenderUI(HDC surface) override;
 
 	void OnAwake() override;
 	void OnInialized() override;
@@ -21,4 +20,7 @@ public:
 	void OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info) override;
 	void OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state) override;
 	void OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) override;
+
+private:
+	float myLife = 5.0f;
 };

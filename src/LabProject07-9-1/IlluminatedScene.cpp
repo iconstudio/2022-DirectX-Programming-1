@@ -82,11 +82,6 @@ void IlluminatedScene::Render()
 	}
 }
 
-void IlluminatedScene::RenderUI(HDC surface)
-{
-	Scene::RenderUI(surface);
-}
-
 void IlluminatedScene::OnAwake()
 {
 }

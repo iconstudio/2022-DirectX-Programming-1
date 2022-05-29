@@ -3,7 +3,10 @@
 
 StageCredit::StageCredit(GameFramework& framework, HWND hwnd)
 	: Scene(framework, hwnd, "Credit")
-{}
+{
+	constexpr float colors[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+	SetBackgroundColor(colors);
+}
 
 void StageCredit::Awake(P3DDevice device, P3DGrpCommandList cmd_list)
 {
@@ -28,11 +31,6 @@ void StageCredit::Update(float elapsed_time)
 void StageCredit::Render()
 {
 	Scene::Render();
-}
-
-void StageCredit::RenderUI(HDC surface)
-{
-	Scene::RenderUI(surface);
 }
 
 void StageCredit::OnAwake()

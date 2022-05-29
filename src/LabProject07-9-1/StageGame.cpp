@@ -4,7 +4,10 @@
 
 StageGame::StageGame(GameFramework& framework, HWND hwnd)
 	: IlluminatedScene(framework, hwnd, "Game")
-{}
+{
+	constexpr float colors[] = { 0.0f, 0.125f, 0.3f, 1.0f };
+	SetBackgroundColor(colors);
+}
 
 void StageGame::ProcessInput(UCHAR* pKeysBuffer)
 {
@@ -68,11 +71,6 @@ void StageGame::Update(float elapsed_time)
 void StageGame::Render()
 {
 	IlluminatedScene::Render();
-}
-
-void StageGame::RenderUI(HDC surface)
-{
-	IlluminatedScene::RenderUI(surface);
 }
 
 void StageGame::OnAwake()

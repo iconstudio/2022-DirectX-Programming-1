@@ -3,7 +3,10 @@
 
 StageGameEnd::StageGameEnd(GameFramework& framework, HWND hwnd)
 	: Scene(framework, hwnd, "Complete")
-{}
+{
+	constexpr float colors[] = { 0.0f, 0.5f, 0.5f, 1.0f };
+	SetBackgroundColor(colors);
+}
 
 void StageGameEnd::Awake(P3DDevice device, P3DGrpCommandList cmd_list)
 {
@@ -30,10 +33,6 @@ void StageGameEnd::Render()
 	Scene::Render();
 }
 
-void StageGameEnd::RenderUI(HDC surface)
-{
-	Scene::RenderUI(surface);
-}
 
 void StageGameEnd::OnAwake()
 {}

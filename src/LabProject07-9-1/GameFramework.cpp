@@ -1,6 +1,5 @@
 #include "pch.hpp"
 #include "GameFramework.h"
-#include "StageIntro.hpp"
 #include "StageMain.hpp"
 #include "StageGame.hpp"
 #include "StageGameEnd.hpp"
@@ -557,14 +556,13 @@ void GameFramework::BuildAssets()
 
 void GameFramework::BuildStages()
 {
-	auto room_intro = RegisterScene(StageIntro(*this, myWindow));
 	auto room_main = RegisterScene(StageMain(*this, myWindow));
 	auto room_game = RegisterScene(StageGame(*this, myWindow));
 	auto room_complete = RegisterScene(StageGameEnd(*this, myWindow));
 	auto room_credit = RegisterScene(StageCredit(*this, myWindow));
 	
 	//AddStage(room_intro);
-	//AddStage(room_main);
+	AddStage(room_main);
 	AddStage(room_game);
 	AddStage(room_complete);
 	AddStage(room_credit);
@@ -677,14 +675,6 @@ void GameFramework::AfterRendering()
 	indexFrameBuffer = mySwapChain->GetCurrentBackBufferIndex();
 
 	WaitForGpuComplete();
-}
-
-void GameFramework::RenderUI(HDC surface) const
-{
-	if (currentScene)
-	{
-		currentScene->RenderUI(surface);
-	}
 }
 
 void GameFramework::WaitForGpuComplete()
@@ -986,7 +976,7 @@ inline void GameFramework::ClearRenderTargetView(DESC_HANDLE& handle
 	, D3D12_RECT* erase_rects, size_t erase_count)
 {
 	myCommandList->ClearRenderTargetView(handle
-		, frameBasisColour
+		, currentScene->myBackgroundColor
 		, static_cast<UINT>(erase_count), erase_rects);
 }
 

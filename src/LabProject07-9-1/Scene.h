@@ -11,7 +11,6 @@ public:
 	virtual void Reset() = 0;
 	virtual void Update(float elapsed_time) = 0;
 	virtual void Render() = 0;
-	virtual void RenderUI(HDC surface) = 0;
 
 	virtual void OnAwake() = 0;
 	virtual void OnInialized() = 0;
@@ -24,6 +23,7 @@ public:
 
 	void SetCamera(GameCamera* cam);
 	void SetRootSignature(P3DSignature signature);
+	void SetBackgroundColor(const float colors[4]);
 
 	template<typename ObjectType, typename GType = std::remove_cvref<ObjectType>>
 		requires(std::is_base_of_v<GType, GameObject>)
@@ -51,6 +51,8 @@ public:
 	const GameCamera* GetCamera() const noexcept;
 	P3DSignature GetRootSignature();
 	P3DSignature const GetRootSignature() const;
+
+	float myBackgroundColor[4];
 
 protected:
 	virtual P3DSignature CreateGraphicsRootSignature();

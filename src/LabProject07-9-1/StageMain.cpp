@@ -3,7 +3,10 @@
 
 StageMain::StageMain(GameFramework& framework, HWND hwnd)
 	: Scene(framework, hwnd, "Main")
-{}
+{
+	constexpr float colors[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	SetBackgroundColor(colors);
+}
 
 void StageMain::Awake(P3DDevice device, P3DGrpCommandList cmd_list)
 {
@@ -28,11 +31,6 @@ void StageMain::Update(float elapsed_time)
 void StageMain::Render()
 {
 	Scene::Render();
-}
-
-void StageMain::RenderUI(HDC surface)
-{
-	Scene::RenderUI(surface);
 }
 
 void StageMain::OnAwake()

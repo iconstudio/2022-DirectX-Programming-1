@@ -15,7 +15,6 @@ public:
 	virtual void Reset() override;
 	virtual void Update(float elapsed_time) override;
 	virtual void Render() override;
-	virtual void RenderUI(HDC surface) override;
 
 	virtual void OnAwake() override;
 	virtual void OnInialized() override;
