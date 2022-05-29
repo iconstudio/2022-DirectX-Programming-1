@@ -14,14 +14,14 @@ CMeshLoadInfo::~CMeshLoadInfo()
 	if (m_pxmf3Normals) delete[] m_pxmf3Normals;
 
 	if (m_pnIndices) delete[] m_pnIndices;
-	
+
 	if (m_pnSubSetIndices) delete[] m_pnSubSetIndices;
 
 	for (int i = 0; i < m_nSubMeshes; i++) if (m_ppnSubSetIndices[i]) delete[] m_ppnSubSetIndices[i];
 	if (m_ppnSubSetIndices) delete[] m_ppnSubSetIndices;
 }
 
-CMeshFromFile::CMeshFromFile(P3DDevice device, P3DGrpCommandList cmd_list, CMeshLoadInfo *pMeshInfo)
+CMeshFromFile::CMeshFromFile(P3DDevice device, P3DGrpCommandList cmd_list, CMeshLoadInfo* pMeshInfo)
 {
 	m_nVertices = pMeshInfo->m_nVertices;
 	m_nType = pMeshInfo->m_nType;
@@ -36,8 +36,8 @@ CMeshFromFile::CMeshFromFile(P3DDevice device, P3DGrpCommandList cmd_list, CMesh
 	m_nSubMeshes = pMeshInfo->m_nSubMeshes;
 	if (m_nSubMeshes > 0)
 	{
-		m_ppd3dSubSetIndexBuffers = new ID3D12Resource*[m_nSubMeshes];
-		m_ppd3dSubSetIndexUploadBuffers = new ID3D12Resource*[m_nSubMeshes];
+		m_ppd3dSubSetIndexBuffers = new ID3D12Resource * [m_nSubMeshes];
+		m_ppd3dSubSetIndexUploadBuffers = new ID3D12Resource * [m_nSubMeshes];
 		m_pd3dSubSetIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[m_nSubMeshes];
 
 		m_pnSubSetIndices = new int[m_nSubMeshes];
@@ -104,9 +104,7 @@ void CMeshFromFile::Render(P3DGrpCommandList cmd_list, int nSubSet)
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
-//
-CMeshIlluminatedFromFile::CMeshIlluminatedFromFile(P3DDevice device, P3DGrpCommandList cmd_list, CMeshLoadInfo *pMeshInfo) : CMeshFromFile::CMeshFromFile(device, cmd_list, pMeshInfo)
+CMeshIlluminatedFromFile::CMeshIlluminatedFromFile(P3DDevice device, P3DGrpCommandList cmd_list, CMeshLoadInfo* pMeshInfo) : CMeshFromFile::CMeshFromFile(device, cmd_list, pMeshInfo)
 {
 	m_pd3dNormalBuffer = ::CreateBufferResource(device, cmd_list, pMeshInfo->m_pxmf3Normals, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dNormalUploadBuffer);
 

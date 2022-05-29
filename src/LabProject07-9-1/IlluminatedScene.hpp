@@ -36,12 +36,12 @@ protected:
 	virtual void UpdateUniforms() override;
 	virtual void ReleaseUniforms() override;
 
-	CLight* m_pLights = NULL;
-	int m_nLights = 0;
+	CLight* myLights = NULL;
+	int numberLights = 0;
 
 	XMFLOAT4 m_xmf4GlobalAmbient;
 
 	ID3D12Resource* m_pd3dcbLights = NULL;
-	LIGHTS* m_pcbMappedLights = NULL;
+	StaticLights* myStaticLights = NULL;
 
 };

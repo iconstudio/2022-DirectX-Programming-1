@@ -45,7 +45,7 @@ protected:
 	int									m_nPipelineStates = 0;
 	ID3D12PipelineState** m_ppd3dPipelineStates = NULL;
 
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC	m_d3dPipelineStateDesc;
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC	pipeline_state_desc;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

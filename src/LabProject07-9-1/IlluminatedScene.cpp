@@ -3,14 +3,14 @@
 
 IlluminatedScene::IlluminatedScene(GameFramework& framework, HWND hwnd, const char* name)
 	: Scene(framework, hwnd, name)
-	, m_xmf4GlobalAmbient(XMFLOAT4())
+	, m_xmf4GlobalAmbient(XMFLOAT4(1, 1, 1, 1))
 {}
 
 IlluminatedScene::~IlluminatedScene()
 {
-	if (m_pLights)
+	if (myLights)
 	{
-		delete[] m_pLights;
+		delete[] myLights;
 	}
 }
 
@@ -40,8 +40,8 @@ void IlluminatedScene::Update(float elapsed_time)
 
 		if (myPlayer)
 		{
-			m_pLights[1].m_xmf3Position = myPlayer->GetPosition();
-			m_pLights[1].m_xmf3Direction = myPlayer->GetLookVector();
+			myLights[1].m_xmf3Position = myPlayer->GetPosition();
+			myLights[1].m_xmf3Direction = myPlayer->GetLookVector();
 		}
 	}
 
@@ -59,8 +59,6 @@ void IlluminatedScene::Render()
 	{
 		throw "장면에 카메라가 없음!";
 	}
-
-	OnRender();
 
 	auto gpu_lights_address = m_pd3dcbLights->GetGPUVirtualAddress();
 	d3dTaskList->SetGraphicsRootConstantBufferView(2, gpu_lights_address);
@@ -118,7 +116,7 @@ void IlluminatedScene::InitializeUniforms()
 	Scene::InitializeUniforms();
 
 	// 256의 배수
-	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255);
+	UINT ncbElementBytes = ((sizeof(StaticLights) + 255) & ~255);
 
 	// 메모리 리소스 생성
 	m_pd3dcbLights = CreateBufferResource(d3dDevice, d3dTaskList
@@ -126,7 +124,7 @@ void IlluminatedScene::InitializeUniforms()
 		, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, nullptr);
 
 	// GPU에서 CPU로 복사
-	auto place = reinterpret_cast<void**>(&m_pcbMappedLights);
+	auto place = reinterpret_cast<void**>(&myStaticLights);
 	auto valid = m_pd3dcbLights->Map(0, nullptr, place);
 	if (FAILED(valid))
 	{
@@ -138,11 +136,11 @@ void IlluminatedScene::UpdateUniforms()
 {
 	Scene::UpdateUniforms();
 
-	memcpy(m_pcbMappedLights->m_pLights, m_pLights, sizeof(CLight) * m_nLights);
+	memcpy(myStaticLights->everyLights, myLights, sizeof(CLight) * numberLights);
 
-	memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
+	memcpy(&myStaticLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
 
-	memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
+	memcpy(&myStaticLights->m_nLights, &numberLights, sizeof(int));
 }
 
 void IlluminatedScene::ReleaseUniforms()
@@ -173,13 +171,11 @@ P3DSignature IlluminatedScene::CreateGraphicsRootSignature()
 	D3D12_ROOT_PARAMETER shader_params[3]{};
 	ZeroMemory(&shader_params, sizeof(shader_params));
 
-	// 메모리 배열
 	shader_params[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	shader_params[0].Descriptor.ShaderRegister = 1; // Camera
 	shader_params[0].Descriptor.RegisterSpace = 0;
 	shader_params[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	// 상수 32개
 	shader_params[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	shader_params[1].Constants.Num32BitValues = 32;
 	shader_params[1].Constants.ShaderRegister = 2; // GameObject
@@ -187,7 +183,6 @@ P3DSignature IlluminatedScene::CreateGraphicsRootSignature()
 	shader_params[1].Constants.RegisterSpace = 0;
 	shader_params[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	// 메모리 배열
 	shader_params[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	shader_params[2].Descriptor.ShaderRegister = 4; // Lights
 	shader_params[2].Descriptor.RegisterSpace = 0;

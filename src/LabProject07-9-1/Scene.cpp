@@ -49,7 +49,9 @@ void Scene::Update(float elapsed_time)
 }
 
 void Scene::Render()
-{}
+{
+	OnRender();
+}
 
 void Scene::RenderUI(HDC surface)
 {}
