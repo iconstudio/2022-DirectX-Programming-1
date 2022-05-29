@@ -22,14 +22,20 @@
     <Filter Include="쉐이더 파일">
       <UniqueIdentifier>{c5acdaa3-2ca2-4b27-8a5c-a99c25ac1f81}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\System">
+      <UniqueIdentifier>{a6e26c70-9f53-4a7b-b056-4adc7b7708e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Resources">
+      <UniqueIdentifier>{a50bb882-24bd-40a5-bcca-028f1da68972}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Generals">
+      <UniqueIdentifier>{b29b328e-723d-4677-8f12-479acc150def}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -39,53 +45,56 @@
     <ClInclude Include="DirectX.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="GameFramework.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Shader.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Material.hpp">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Light.hpp">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Arithmetics.hpp">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="pch.hpp">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="GameScenes.hpp">
       <Filter>헤더 파일\Contents</Filter>
-    </ClInclude>
-    <ClInclude Include="Model.hpp">
-      <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Terrains.hpp">
       <Filter>헤더 파일\Contents</Filter>
     </ClInclude>
+    <ClInclude Include="GameFramework.h">
+      <Filter>헤더 파일\System</Filter>
+    </ClInclude>
     <ClInclude Include="IlluminatedScene.hpp">
-      <Filter>헤더 파일</Filter>
+      <Filter>헤더 파일\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>헤더 파일\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>헤더 파일\Contents</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.hpp">
+      <Filter>헤더 파일\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.hpp">
+      <Filter>헤더 파일\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>헤더 파일\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.hpp">
+      <Filter>헤더 파일\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>헤더 파일\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>헤더 파일\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>헤더 파일\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>헤더 파일\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Arithmetics.hpp">
+      <Filter>헤더 파일\Generals</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.hpp">
+      <Filter>헤더 파일\Generals</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>헤더 파일\Generals</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -105,9 +114,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Object.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Player.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
@@ -142,6 +148,9 @@
     </ClCompile>
     <ClCompile Include="IlluminatedScene.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>소스 파일\Contents</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
