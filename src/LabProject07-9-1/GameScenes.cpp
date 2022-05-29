@@ -51,7 +51,39 @@ void StageIntro::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {}
 
 void StageIntro::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
-{}
+{
+	switch (msg)
+	{
+		case WM_LBUTTONDOWN:
+		{
+		}
+		break;
+
+		case WM_RBUTTONDOWN:
+		{
+		}
+		break;
+
+		case WM_LBUTTONUP:
+		{
+		}
+		break;
+
+		case WM_RBUTTONUP:
+		{
+		}
+		break;
+
+		case WM_MOUSEMOVE:
+		{
+		}
+		break;
+
+		default:
+		{}
+		break;
+	}
+}
 
 void StageIntro::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
 {}
@@ -107,6 +139,37 @@ void StageMain::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
 void StageMain::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 {
+	switch (msg)
+	{
+		case WM_LBUTTONDOWN:
+		{
+		}
+		break;
+
+		case WM_RBUTTONDOWN:
+		{
+		}
+		break;
+
+		case WM_LBUTTONUP:
+		{
+		}
+		break;
+
+		case WM_RBUTTONUP:
+		{
+		}
+		break;
+
+		case WM_MOUSEMOVE:
+		{
+		}
+		break;
+
+		default:
+		{}
+		break;
+	}
 }
 
 void StageMain::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
@@ -287,6 +350,37 @@ void StageGame::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
 void StageGame::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 {
+	switch (msg)
+	{
+		case WM_LBUTTONDOWN:
+		{
+		}
+		break;
+
+		case WM_RBUTTONDOWN:
+		{
+		}
+		break;
+
+		case WM_LBUTTONUP:
+		{
+		}
+		break;
+
+		case WM_RBUTTONUP:
+		{
+		}
+		break;
+
+		case WM_MOUSEMOVE:
+		{
+		}
+		break;
+
+		default:
+		{}
+		break;
+	}
 }
 
 void StageGame::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
@@ -344,6 +438,37 @@ void StageGameEnd::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
 void StageGameEnd::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 {
+	switch (msg)
+	{
+		case WM_LBUTTONDOWN:
+		{
+		}
+		break;
+
+		case WM_RBUTTONDOWN:
+		{
+		}
+		break;
+
+		case WM_LBUTTONUP:
+		{
+		}
+		break;
+
+		case WM_RBUTTONUP:
+		{
+		}
+		break;
+
+		case WM_MOUSEMOVE:
+		{
+		}
+		break;
+
+		default:
+		{}
+		break;
+	}
 }
 
 void StageGameEnd::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
@@ -401,6 +526,37 @@ void StageCredit::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
 void StageCredit::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 {
+	switch (msg)
+	{
+		case WM_LBUTTONDOWN:
+		{
+		}
+		break;
+
+		case WM_RBUTTONDOWN:
+		{
+		}
+		break;
+
+		case WM_LBUTTONUP:
+		{
+		}
+		break;
+
+		case WM_RBUTTONUP:
+		{
+		}
+		break;
+
+		case WM_MOUSEMOVE:
+		{
+		}
+		break;
+
+		default:
+		{}
+		break;
+	}
 }
 
 void StageCredit::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
