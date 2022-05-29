@@ -29,10 +29,6 @@ public:
 	virtual void Render(P3DGrpCommandList cmd_list, int nSubSet) { }
 };
 
-#define VERTEXT_POSITION			0x01
-#define VERTEXT_COLOR				0x02
-#define VERTEXT_NORMAL				0x04
-
 class CMeshLoadInfo
 {
 public:

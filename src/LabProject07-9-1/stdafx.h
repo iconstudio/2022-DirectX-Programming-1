@@ -137,6 +137,10 @@ constexpr float ASPECT_RATIO = (float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_H
 #define SPOT_LIGHT			2
 #define DIRECTIONAL_LIGHT	3
 
+#define VERTEXT_POSITION			0x01
+#define VERTEXT_COLOR				0x02
+#define VERTEXT_NORMAL				0x04
+
 #include "Arithmetics.hpp"
 
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE

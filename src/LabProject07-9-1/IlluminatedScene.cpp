@@ -89,7 +89,6 @@ void IlluminatedScene::RenderUI(HDC surface)
 
 void IlluminatedScene::OnAwake()
 {
-	//CMaterial::PrepareShaders(d3dDevice, d3dTaskList, mySignature);
 }
 
 void IlluminatedScene::OnInialized()

@@ -541,6 +541,7 @@ void GameFramework::BuildPipeline()
 	}
 
 	myRootSignature = signature;
+
 	CMaterial::PrepareShaders(myDevice, myCommandList, myRootSignature);
 }
 
@@ -576,6 +577,7 @@ void GameFramework::BuildStages()
 		if (scene)
 		{
 			scene->Awake(myDevice, myCommandList);
+			scene->SetRootSignature(myRootSignature);
 		}
 		else
 		{
