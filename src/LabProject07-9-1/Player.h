@@ -77,6 +77,8 @@ public:
 
 	virtual void Update(float fTimeElapsed);
 
+	virtual void CollideWith(GameObject* other) override;
+
 	virtual void OnPlayerUpdateCallback(float fTimeElapsed) {}
 	void SetPlayerUpdatedContext(LPVOID pContext) { m_pPlayerUpdatedContext = pContext; }
 

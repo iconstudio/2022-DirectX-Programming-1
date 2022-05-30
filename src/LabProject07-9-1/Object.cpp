@@ -312,7 +312,7 @@ bool GameObject::CheckCollisionWith(GameObject* other) const
 	return false;
 }
 
-void GameObject::CollideWith(GameObject* other) const
+void GameObject::CollideWith(GameObject* other)
 {
 	const auto& tag = other->GetTag();
 	switch (tag)

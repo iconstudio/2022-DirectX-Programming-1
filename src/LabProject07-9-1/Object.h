@@ -60,7 +60,7 @@ public:
 	void Rotate(XMFLOAT4* pxmf4Quaternion);
 
 	virtual bool CheckCollisionWith(GameObject* other) const;
-	virtual void CollideWith(GameObject* other) const;
+	virtual void CollideWith(GameObject* other);
 
 	GameObject* GetParent() { return(m_pParent); }
 	void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);

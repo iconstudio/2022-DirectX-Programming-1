@@ -214,6 +214,29 @@ void CPlayer::Update(float fTimeElapsed)
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 }
 
+void CPlayer::CollideWith(GameObject* other)
+{
+	const auto& tag = other->GetTag();
+	switch (tag)
+	{
+		case COLLISION_TAGS::NONE:
+		{}
+		break;
+
+		case COLLISION_TAGS::CAR:
+		{}
+		break;
+
+		case COLLISION_TAGS::ROCK:
+		{}
+		break;
+
+		case COLLISION_TAGS::TREE:
+		{}
+		break;
+	}
+}
+
 GameCamera* CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
 {
 	GameCamera* pNewCamera = NULL;

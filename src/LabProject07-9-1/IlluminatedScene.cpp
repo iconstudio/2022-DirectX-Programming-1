@@ -48,6 +48,11 @@ void IlluminatedScene::Update(float elapsed_time)
 	for (auto& instance : myInstances)
 	{
 		instance->Animate(elapsed_time, nullptr);
+
+		if (myPlayer->CheckCollisionWith(instance.get()))
+		{
+			myPlayer->CollideWith(instance.get());
+		}
 	}
 }
 
