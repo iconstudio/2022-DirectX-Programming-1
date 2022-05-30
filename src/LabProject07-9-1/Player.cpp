@@ -88,6 +88,14 @@ void CPlayer::Move(float fxOffset, float fyOffset, float fzOffset)
 	m_xmf3Position.z += fzOffset;
 }
 
+void CPlayer::MoveForward(float fDistance)
+{
+	const auto look = GetLookVector();
+	const auto velocity = Vector3::ScalarProduct(look, fDistance);
+
+	m_xmf3Position = Vector3::Add(m_xmf3Position, velocity);
+}
+
 void CPlayer::Rotate(float x, float y, float z)
 {
 	DWORD nCurrentCameraMode = myCamera->GetMode();
@@ -295,6 +303,7 @@ void CAirplanePlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
 		m_pMainRotorFrame->localTransform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->localTransform);
 	}
+
 	if (m_pTailRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
@@ -302,6 +311,7 @@ void CAirplanePlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	}
 
 	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
+	UpdateTransform(pxmf4x4Parent);
 }
 
 void CAirplanePlayer::OnPrepareRender()
@@ -329,7 +339,7 @@ GameCamera* CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElaps
 		break;
 
 		case SPACESHIP_CAMERA:
-		SetFriction(100.5f);
+		SetFriction(10.5f);
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		SetMaxVelocityXZ(40.0f);
 		SetMaxVelocityY(40.0f);
@@ -342,13 +352,13 @@ GameCamera* CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElaps
 		break;
 
 		case THIRD_PERSON_CAMERA:
-		SetFriction(20.5f);
+		SetFriction(30.0f);
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		SetMaxVelocityXZ(25.5f);
-		SetMaxVelocityY(40.0f);
+		SetMaxVelocityXZ(90.0f);
+		SetMaxVelocityY(100.0f);
 		myCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		myCamera->SetTimeLag(0.25f);
-		myCamera->SetOffset(XMFLOAT3(0.0f, 50.0f, -60.0f));
+		myCamera->SetOffset(XMFLOAT3(0.0f, 50.0f, -80.0f));
 		myCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		myCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		myCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);

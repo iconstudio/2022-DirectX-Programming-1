@@ -42,8 +42,11 @@ namespace Vector3
 	{
 		XMFLOAT3 result{};
 
-		const auto xmvector1 = XMLoadFloat3(std::forward<XMFLOAT3*>(&vector1));
-		const auto xmvector2 = XMLoadFloat3(std::forward<XMFLOAT3*>(&vector2));
+		const auto&& fvector1 = std::forward<XMFLOAT3>(vector1);
+		const auto&& fvector2 = std::forward<XMFLOAT3>(vector2);
+
+		const auto xmvector1 = XMLoadFloat3(&fvector1);
+		const auto xmvector2 = XMLoadFloat3(&fvector2);
 		XMStoreFloat3(&result, xmvector1 + xmvector2);
 
 		return result;
@@ -51,7 +54,7 @@ namespace Vector3
 
 	inline XMFLOAT3 Add(const XMFLOAT3& vector1, const XMFLOAT3& vector2)
 	{
-		return Add(XMFLOAT3(vector1), XMFLOAT3(vector1));
+		return Add(XMFLOAT3(vector1), XMFLOAT3(vector2));
 	}
 
 	inline XMFLOAT3 Add(const XMFLOAT3& vector1, XMFLOAT3&& vector2)

@@ -86,8 +86,15 @@ void GameObject::SetMaterial(int index, CMaterial* mat)
 
 void GameObject::Animate(float time_elapsed, XMFLOAT4X4* parent)
 {
-	if (mySibling) mySibling->Animate(time_elapsed, parent);
-	if (myChild) myChild->Animate(time_elapsed, &worldTransform);
+	if (mySibling)
+	{
+		mySibling->Animate(time_elapsed, parent);
+	}
+
+	if (myChild)
+	{
+		myChild->Animate(time_elapsed, &worldTransform);
+	}
 }
 
 GameObject* GameObject::FindFrame(const char* name)

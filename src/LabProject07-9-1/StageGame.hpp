@@ -23,5 +23,8 @@ public:
 
 	void ProcessInput(UCHAR* pKeysBuffer);
 
-	GameObject* myTestPlayer = nullptr;
+	const float roadWidth = 60.0f;
+	const float roadHeight = 2000.0f;
+
+	BoundingSphere myGoal;
 };

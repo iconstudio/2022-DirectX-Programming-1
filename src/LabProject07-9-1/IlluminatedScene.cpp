@@ -35,10 +35,10 @@ void IlluminatedScene::Update(float elapsed_time)
 
 	if (myPlayer)
 	{
-		myPlayer->Animate(elapsed_time, NULL);
+		myPlayer->Animate(elapsed_time, nullptr);
 		myPlayer->Update(elapsed_time);
 
-		if (myPlayer)
+		if (myLights)
 		{
 			myLights[1].m_xmf3Position = myPlayer->GetPosition();
 			myLights[1].m_xmf3Direction = myPlayer->GetLookVector();
