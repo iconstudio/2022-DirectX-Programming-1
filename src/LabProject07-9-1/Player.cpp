@@ -225,19 +225,64 @@ void CPlayer::CollideWith(GameObject* other)
 
 		case COLLISION_TAGS::CAR:
 		{
-			const auto& pos = other->GetPosition();
+			constexpr float ot_mass = 100.0f;
+			constexpr float my_mass = 100.0f;
+			constexpr auto ratio = (1.0f + ot_mass / my_mass) * 10.0f;
+
+			const auto& ot_pos = other->GetPosition();
+			const auto& my_pos = GetPosition();
+
+			const auto reflection = Vector3::Subtract(my_pos, ot_pos);
+			const auto reflection_dir = Vector3::Normalize(reflection);
+
+			const auto& my_vel = GetVelocity();
+			const auto my_inverseddir = Vector3::ScalarProduct(my_vel, -1.0f, false);
+
+			const auto power = Vector3::Add(my_inverseddir, reflection);
+			const auto my_dir = Vector3::ScalarProduct(power, ratio, true);
+			Move(my_dir, true);
 		}
 		break;
 
 		case COLLISION_TAGS::ROCK:
 		{
-			const auto& pos = other->GetPosition();
+			const auto ot_mass = 20;
+			constexpr float my_mass = 100.0f;
+			constexpr auto ratio = (1.0f + ot_mass / my_mass) * 10.0f;
+
+			const auto& ot_pos = other->GetPosition();
+			const auto& my_pos = GetPosition();
+
+			const auto reflection = Vector3::Subtract(my_pos, ot_pos);
+			const auto reflection_dir = Vector3::Normalize(reflection);
+
+			const auto& my_vel = GetVelocity();
+			const auto my_inverseddir = Vector3::ScalarProduct(my_vel, -1.0f, false);
+
+			const auto power = Vector3::Add(my_inverseddir, reflection);
+			const auto my_dir = Vector3::ScalarProduct(power, ratio, true);
+			Move(my_dir, true);
 		}
 		break;
 
 		case COLLISION_TAGS::TREE:
 		{
-			const auto& pos = other->GetPosition();
+			const auto ot_mass = 50;
+			constexpr float my_mass = 100.0f;
+			constexpr auto ratio = (1.0f + ot_mass / my_mass) * 10.0f;
+
+			const auto& ot_pos = other->GetPosition();
+			const auto& my_pos = GetPosition();
+
+			const auto reflection = Vector3::Subtract(my_pos, ot_pos);
+			const auto reflection_dir = Vector3::Normalize(reflection);
+
+			const auto& my_vel = GetVelocity();
+			const auto my_inverseddir = Vector3::ScalarProduct(my_vel, -1.0f, false);
+
+			const auto power = Vector3::Add(my_inverseddir, reflection);
+			const auto my_dir = Vector3::ScalarProduct(power, ratio, true);
+			Move(my_dir, true);
 		}
 		break;
 	}
@@ -390,7 +435,7 @@ GameCamera* CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElaps
 		case THIRD_PERSON_CAMERA:
 		SetFriction(90.0f);
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		SetMaxVelocityXZ(90.0f);
+		SetMaxVelocityXZ(150.0f);
 		SetMaxVelocityY(30.0f);
 		myCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		myCamera->SetTimeLag(0.25f);

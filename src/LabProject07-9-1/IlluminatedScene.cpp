@@ -43,15 +43,15 @@ void IlluminatedScene::Update(float elapsed_time)
 			myLights[1].m_xmf3Position = myPlayer->GetPosition();
 			myLights[1].m_xmf3Direction = myPlayer->GetLookVector();
 		}
-	}
 
-	for (auto& instance : myInstances)
-	{
-		instance->Animate(elapsed_time, nullptr);
-
-		if (myPlayer->CheckCollisionWith(instance.get()))
+		for (auto& instance : myInstances)
 		{
-			myPlayer->CollideWith(instance.get());
+			instance->Animate(elapsed_time, nullptr);
+
+			if (myPlayer->CheckCollisionWith(instance.get()))
+			{
+				myPlayer->CollideWith(instance.get());
+			}
 		}
 	}
 }

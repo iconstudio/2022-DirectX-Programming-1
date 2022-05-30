@@ -90,7 +90,6 @@ void StageGame::Reset()
 	IlluminatedScene::Reset();
 
 	myPlayer->SetPosition(playerSpawnPoint);
-	myPlayer->m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	myPlayer->SetVelocity(XMFLOAT3());
 	raceTimer = 4.0f;
 }
