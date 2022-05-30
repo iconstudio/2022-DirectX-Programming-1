@@ -96,7 +96,7 @@ void StageGameEnd::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
 				case VK_SPACE:
 				case VK_RETURN:
 				{
-					myFramework.JumpToNextStage();
+					myFramework.JumpToStage(0);
 				}
 				break;
 			}

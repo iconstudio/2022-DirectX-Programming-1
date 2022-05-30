@@ -4,6 +4,7 @@
 #include "Model.hpp"
 
 CPlayer::CPlayer()
+	: myCollider()
 {
 	myCamera = NULL;
 
@@ -352,13 +353,13 @@ GameCamera* CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElaps
 		break;
 
 		case THIRD_PERSON_CAMERA:
-		SetFriction(30.0f);
+		SetFriction(90.0f);
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		SetMaxVelocityXZ(90.0f);
-		SetMaxVelocityY(100.0f);
+		SetMaxVelocityY(30.0f);
 		myCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		myCamera->SetTimeLag(0.25f);
-		myCamera->SetOffset(XMFLOAT3(0.0f, 50.0f, -80.0f));
+		myCamera->SetOffset(XMFLOAT3(0.0f, 60.0f, -90.0f));
 		myCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		myCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		myCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);

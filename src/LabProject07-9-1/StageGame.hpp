@@ -23,8 +23,10 @@ public:
 
 	void ProcessInput(UCHAR* pKeysBuffer);
 
-	const float roadWidth = 60.0f;
-	const float roadHeight = 2000.0f;
+	const float roadWidth = 100.0f;
+	const float roadHeight = 3000.0f;
 
 	BoundingSphere myGoal;
+
+	XMFLOAT3 playerSpawnPoint;
 };

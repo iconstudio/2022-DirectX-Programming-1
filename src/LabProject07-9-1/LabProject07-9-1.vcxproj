@@ -172,7 +172,6 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
-    <ClInclude Include="StageCredit.hpp" />
     <ClInclude Include="StageGame.hpp" />
     <ClInclude Include="StageGameEnd.hpp" />
     <ClInclude Include="StageMain.hpp" />
@@ -198,7 +197,6 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="StageCredit.cpp" />
     <ClCompile Include="StageGame.cpp" />
     <ClCompile Include="StageGameEnd.cpp" />
     <ClCompile Include="StageMain.cpp" />

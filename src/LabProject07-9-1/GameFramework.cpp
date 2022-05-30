@@ -3,7 +3,6 @@
 #include "StageMain.hpp"
 #include "StageGame.hpp"
 #include "StageGameEnd.hpp"
-#include "StageCredit.hpp"
 #include "Shader.h"
 #include "Model.hpp"
 
@@ -559,13 +558,10 @@ void GameFramework::BuildStages()
 	auto room_main = RegisterScene(StageMain(*this, myWindow));
 	auto room_game = RegisterScene(StageGame(*this, myWindow));
 	auto room_complete = RegisterScene(StageGameEnd(*this, myWindow));
-	auto room_credit = RegisterScene(StageCredit(*this, myWindow));
 	
-	//AddStage(room_intro);
 	AddStage(room_main);
 	AddStage(room_game);
 	AddStage(room_complete);
-	AddStage(room_credit);
 	JumpToStage(0);
 
 	for (auto& stage_pair : myScenes)

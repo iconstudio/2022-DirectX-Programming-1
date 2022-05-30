@@ -2,26 +2,41 @@
 #include "StageGame.hpp"
 #include "GameFramework.h"
 
+float MakeRandom()
+{
+	return (float(rand()) / float(RAND_MAX));
+}
+
 StageGame::StageGame(GameFramework& framework, HWND hwnd)
 	: IlluminatedScene(framework, hwnd, "Game")
-	, myGoal()
+	, myGoal(), playerSpawnPoint()
 {
-	constexpr float colors[] = { 0.0f, 0.125f, 0.3f, 1.0f };
+	constexpr float colors[] = { 0.2f, 0.6f, 0.4f, 1.0f };
 	SetBackgroundColor(colors);
 }
 
 void StageGame::ProcessInput(UCHAR* pKeysBuffer)
 {
-	DWORD dwDirection = 0;
-	if (pKeysBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
-	if (pKeysBuffer['W'] & 0xF0) dwDirection |= DIR_FORWARD;
-	if (pKeysBuffer['S'] & 0xF0) dwDirection |= DIR_BACKWARD;
-	if (pKeysBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
+	float pitch = 0.0f;
 
-	if (pKeysBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT;
-	if (pKeysBuffer['A'] & 0xF0) dwDirection |= DIR_LEFT;
-	if (pKeysBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT;
-	if (pKeysBuffer['D'] & 0xF0) dwDirection |= DIR_RIGHT;
+	DWORD dwDirection = 0;
+	if (pKeysBuffer[VK_UP] & 0xF0 || pKeysBuffer['W'] & 0xF)
+	{
+		dwDirection |= DIR_FORWARD;
+	}
+	if (pKeysBuffer[VK_DOWN] & 0xF0 || pKeysBuffer['S'] & 0xF0)
+	{
+		dwDirection |= DIR_BACKWARD;
+	}
+
+	if (pKeysBuffer[VK_LEFT] & 0xF0 || pKeysBuffer['A'] & 0xF0)
+	{
+		pitch -= 1.0f;
+	}
+	if (pKeysBuffer[VK_RIGHT] & 0xF0 || pKeysBuffer['D'] & 0xF0)
+	{
+		pitch += 1.0f;
+	}
 
 	if (pKeysBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
 	if (pKeysBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
@@ -37,6 +52,8 @@ void StageGame::ProcessInput(UCHAR* pKeysBuffer)
 		SetCursorPos(posCursor.x, posCursor.y);
 	}
 
+	cxDelta += pitch * 20.0f * lastDeltaTime;
+
 	if ((dwDirection != 0) || (cxDelta != 0.0f))
 	{
 		if (cxDelta)
@@ -46,7 +63,7 @@ void StageGame::ProcessInput(UCHAR* pKeysBuffer)
 
 		if (dwDirection)
 		{
-			myPlayer->Move(dwDirection, 1.5f, true);
+			myPlayer->Move(dwDirection, 2.0f, true);
 		}
 	}
 }
@@ -64,6 +81,10 @@ void StageGame::Start()
 void StageGame::Reset()
 {
 	IlluminatedScene::Reset();
+
+	myPlayer->SetPosition(playerSpawnPoint);
+	myPlayer->m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	myPlayer->SetVelocity(XMFLOAT3());
 }
 
 void StageGame::Update(float elapsed_time)
@@ -75,6 +96,14 @@ void StageGame::Update(float elapsed_time)
 	if (GetKeyboardState(keystate))
 	{
 		ProcessInput(keystate);
+	}
+
+	auto& player_collider = myPlayer->myCollider;
+	player_collider.Center = myPlayer->GetPosition();
+
+	if (player_collider.Intersects(myGoal))
+	{
+		myFramework.JumpToNextStage();
 	}
 }
 
@@ -88,10 +117,10 @@ void StageGame::OnAwake()
 	IlluminatedScene::OnAwake();
 
 	//
-	m_xmf4GlobalAmbient = XMFLOAT4(0.15f, 0.2f, 0.15f, 1.0f);
+	m_xmf4GlobalAmbient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	//
-	numberLights = 4;
+	numberLights = 6;
 	myLights = new CLight[numberLights];
 	::ZeroMemory(myLights, sizeof(CLight) * numberLights);
 
@@ -104,6 +133,7 @@ void StageGame::OnAwake()
 	myLights[0].m_xmf3Position = XMFLOAT3(30.0f, 30.0f, 30.0f);
 	myLights[0].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	myLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
+
 	myLights[1].m_bEnable = true;
 	myLights[1].m_nType = SPOT_LIGHT;
 	myLights[1].m_fRange = 500.0f;
@@ -114,14 +144,16 @@ void StageGame::OnAwake()
 	myLights[1].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	myLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
 	myLights[1].m_fFalloff = 8.0f;
-	myLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
+	myLights[1].m_fPhi = (float)cos(XMConvertToRadians(45.0f));
 	myLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+
 	myLights[2].m_bEnable = true;
 	myLights[2].m_nType = DIRECTIONAL_LIGHT;
 	myLights[2].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	myLights[2].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	myLights[2].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.8f, 0.6f, 1.0f);
 	myLights[2].m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.0f);
 	myLights[2].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
+
 	myLights[3].m_bEnable = true;
 	myLights[3].m_nType = SPOT_LIGHT;
 	myLights[3].m_fRange = 600.0f;
@@ -135,21 +167,44 @@ void StageGame::OnAwake()
 	myLights[3].m_fPhi = (float)cos(XMConvertToRadians(90.0f));
 	myLights[3].m_fTheta = (float)cos(XMConvertToRadians(30.0f));
 
+	myLights[4].m_bEnable = true;
+	myLights[4].m_nType = POINT_LIGHT;
+	myLights[4].m_fRange = 300.0f;
+	myLights[4].m_xmf4Ambient = XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f);
+	myLights[4].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.5f, 0.9f, 1.0f);
+	myLights[4].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
+	myLights[4].m_xmf3Position = XMFLOAT3(roadWidth * 0.5f, 0.0f, roadHeight * 0.5f);
+	myLights[4].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	myLights[4].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
+
+	// °á½Â¼±
+	XMFLOAT3 goal = XMFLOAT3(roadWidth * 0.5f, 0.0f, roadHeight);
+
+	myLights[5].m_bEnable = true;
+	myLights[5].m_nType = POINT_LIGHT;
+	myLights[5].m_fRange = 100.0f;
+	myLights[5].m_xmf4Ambient = XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f);
+	myLights[5].m_xmf4Diffuse = XMFLOAT4(0.1f, 1.0f, 0.5f, 1.0f);
+	myLights[5].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
+	myLights[5].m_xmf3Position = XMFLOAT3(goal);
+	myLights[5].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	myLights[5].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
+
 	//
 	myInstances.reserve(100);
 	myInstances.clear();
 
 	auto model_rock1 = myFramework.GetModel("Rock1").lock();
-	model_rock1->SetScale(5.0f, 5.0f, 5.0f);
+	model_rock1->SetScale(10.0f, 10.0f, 10.0f);
 
 	auto model_rock2 = myFramework.GetModel("Rock2").lock();
-	model_rock2->SetScale(5.0f, 5.0f, 5.0f);
+	model_rock2->SetScale(10.0f, 10.0f, 10.0f);
 
 	XMFLOAT3 stone_place;
 
 	constexpr float width = 100.0f;
-	constexpr float height = 2000.0f;
-	constexpr int count = 100;
+	constexpr float height = 3000.0f;
+	constexpr int count = 50;
 	constexpr auto place_gap = height / float(count);
 
 	GameObject* stone = NULL;
@@ -166,7 +221,6 @@ void StageGame::OnAwake()
 			myInstances.emplace_back(stone);
 
 			stone_place.z += place_gap;
-			//stone_place = Vector3::Add(stone_place, XMFLOAT3{0.0f, 0.0f, });
 
 			stone = new GameObject();
 			stone->Attach(model_rock2.get(), true);
@@ -180,40 +234,74 @@ void StageGame::OnAwake()
 
 	auto model_policecar = myFramework.GetModel("PoliceCar").lock();
 
-	CGunshipObject* pGunshipObject = NULL;
-	pGunshipObject = new CGunshipObject();
-	pGunshipObject->Attach(model_policecar.get(), true);
-	pGunshipObject->Awake();
-	pGunshipObject->SetPosition(135.0f, 0.0f, 220.0f);
-	pGunshipObject->SetScale(8.5f, 8.5f, 8.5f);
-	pGunshipObject->Rotate(0.0f, -90.0f, 0.0f);
-	myInstances.emplace_back(pGunshipObject);
+	auto policecar = new GameObject();
+	policecar->Attach(model_policecar.get(), true);
+	policecar->SetPosition(135.0f, 0.0f, 220.0f);
+	policecar->SetScale(8.5f, 8.5f, 8.5f);
+	policecar->Rotate(0.0f, -90.0f, 0.0f);
+	myInstances.emplace_back(policecar);
+
+	policecar = new GameObject();
+	policecar->Attach(model_policecar.get(), true);
+	policecar->SetPosition(-15.0f, 0.0f, 60.0f);
+	policecar->SetScale(8.5f, 8.5f, 8.5f);
+	policecar->Rotate(0.0f, 90.0f, 0.0f);
+	myInstances.emplace_back(policecar);
 
 	auto model_tree = myFramework.GetModel("Tree").lock();
 
-	CSuperCobraObject* pSuperCobraObject = NULL;
-	pSuperCobraObject = new CSuperCobraObject();
-	pSuperCobraObject->Attach(model_tree.get(), true);
-	pSuperCobraObject->Awake();
-	pSuperCobraObject->SetPosition(95.0f, 0.0f, 50.0f);
-	pSuperCobraObject->SetScale(9.5f, 9.5f, 9.5f);
-	pSuperCobraObject->Rotate(0.0f, -90.0f, 0.0f);
-	myInstances.emplace_back(pSuperCobraObject);
+	float cx = 0.0f;
+	float cz = 0.0f;
+	for (int i = 0; i < 10; ++i)
+	{
+		auto tree = new GameObject();
+		tree->Attach(model_tree.get(), true);
+		tree->SetPosition(150.0f + cx, 0.0f, 50.0f + cz);
+		tree->SetScale(9.5f, 9.5f, 9.5f);
+		tree->Rotate(0.0f, -90.0f, 0.0f);
+		myInstances.emplace_back(tree);
+
+		cx = MakeRandom() * 50.0f - 25.0f;
+		cz += MakeRandom() * 30.0f + 20.0f;
+	}
 
 	auto model_rallycar = myFramework.GetModel("RallyCar").lock();
 	model_rallycar->SetPosition(-8.0f, -0.0f, 0.0f);
 	model_rallycar->SetScale(10.0f, 10.0f, 10.0f);
-	model_rallycar->Rotate(15.0f, 0.0f, 0.0f);
-	//model_rallycar->Rotate(0.0f, -90.0f, 0.0f);
+
+	playerSpawnPoint = XMFLOAT3(width * 0.5f, 0.0f, -3.0f);
 
 	auto player = new CAirplanePlayer(d3dDevice, d3dTaskList, GetRootSignature());
 	player->Attach(model_rallycar.get(), true);
-	player->SetPosition(XMFLOAT3(width * 0.5f, 0.0f, -3.0f));
+	player->SetPosition(playerSpawnPoint);
 	player->m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	SetCamera(player->GetCamera());
 	myPlayer = player;
 
-	//myTestPlayer = player;
+	auto& player_collider = myPlayer->myCollider;
+	player_collider.Extents = XMFLOAT3(2.0f, 2.0f, 4.0f);
+
+	myGoal.Center = goal;
+	myGoal.Radius = 5.0f;
+
+	auto model_cactus = myFramework.GetModel("Cactus").lock();
+	model_cactus->SetPosition(0.0f, 0.0f, 0.0f);
+	model_cactus->SetScale(30.0f, 30.0f, 30.0f);
+
+	auto goaline = new GameObject();
+	goaline->Attach(model_cactus.get(), true);
+	goaline->SetPosition(goal);
+	myInstances.emplace_back(goaline);
+
+	goaline = new GameObject();
+	goaline->Attach(model_cactus.get(), true);
+	goaline->SetPosition(Vector3::Add(goal, XMFLOAT3(-20.0f, 0.0f, 0.0f)));
+	myInstances.emplace_back(goaline);
+
+	goaline = new GameObject();
+	goaline->Attach(model_cactus.get(), true);
+	goaline->SetPosition(Vector3::Add(goal, XMFLOAT3(+20.0f, 0.0f, 0.0f)));
+	myInstances.emplace_back(goaline);
 }
 
 void StageGame::OnInialized()
@@ -293,41 +381,14 @@ void StageGame::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
 				case VK_UP:
 				case 'W': 
 				{
-					//const auto look = myPlayer->GetLook();
-					//const auto dir = Vector3::Normalize(look);
-					//const auto velocity = Vector3::ScalarProduct(look, 20.0f);
-
-					//myPlayer->Move(velocity, true);
-					//myPlayer->Move(velocity, false);
 				}
 				break;
 
 				case VK_DOWN:
 				case 'S':
 				{
-					//const auto look = myPlayer->GetLook();
-					//const auto dir = Vector3::Normalize(look);
-					//const auto velocity = Vector3::ScalarProduct(look, -20.0f);
-
-					//myPlayer->Move(velocity, true);
-					//myPlayer->Move(velocity, false);
 				}
 				break;
-
-				case 'A':
-				{
-					myPlayer->Rotate(0.0f, -1.0f, 0.0f);
-				}
-				break;
-
-				case 'D':
-				{
-					myPlayer->Rotate(0.0f, 1.0f, 0.0f);
-				}
-				break;
-
-				case 'Q': myPlayer->MoveUp(+1.0f); break;
-				case 'R': myPlayer->MoveUp(-1.0f); break;
 
 				case VK_F4:
 				{
