@@ -152,9 +152,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="Arithmetics.hpp" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="GameObject.hpp" />

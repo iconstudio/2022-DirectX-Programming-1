@@ -98,7 +98,8 @@ void StageGame::Update(float elapsed_time)
 
 	if (raceTimer <= 0)
 	{
-		BYTE keystate[256];
+		BYTE keystate[256]{};
+		ZeroMemory(keystate, sizeof(keystate));
 
 		if (GetKeyboardState(keystate))
 		{
@@ -250,22 +251,28 @@ void StageGame::OnAwake()
 	}
 
 	auto model_policecar = myFramework.GetModel("PoliceCar").lock();
+	model_policecar->SetScale(8.5f, 8.5f, 8.5f);
 
 	auto policecar = new GameObject();
 	policecar->Attach(model_policecar.get(), true);
-	policecar->SetPosition(135.0f, 0.0f, 220.0f);
-	policecar->SetScale(8.5f, 8.5f, 8.5f);
-	policecar->Rotate(0.0f, -90.0f, 0.0f);
+	policecar->SetPosition(135.0f, 0.0f, 620.0f);
+	policecar->Rotate(0.0f, -50.0f, 0.0f);
 	myInstances.emplace_back(policecar);
 
 	policecar = new GameObject();
 	policecar->Attach(model_policecar.get(), true);
-	policecar->SetPosition(-15.0f, 0.0f, 60.0f);
-	policecar->SetScale(8.5f, 8.5f, 8.5f);
-	policecar->Rotate(0.0f, 90.0f, 0.0f);
+	policecar->SetPosition(-15.0f, 0.0f, 130.0f);
+	policecar->Rotate(0.0f, 60.0f, 0.0f);
+	myInstances.emplace_back(policecar);
+
+	policecar = new GameObject();
+	policecar->Attach(model_policecar.get(), true);
+	policecar->SetPosition(140.0f, 0.0f, 1750.0f);
+	policecar->Rotate(0.0f, 200.0f, 0.0f);
 	myInstances.emplace_back(policecar);
 
 	auto model_tree = myFramework.GetModel("Tree").lock();
+	model_tree->SetScale(9.5f, 9.5f, 9.5f);
 
 	float cx = 0.0f;
 	float cz = 0.0f;
@@ -274,12 +281,22 @@ void StageGame::OnAwake()
 		auto tree = new GameObject();
 		tree->Attach(model_tree.get(), true);
 		tree->SetPosition(150.0f + cx, 0.0f, 50.0f + cz);
-		tree->SetScale(9.5f, 9.5f, 9.5f);
-		tree->Rotate(0.0f, -90.0f, 0.0f);
+		tree->Rotate(0.0f, MakeRandom() * 360.0f, 0.0f);
 		myInstances.emplace_back(tree);
 
 		cx = MakeRandom() * 50.0f - 25.0f;
 		cz += MakeRandom() * 30.0f + 20.0f;
+	}
+	for (int i = 0; i < 10; ++i)
+	{
+		auto tree = new GameObject();
+		tree->Attach(model_tree.get(), true);
+		tree->SetPosition(-110.0f + cx, 0.0f, 2490.0f + cz);
+		tree->Rotate(0.0f, MakeRandom() * 360.0f, 0.0f);
+		myInstances.emplace_back(tree);
+
+		cx = MakeRandom() * 50.0f - 25.0f;
+		cz += MakeRandom() * 60.0f + 10.0f;
 	}
 
 	auto model_rallycar = myFramework.GetModel("RallyCar").lock();

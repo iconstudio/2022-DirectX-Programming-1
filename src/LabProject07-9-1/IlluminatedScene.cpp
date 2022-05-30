@@ -117,7 +117,7 @@ void IlluminatedScene::InitializeUniforms()
 		, NULL, ncbElementBytes
 		, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, nullptr);
 
-	// GPU에서 CPU로 복사
+	// CPU에서 GPU로 복사
 	auto place = reinterpret_cast<void**>(&myStaticLights);
 	auto valid = m_pd3dcbLights->Map(0, nullptr, place);
 	if (FAILED(valid))
