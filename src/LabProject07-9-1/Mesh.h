@@ -2,31 +2,37 @@
 
 class CMesh
 {
-protected:
-	UINT m_nSlot = 0;
-	UINT m_nVertices = 0;
-	UINT m_nOffset = 0;
+public:
+	CMesh() { }
+    virtual ~CMesh() { }
 
-	D3D12_PRIMITIVE_TOPOLOGY typePrimitives = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	UINT m_nType = 0;
+private:
+	int m_nReferences = 0;
 
 public:
-	virtual void ReleaseUploadBuffers() {}
+	void AddRef() { m_nReferences++; }
+	void Release() { if (--m_nReferences <= 0) delete this; }
 
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList) {}
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet) {}
+	virtual void ReleaseUploadBuffers() { }
 
-	UINT GetType() { return m_nType; }
+protected:
+	D3D12_PRIMITIVE_TOPOLOGY		typePrimitive = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	UINT							m_nSlot = 0;
+	UINT							m_nVertices = 0;
+	UINT							m_nOffset = 0;
+
+	UINT							m_nType = 0;
+
+public:
+	UINT GetType() { return(m_nType); }
+	virtual void Render(P3DGrpCommandList cmd_list) { }
+	virtual void Render(P3DGrpCommandList cmd_list, int nSubSet) { }
 };
-
-#define VERTEXT_POSITION			0x01
-#define VERTEXT_COLOR				0x02
-#define VERTEXT_NORMAL				0x04
 
 class CMeshLoadInfo
 {
 public:
-	CMeshLoadInfo();
+	CMeshLoadInfo() { }
 	~CMeshLoadInfo();
 
 public:
@@ -53,7 +59,7 @@ public:
 class CMeshFromFile : public CMesh
 {
 public:
-	CMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, CMeshLoadInfo *pMeshInfo);
+	CMeshFromFile(P3DDevice device, P3DGrpCommandList cmd_list, CMeshLoadInfo *pMeshInfo);
 	virtual ~CMeshFromFile();
 
 public:
@@ -72,13 +78,13 @@ protected:
 	D3D12_INDEX_BUFFER_VIEW			*m_pd3dSubSetIndexBufferViews = NULL;
 
 public:
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet);
+	virtual void Render(P3DGrpCommandList cmd_list, int nSubSet);
 };
 
 class CMeshIlluminatedFromFile : public CMeshFromFile
 {
 public:
-	CMeshIlluminatedFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, CMeshLoadInfo *pMeshInfo);
+	CMeshIlluminatedFromFile(P3DDevice device, P3DGrpCommandList cmd_list, CMeshLoadInfo *pMeshInfo);
 	virtual ~CMeshIlluminatedFromFile();
 
 	virtual void ReleaseUploadBuffers();
@@ -89,5 +95,5 @@ protected:
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dNormalBufferView;
 
 public:
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet);
+	virtual void Render(P3DGrpCommandList cmd_list, int nSubSet);
 };

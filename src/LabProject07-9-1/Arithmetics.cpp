@@ -1,2 +1,2 @@
-#include "stdafx.h"
+#include "pch.hpp"
 #include "Arithmetics.hpp"

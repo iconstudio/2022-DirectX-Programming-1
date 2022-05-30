@@ -2,103 +2,245 @@
 
 namespace Vector3
 {
-	inline XMFLOAT3 XMVectorToFloat3(XMVECTOR& xmvVector)
+	inline XMFLOAT3 XMVectorToFloat3(XMVECTOR&& xmvVector)
 	{
-		XMFLOAT3 xmf3Result;
-		XMStoreFloat3(&xmf3Result, xmvVector);
-		return(xmf3Result);
+		XMFLOAT3 result{};
+
+		XMStoreFloat3(&result, std::forward<XMVECTOR>(xmvVector));
+
+		return result;
 	}
 
-	inline XMFLOAT3 ScalarProduct(XMFLOAT3& xmf3Vector, float fScalar, bool bNormalize = true)
+	inline XMFLOAT3 XMVectorToFloat3(const XMVECTOR& xmvVector)
 	{
-		XMFLOAT3 xmf3Result;
-		if (bNormalize)
-			XMStoreFloat3(&xmf3Result, XMVector3Normalize(XMLoadFloat3(&xmf3Vector)) * fScalar);
+		return XMVectorToFloat3(XMVECTOR(xmvVector));
+	}
+
+	inline XMFLOAT3 ScalarProduct(XMFLOAT3&& vector, float scalar, bool normalize = true)
+	{
+		XMFLOAT3 result{};
+
+		const auto xmvector = XMLoadFloat3(std::forward<XMFLOAT3*>(&vector));
+		if (normalize)
+		{
+			XMStoreFloat3(&result, XMVector3Normalize(xmvector) * scalar);
+		}
 		else
-			XMStoreFloat3(&xmf3Result, XMLoadFloat3(&xmf3Vector) * fScalar);
-		return(xmf3Result);
+		{
+			XMStoreFloat3(&result, xmvector * scalar);
+		}
+
+		return result;
 	}
 
-	inline XMFLOAT3 Add(const XMFLOAT3& xmf3Vector1, const XMFLOAT3& xmf3Vector2)
+	inline XMFLOAT3 ScalarProduct(const XMFLOAT3& vector, float scalar, bool normalize = true)
 	{
-		XMFLOAT3 xmf3Result;
-		XMStoreFloat3(&xmf3Result, XMLoadFloat3(&xmf3Vector1) + XMLoadFloat3(&xmf3Vector2));
-		return(xmf3Result);
+		return ScalarProduct(XMFLOAT3(vector), scalar, normalize);
 	}
 
-	inline XMFLOAT3 Add(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2, float fScalar)
+	inline XMFLOAT3 Add(XMFLOAT3&& vector1, XMFLOAT3&& vector2)
 	{
-		XMFLOAT3 xmf3Result;
-		XMStoreFloat3(&xmf3Result, XMLoadFloat3(&xmf3Vector1) + (XMLoadFloat3(&xmf3Vector2) * fScalar));
-		return(xmf3Result);
+		XMFLOAT3 result{};
+
+		const auto&& fvector1 = std::forward<XMFLOAT3>(vector1);
+		const auto&& fvector2 = std::forward<XMFLOAT3>(vector2);
+
+		const auto xmvector1 = XMLoadFloat3(&fvector1);
+		const auto xmvector2 = XMLoadFloat3(&fvector2);
+		XMStoreFloat3(&result, xmvector1 + xmvector2);
+
+		return result;
 	}
 
-	inline XMFLOAT3 Subtract(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2)
+	inline XMFLOAT3 Add(const XMFLOAT3& vector1, const XMFLOAT3& vector2)
 	{
-		XMFLOAT3 xmf3Result;
-		XMStoreFloat3(&xmf3Result, XMLoadFloat3(&xmf3Vector1) - XMLoadFloat3(&xmf3Vector2));
-		return(xmf3Result);
+		return Add(XMFLOAT3(vector1), XMFLOAT3(vector2));
 	}
 
-	inline float DotProduct(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2)
+	inline XMFLOAT3 Add(const XMFLOAT3& vector1, XMFLOAT3&& vector2)
 	{
-		XMFLOAT3 xmf3Result;
-		XMStoreFloat3(&xmf3Result, XMVector3Dot(XMLoadFloat3(&xmf3Vector1), XMLoadFloat3(&xmf3Vector2)));
-		return(xmf3Result.x);
+		return Add(XMFLOAT3(vector1), std::forward<XMFLOAT3>(vector2));
 	}
 
-	inline XMFLOAT3 CrossProduct(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2, bool bNormalize = true)
+	inline XMFLOAT3 Add(XMFLOAT3&& vector1, const XMFLOAT3& vector2)
 	{
-		XMFLOAT3 xmf3Result;
-		if (bNormalize)
-			XMStoreFloat3(&xmf3Result, XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&xmf3Vector1), XMLoadFloat3(&xmf3Vector2))));
+		return Add(std::forward<XMFLOAT3>(vector1), XMFLOAT3(vector2));
+	}
+
+	inline XMFLOAT3 Add(const XMFLOAT3& vector1, const XMFLOAT3& vector2, float scalar)
+	{
+		XMFLOAT3 result{};
+
+		XMStoreFloat3(&result, XMLoadFloat3(&vector1) + (XMLoadFloat3(&vector2) * scalar));
+
+		return result;
+	}
+
+	inline XMFLOAT3 Subtract(const XMFLOAT3& vector1, const XMFLOAT3& vector2)
+	{
+		XMFLOAT3 result{};
+
+		XMStoreFloat3(&result, XMLoadFloat3(&vector1) - XMLoadFloat3(&vector2));
+
+		return result;
+	}
+
+	inline float DotProduct(const XMFLOAT3& vector1, const XMFLOAT3& vector2)
+	{
+		XMFLOAT3 result{};
+
+		XMStoreFloat3(&result, XMVector3Dot(XMLoadFloat3(&vector1), XMLoadFloat3(&vector2)));
+
+		return result.x;
+	}
+
+	inline XMFLOAT3 CrossProduct(const XMFLOAT3& vector1, const XMFLOAT3& vector2, bool normalize = true)
+	{
+		XMFLOAT3 result{};
+
+		if (normalize)
+		{
+			XMStoreFloat3(&result, XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&vector1), XMLoadFloat3(&vector2))));
+		}
 		else
-			XMStoreFloat3(&xmf3Result, XMVector3Cross(XMLoadFloat3(&xmf3Vector1), XMLoadFloat3(&xmf3Vector2)));
-		return(xmf3Result);
+		{
+			XMStoreFloat3(&result, XMVector3Cross(XMLoadFloat3(&vector1), XMLoadFloat3(&vector2)));
+		}
+		return result;
 	}
 
-	inline XMFLOAT3 Normalize(XMFLOAT3& xmf3Vector)
+	inline XMFLOAT3 Normalize(XMFLOAT3&& vector)
 	{
-		XMFLOAT3 m_xmf3Normal;
-		XMStoreFloat3(&m_xmf3Normal, XMVector3Normalize(XMLoadFloat3(&xmf3Vector)));
-		return(m_xmf3Normal);
+		XMFLOAT3 normal{};
+
+		const auto mid = XMLoadFloat3(std::forward<XMFLOAT3*>(&vector));
+		XMStoreFloat3(&normal, XMVector3Normalize(mid));
+
+		return normal;
 	}
 
-	inline float Length(XMFLOAT3& xmf3Vector)
+	inline XMFLOAT3 Normalize(const XMFLOAT3& vector)
 	{
-		XMFLOAT3 xmf3Result;
-		XMStoreFloat3(&xmf3Result, XMVector3Length(XMLoadFloat3(&xmf3Vector)));
-		return(xmf3Result.x);
+		return Normalize(XMFLOAT3(vector));
 	}
 
-	inline float Angle(XMVECTOR& xmvVector1, XMVECTOR& xmvVector2)
+	inline float Length(XMFLOAT3&& vector)
 	{
-		XMVECTOR xmvAngle = XMVector3AngleBetweenNormals(xmvVector1, xmvVector2);
-		return(XMConvertToDegrees(XMVectorGetX(xmvAngle)));
+		XMFLOAT3 result{};
+
+		const auto mid = XMLoadFloat3(std::forward<XMFLOAT3*>(&vector));
+		XMStoreFloat3(&result, XMVector3Length(mid));
+
+		return(result.x);
 	}
 
-	inline float Angle(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2)
+	inline float Length(const XMFLOAT3& vector)
 	{
-		return(Angle(XMLoadFloat3(&xmf3Vector1), XMLoadFloat3(&xmf3Vector2)));
+		return Length(XMFLOAT3(vector));
 	}
 
-	inline XMFLOAT3 TransformNormal(XMFLOAT3& xmf3Vector, XMMATRIX& xmmtxTransform)
+	inline float Angle(XMVECTOR&& xvector1, XMVECTOR&& xvector2)
 	{
-		XMFLOAT3 xmf3Result;
-		XMStoreFloat3(&xmf3Result, XMVector3TransformNormal(XMLoadFloat3(&xmf3Vector), xmmtxTransform));
-		return(xmf3Result);
+		const auto&& pos1 = std::forward<XMVECTOR>(xvector1);
+		const auto&& pos2 = std::forward<XMVECTOR>(xvector2);
+
+		return XMConvertToDegrees(XMVectorGetX(XMVector3AngleBetweenNormals(pos1, pos2)));
 	}
 
-	inline XMFLOAT3 TransformCoord(XMFLOAT3& xmf3Vector, XMMATRIX& xmmtxTransform)
+	inline float Angle(const XMVECTOR& xvector1, const XMVECTOR& xvector2)
 	{
-		XMFLOAT3 xmf3Result;
-		XMStoreFloat3(&xmf3Result, XMVector3TransformCoord(XMLoadFloat3(&xmf3Vector), xmmtxTransform));
-		return(xmf3Result);
+		return Angle(XMVECTOR(xvector1), XMVECTOR(xvector2));
 	}
 
-	inline XMFLOAT3 TransformCoord(XMFLOAT3& xmf3Vector, XMFLOAT4X4& xmmtx4x4Matrix)
+	inline float Angle(const XMVECTOR& xvector1, XMVECTOR&& xvector2)
 	{
-		return(TransformCoord(xmf3Vector, XMLoadFloat4x4(&xmmtx4x4Matrix)));
+		return Angle(XMVECTOR(xvector1), std::forward<XMVECTOR>(xvector2));
+	}
+
+	inline float Angle(XMVECTOR&& xvector1, const XMVECTOR& xvector2)
+	{
+		return Angle(std::forward<XMVECTOR>(xvector1), XMVECTOR(xvector2));
+	}
+
+	inline float Angle(XMFLOAT3&& vector1, XMFLOAT3&& vector2)
+	{
+		const auto&& vec1 = std::forward<XMFLOAT3>(vector1);
+		const auto&& vec2 = std::forward<XMFLOAT3>(vector2);
+
+		return Angle(XMLoadFloat3(&vec1), XMLoadFloat3(&vec2));
+	}
+
+	inline float Angle(const XMFLOAT3& vector1, const XMFLOAT3& vector2)
+	{
+		return Angle(XMLoadFloat3(&vector1), XMLoadFloat3(&vector2));
+	}
+
+	inline XMFLOAT3 TransformNormal(XMFLOAT3&& vector, XMMATRIX&& transform)
+	{
+		XMFLOAT3 result{};
+
+		XMStoreFloat3(&result
+			, XMVector3TransformNormal(XMLoadFloat3(std::forward<XMFLOAT3*>(&vector))
+			, std::forward<XMMATRIX>(transform)));
+
+		return result;
+	}
+
+	inline XMFLOAT3 TransformNormal(const XMFLOAT3& vector, const XMMATRIX& transform)
+	{
+		return TransformNormal(XMFLOAT3(vector), XMMATRIX(transform));
+	}
+
+	inline XMFLOAT3 TransformNormal(const XMFLOAT3& vector, XMMATRIX&& transform)
+	{
+		return TransformNormal(XMFLOAT3(vector), std::forward<XMMATRIX>(transform));
+	}
+
+	inline XMFLOAT3 TransformNormal(XMFLOAT3&& vector, const XMMATRIX&& transform)
+	{
+		return TransformNormal(std::forward<XMFLOAT3>(vector), XMMATRIX(transform));
+	}
+
+	inline XMFLOAT3 TransformCoord(XMFLOAT3&& vector, XMMATRIX&& transform)
+	{
+		XMFLOAT3 result{};
+
+		XMStoreFloat3(&result
+			, XMVector3TransformCoord(XMLoadFloat3(std::forward<XMFLOAT3*>(&vector))
+			, transform));
+
+		return result;
+	}
+
+	inline XMFLOAT3 TransformCoord(const XMFLOAT3& vector, const XMMATRIX& transform)
+	{
+		return TransformCoord(XMFLOAT3(vector), XMMATRIX(transform));
+	}
+
+	inline XMFLOAT3 TransformCoord(XMFLOAT3&& vector, XMFLOAT4X4&& transform)
+	{
+		XMFLOAT3 result{};
+
+		XMStoreFloat3(&result
+			, XMVector3TransformCoord(XMLoadFloat3(std::forward<XMFLOAT3*>(&vector))
+			, XMLoadFloat4x4(std::forward<XMFLOAT4X4*>(&transform))));
+
+		return result;
+	}
+
+	inline XMFLOAT3 TransformCoord(const XMFLOAT3& vector, XMFLOAT4X4&& transform)
+	{
+		return TransformCoord(XMFLOAT3(vector), std::forward<XMFLOAT4X4>(transform));
+	}
+
+	inline XMFLOAT3 TransformCoord(XMFLOAT3&& vector, const XMMATRIX& transform)
+	{
+		return TransformCoord(std::forward<XMFLOAT3>(vector), XMMATRIX(transform));
+	}
+
+	inline XMFLOAT3 TransformCoord(const XMFLOAT3& vector, const XMFLOAT4X4& transform)
+	{
+		return TransformCoord(XMFLOAT3(vector), XMFLOAT4X4(transform));
 	}
 }
 
@@ -106,9 +248,11 @@ namespace Vector4
 {
 	inline XMFLOAT4 Add(XMFLOAT4& xmf4Vector1, XMFLOAT4& xmf4Vector2)
 	{
-		XMFLOAT4 xmf4Result;
-		XMStoreFloat4(&xmf4Result, XMLoadFloat4(&xmf4Vector1) + XMLoadFloat4(&xmf4Vector2));
-		return(xmf4Result);
+		XMFLOAT4 result{};
+
+		XMStoreFloat4(&result, XMLoadFloat4(&xmf4Vector1) + XMLoadFloat4(&xmf4Vector2));
+
+		return result;
 	}
 }
 
@@ -116,66 +260,161 @@ namespace Matrix4x4
 {
 	inline XMFLOAT4X4 Identity()
 	{
-		XMFLOAT4X4 xmmtx4x4Result;
-		XMStoreFloat4x4(&xmmtx4x4Result, XMMatrixIdentity());
-		return(xmmtx4x4Result);
+		XMFLOAT4X4 result{};
+
+		XMStoreFloat4x4(&result, DirectX::XMMatrixIdentity());
+
+		return result;
 	}
 
-	inline XMFLOAT4X4 Multiply(XMFLOAT4X4& xmmtx4x4Matrix1, XMFLOAT4X4& xmmtx4x4Matrix2)
+	inline XMFLOAT4X4 Multiply(XMFLOAT4X4&& lhs, XMFLOAT4X4&& rhs)
 	{
-		XMFLOAT4X4 xmmtx4x4Result;
-		XMStoreFloat4x4(&xmmtx4x4Result, XMLoadFloat4x4(&xmmtx4x4Matrix1) * XMLoadFloat4x4(&xmmtx4x4Matrix2));
-		return(xmmtx4x4Result);
+		XMFLOAT4X4 result{};
+		
+		const auto&& mat1 = XMLoadFloat4x4(std::forward<XMFLOAT4X4*>(&lhs));
+		const auto&& mat2 = XMLoadFloat4x4(std::forward<XMFLOAT4X4*>(&rhs));
+
+		XMStoreFloat4x4(&result, mat1 * mat2);
+
+		return result;
 	}
 
-	inline XMFLOAT4X4 Multiply(XMFLOAT4X4& xmmtx4x4Matrix1, XMMATRIX& xmmtxMatrix2)
+	inline XMFLOAT4X4 Multiply(const XMFLOAT4X4& lhs, const XMFLOAT4X4& rhs)
 	{
-		XMFLOAT4X4 xmmtx4x4Result;
-		XMStoreFloat4x4(&xmmtx4x4Result, XMLoadFloat4x4(&xmmtx4x4Matrix1) * xmmtxMatrix2);
-		return(xmmtx4x4Result);
+		XMFLOAT4X4 result{};
+
+		XMStoreFloat4x4(&result, XMLoadFloat4x4(&lhs) * XMLoadFloat4x4(&rhs));
+
+		return result;
+	}
+	inline XMFLOAT4X4 Multiply(const XMFLOAT4X4& lhs, const XMMATRIX& rhs)
+	{
+		XMFLOAT4X4 result{};
+
+		XMStoreFloat4x4(&result, XMLoadFloat4x4(&lhs) * rhs);
+
+		return result;
 	}
 
-	inline XMFLOAT4X4 Multiply(XMMATRIX& xmmtxMatrix1, XMFLOAT4X4& xmmtx4x4Matrix2)
+	inline XMFLOAT4X4 Multiply(const XMMATRIX& xmmtxMatrix1, const XMFLOAT4X4& rhs)
 	{
-		XMFLOAT4X4 xmmtx4x4Result;
-		XMStoreFloat4x4(&xmmtx4x4Result, xmmtxMatrix1 * XMLoadFloat4x4(&xmmtx4x4Matrix2));
-		return(xmmtx4x4Result);
+		XMFLOAT4X4 result{};
+
+		XMStoreFloat4x4(&result, xmmtxMatrix1 * XMLoadFloat4x4(&rhs));
+
+		return result;
 	}
 
-	inline XMFLOAT4X4 Inverse(XMFLOAT4X4& xmmtx4x4Matrix)
+	inline XMFLOAT4X4 Inverse(const XMFLOAT4X4&& matrix)
 	{
-		XMFLOAT4X4 xmmtx4x4Result;
-		XMStoreFloat4x4(&xmmtx4x4Result, XMMatrixInverse(NULL, XMLoadFloat4x4(&xmmtx4x4Matrix)));
-		return(xmmtx4x4Result);
+		XMFLOAT4X4 result{};
+
+		const auto&& mat = std::forward<XMMATRIX>(DirectX::XMMatrixInverse(nullptr, XMLoadFloat4x4(&matrix)));
+		XMStoreFloat4x4(&result, mat);
+
+		return result;
 	}
 
-	inline XMFLOAT4X4 Transpose(XMFLOAT4X4& xmmtx4x4Matrix)
+	inline XMFLOAT4X4 Inverse(const XMFLOAT4X4& matrix)
 	{
-		XMFLOAT4X4 xmmtx4x4Result;
-		XMStoreFloat4x4(&xmmtx4x4Result, XMMatrixTranspose(XMLoadFloat4x4(&xmmtx4x4Matrix)));
-		return(xmmtx4x4Result);
+		return Inverse(XMFLOAT4X4(matrix));
 	}
 
-	inline XMFLOAT4X4 PerspectiveFovLH(float FovAngleY, float AspectRatio, float NearZ, float FarZ)
+	inline XMFLOAT4X4 Transpose(const XMFLOAT4X4& matrix)
 	{
-		XMFLOAT4X4 xmmtx4x4Result;
-		XMStoreFloat4x4(&xmmtx4x4Result, XMMatrixPerspectiveFovLH(FovAngleY, AspectRatio, NearZ, FarZ));
-		return(xmmtx4x4Result);
+		XMFLOAT4X4 result{};
+
+		const auto mat = DirectX::XMMatrixTranspose(XMLoadFloat4x4(&matrix));
+		XMStoreFloat4x4(&result, mat);
+
+		return result;
 	}
 
-	inline XMFLOAT4X4 LookAtLH(XMFLOAT3& xmf3EyePosition, XMFLOAT3& xmf3LookAtPosition, XMFLOAT3& xmf3UpDirection)
+	inline XMFLOAT4X4 RotationYawPitchRoll(float pitch, float yaw, float roll)
 	{
-		XMFLOAT4X4 xmmtx4x4Result;
-		XMStoreFloat4x4(&xmmtx4x4Result, XMMatrixLookAtLH(XMLoadFloat3(&xmf3EyePosition), XMLoadFloat3(&xmf3LookAtPosition), XMLoadFloat3(&xmf3UpDirection)));
-		return(xmmtx4x4Result);
+		XMFLOAT4X4 result{};
+
+		const auto rad_pitch = XMConvertToRadians(pitch);
+		const auto rad_yaw = XMConvertToRadians(yaw);
+		const auto rad_roll = XMConvertToRadians(roll);
+		const auto rot = XMMatrixRotationRollPitchYaw(rad_pitch, rad_yaw, rad_roll);
+		XMStoreFloat4x4(&result, rot);
+
+		return result;
+	}
+
+	inline XMFLOAT4X4 RotationAxis(const XMFLOAT3 axis, float angle)
+	{
+		XMFLOAT4X4 result{};
+
+		const auto rot = XMMatrixRotationAxis(XMLoadFloat3(&axis), XMConvertToRadians(angle));
+		XMStoreFloat4x4(&result, rot);
+
+		return result;
+	}
+
+	inline XMFLOAT4X4 PerspectiveFovLH(float fov_y, float aspect, float znear, float zfar)
+	{
+		XMFLOAT4X4 result{};
+
+		const auto mat = DirectX::XMMatrixPerspectiveFovLH(fov_y, aspect, znear, zfar);
+		XMStoreFloat4x4(&result, mat);
+
+		return result;
+	}
+
+	inline XMFLOAT4X4 LookAtLH(XMFLOAT3&& eye_pos
+		, XMFLOAT3&& lookat
+		, XMFLOAT3&& up)
+	{
+		XMFLOAT4X4 result{};
+
+		const auto&& eye = std::forward<XMVECTOR>(XMLoadFloat3(&eye_pos));
+		const auto&& eye_look = std::forward<XMVECTOR>(XMLoadFloat3(&lookat));
+		const auto&& eye_up = std::forward<XMVECTOR>(XMLoadFloat3(&up));
+		const auto mat = XMMatrixLookAtLH(eye, eye_look, eye_up);
+		XMStoreFloat4x4(&result, mat);
+
+		return result;
+	}
+
+	inline XMFLOAT4X4 LookAtLH(const XMFLOAT3& eye_pos
+		, const XMFLOAT3& lookat
+		, const XMFLOAT3& up)
+	{
+		return LookAtLH(XMFLOAT3(eye_pos), XMFLOAT3(lookat), XMFLOAT3(up));
+	}
+
+	inline XMFLOAT4X4 LookAtLH(XMFLOAT3&& eye_pos
+		, const XMFLOAT3& lookat
+		, const XMFLOAT3& up)
+	{
+		return LookAtLH(std::forward<XMFLOAT3>(eye_pos), XMFLOAT3(lookat), XMFLOAT3(up));
+	}
+
+	inline XMFLOAT4X4 LookToLH(const XMFLOAT3 eye_pos
+		, const XMFLOAT3 look_pos
+		, const XMFLOAT3 up_dir)
+	{
+		XMFLOAT4X4 result{};
+
+		const auto eye = XMLoadFloat3(&eye_pos);
+		const auto look = XMLoadFloat3(&look_pos);
+		const auto up = XMLoadFloat3(&up_dir);
+		XMStoreFloat4x4(&result, XMMatrixLookToLH(eye, look, up));
+
+		return result;
 	}
 }
 
 namespace Triangle
 {
-	inline bool Intersect(XMFLOAT3& xmf3RayPosition, XMFLOAT3& xmf3RayDirection, XMFLOAT3& v0, XMFLOAT3& v1, XMFLOAT3& v2, float& fHitDistance)
+	inline bool Intersect(XMFLOAT3& xmf3RayPosition, XMFLOAT3& xmf3RayDirection, XMFLOAT3& v0, XMFLOAT3& v1, XMFLOAT3& v2, float& dist)
 	{
-		return(TriangleTests::Intersects(XMLoadFloat3(&xmf3RayPosition), XMLoadFloat3(&xmf3RayDirection), XMLoadFloat3(&v0), XMLoadFloat3(&v1), XMLoadFloat3(&v2), fHitDistance));
+		return TriangleTests::Intersects(XMLoadFloat3(&xmf3RayPosition)
+			, XMLoadFloat3(&xmf3RayDirection)
+			, XMLoadFloat3(&v0), XMLoadFloat3(&v1), XMLoadFloat3(&v2)
+			, dist);
 	}
 }
 
@@ -183,8 +422,8 @@ namespace Plane
 {
 	inline XMFLOAT4 Normalize(XMFLOAT4& xmf4Plane)
 	{
-		XMFLOAT4 xmf4Result;
-		XMStoreFloat4(&xmf4Result, XMPlaneNormalize(XMLoadFloat4(&xmf4Plane)));
-		return(xmf4Result);
+		XMFLOAT4 result;
+		XMStoreFloat4(&result, XMPlaneNormalize(XMLoadFloat4(&xmf4Plane)));
+		return result;
 	}
 }
