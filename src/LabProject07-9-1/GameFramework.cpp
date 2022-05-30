@@ -551,7 +551,7 @@ void GameFramework::BuildAssets()
 	auto model_rock1 = RegisterModel("Model/Rock.bin", "Rock1");
 	auto model_rock2 = RegisterModel("Model/Rock2.bin", "Rock2");
 	auto model_tree = RegisterModel("Model/Tree.bin", "Tree");
-	auto model_cactus = RegisterModel("Model/Cactus.bin", "Rock");
+	auto model_cactus = RegisterModel("Model/Cactus.bin", "Cactus");
 }
 
 void GameFramework::BuildStages()

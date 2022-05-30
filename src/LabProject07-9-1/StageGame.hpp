@@ -22,4 +22,6 @@ public:
 	void OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) override;
 
 	void ProcessInput(UCHAR* pKeysBuffer);
+
+	GameObject* myTestPlayer = nullptr;
 };

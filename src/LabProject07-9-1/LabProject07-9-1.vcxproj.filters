@@ -193,15 +193,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="LabProject07-9-1.rc">
+    <ResourceCompile Include="myresource.rc">
       <Filter>리소스 파일</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="small.ico">
-      <Filter>리소스 파일</Filter>
-    </Image>
-    <Image Include="LabProject07-9-1.ico">
       <Filter>리소스 파일</Filter>
     </Image>
     <Image Include="icon.ico">

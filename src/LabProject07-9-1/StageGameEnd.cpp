@@ -1,5 +1,6 @@
 #include "pch.hpp"
 #include "StageGameEnd.hpp"
+#include "GameFramework.h"
 
 StageGameEnd::StageGameEnd(GameFramework& framework, HWND hwnd)
 	: Scene(framework, hwnd, "Complete")
@@ -85,4 +86,21 @@ void StageGameEnd::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 }
 
 void StageGameEnd::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
-{}
+{
+	switch (msg)
+	{
+		case WM_KEYDOWN:
+		{
+			switch (key)
+			{
+				case VK_SPACE:
+				case VK_RETURN:
+				{
+					myFramework.JumpToNextStage();
+				}
+				break;
+			}
+		}
+		break;
+	}
+}

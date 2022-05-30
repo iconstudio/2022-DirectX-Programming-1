@@ -1,5 +1,6 @@
 #include "pch.hpp"
 #include "StageCredit.hpp"
+#include "GameFramework.h"
 
 StageCredit::StageCredit(GameFramework& framework, HWND hwnd)
 	: Scene(framework, hwnd, "Credit")
@@ -84,4 +85,21 @@ void StageCredit::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 }
 
 void StageCredit::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
-{}
+{
+	switch (msg)
+	{
+		case WM_KEYDOWN:
+		{
+			switch (key)
+			{
+				case VK_SPACE:
+				case VK_RETURN:
+				{
+					myFramework.JumpToStage(0);
+				}
+				break;
+			}
+		}
+		break;
+	}
+}

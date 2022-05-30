@@ -1,5 +1,6 @@
 #include "pch.hpp"
 #include "StageMain.hpp"
+#include "GameFramework.h"
 
 StageMain::StageMain(GameFramework& framework, HWND hwnd)
 	: Scene(framework, hwnd, "Main")
@@ -84,4 +85,21 @@ void StageMain::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 }
 
 void StageMain::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
-{}
+{
+	switch (msg)
+	{
+		case WM_KEYDOWN:
+		{
+			switch (key)
+			{
+				case VK_SPACE:
+				case VK_RETURN:
+				{
+					myFramework.JumpToNextStage();
+				}
+				break;
+			}
+		}
+		break;
+	}
+}

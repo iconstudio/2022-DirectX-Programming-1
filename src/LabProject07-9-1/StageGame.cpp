@@ -130,7 +130,8 @@ void StageGame::OnAwake()
 	myInstances.clear();
 
 	// Apache
-	auto model_rock1 = myFramework.GetModel("Rock").lock();
+	auto model_rock1 = myFramework.GetModel("Rock1").lock();
+	auto model_rock2 = myFramework.GetModel("Rock2").lock();
 
 	CApacheObject* pApacheObject = NULL;
 	pApacheObject = new CApacheObject();
@@ -140,8 +141,6 @@ void StageGame::OnAwake()
 	pApacheObject->SetScale(10.5f, 10.5f, 10.5f);
 	pApacheObject->Rotate(0.0f, 90.0f, 0.0f);
 	myInstances.emplace_back(pApacheObject);
-
-	auto model_rock2 = myFramework.GetModel("Rock").lock();
 
 	pApacheObject = new CApacheObject();
 	pApacheObject->Attach(model_rock2.get(), true);
@@ -174,25 +173,27 @@ void StageGame::OnAwake()
 	myInstances.emplace_back(pSuperCobraObject);
 
 	auto model_rallycar = myFramework.GetModel("RallyCar").lock();
+	model_rallycar->SetPosition(-8.0f, -2.0f, 0.0f);
+	model_rallycar->SetScale(10.0f, 10.0f, 10.0f);
+	model_rallycar->Rotate(15.0f, 0.0f, 0.0f);
 
-	CMi24Object* pMi24Object = NULL;
-	pMi24Object = new CMi24Object();
-	pMi24Object->Attach(model_rallycar.get(), true);
-	pMi24Object->Awake();
-	pMi24Object->SetPosition(-95.0f, 50.0f, 50.0f);
-	pMi24Object->SetScale(4.5f, 4.5f, 4.5f);
-	pMi24Object->Rotate(0.0f, -90.0f, 0.0f);
-	myInstances.emplace_back(pMi24Object);
+	//CMi24Object* player = NULL;
+	//player = new CMi24Object();
+	//player->Attach(model_rallycar.get(), true);
+	//player->Awake();
+	//player->SetPosition(-95.0f, 50.0f, 50.0f);
+	//player->SetScale(4.5f, 4.5f, 4.5f);
+	//player->Rotate(0.0f, -90.0f, 0.0f);
+	//myInstances.emplace_back(player);
 
-	auto pAirplanePlayer = new CAirplanePlayer(d3dDevice, d3dTaskList, GetRootSignature());
-	pAirplanePlayer->Attach(model_rallycar.get(), true);
-	pAirplanePlayer->Rotate(15.0f, 0.0f, 0.0f);
-	pAirplanePlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, -3.0f));
-	pAirplanePlayer->SetScale(4.5f, 4.5f, 4.5f);
-	pAirplanePlayer->m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	auto player = new CAirplanePlayer(d3dDevice, d3dTaskList, GetRootSignature());
+	player->Attach(model_rallycar.get(), true);
+	player->SetPosition(XMFLOAT3(0.0f, 0.0f, -3.0f));
+	player->m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	SetCamera(player->GetCamera());
+	myPlayer = player;
 
-	myPlayer = pAirplanePlayer;
-	SetCamera(pAirplanePlayer->GetCamera());
+	//myTestPlayer = player;
 }
 
 void StageGame::OnInialized()
@@ -219,6 +220,8 @@ void StageGame::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 	{
 		case WM_LBUTTONDOWN:
 		{
+			SetCapture(hwnd);
+			GetCursorPos(&posCursor);
 		}
 		break;
 
@@ -229,6 +232,7 @@ void StageGame::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 
 		case WM_LBUTTONUP:
 		{
+			ReleaseCapture();
 		}
 		break;
 
@@ -262,16 +266,42 @@ void StageGame::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
 				case VK_F2:
 				case VK_F3:
 				{
-					myCamera = myPlayer->ChangeCamera((DWORD)(key - VK_F1 + 1), 1.0f);
+					//myCamera = myPlayer->ChangeCamera((DWORD)(key - VK_F1 + 1), 1.0f);
 				}
 				break;
 
-				case 'W': something->MoveForward(+1.0f); break;
-				case 'S': something->MoveForward(-1.0f); break;
-				case 'A': something->MoveStrafe(-1.0f); break;
-				case 'D': something->MoveStrafe(+1.0f); break;
-				case 'Q': something->MoveUp(+1.0f); break;
-				case 'R': something->MoveUp(-1.0f); break;
+				case 'W': 
+				{
+					myPlayer->Move(DIR_LEFT, 4.0f, false);
+				}
+				break;
+
+				case 'S':
+				{
+					myPlayer->Move(DIR_RIGHT, 4.0f, false);
+				}
+				break;
+
+				case 'A':
+				{
+					myPlayer->Rotate(0.0f, -1.0f, 0.0f);
+				}
+				break;
+
+				case 'D':
+				{
+					myPlayer->Rotate(0.0f, 1.0f, 0.0f);
+				}
+				break;
+
+				case 'Q': myPlayer->MoveUp(+1.0f); break;
+				case 'R': myPlayer->MoveUp(-1.0f); break;
+
+				case VK_F4:
+				{
+					myFramework.JumpToNextStage();
+				}
+				break;
 			}
 			break;
 		}

@@ -81,6 +81,13 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 	}
 }
 
+void CPlayer::Move(float fxOffset, float fyOffset, float fzOffset)
+{
+	m_xmf3Position.x += fxOffset;
+	m_xmf3Position.y += fyOffset;
+	m_xmf3Position.z += fzOffset;
+}
+
 void CPlayer::Rotate(float x, float y, float z)
 {
 	DWORD nCurrentCameraMode = myCamera->GetMode();
@@ -341,7 +348,7 @@ GameCamera* CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElaps
 		SetMaxVelocityY(40.0f);
 		myCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		myCamera->SetTimeLag(0.25f);
-		myCamera->SetOffset(XMFLOAT3(0.0f, 105.0f, -140.0f));
+		myCamera->SetOffset(XMFLOAT3(0.0f, 50.0f, -60.0f));
 		myCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		myCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		myCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
