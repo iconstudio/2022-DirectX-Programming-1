@@ -183,13 +183,24 @@ void GameObject::UpdateUniforms(P3DGrpCommandList cmd_list, CMaterial* pMaterial
 void GameObject::ReleaseUniforms()
 {}
 
-void GameObject::BuildCollider(XMFLOAT3 size)
+void GameObject::SetOriginalCollider(const shared_ptr<BoundingOrientedBox>& box)
 {
-	// look
-	const auto dir = XMFLOAT4(worldTransform._31, worldTransform._32, worldTransform._33, worldTransform._34);
+	staticCollider = box;
+}
 
-	auto handle = new BoundingOrientedBox(GetPosition(), size, dir);
+void GameObject::BuildCollider()
+{
+	auto handle = new BoundingOrientedBox(*staticCollider);
 	myCollider = unique_ptr<BoundingOrientedBox>(handle);
+}
+
+void GameObject::UpdateCollider(const XMFLOAT4X4* mat)
+{
+	if (myCollider)
+	{
+		const auto my_mat = XMLoadFloat4x4(mat);
+		staticCollider->Transform(*myCollider, my_mat);
+	}
 }
 
 void GameObject::BuildMaterials(P3DDevice device, P3DGrpCommandList cmd_list)
@@ -206,6 +217,8 @@ void GameObject::ReleaseUploadBuffers()
 void GameObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
 {
 	worldTransform = (pxmf4x4Parent) ? Matrix4x4::Multiply(localTransform, *pxmf4x4Parent) : localTransform;
+
+	UpdateCollider(&worldTransform);
 
 	if (mySibling) mySibling->UpdateTransform(pxmf4x4Parent);
 	if (myChild) myChild->UpdateTransform(&worldTransform);

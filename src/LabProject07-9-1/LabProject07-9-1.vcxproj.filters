@@ -114,6 +114,9 @@
     <ClInclude Include="Obstacles.hpp">
       <Filter>헤더 파일\Contents</Filter>
     </ClInclude>
+    <ClInclude Include="Vehicles.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -181,6 +184,9 @@
     </ClCompile>
     <ClCompile Include="Obstacles.cpp">
       <Filter>소스 파일\Contents</Filter>
+    </ClCompile>
+    <ClCompile Include="Vehicles.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

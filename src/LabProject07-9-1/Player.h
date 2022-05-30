@@ -95,7 +95,6 @@ public:
 	virtual void OnPrepareRender();
 	virtual void Render(P3DGrpCommandList cmd_list, GameCamera* pCamera = NULL);
 
-	BoundingOrientedBox myCollider;
 };
 
 class CAirplanePlayer : public CPlayer

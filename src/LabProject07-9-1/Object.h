@@ -26,7 +26,10 @@ public:
 
 	virtual constexpr COLLISION_TAGS GetTag() const noexcept;
 
-	virtual void BuildCollider(XMFLOAT3 size);
+	void SetOriginalCollider(const shared_ptr<BoundingOrientedBox>& box);
+	virtual void BuildCollider();
+	void UpdateCollider(const XMFLOAT4X4* mat);
+
 	virtual void BuildMaterials(P3DDevice device, P3DGrpCommandList cmd_list);
 	virtual void ReleaseUploadBuffers();
 
@@ -83,6 +86,7 @@ public:
 	GameObject* myChild = NULL;
 	GameObject* mySibling = NULL;
 
+	shared_ptr<BoundingOrientedBox> staticCollider;
 	unique_ptr<BoundingOrientedBox> myCollider;
 
 	static void PrintFrameInfo(GameObject* pGameObject, GameObject* pParent);

@@ -1,6 +1,7 @@
 #include "pch.hpp"
 #include "StageGame.hpp"
 #include "GameFramework.h"
+#include "Vehicles.hpp"
 
 float MakeRandom()
 {
@@ -108,9 +109,9 @@ void StageGame::Update(float elapsed_time)
 		}
 
 		auto& player_collider = myPlayer->myCollider;
-		player_collider.Center = myPlayer->GetPosition();
+		player_collider->Center = myPlayer->GetPosition();
 
-		if (player_collider.Intersects(myGoal))
+		if (player_collider->Intersects(myGoal))
 		{
 			myFramework.JumpToNextStage();
 		}
@@ -214,10 +215,17 @@ void StageGame::OnAwake()
 	myInstances.clear();
 
 	auto model_rock1 = myFramework.GetModel("Rock1").lock();
-	model_rock1->SetScale(10.0f, 10.0f, 10.0f);
+	model_rock1->SetScale(15.0f, 15.0f, 15.0f);
 
 	auto model_rock2 = myFramework.GetModel("Rock2").lock();
-	model_rock2->SetScale(10.0f, 10.0f, 10.0f);
+	model_rock2->SetScale(15.0f, 15.0f, 15.0f);
+
+	XMFLOAT4 orientation{};
+	XMStoreFloat4(&orientation, XMQuaternionIdentity());
+
+	auto collider_rock = make_shared<BoundingOrientedBox>(XMFLOAT3()
+		, XMFLOAT3(2.0f, 2.0f, 2.0f)
+		, orientation);
 
 	XMFLOAT3 stone_place;
 
@@ -236,7 +244,8 @@ void StageGame::OnAwake()
 			stone = new GameObject();
 			stone->Attach(model_rock1.get(), true);
 			stone->SetPosition(stone_place);
-			stone->BuildCollider(XMFLOAT3(2.0f, 2.0f, 2.0f));
+			stone->SetOriginalCollider(collider_rock);
+			stone->BuildCollider();
 			stone->Rotate(0.0f, 90.0f, 0.0f);
 			myInstances.emplace_back(stone);
 
@@ -245,7 +254,8 @@ void StageGame::OnAwake()
 			stone = new GameObject();
 			stone->Attach(model_rock2.get(), true);
 			stone->SetPosition(stone_place);
-			stone->BuildCollider(XMFLOAT3(2.0f, 2.0f, 2.0f));
+			stone->SetOriginalCollider(collider_rock);
+			stone->BuildCollider();
 			stone->Rotate(0.0f, -90.0f, 0.0f);
 			myInstances.emplace_back(stone);
 
@@ -315,8 +325,9 @@ void StageGame::OnAwake()
 	SetCamera(player->GetCamera());
 	myPlayer = player;
 
+	static_assert(false);
 	auto& player_collider = myPlayer->myCollider;
-	player_collider.Extents = XMFLOAT3(2.0f, 2.0f, 4.0f);
+	player_collider->Extents = XMFLOAT3(3.0f, 4.0f, 6.0f);
 
 	myGoal.Center = goal;
 	myGoal.Radius = 5.0f;

@@ -9,7 +9,7 @@ constexpr COLLISION_TAGS CPlayer::GetTag() const noexcept
 }
 
 CPlayer::CPlayer()
-	: myCollider()
+	: GameObject()
 {
 	myCamera = NULL;
 
@@ -224,15 +224,21 @@ void CPlayer::CollideWith(GameObject* other)
 		break;
 
 		case COLLISION_TAGS::CAR:
-		{}
+		{
+			const auto& pos = other->GetPosition();
+		}
 		break;
 
 		case COLLISION_TAGS::ROCK:
-		{}
+		{
+			const auto& pos = other->GetPosition();
+		}
 		break;
 
 		case COLLISION_TAGS::TREE:
-		{}
+		{
+			const auto& pos = other->GetPosition();
+		}
 		break;
 	}
 }
@@ -327,6 +333,7 @@ void CAirplanePlayer::Awake()
 
 void CAirplanePlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
+
 	if (m_pMainRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
