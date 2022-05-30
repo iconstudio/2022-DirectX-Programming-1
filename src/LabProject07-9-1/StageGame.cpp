@@ -10,9 +10,11 @@ float MakeRandom()
 StageGame::StageGame(GameFramework& framework, HWND hwnd)
 	: IlluminatedScene(framework, hwnd, "Game")
 	, myGoal(), playerSpawnPoint()
+	, raceColors
+{ { 0.2f, 0.2f, 0.2f, 1.0f }, { 0.4f, 0.6f, 0.6f, 1.0f }
+, { 0.3f, 0.8f, 0.6f, 1.0f }, {0.2f, 0.6f, 0.4f, 1.0f } }
 {
-	constexpr float colors[] = { 0.2f, 0.6f, 0.4f, 1.0f };
-	SetBackgroundColor(colors);
+	SetBackgroundColor(raceColors[0]);
 }
 
 void StageGame::ProcessInput(UCHAR* pKeysBuffer)
@@ -85,25 +87,40 @@ void StageGame::Reset()
 	myPlayer->SetPosition(playerSpawnPoint);
 	myPlayer->m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	myPlayer->SetVelocity(XMFLOAT3());
+	raceTimer = 4.0f;
 }
 
 void StageGame::Update(float elapsed_time)
 {
 	IlluminatedScene::Update(elapsed_time);
 
-	BYTE keystate[256];
+	raceTimer -= elapsed_time;
 
-	if (GetKeyboardState(keystate))
+	if (raceTimer <= 0)
 	{
-		ProcessInput(keystate);
+		BYTE keystate[256];
+
+		if (GetKeyboardState(keystate))
+		{
+			ProcessInput(keystate);
+		}
+
+		auto& player_collider = myPlayer->myCollider;
+		player_collider.Center = myPlayer->GetPosition();
+
+		if (player_collider.Intersects(myGoal))
+		{
+			myFramework.JumpToNextStage();
+		}
+
+		SetBackgroundColor(defaultColor);
 	}
-
-	auto& player_collider = myPlayer->myCollider;
-	player_collider.Center = myPlayer->GetPosition();
-
-	if (player_collider.Intersects(myGoal))
+	else
 	{
-		myFramework.JumpToNextStage();
+		const int raceApproxtime = int(raceTimer);
+		const int raceIndex = 3 - std::min(3, raceApproxtime);
+		 
+		SetBackgroundColor(raceColors[raceIndex]);
 	}
 }
 
@@ -379,7 +396,7 @@ void StageGame::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
 				break;
 
 				case VK_UP:
-				case 'W': 
+				case 'W':
 				{
 				}
 				break;

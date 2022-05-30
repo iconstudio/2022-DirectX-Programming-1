@@ -29,4 +29,9 @@ public:
 	BoundingSphere myGoal;
 
 	XMFLOAT3 playerSpawnPoint;
+
+	const float defaultColor[4] = { 0.2f, 0.6f, 0.4f, 1.0f };
+
+	const float raceColors[4][4];
+	float raceTimer = 4.0f;
 };
