@@ -33,6 +33,8 @@ protected:
 
 	GameCamera* m_pCamera = NULL;
 
+	POINT m_ptOldCursorPos;
+
 public:
 	CPlayer();
 	virtual ~CPlayer();
@@ -62,12 +64,12 @@ public:
 	void Move(float fxOffset = 0.0f, float fyOffset = 0.0f, float fzOffset = 0.0f);
 	void Rotate(float x, float y, float z);
 
-	void Update(float fTimeElapsed);
+	void Update(float elapsed_time);
 
-	virtual void OnPlayerUpdateCallback(float fTimeElapsed) {}
+	virtual void OnPlayerUpdateCallback(float elapsed_time) {}
 	void SetPlayerUpdatedContext(LPVOID pContext) { m_pPlayerUpdatedContext = pContext; }
 
-	virtual void OnCameraUpdateCallback(float fTimeElapsed) {}
+	virtual void OnCameraUpdateCallback(float elapsed_time) {}
 	void SetCameraUpdatedContext(LPVOID pContext) { m_pCameraUpdatedContext = pContext; }
 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);

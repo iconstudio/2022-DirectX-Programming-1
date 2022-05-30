@@ -72,13 +72,13 @@ public:
 	GameObject* mySibling = NULL;
 
 public:
-	static MATERIALSLOADINFO* LoadMaterialsInfoFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
 	static CMeshLoadInfo* LoadMeshInfoFromFile(FILE* pInFile);
 
 	static GameObject* LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FILE* pInFile);
 	static GameObject* LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName);
 
-	static void PrintFrameInfo(GameObject* pGameObject, GameObject* pParent);
+private:
+	void PrintFrameInfo(GameObject* parent = nullptr);
 };
 
 class CRotatingObject : public GameObject

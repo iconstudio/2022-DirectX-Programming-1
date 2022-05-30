@@ -12,6 +12,7 @@ float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
 	float3 vToLight = -gLights[nIndex].m_vDirection;
 	float fDiffuseFactor = dot(vToLight, vNormal);
 	float fSpecularFactor = 0.0f;
+	
 	if (fDiffuseFactor > 0.0f)
 	{
 		if (gMaterial.m_cSpecular.a != 0.0f)
