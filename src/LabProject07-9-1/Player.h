@@ -13,6 +13,8 @@
 class CPlayer : public GameObject
 {
 public:
+	virtual constexpr COLLISION_TAGS GetTag() const noexcept override;
+
 	XMFLOAT3					m_xmf3Position;
 	XMFLOAT3					m_xmf3Right;
 	XMFLOAT3					m_xmf3Up;

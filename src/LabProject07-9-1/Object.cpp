@@ -50,6 +50,11 @@ void GameObject::Attach(GameObject* pChild, bool bReferenceUpdate)
 	}
 }
 
+constexpr COLLISION_TAGS GameObject::GetTag() const noexcept
+{
+	return COLLISION_TAGS::NONE;
+}
+
 void GameObject::SetMesh(CMesh* pMesh)
 {
 	if (m_pMesh) m_pMesh->Release();
@@ -60,7 +65,7 @@ void GameObject::SetMesh(CMesh* pMesh)
 void GameObject::SetShader(Pipeline* pipeline)
 {
 	m_nMaterials = 1;
-	m_ppMaterials = new CMaterial*[m_nMaterials];
+	m_ppMaterials = new CMaterial * [m_nMaterials];
 	m_ppMaterials[0] = new CMaterial();
 	m_ppMaterials[0]->SetShader(pipeline);
 }
@@ -178,6 +183,15 @@ void GameObject::UpdateUniforms(P3DGrpCommandList cmd_list, CMaterial* pMaterial
 void GameObject::ReleaseUniforms()
 {}
 
+void GameObject::BuildCollider(XMFLOAT3 size)
+{
+	// look
+	const auto dir = XMFLOAT4(worldTransform._31, worldTransform._32, worldTransform._33, worldTransform._34);
+
+	auto handle = new BoundingOrientedBox(GetPosition(), size, dir);
+	myCollider = unique_ptr<BoundingOrientedBox>(handle);
+}
+
 void GameObject::BuildMaterials(P3DDevice device, P3DGrpCommandList cmd_list)
 {}
 
@@ -285,6 +299,28 @@ void GameObject::Rotate(XMFLOAT4* pxmf4Quaternion)
 	localTransform = Matrix4x4::Multiply(mtxRotate, localTransform);
 
 	UpdateTransform(NULL);
+}
+
+bool GameObject::CheckCollisionWith(GameObject* other) const
+{
+	const auto& other_collision = other->myCollider;
+	if (myCollider && other_collision)
+	{
+		return other_collision->Intersects(*myCollider);
+	}
+
+	return false;
+}
+
+void GameObject::CollideWith(GameObject* other) const
+{
+	const auto& tag = other->GetTag();
+	switch (tag)
+	{
+		case COLLISION_TAGS::NONE:
+		{}
+		break;
+	}
 }
 
 void GameObject::PrintFrameInfo(GameObject* root, GameObject* pParent)

@@ -3,6 +3,15 @@
 #include "Material.hpp"
 #include "Camera.h"
 
+enum class COLLISION_TAGS
+{
+	NONE = 0,
+	ROCK,
+	TREE,
+	CAR,
+	PLAYER
+};
+
 class GameObject
 {
 public:
@@ -15,6 +24,9 @@ public:
 	void SetMaterial(int nMaterial, CMaterial* pMaterial);
 	void Attach(GameObject* pChild, bool bReferenceUpdate = false);
 
+	virtual constexpr COLLISION_TAGS GetTag() const noexcept;
+
+	virtual void BuildCollider(XMFLOAT3 size);
 	virtual void BuildMaterials(P3DDevice device, P3DGrpCommandList cmd_list);
 	virtual void ReleaseUploadBuffers();
 
@@ -46,6 +58,9 @@ public:
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 	void Rotate(XMFLOAT4* pxmf4Quaternion);
+
+	virtual bool CheckCollisionWith(GameObject* other) const;
+	virtual void CollideWith(GameObject* other) const;
 
 	GameObject* GetParent() { return(m_pParent); }
 	void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
@@ -162,9 +177,4 @@ public:
 
 public:
 	virtual void Awake();
-};
-
-enum class COLLISION_TAGS
-{
-
 };

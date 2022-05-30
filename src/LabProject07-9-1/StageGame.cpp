@@ -10,6 +10,7 @@ float MakeRandom()
 StageGame::StageGame(GameFramework& framework, HWND hwnd)
 	: IlluminatedScene(framework, hwnd, "Game")
 	, myGoal(), playerSpawnPoint()
+	, myWalls()
 	, raceColors
 { { 0.2f, 0.2f, 0.2f, 1.0f }, { 0.4f, 0.6f, 0.6f, 1.0f }
 , { 0.3f, 0.8f, 0.6f, 1.0f }, {0.2f, 0.6f, 0.4f, 1.0f } }
@@ -235,6 +236,7 @@ void StageGame::OnAwake()
 			stone = new GameObject();
 			stone->Attach(model_rock1.get(), true);
 			stone->SetPosition(stone_place);
+			stone->BuildCollider(XMFLOAT3(2.0f, 2.0f, 2.0f));
 			stone->Rotate(0.0f, 90.0f, 0.0f);
 			myInstances.emplace_back(stone);
 
@@ -243,6 +245,7 @@ void StageGame::OnAwake()
 			stone = new GameObject();
 			stone->Attach(model_rock2.get(), true);
 			stone->SetPosition(stone_place);
+			stone->BuildCollider(XMFLOAT3(2.0f, 2.0f, 2.0f));
 			stone->Rotate(0.0f, -90.0f, 0.0f);
 			myInstances.emplace_back(stone);
 

@@ -41,6 +41,12 @@ void Scene::Update(float elapsed_time)
 {
 	lastDeltaTime = elapsed_time;
 
+
+	for (auto& instance : myInstances)
+	{
+		instance->ReleaseUploadBuffers();
+	}
+
 	OnUpdate();
 }
 

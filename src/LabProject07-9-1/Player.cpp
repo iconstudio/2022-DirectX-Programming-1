@@ -3,6 +3,11 @@
 #include "Shader.h"
 #include "Model.hpp"
 
+constexpr COLLISION_TAGS CPlayer::GetTag() const noexcept
+{
+	return COLLISION_TAGS::PLAYER;
+}
+
 CPlayer::CPlayer()
 	: myCollider()
 {

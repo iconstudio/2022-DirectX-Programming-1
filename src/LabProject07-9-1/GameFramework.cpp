@@ -582,7 +582,6 @@ void GameFramework::BuildStages()
 
 void GameFramework::BuildWorld()
 {
-
 }
 
 void GameFramework::BuildParticles()

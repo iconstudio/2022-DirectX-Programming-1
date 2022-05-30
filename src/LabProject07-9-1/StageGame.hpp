@@ -30,6 +30,8 @@ public:
 
 	XMFLOAT3 playerSpawnPoint;
 
+	std::vector<GameObject*> myWalls;
+
 	const float defaultColor[4] = { 0.2f, 0.6f, 0.4f, 1.0f };
 
 	const float raceColors[4][4];
