@@ -1,9 +1,20 @@
 #pragma once
 #include "Object.h"
 
-class Obstacles : public GameObject
-{};
-
-class Rock : public Obstacles
+class Rock : public GameObject
 {
+public:
+	virtual constexpr COLLISION_TAGS GetTag() const noexcept
+	{
+		return COLLISION_TAGS::ROCK;
+	}
+};
+
+class Tree : public GameObject
+{
+public:
+	virtual constexpr COLLISION_TAGS GetTag() const noexcept
+	{
+		return COLLISION_TAGS::TREE;
+	}
 };

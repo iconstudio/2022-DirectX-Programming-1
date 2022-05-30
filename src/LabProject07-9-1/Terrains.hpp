@@ -1,5 +1,3 @@
 #pragma once
-
-class Terrains
-{};
+#include "Object.h"
 

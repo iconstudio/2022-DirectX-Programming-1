@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{6E098125-3DD4-4A11-BEA0-145217177AAC}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>LabProject0791</RootNamespace>
+    <RootNamespace>MidtermProject</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>Midterm Project</ProjectName>
   </PropertyGroup>

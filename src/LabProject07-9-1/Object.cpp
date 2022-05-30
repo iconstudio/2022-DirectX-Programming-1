@@ -91,6 +91,8 @@ void GameObject::SetMaterial(int index, CMaterial* mat)
 
 void GameObject::Animate(float time_elapsed, XMFLOAT4X4* parent)
 {
+	UpdateCollider(&worldTransform);
+
 	if (mySibling)
 	{
 		mySibling->Animate(time_elapsed, parent);
@@ -160,7 +162,6 @@ void GameObject::Render(P3DGrpCommandList cmd_list, GameCamera* pCamera)
 	if (myChild) myChild->Render(cmd_list, pCamera);
 }
 
-
 void GameObject::InitializeUniforms(P3DDevice device, P3DGrpCommandList cmd_list)
 {}
 
@@ -178,7 +179,6 @@ void GameObject::UpdateUniforms(P3DGrpCommandList cmd_list, XMFLOAT4X4* pxmf4x4W
 
 void GameObject::UpdateUniforms(P3DGrpCommandList cmd_list, CMaterial* pMaterial)
 {}
-
 
 void GameObject::ReleaseUniforms()
 {}
@@ -198,8 +198,16 @@ void GameObject::UpdateCollider(const XMFLOAT4X4* mat)
 {
 	if (myCollider)
 	{
-		const auto my_mat = XMLoadFloat4x4(mat);
-		staticCollider->Transform(*myCollider, my_mat);
+		const auto float4x4 = DirectX::XMLoadFloat4x4(mat);
+
+		const auto& original_collider = staticCollider;
+		original_collider->Transform(*myCollider, float4x4);
+
+		auto& angle = myCollider->Orientation;
+
+		const auto orientation = DirectX::XMLoadFloat4(&angle);
+		const auto quaternion = DirectX::XMQuaternionNormalize(orientation);
+		DirectX::XMStoreFloat4(&angle, quaternion);
 	}
 }
 

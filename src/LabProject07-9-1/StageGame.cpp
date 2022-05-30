@@ -1,7 +1,10 @@
 #include "pch.hpp"
 #include "StageGame.hpp"
 #include "GameFramework.h"
+#include "Object.h"
 #include "Vehicles.hpp"
+#include "Terrains.hpp"
+#include "Obstacles.hpp"
 
 float MakeRandom()
 {
@@ -122,7 +125,7 @@ void StageGame::Update(float elapsed_time)
 	{
 		const int raceApproxtime = int(raceTimer);
 		const int raceIndex = 3 - std::min(3, raceApproxtime);
-		 
+
 		SetBackgroundColor(raceColors[raceIndex]);
 	}
 }
@@ -224,7 +227,7 @@ void StageGame::OnAwake()
 	XMStoreFloat4(&orientation, XMQuaternionIdentity());
 
 	auto collider_rock = make_shared<BoundingOrientedBox>(XMFLOAT3()
-		, XMFLOAT3(2.0f, 2.0f, 2.0f)
+		, XMFLOAT3(6.0f, 6.0f, 6.0f)
 		, orientation);
 
 	XMFLOAT3 stone_place;
@@ -234,28 +237,28 @@ void StageGame::OnAwake()
 	constexpr int count = 50;
 	constexpr auto place_gap = height / float(count);
 
-	GameObject* stone = NULL;
+	Rock* stone = nullptr;
 	for (int i = 0; i < 2; ++i)
 	{
 		stone_place = XMFLOAT3{ i * width, 0.0f, 0.0f };
 
 		for (int j = 0; j < 100; ++j)
 		{
-			stone = new GameObject();
+			stone = new Rock();
 			stone->Attach(model_rock1.get(), true);
-			stone->SetPosition(stone_place);
 			stone->SetOriginalCollider(collider_rock);
 			stone->BuildCollider();
+			stone->SetPosition(stone_place);
 			stone->Rotate(0.0f, 90.0f, 0.0f);
 			myInstances.emplace_back(stone);
 
 			stone_place.z += place_gap;
 
-			stone = new GameObject();
+			stone = new Rock();
 			stone->Attach(model_rock2.get(), true);
-			stone->SetPosition(stone_place);
 			stone->SetOriginalCollider(collider_rock);
 			stone->BuildCollider();
+			stone->SetPosition(stone_place);
 			stone->Rotate(0.0f, -90.0f, 0.0f);
 			myInstances.emplace_back(stone);
 
@@ -263,23 +266,33 @@ void StageGame::OnAwake()
 		}
 	}
 
+	auto collider_car = make_shared<BoundingOrientedBox>(XMFLOAT3()
+		, XMFLOAT3(9.0f, 12.0f, 18.0f)
+		, orientation);
+
 	auto model_policecar = myFramework.GetModel("PoliceCar").lock();
 	model_policecar->SetScale(8.5f, 8.5f, 8.5f);
 
-	auto policecar = new GameObject();
+	auto policecar = new Vehicles();
 	policecar->Attach(model_policecar.get(), true);
+	policecar->SetOriginalCollider(collider_car);
+	policecar->BuildCollider();
 	policecar->SetPosition(135.0f, 0.0f, 620.0f);
 	policecar->Rotate(0.0f, -50.0f, 0.0f);
 	myInstances.emplace_back(policecar);
 
-	policecar = new GameObject();
+	policecar = new Vehicles();
 	policecar->Attach(model_policecar.get(), true);
+	policecar->SetOriginalCollider(collider_car);
+	policecar->BuildCollider();
 	policecar->SetPosition(-15.0f, 0.0f, 130.0f);
 	policecar->Rotate(0.0f, 60.0f, 0.0f);
 	myInstances.emplace_back(policecar);
 
-	policecar = new GameObject();
+	policecar = new Vehicles();
 	policecar->Attach(model_policecar.get(), true);
+	policecar->SetOriginalCollider(collider_car);
+	policecar->BuildCollider();
 	policecar->SetPosition(140.0f, 0.0f, 1750.0f);
 	policecar->Rotate(0.0f, 200.0f, 0.0f);
 	myInstances.emplace_back(policecar);
@@ -287,12 +300,19 @@ void StageGame::OnAwake()
 	auto model_tree = myFramework.GetModel("Tree").lock();
 	model_tree->SetScale(9.5f, 9.5f, 9.5f);
 
+	auto collider_tree = make_shared<BoundingOrientedBox>(XMFLOAT3()
+		, XMFLOAT3(6.0f, 30.0f, 6.0f)
+		, orientation);
+
 	float cx = 0.0f;
 	float cz = 0.0f;
+	Tree* tree = nullptr;
 	for (int i = 0; i < 10; ++i)
 	{
-		auto tree = new GameObject();
+		tree = new Tree();
 		tree->Attach(model_tree.get(), true);
+		tree->SetOriginalCollider(collider_tree);
+		tree->BuildCollider();
 		tree->SetPosition(150.0f + cx, 0.0f, 50.0f + cz);
 		tree->Rotate(0.0f, MakeRandom() * 360.0f, 0.0f);
 		myInstances.emplace_back(tree);
@@ -300,10 +320,13 @@ void StageGame::OnAwake()
 		cx = MakeRandom() * 50.0f - 25.0f;
 		cz += MakeRandom() * 30.0f + 20.0f;
 	}
+
 	for (int i = 0; i < 10; ++i)
 	{
-		auto tree = new GameObject();
+		tree = new Tree();
 		tree->Attach(model_tree.get(), true);
+		tree->SetOriginalCollider(collider_tree);
+		tree->BuildCollider();
 		tree->SetPosition(-110.0f + cx, 0.0f, 2490.0f + cz);
 		tree->Rotate(0.0f, MakeRandom() * 360.0f, 0.0f);
 		myInstances.emplace_back(tree);
@@ -320,14 +343,12 @@ void StageGame::OnAwake()
 
 	auto player = new CAirplanePlayer(d3dDevice, d3dTaskList, GetRootSignature());
 	player->Attach(model_rallycar.get(), true);
+	player->SetOriginalCollider(collider_car);
+	player->BuildCollider();
 	player->SetPosition(playerSpawnPoint);
 	player->m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	SetCamera(player->GetCamera());
 	myPlayer = player;
-
-	static_assert(false);
-	auto& player_collider = myPlayer->myCollider;
-	player_collider->Extents = XMFLOAT3(3.0f, 4.0f, 6.0f);
 
 	myGoal.Center = goal;
 	myGoal.Radius = 5.0f;
