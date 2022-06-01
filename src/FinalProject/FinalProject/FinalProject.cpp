@@ -81,7 +81,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	return RegisterClassExW(&wcex);
 }
 
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
+BOOL InitInstance(HINSTANCE hInstance, int cmd_show)
 {
 	gameClient = hInstance;
 
@@ -97,7 +97,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 		return FALSE;
 	}
 
-	ShowWindow(window, nCmdShow);
+	ShowWindow(window, cmd_show);
 	UpdateWindow(window);
 
 	return TRUE;
@@ -111,7 +111,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		case WM_CREATE:
 		{
+			gameRenderer.Awake();
 			gameFramework.SetHWND(hwnd).SetHInstance(gameClient).Awake();
+			gameRenderer.Start();
 			gameFramework.Start();
 		}
 		break;

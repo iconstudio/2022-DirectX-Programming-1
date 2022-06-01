@@ -3,6 +3,17 @@
 
 GraphicsCore::GraphicsCore(long width, long height)
 	: frameWidth(width), frameHeight(height)
+	, myFactory(nullptr), myDevice(nullptr)
+	, myRenderFence(nullptr), myFences(), eventFence(NULL)
+	, myCommandList(nullptr), myCommandQueue(nullptr), myCommandAlloc(nullptr)
+	, myRootSignature(nullptr)
+	, mySwapChain(nullptr), resSwapChainBackBuffers(), myBarriers()
+	, heapRtvDesc(nullptr), szRtvDescIncrements(0)
+	, myDepthStencilBuffer(nullptr)
+	, heapDsvDesc(nullptr), szDsvDescIncrements(0)
+#ifdef _DEBUG
+	, myDebugController(nullptr)
+#endif
 {}
 
 void GraphicsCore::Awake()

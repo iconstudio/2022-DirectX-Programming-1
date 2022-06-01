@@ -2,16 +2,18 @@
 class Shader
 {
 public:
-	Shader(const Shader& other);
-	Shader(Shader&& other);
+	Shader(const Shader& other) = default;
+	Shader(Shader&& other) = default;
 	Shader(const char* version);
+	~Shader();
 
-	bool Load(const char* filepath, const char* entry);
+	void Load(const Filepath& filepath);
+	void Complile(const Filepath& filepath, const char* entry);
 
 	bool isCompiled;
 
 	const std::string myVersion;
 
 	D3DByteCode myCode;
-	ID3DBlob* myBlob;
+	unique_ptr<ID3DBlob*> myBlob;
 };

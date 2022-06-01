@@ -19,4 +19,9 @@ public:
 	virtual void OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info) override;
 	virtual void OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state) override;
 	virtual void OnWindow(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) override;
+
+	std::vector<shared_ptr<GameObject>> myInstances;
+
+private:
+
 };
