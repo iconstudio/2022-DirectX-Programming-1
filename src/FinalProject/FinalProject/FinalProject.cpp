@@ -1,18 +1,23 @@
-﻿#include "pch.h"
+﻿#include "pch.hpp"
 #include "stdafx.h"
 #include "FinalProject.h"
-
-HINSTANCE hInst; // 현재 인스턴스입니다.
+#include "Timer.hpp"
+#include "Framework.hpp"
+#include "GraphicsCore.hpp"
 
 constexpr int MAX_LOADSTRING = 100;
-WCHAR szTitle[MAX_LOADSTRING]; // 제목 표시줄 텍스트입니다.
-WCHAR szWindowClass[MAX_LOADSTRING]; // 기본 창 클래스 이름입니다.
+WCHAR captionTitle[MAX_LOADSTRING]{}; // 제목 표시줄 텍스트입니다.
+WCHAR captionClass[MAX_LOADSTRING]{}; // 기본 창 클래스 이름입니다.
+HINSTANCE gameClient; // 현재 인스턴스입니다.
 
-// 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
-ATOM                MyRegisterClass(HINSTANCE hInstance);
-BOOL                InitInstance(HINSTANCE, int);
-LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+ATOM MyRegisterClass(HINSTANCE hInstance);
+BOOL InitInstance(HINSTANCE, int);
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
+
+Timer gameTimer{ 100.0f };
+GraphicsCore gameRenderer{ FRAME_BUFFER_W, FRAME_BUFFER_H };
+Framework gameFramework{ gameRenderer, FRAME_BUFFER_W, FRAME_BUFFER_H };
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -22,8 +27,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	LoadStringW(hInstance, IDC_FINALPROJECT, szWindowClass, MAX_LOADSTRING);
+	LoadStringW(hInstance, IDS_APP_TITLE, captionTitle, MAX_LOADSTRING);
+	LoadStringW(hInstance, IDC_FINALPROJECT, captionClass, MAX_LOADSTRING);
 
 	MyRegisterClass(hInstance);
 
@@ -32,25 +37,32 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		return FALSE;
 	}
 
-	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_FINALPROJECT));
-
 	MSG msg;
-
-	while (GetMessage(&msg, nullptr, 0, 0))
+	while (true)
 	{
-		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+		gameTimer.Tick();
+
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
+			if (WM_QUIT == msg.message)
+			{
+				break;
+			}
+
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
+
+		gameFramework.Update(gameTimer.GetDeltaTime());
+		//gameFramework.Render();
 	}
 
-	return (int)msg.wParam;
+	return static_cast<int>(msg.wParam);
 }
 
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
-	WNDCLASSEXW wcex;
+	WNDCLASSEXW wcex{};
 
 	wcex.cbSize = sizeof(WNDCLASSEX);
 
@@ -63,7 +75,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_FINALPROJECT);
-	wcex.lpszClassName = szWindowClass;
+	wcex.lpszClassName = captionClass;
 	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
 	return RegisterClassExW(&wcex);
@@ -71,57 +83,76 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-	hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
+	gameClient = hInstance;
 
-	HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+	HWND window = CreateWindowW(captionClass, captionTitle
+		, WS_OVERLAPPEDWINDOW
+		, CW_USEDEFAULT, 0
+		, CW_USEDEFAULT, 0
+		, nullptr, nullptr, hInstance
+		, nullptr);
 
-	if (!hWnd)
+	if (!window)
 	{
 		return FALSE;
 	}
 
-	ShowWindow(hWnd, nCmdShow);
-	UpdateWindow(hWnd);
+	ShowWindow(window, nCmdShow);
+	UpdateWindow(window);
 
 	return TRUE;
 }
 
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	switch (message)
+	PAINTSTRUCT ps{};
+
+	switch (msg)
 	{
+		case WM_CREATE:
+		{
+			gameFramework.SetHWND(hwnd).SetHInstance(gameClient).Awake();
+			gameFramework.Start();
+		}
+		break;
+
 		case WM_COMMAND:
 		{
-			int wmId = LOWORD(wParam);
+			int wmId = LOWORD(wp);
 			// 메뉴 선택을 구문 분석합니다:
 			switch (wmId)
 			{
 				case IDM_ABOUT:
-				DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+				DialogBox(gameClient, MAKEINTRESOURCE(IDD_ABOUTBOX), hwnd, About);
 				break;
 				case IDM_EXIT:
-				DestroyWindow(hWnd);
+				DestroyWindow(hwnd);
 				break;
 				default:
-				return DefWindowProc(hWnd, message, wParam, lParam);
+				return DefWindowProc(hwnd, msg, wp, lp);
 			}
 		}
 		break;
+
 		case WM_PAINT:
 		{
-			PAINTSTRUCT ps;
-			HDC hdc = BeginPaint(hWnd, &ps);
-			// TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
-			EndPaint(hWnd, &ps);
+			HDC hdc = BeginPaint(hwnd, &ps);
+			EndPaint(hwnd, &ps);
 		}
 		break;
+
 		case WM_DESTROY:
-		PostQuitMessage(0);
+		{
+			PostQuitMessage(0);
+		}
 		break;
+
 		default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
+		{
+			return DefWindowProc(hwnd, msg, wp, lp);
+		}
 	}
+
 	return 0;
 }
 
