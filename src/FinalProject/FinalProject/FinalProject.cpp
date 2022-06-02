@@ -74,7 +74,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_FINALPROJECT));
 	wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wcex.lpszMenuName = MAKEINTRESOURCEW(IDC_FINALPROJECT);
+	wcex.lpszMenuName = NULL; // MAKEINTRESOURCEW(IDC_FINALPROJECT);
 	wcex.lpszClassName = captionClass;
 	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
@@ -115,24 +115,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			gameFramework.SetHWND(hwnd).SetHInstance(gameClient).Awake();
 			gameRenderer.Start();
 			gameFramework.Start();
-		}
-		break;
 
-		case WM_COMMAND:
-		{
-			int wmId = LOWORD(wp);
-			// 메뉴 선택을 구문 분석합니다:
-			switch (wmId)
-			{
-				case IDM_ABOUT:
-				DialogBox(gameClient, MAKEINTRESOURCE(IDD_ABOUTBOX), hwnd, About);
-				break;
-				case IDM_EXIT:
-				DestroyWindow(hwnd);
-				break;
-				default:
-				return DefWindowProc(hwnd, msg, wp, lp);
-			}
+			DialogBox(gameClient, MAKEINTRESOURCE(IDD_ABOUTBOX), hwnd, About);
 		}
 		break;
 

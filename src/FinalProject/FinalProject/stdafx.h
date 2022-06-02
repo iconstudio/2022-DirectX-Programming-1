@@ -44,8 +44,6 @@ using P3DSignature = ID3D12RootSignature*;
 using D3DHandle = D3D12_CPU_DESCRIPTOR_HANDLE;
 using D3DByteCode = D3D12_SHADER_BYTECODE;
 
-#include <shellapi.h>
-
 #include <memory>
 #include <filesystem>
 #include <string>
@@ -65,3 +63,40 @@ using std::make_unique;
 using std::make_pair;
 using Filepath = std::filesystem::path;
 constexpr auto PI = std::numbers::pi;
+
+template <>
+struct std::default_delete<IUnknown>
+{ // default deleter for unique_ptr
+	constexpr default_delete() noexcept = default;
+
+	template <class _Ty2, enable_if_t<is_convertible_v<_Ty2*, IUnknown*>, int> = 0>
+	default_delete(const default_delete<_Ty2>&) noexcept {}
+
+	void operator()(IUnknown* _Ptr) const noexcept /* strengthened */
+	{ // delete a pointer
+		static_assert(0 < sizeof(IUnknown), "can't delete an incomplete type");
+		delete _Ptr;
+	}
+};
+
+struct signature_deleter
+{
+	constexpr signature_deleter() noexcept = default;
+
+	void operator()(P3DSignature _Ptr) const noexcept
+	{
+		_Ptr->Release();
+		delete _Ptr;
+	}
+};
+
+struct pipelinestate_deleter
+{
+	constexpr pipelinestate_deleter() noexcept = default;
+
+	void operator()(ID3D12PipelineState* _Ptr) const noexcept
+	{
+		_Ptr->Release();
+		delete _Ptr;
+	}
+};

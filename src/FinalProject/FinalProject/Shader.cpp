@@ -11,7 +11,7 @@ Shader::~Shader()
 {
 	if (myBlob)
 	{
-		(*myBlob)->Release();
+		//(*myBlob)->Release();
 	}
 }
 

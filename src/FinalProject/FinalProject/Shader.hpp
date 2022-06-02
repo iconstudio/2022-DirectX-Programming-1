@@ -2,8 +2,6 @@
 class Shader
 {
 public:
-	Shader(const Shader& other) = default;
-	Shader(Shader&& other) = default;
 	Shader(const char* version);
 	~Shader();
 
@@ -15,5 +13,5 @@ public:
 	const std::string myVersion;
 
 	D3DByteCode myCode;
-	unique_ptr<ID3DBlob*> myBlob;
+	shared_ptr<ID3DBlob*> myBlob;
 };

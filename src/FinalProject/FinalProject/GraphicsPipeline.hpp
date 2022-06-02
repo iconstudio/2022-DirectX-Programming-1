@@ -4,7 +4,7 @@
 class GraphicsPipeline : public PlayableObjet
 {
 public:
-	GraphicsPipeline();
+	GraphicsPipeline(P3DDevice device, P3DGrpCommandList cmdlist);
 	virtual ~GraphicsPipeline();
 
 	GraphicsPipeline& Attach(P3DSignature* signature);
@@ -14,6 +14,8 @@ public:
 	GraphicsPipeline& Attach(D3D12_INPUT_LAYOUT_DESC&& desc);
 	GraphicsPipeline& Attach(const D3D12_RASTERIZER_DESC& desc);
 	GraphicsPipeline& Attach(D3D12_RASTERIZER_DESC&& desc);
+	GraphicsPipeline& Attach(const D3D12_BLEND_DESC& desc);
+	GraphicsPipeline& Attach(D3D12_BLEND_DESC&& desc);
 	GraphicsPipeline& Attach(const D3D12_DEPTH_STENCIL_DESC& desc);
 	GraphicsPipeline& Attach(D3D12_DEPTH_STENCIL_DESC&& desc);
 
@@ -22,17 +24,16 @@ public:
 	virtual void Reset() override;
 	virtual void Update(float delta_time) override;
 
-	Shader CreateEmptyShader(const char* version) const;
-	D3D12_INPUT_LAYOUT_DESC CreateEmptyInputLayout() const;
-	D3D12_RASTERIZER_DESC CreateEmptyRasterizerState() const;
-	D3D12_BLEND_DESC CreateEmptyBlendState() const;
-	D3D12_DEPTH_STENCIL_DESC CreateEmptyDepthStencilState() const;
+	bool IsModified() const;
 
 private:
-	unique_ptr<ID3D12PipelineState*> myState;
+	P3DDevice dxDevice;
+	P3DGrpCommandList dxCmdList;
+	shared_ptr<P3DSignature> mySignature;
 
-	P3DSignature* mySignature;
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC myDescription;
+	shared_ptr<ID3D12PipelineState*> myState;
+	bool isModified;
 
 	std::vector<shared_ptr<Shader>> myShaders;
 };

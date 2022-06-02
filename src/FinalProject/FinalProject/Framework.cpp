@@ -21,7 +21,9 @@ Framework& Framework::SetHInstance(HINSTANCE instance)
 }
 
 void Framework::Awake()
-{}
+{
+
+}
 
 void Framework::Start()
 {}

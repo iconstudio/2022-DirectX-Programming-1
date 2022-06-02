@@ -1,12 +1,15 @@
 #include "pch.hpp"
 #include "Scene.hpp"
-#include "Framework.hpp"
+#include "GameObject.hpp"
 
 Scene::Scene(Framework& framework, const char* name)
 	: WeakSingleton(framework)
 {
 
 }
+
+Scene::~Scene()
+{}
 
 void Scene::Awake()
 {}

@@ -10,6 +10,7 @@ class Scene
 {
 public:
 	Scene(Framework& framework, const char* name);
+	virtual ~Scene();
 
 	virtual void Awake() override;
 	virtual void Start() override;

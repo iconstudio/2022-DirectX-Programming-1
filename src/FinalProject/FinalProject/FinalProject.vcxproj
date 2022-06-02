@@ -162,6 +162,7 @@
     <ClInclude Include="FinalProject.h" />
     <ClInclude Include="DelegateObjet.hpp" />
     <ClInclude Include="Framework.hpp" />
+    <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="GraphicsCore.hpp" />
     <ClInclude Include="GraphicsPipeline.hpp" />
     <ClInclude Include="PausableObjet.hpp" />
@@ -178,6 +179,7 @@
   <ItemGroup>
     <ClCompile Include="FinalProject.cpp" />
     <ClCompile Include="Framework.cpp" />
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GraphicsCore.cpp" />
     <ClCompile Include="GraphicsPipeline.cpp" />
     <ClCompile Include="PausableObjet.cpp" />
@@ -200,6 +202,14 @@
   <ItemGroup>
     <Image Include="FinalProject.ico" />
     <Image Include="small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="VertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
