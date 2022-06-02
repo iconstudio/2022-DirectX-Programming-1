@@ -22,8 +22,8 @@ public:
 
 	void RegisterPipeline(const GraphicsPipeline& pipeline);
 	void RegisterPipeline(GraphicsPipeline&& pipeline);
-	void SetPipeline(const int index);
 
+	void SetPipeline(const int index);
 	const GraphicsPipeline& GetPipeline(const int index) const;
 	GraphicsPipeline& GetPipeline(const int index);
 

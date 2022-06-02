@@ -108,12 +108,7 @@ void GraphicsCore::Awake()
 
 void GraphicsCore::Start()
 {
-	for (auto& pipeline : myPipelines)
-	{
-		pipeline->Start();
-	}
-
-	currentPipeline = myPipelines[0];
+	SetPipeline(0);
 }
 
 void GraphicsCore::Reset()
@@ -561,6 +556,12 @@ constexpr D3D12_DEPTH_STENCIL_DESC GraphicsCore::CreateEmptyDepthStencilState() 
 		, D3D12_COMPARISON_FUNC_NEVER
 		, D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP
 		, D3D12_COMPARISON_FUNC_NEVER };
+}
+
+void GraphicsCore::SetPipeline(const int index)
+{
+	currentPipeline = myPipelines[index];
+	currentPipeline->Start();
 }
 
 const GraphicsPipeline& GraphicsCore::GetPipeline(const int index) const

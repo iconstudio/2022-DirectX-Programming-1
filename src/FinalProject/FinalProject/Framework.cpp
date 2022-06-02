@@ -22,7 +22,10 @@ Framework& Framework::SetHInstance(HINSTANCE instance)
 
 void Framework::Awake()
 {
-
+	for (auto& scene : myScenes)
+	{
+		scene.second->Awake();
+	}
 }
 
 void Framework::Start()

@@ -28,8 +28,12 @@ public:
 	bool IsModified() const;
 
 private:
+	virtual void CreateUniforms();
+	void CreateRootSignature();
+	void CreatePipelineState();
+
 	P3DDevice dxDevice;
-	P3DGrpCommandList dxCmdList;
+	P3DGrpCommandList dxTaskList;
 
 	shared_ptr<P3DSignature> mySignature;
 	std::vector<D3D12_ROOT_PARAMETER> myShaderUniforms;

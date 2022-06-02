@@ -19,6 +19,16 @@ Timer gameTimer{ 100.0f };
 GraphicsCore gameRenderer{ FRAME_BUFFER_W, FRAME_BUFFER_H };
 Framework gameFramework{ gameRenderer, FRAME_BUFFER_W, FRAME_BUFFER_H };
 
+void InitialzeGame(HWND hwnd)
+{
+
+
+	gameRenderer.SetHWND(hwnd).Awake();
+	gameFramework.SetHWND(hwnd).SetHInstance(gameClient).Awake();
+	gameRenderer.Start();
+	gameFramework.Start();
+}
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
 	_In_ LPWSTR    lpCmdLine,
@@ -111,12 +121,17 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		case WM_CREATE:
 		{
-			gameRenderer.Awake();
-			gameFramework.SetHWND(hwnd).SetHInstance(gameClient).Awake();
-			gameRenderer.Start();
-			gameFramework.Start();
+			SetTimer(hwnd, 0, 10, NULL);
+		}
+		break;
+
+		case WM_TIMER:
+		{
+			KillTimer(hwnd, 0);
 
 			DialogBox(gameClient, MAKEINTRESOURCE(IDD_ABOUTBOX), hwnd, About);
+
+			InitialzeGame(hwnd);
 		}
 		break;
 

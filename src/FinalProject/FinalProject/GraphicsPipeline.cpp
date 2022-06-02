@@ -3,7 +3,7 @@
 #include "Shader.hpp"
 
 GraphicsPipeline::GraphicsPipeline(P3DDevice device, P3DGrpCommandList cmdlist)
-	: dxDevice(device), dxCmdList(cmdlist), mySignature(nullptr)
+	: dxDevice(device), dxTaskList(cmdlist), mySignature(nullptr)
 	, myDescription(), myState(nullptr), isModified(false)
 {
 #ifdef _DEBUG
@@ -22,44 +22,55 @@ GraphicsPipeline::GraphicsPipeline(P3DDevice device, P3DGrpCommandList cmdlist)
 }
 
 GraphicsPipeline::~GraphicsPipeline()
-{
-
-}
+{}
 
 void GraphicsPipeline::Awake()
 {
+	CreateUniforms();
+	CreateRootSignature();
+	CreatePipelineState();
+}
+
+void GraphicsPipeline::CreateUniforms()
+{
+	// Camera
+	D3D12_ROOT_PARAMETER param0{};
+	param0.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	param0.Descriptor.ShaderRegister = 1;
+	param0.Descriptor.RegisterSpace = 0;
+	param0.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	Attach(param0);
+
+	// GameObject
+	D3D12_ROOT_PARAMETER param1{};
+	param1.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	param1.Constants.Num32BitValues = 32;
+	param1.Constants.ShaderRegister = 2;
+	param1.Constants.RegisterSpace = 0;
+	param1.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	Attach(param1);
+
+	// Lights
+	D3D12_ROOT_PARAMETER param2{};
+	param2.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	param2.Descriptor.ShaderRegister = 4;
+	param2.Descriptor.RegisterSpace = 0;
+	param2.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	Attach(param2);
+}
+
+void GraphicsPipeline::CreateRootSignature()
+{
 	P3DSignature signature = nullptr;
-
-	D3D12_ROOT_PARAMETER shader_params[3]{};
-	ZeroMemory(&shader_params, sizeof(shader_params));
-
-	shader_params[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	shader_params[0].Descriptor.ShaderRegister = 1; // Camera
-	shader_params[0].Descriptor.RegisterSpace = 0;
-	shader_params[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
-	shader_params[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	shader_params[1].Constants.Num32BitValues = 32;
-	shader_params[1].Constants.ShaderRegister = 2; // GameObject
-
-	shader_params[1].Constants.RegisterSpace = 0;
-	shader_params[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
-	shader_params[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	shader_params[2].Descriptor.ShaderRegister = 4; // Lights
-	shader_params[2].Descriptor.RegisterSpace = 0;
-	shader_params[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	// 정점 쉐이더, 픽셀 쉐이더, 입력 조립기, 출력 병합기 
 	auto flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 
-	D3D12_ROOT_SIGNATURE_DESC signature_desc;
-	ZeroMemory(&signature_desc, sizeof(signature_desc));
-
-	signature_desc.NumParameters = _countof(shader_params);
-	signature_desc.pParameters = shader_params;
-	signature_desc.NumStaticSamplers = 0; // 텍스처
-	signature_desc.pStaticSamplers = NULL;
+	D3D12_ROOT_SIGNATURE_DESC signature_desc{};
+	signature_desc.NumParameters = myShaderUniforms.size();
+	signature_desc.pParameters = myShaderUniforms.data();
+	signature_desc.NumStaticSamplers = 0;
+	signature_desc.pStaticSamplers = nullptr;
 	signature_desc.Flags = flags;
 
 	ID3DBlob* signature_blob = nullptr;
@@ -94,8 +105,11 @@ void GraphicsPipeline::Awake()
 		error_blob->Release();
 	}
 
-	//mySignature = shared_ptr<P3DSignature>(&signature);
+	mySignature = shared_ptr<P3DSignature>(&signature);
+}
 
+void GraphicsPipeline::CreatePipelineState()
+{
 	if (isModified)
 	{
 		ID3D12PipelineState** state = nullptr;
@@ -116,6 +130,7 @@ void GraphicsPipeline::Awake()
 
 void GraphicsPipeline::Start()
 {
+	dxTaskList->SetGraphicsRootSignature(*mySignature);
 }
 
 void GraphicsPipeline::Reset()
