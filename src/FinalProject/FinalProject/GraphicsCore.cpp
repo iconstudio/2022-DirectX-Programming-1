@@ -19,16 +19,7 @@ GraphicsCore::GraphicsCore(long width, long height)
 	, myPipelines(), currentPipeline(nullptr)
 {
 	myPipelines.reserve(10);
-}
 
-GraphicsCore& GraphicsCore::SetHWND(HWND window)
-{
-	myWindow = window;
-	return *this;
-}
-
-void GraphicsCore::Awake()
-{
 	auto& barrier_render = myBarriers[0];
 	barrier_render.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 	barrier_render.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
@@ -44,6 +35,70 @@ void GraphicsCore::Awake()
 	barrier_swap.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
 	barrier_swap.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	barrier_swap.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+}
+
+GraphicsCore::~GraphicsCore()
+{
+	WaitForGpuComplete();
+
+	CloseHandle(eventFence);
+
+	if (myDepthStencilBuffer) myDepthStencilBuffer->Release();
+	if (heapDsvDesc) heapDsvDesc->Release();
+
+	for (int i = 0; i < numberFrameBuffers; i++)
+	{
+		if (resSwapChainBackBuffers[i])
+		{
+			resSwapChainBackBuffers[i]->Release();
+		}
+	}
+	if (heapRtvDesc) heapRtvDesc->Release();
+
+	if (mySwapChain)
+	{
+		mySwapChain->SetFullscreenState(FALSE, NULL);
+		mySwapChain->Release();
+	}
+
+	if (myRootSignature)
+	{
+		myRootSignature->Release();
+	}
+
+	if (myCommandAlloc) myCommandAlloc->Release();
+	if (myCommandQueue) myCommandQueue->Release();
+	if (myCommandList) myCommandList->Release();
+
+	if (myRenderFence) myRenderFence->Release();
+
+	if (myDevice) myDevice->Release();
+	if (myFactory) myFactory->Release();
+
+#if defined(_DEBUG)
+	if (myDebugController) myDebugController->Release();
+
+	IDXGIDebug1* pdxgiDebug = NULL;
+	DXGIGetDebugInterface1(0, __uuidof(IDXGIDebug1), (void**)&pdxgiDebug);
+
+	HRESULT hResult = pdxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_DETAIL);
+	pdxgiDebug->Release();
+#endif
+}
+
+GraphicsCore& GraphicsCore::SetHWND(HWND window)
+{
+	myWindow = window;
+	return *this;
+}
+
+void GraphicsCore::Awake()
+{
+	CreateDirect3DDevice();
+	CreateCommanders();
+	CreateSwapChain();
+	CreateRenderTargetViews();
+	CreateDepthStencilView();
 
 	for (auto& pipeline : myPipelines)
 	{
@@ -82,14 +137,72 @@ void GraphicsCore::Render()
 {}
 
 void GraphicsCore::ToggleFullscreen()
-{}
+{
+	HRESULT valid = 0;
+
+	BOOL fullscreen = FALSE;
+	valid = mySwapChain->GetFullscreenState(&fullscreen, NULL);
+	if (FAILED(valid))
+	{
+		throw "스왑 체인에서 전체 화면 상태를 얻어오는데에 실패!";
+	}
+
+	valid = mySwapChain->SetFullscreenState(!fullscreen, NULL);
+	if (FAILED(valid))
+	{
+		throw "스왑 체인의 전체 화면 상태를 설정하는데에 실패!";
+	}
+
+	DXGI_MODE_DESC sw_mode{};
+	ZeroMemory(&sw_mode, sizeof(sw_mode));
+
+	sw_mode.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	sw_mode.Width = frameWidth;
+	sw_mode.Height = frameHeight;
+	sw_mode.RefreshRate.Numerator = 60;
+	sw_mode.RefreshRate.Denominator = 1;
+	sw_mode.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+	sw_mode.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+
+	valid = mySwapChain->ResizeTarget(&sw_mode);
+	if (FAILED(valid))
+	{
+		throw "스왑 체인의 상태를 설정하는데 실패!";
+	}
+
+	for (UINT i = 0; i < numberFrameBuffers; i++)
+	{
+		if (resSwapChainBackBuffers[i])
+		{
+			resSwapChainBackBuffers[i]->Release();
+		}
+	}
+
+	DXGI_SWAP_CHAIN_DESC frame_desc{};
+	ZeroMemory(&frame_desc, sizeof(frame_desc));
+
+	valid = mySwapChain->GetDesc(&frame_desc);
+	if (FAILED(valid))
+	{
+		throw "스왑 체인의 서술자를 가져오는데 실패!";
+	}
+
+	valid = mySwapChain->ResizeBuffers(numberFrameBuffers, frameWidth, frameHeight, frame_desc.BufferDesc.Format, frame_desc.Flags);
+	if (FAILED(valid))
+	{
+		throw "후면 렌더링 버퍼의 크기를 재정의 하는데에 실패!";
+	}
+
+	indexFrameBuffer = mySwapChain->GetCurrentBackBufferIndex();
+
+	CreateRenderTargetViews();
+}
 
 void GraphicsCore::CreateDirect3DDevice()
 {
 	HRESULT valid = 0;
 	IID uiid{};
 	void** place = nullptr;
-	ZeroMemory(&uiid, sizeof(uiid));
 
 	UINT factory_flags = 0;
 #if defined(_DEBUG)
@@ -161,12 +274,11 @@ void GraphicsCore::CreateDirect3DDevice()
 	}
 
 	D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS aa_desc{};
-	ZeroMemory(&aa_desc, sizeof(aa_desc));
-
 	aa_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	aa_desc.SampleCount = 4;
 	aa_desc.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
 	aa_desc.NumQualityLevels = 0;
+
 	const auto aa_feature = D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS;
 	const auto aa_sz = sizeof(aa_desc);
 
@@ -205,11 +317,8 @@ void GraphicsCore::CreateCommanders()
 	HRESULT valid = 0;
 	IID uiid{};
 	void** place = nullptr;
-	ZeroMemory(&uiid, sizeof(uiid));
 
 	D3D12_COMMAND_QUEUE_DESC queue_desc{};
-	ZeroMemory(&queue_desc, sizeof(queue_desc));
-
 	queue_desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	queue_desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 
@@ -248,8 +357,6 @@ void GraphicsCore::CreateCommanders()
 void GraphicsCore::CreateSwapChain()
 {
 	DXGI_SWAP_CHAIN_DESC sw_desc{};
-	ZeroMemory(&sw_desc, sizeof(sw_desc));
-
 	sw_desc.BufferCount = numberFrameBuffers;
 	sw_desc.BufferDesc.Width = frameWidth;
 	sw_desc.BufferDesc.Height = frameHeight;
@@ -273,7 +380,7 @@ void GraphicsCore::CreateSwapChain()
 	sw_desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 	auto place = reinterpret_cast<IDXGISwapChain**>(&mySwapChain);
-	HRESULT valid = myFactory->CreateSwapChain(myCommandQueue, &sw_desc, place);
+	auto valid = myFactory->CreateSwapChain(myCommandQueue, &sw_desc, place);
 	if (FAILED(valid))
 	{
 		throw "스왑 체인 생성 실패!";
@@ -293,12 +400,10 @@ void GraphicsCore::CreateRenderTargetViews()
 	HRESULT valid = 0;
 	IID uiid{};
 	void** place = nullptr;
-	ZeroMemory(&uiid, sizeof(uiid));
-
-	D3D12_DESCRIPTOR_HEAP_DESC rtv_heap_desc{};
-	ZeroMemory(&rtv_heap_desc, sizeof(rtv_heap_desc));
 
 	const auto buffer_type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+
+	D3D12_DESCRIPTOR_HEAP_DESC rtv_heap_desc{};
 	rtv_heap_desc.NumDescriptors = numberFrameBuffers;
 	rtv_heap_desc.Type = buffer_type;
 	rtv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
@@ -336,12 +441,10 @@ void GraphicsCore::CreateDepthStencilView()
 	HRESULT valid = 0;
 	IID uiid{};
 	void** place = nullptr;
-	ZeroMemory(&uiid, sizeof(uiid));
-
-	D3D12_DESCRIPTOR_HEAP_DESC dsv_heap_desc{};
-	ZeroMemory(&dsv_heap_desc, sizeof(dsv_heap_desc));
 
 	const auto buffer_type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+
+	D3D12_DESCRIPTOR_HEAP_DESC dsv_heap_desc{};
 	dsv_heap_desc.NumDescriptors = 1;
 	dsv_heap_desc.Type = buffer_type;
 	dsv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
@@ -357,10 +460,7 @@ void GraphicsCore::CreateDepthStencilView()
 
 	szDsvDescIncrements = myDevice->GetDescriptorHandleIncrementSize(buffer_type);
 
-
 	D3D12_RESOURCE_DESC stencil_desc{};
-	ZeroMemory(&stencil_desc, sizeof(stencil_desc));
-
 	stencil_desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	stencil_desc.Alignment = 0;
 	stencil_desc.Width = UINT64(frameWidth);
@@ -383,8 +483,6 @@ void GraphicsCore::CreateDepthStencilView()
 
 	// 메모리 할당 방법 정의
 	D3D12_HEAP_PROPERTIES heap_properties{};
-	ZeroMemory(&heap_properties, sizeof(heap_properties));
-
 	heap_properties.Type = D3D12_HEAP_TYPE_DEFAULT;
 	heap_properties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
 	heap_properties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
@@ -392,8 +490,6 @@ void GraphicsCore::CreateDepthStencilView()
 	heap_properties.VisibleNodeMask = 1;
 
 	D3D12_CLEAR_VALUE d3dClearValue{};
-	ZeroMemory(&d3dClearValue, sizeof(d3dClearValue));
-
 	d3dClearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	d3dClearValue.DepthStencil.Depth = 1.0f;
 	d3dClearValue.DepthStencil.Stencil = 0;
@@ -409,8 +505,6 @@ void GraphicsCore::CreateDepthStencilView()
 	}
 
 	D3D12_DEPTH_STENCIL_VIEW_DESC dsv_desc{};
-	ZeroMemory(&dsv_desc, sizeof(dsv_desc));
-
 	dsv_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	dsv_desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	dsv_desc.Flags = D3D12_DSV_FLAG_NONE;
@@ -428,6 +522,11 @@ void GraphicsCore::RegisterPipeline(const GraphicsPipeline& pipeline)
 void GraphicsCore::RegisterPipeline(GraphicsPipeline&& pipeline)
 {
 	myPipelines.emplace_back(new GraphicsPipeline(std::forward<GraphicsPipeline>(pipeline)));
+}
+
+GraphicsPipeline GraphicsCore::CreateEmptyPipeline() const
+{
+	return GraphicsPipeline(myDevice, myCommandList);
 }
 
 Shader GraphicsCore::CreateEmptyShader(const char* version) const

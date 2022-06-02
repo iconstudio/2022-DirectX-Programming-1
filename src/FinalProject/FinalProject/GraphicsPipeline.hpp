@@ -7,6 +7,7 @@ public:
 	GraphicsPipeline(P3DDevice device, P3DGrpCommandList cmdlist);
 	virtual ~GraphicsPipeline();
 
+	GraphicsPipeline& Attach(const D3D12_ROOT_PARAMETER& param);
 	GraphicsPipeline& Attach(P3DSignature* signature);
 	GraphicsPipeline& Attach(const Shader& shader);
 	GraphicsPipeline& Attach(Shader&& shader);
@@ -29,7 +30,9 @@ public:
 private:
 	P3DDevice dxDevice;
 	P3DGrpCommandList dxCmdList;
+
 	shared_ptr<P3DSignature> mySignature;
+	std::vector<D3D12_ROOT_PARAMETER> myShaderUniforms;
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC myDescription;
 	shared_ptr<ID3D12PipelineState*> myState;

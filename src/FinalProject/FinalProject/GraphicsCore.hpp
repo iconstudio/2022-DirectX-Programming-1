@@ -22,15 +22,17 @@ public:
 
 	void RegisterPipeline(const GraphicsPipeline& pipeline);
 	void RegisterPipeline(GraphicsPipeline&& pipeline);
+	void SetPipeline(const int index);
 
+	const GraphicsPipeline& GetPipeline(const int index) const;
+	GraphicsPipeline& GetPipeline(const int index);
+
+	GraphicsPipeline CreateEmptyPipeline() const;
 	Shader CreateEmptyShader(const char* version) const;
 	constexpr D3D12_INPUT_LAYOUT_DESC CreateEmptyInputLayout() const;
 	constexpr D3D12_RASTERIZER_DESC CreateEmptyRasterizerState() const;
 	constexpr D3D12_BLEND_DESC CreateEmptyBlendState() const;
 	constexpr D3D12_DEPTH_STENCIL_DESC CreateEmptyDepthStencilState() const;
-
-	const GraphicsPipeline& GetPipeline(const int index) const;
-	GraphicsPipeline& GetPipeline(const int index);
 
 private:
 	void CreateDirect3DDevice();

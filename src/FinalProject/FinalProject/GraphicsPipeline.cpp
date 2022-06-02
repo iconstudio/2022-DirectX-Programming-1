@@ -95,10 +95,7 @@ void GraphicsPipeline::Awake()
 	}
 
 	//mySignature = shared_ptr<P3DSignature>(&signature);
-}
 
-void GraphicsPipeline::Start()
-{
 	if (isModified)
 	{
 		ID3D12PipelineState** state = nullptr;
@@ -117,11 +114,20 @@ void GraphicsPipeline::Start()
 	}
 }
 
+void GraphicsPipeline::Start()
+{
+}
+
 void GraphicsPipeline::Reset()
 {}
 
 void GraphicsPipeline::Update(float delta_time)
 {}
+
+GraphicsPipeline& GraphicsPipeline::Attach(const D3D12_ROOT_PARAMETER& param)
+{
+	myShaderUniforms.push_back(param);
+}
 
 GraphicsPipeline& GraphicsPipeline::Attach(P3DSignature* signature)
 {
