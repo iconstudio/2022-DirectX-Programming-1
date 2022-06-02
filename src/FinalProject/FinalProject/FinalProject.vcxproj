@@ -165,6 +165,7 @@
     <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="GraphicsCore.hpp" />
     <ClInclude Include="GraphicsPipeline.hpp" />
+    <ClInclude Include="Material.hpp" />
     <ClInclude Include="PausableObjet.hpp" />
     <ClInclude Include="PlayableObjet.hpp" />
     <ClInclude Include="Scene.hpp" />
@@ -182,6 +183,7 @@
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GraphicsCore.cpp" />
     <ClCompile Include="GraphicsPipeline.cpp" />
+    <ClCompile Include="Material.cpp" />
     <ClCompile Include="PausableObjet.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

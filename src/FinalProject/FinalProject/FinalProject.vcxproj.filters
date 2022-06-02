@@ -84,8 +84,11 @@
     <ClInclude Include="Shader.hpp">
       <Filter>헤더 파일\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Material.hpp">
+      <Filter>헤더 파일\Graphics</Filter>
+    </ClInclude>
     <ClInclude Include="GameObject.hpp">
-      <Filter>헤더 파일</Filter>
+      <Filter>헤더 파일\System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -125,8 +128,11 @@
     <ClCompile Include="Shader.cpp">
       <Filter>소스 파일\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>소스 파일\Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="GameObject.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
