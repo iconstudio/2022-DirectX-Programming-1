@@ -2,14 +2,14 @@
 
 class Material
 {
-	Material();
+	Material(const int id);
 	virtual ~Material();
 
-	void SetShader(GraphicsPipeline* pShader);
+	void SetShader(const int id);
 
 	void UpdateUniforms(P3DGrpCommandList cmd_list);
 
-	GraphicsPipeline* m_pShader = NULL;
+	int myShaderID;
 
 	XMFLOAT4 m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	XMFLOAT4 m_xmf4Diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);

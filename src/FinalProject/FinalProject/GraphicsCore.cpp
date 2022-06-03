@@ -649,7 +649,19 @@ D3D12_RASTERIZER_DESC GraphicsCore::CreateEmptyRasterizerState() const
 
 D3D12_BLEND_DESC GraphicsCore::CreateEmptyBlendState() const
 {
-	return D3D12_BLEND_DESC{ FALSE, FALSE };
+	auto blend_dest = D3D12_BLEND_DESC{ FALSE, FALSE };
+	auto& target_desc = blend_dest.RenderTarget[0];
+	target_desc.BlendEnable = FALSE;
+	target_desc.LogicOpEnable = FALSE;
+	target_desc.SrcBlend = D3D12_BLEND_ONE;
+	target_desc.DestBlend = D3D12_BLEND_ZERO;
+	target_desc.BlendOp = D3D12_BLEND_OP_ADD;
+	target_desc.SrcBlendAlpha = D3D12_BLEND_ONE;
+	target_desc.DestBlendAlpha = D3D12_BLEND_ZERO;
+	target_desc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	target_desc.LogicOp = D3D12_LOGIC_OP_NOOP;
+	target_desc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+	return blend_dest;
 }
 
 D3D12_DEPTH_STENCIL_DESC GraphicsCore::CreateEmptyDepthStencilState() const

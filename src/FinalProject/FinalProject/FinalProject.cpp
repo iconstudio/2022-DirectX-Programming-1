@@ -16,6 +16,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance);
 BOOL InitInstance(HINSTANCE, int);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
+void SetTitle(HWND hwnd, const wchar_t* caption);
 
 Timer gameTimer{ 100.0f };
 GraphicsCore gameRenderer{ FRAME_BUFFER_W, FRAME_BUFFER_H };
@@ -26,8 +27,11 @@ void InitialzeGame(HWND hwnd)
 	gameRenderer.SetHWND(hwnd).Awake();
 	gameFramework.SetHWND(hwnd).SetHInstance(gameClient).Awake();
 
-	auto shader = gameRenderer.CreateEmptyShader("vs_5_1");
-	shader.Complile("VertexShader.hlsl", "main");
+	auto vs_shader = gameRenderer.CreateEmptyShader("vs_5_1");
+	vs_shader.Complile("VertexShader.hlsl", "main");
+
+	auto ps_shader = gameRenderer.CreateEmptyShader("ps_5_1");
+	ps_shader.Complile("VertexShader.hlsl", "main");
 
 	UINT nInputElementDescs = 2;
 	auto attributes = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
@@ -41,22 +45,12 @@ void InitialzeGame(HWND hwnd)
 	auto rs_dest = gameRenderer.CreateEmptyRasterizerState();
 
 	auto blend_dest = gameRenderer.CreateEmptyBlendState();
-	auto& target_desc = blend_dest.RenderTarget[0];
-	target_desc.BlendEnable = FALSE;
-	target_desc.LogicOpEnable = FALSE;
-	target_desc.SrcBlend = D3D12_BLEND_ONE;
-	target_desc.DestBlend = D3D12_BLEND_ZERO;
-	target_desc.BlendOp = D3D12_BLEND_OP_ADD;
-	target_desc.SrcBlendAlpha = D3D12_BLEND_ONE;
-	target_desc.DestBlendAlpha = D3D12_BLEND_ZERO;
-	target_desc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	target_desc.LogicOp = D3D12_LOGIC_OP_NOOP;
-	target_desc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
 	auto ds_dest = gameRenderer.CreateEmptyDepthStencilState();
 
 	auto pipeline = gameRenderer.CreateEmptyPipeline();
-	pipeline.Attach(shader);
+	pipeline.Attach(vs_shader);
+	pipeline.Attach(ps_shader);
 	pipeline.Attach(io_layout);
 	pipeline.Attach(rs_dest);
 	pipeline.Attach(blend_dest);
@@ -213,4 +207,9 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	}
 	return (INT_PTR)FALSE;
+}
+
+void SetTitle(HWND hwnd, const wchar_t* caption)
+{
+	SetWindowText(hwnd, caption);
 }
