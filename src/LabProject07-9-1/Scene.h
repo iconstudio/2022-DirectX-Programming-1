@@ -3,7 +3,7 @@
 class Scene
 {
 public:
-	Scene(GameFramework& framework, HWND hwnd, const char* name);
+	Scene(Framework& framework, HWND hwnd, const char* name);
 	virtual ~Scene();
 
 	virtual void Awake(P3DDevice device, P3DGrpCommandList cmd_list) = 0;
@@ -65,7 +65,7 @@ protected:
 	const std::string myName;
 
 	HWND handleWindow;
-	GameFramework& myFramework;
+	Framework& myFramework;
 
 	P3DDevice d3dDevice;
 	P3DGrpCommandList d3dTaskList;

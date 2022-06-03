@@ -1,6 +1,6 @@
 #include "pch.hpp"
 #include "Material.hpp"
-#include "Shader.h"
+#include "Shader.hpp"
 
 RawMaterial::RawMaterial(const UINT type)
 	: myType(type)
@@ -26,7 +26,7 @@ CMaterial::~CMaterial()
 	if (m_pMaterialColors) m_pMaterialColors->Release();
 }
 
-void CMaterial::SetShader(Pipeline* pShader)
+void CMaterial::SetShader(CShader* pShader)
 {
 	if (m_pShader)
 	{

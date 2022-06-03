@@ -1,10 +1,10 @@
 #include "pch.hpp"
-#include "Shader.h"
+#include "Shader.hpp"
 
-Pipeline::Pipeline()
+CShader::CShader()
 {}
 
-Pipeline::~Pipeline()
+CShader::~CShader()
 {
 	ReleaseUniforms();
 
@@ -21,25 +21,25 @@ Pipeline::~Pipeline()
 	}
 }
 
-ShaderBlob Pipeline::CreateVertexShader()
+D3DByteCode CShader::CreateVertexShader()
 {
-	ShaderBlob d3dShaderByteCode{};
+	D3DByteCode d3dShaderByteCode{};
 	d3dShaderByteCode.BytecodeLength = 0;
 	d3dShaderByteCode.pShaderBytecode = NULL;
 
 	return(d3dShaderByteCode);
 }
 
-ShaderBlob Pipeline::CreatePixelShader()
+D3DByteCode CShader::CreatePixelShader()
 {
-	ShaderBlob d3dShaderByteCode{};
+	D3DByteCode d3dShaderByteCode{};
 	d3dShaderByteCode.BytecodeLength = 0;
 	d3dShaderByteCode.pShaderBytecode = NULL;
 
 	return(d3dShaderByteCode);
 }
 
-ShaderBlob Pipeline::CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob)
+D3DByteCode CShader::CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dD3DByteCode)
 {
 	UINT nCompileFlags = 0;
 #if defined(_DEBUG)
@@ -51,7 +51,7 @@ ShaderBlob Pipeline::CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszS
 		, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE
 		, pszShaderName, pszShaderProfile
 		, nCompileFlags, 0
-		, ppd3dShaderBlob
+		, ppd3dD3DByteCode
 		, &pd3dErrorBlob);
 	if (FAILED(valid))
 	{
@@ -64,9 +64,9 @@ ShaderBlob Pipeline::CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszS
 		pErrorString = (char*)pd3dErrorBlob->GetBufferPointer();
 	}
 
-	ShaderBlob d3dShaderByteCode{};
-	d3dShaderByteCode.BytecodeLength = (*ppd3dShaderBlob)->GetBufferSize();
-	d3dShaderByteCode.pShaderBytecode = (*ppd3dShaderBlob)->GetBufferPointer();
+	D3DByteCode d3dShaderByteCode{};
+	d3dShaderByteCode.BytecodeLength = (*ppd3dD3DByteCode)->GetBufferSize();
+	d3dShaderByteCode.pShaderBytecode = (*ppd3dD3DByteCode)->GetBufferPointer();
 
 	return d3dShaderByteCode;
 }
@@ -81,7 +81,7 @@ ShaderBlob Pipeline::CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszS
 #include <sstream>
 #endif
 
-ShaderBlob Pipeline::ReadCompiledShaderFromFile(const WCHAR* pszFileName, ID3DBlob** ppd3dShaderBlob)
+D3DByteCode CShader::ReadCompiledShaderFromFile(const WCHAR* pszFileName, ID3DBlob** ppd3dD3DByteCode)
 {
 	UINT nReadBytes = 0;
 #ifdef _WITH_WFOPEN
@@ -104,14 +104,14 @@ ShaderBlob Pipeline::ReadCompiledShaderFromFile(const WCHAR* pszFileName, ID3DBl
 	ifsFile.close();
 #endif
 
-	ShaderBlob d3dShaderByteCode;
-	if (ppd3dShaderBlob)
+	D3DByteCode d3dShaderByteCode;
+	if (ppd3dD3DByteCode)
 	{
-		*ppd3dShaderBlob = NULL;
-		HRESULT hResult = D3DCreateBlob(nReadBytes, ppd3dShaderBlob);
-		memcpy((*ppd3dShaderBlob)->GetBufferPointer(), pByteCode, nReadBytes);
-		d3dShaderByteCode.BytecodeLength = (*ppd3dShaderBlob)->GetBufferSize();
-		d3dShaderByteCode.pShaderBytecode = (*ppd3dShaderBlob)->GetBufferPointer();
+		*ppd3dD3DByteCode = NULL;
+		HRESULT hResult = D3DCreateBlob(nReadBytes, ppd3dD3DByteCode);
+		memcpy((*ppd3dD3DByteCode)->GetBufferPointer(), pByteCode, nReadBytes);
+		d3dShaderByteCode.BytecodeLength = (*ppd3dD3DByteCode)->GetBufferSize();
+		d3dShaderByteCode.pShaderBytecode = (*ppd3dD3DByteCode)->GetBufferPointer();
 	}
 	else
 	{
@@ -122,7 +122,7 @@ ShaderBlob Pipeline::ReadCompiledShaderFromFile(const WCHAR* pszFileName, ID3DBl
 	return(d3dShaderByteCode);
 }
 
-D3D12_INPUT_LAYOUT_DESC Pipeline::CreateInputLayout()
+D3D12_INPUT_LAYOUT_DESC CShader::CreateInputLayout()
 {
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
 	d3dInputLayoutDesc.pInputElementDescs = NULL;
@@ -131,7 +131,7 @@ D3D12_INPUT_LAYOUT_DESC Pipeline::CreateInputLayout()
 	return(d3dInputLayoutDesc);
 }
 
-D3D12_RASTERIZER_DESC Pipeline::CreateRasterizerState()
+D3D12_RASTERIZER_DESC CShader::CreateRasterizerState()
 {
 	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
 	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
@@ -151,7 +151,7 @@ D3D12_RASTERIZER_DESC Pipeline::CreateRasterizerState()
 	return(d3dRasterizerDesc);
 }
 
-D3D12_DEPTH_STENCIL_DESC Pipeline::CreateDepthStencilState()
+D3D12_DEPTH_STENCIL_DESC CShader::CreateDepthStencilState()
 {
 	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc;
 	::ZeroMemory(&d3dDepthStencilDesc, sizeof(D3D12_DEPTH_STENCIL_DESC));
@@ -173,7 +173,7 @@ D3D12_DEPTH_STENCIL_DESC Pipeline::CreateDepthStencilState()
 	return(d3dDepthStencilDesc);
 }
 
-D3D12_BLEND_DESC Pipeline::CreateBlendState()
+D3D12_BLEND_DESC CShader::CreateBlendState()
 {
 	D3D12_BLEND_DESC d3dBlendDesc;
 	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
@@ -193,7 +193,7 @@ D3D12_BLEND_DESC Pipeline::CreateBlendState()
 	return(d3dBlendDesc);
 }
 
-void Pipeline::CreateShader(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature)
+void CShader::CreateShader(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature)
 {
 	ZeroMemory(&pipeline_state_desc, sizeof(pipeline_state_desc));
 
@@ -222,22 +222,22 @@ void Pipeline::CreateShader(P3DDevice device, P3DGrpCommandList cmd_list, P3DSig
 	}
 }
 
-void Pipeline::InitializeUniforms(P3DDevice device, P3DGrpCommandList cmd_list)
+void CShader::InitializeUniforms(P3DDevice device, P3DGrpCommandList cmd_list)
 {}
 
-void Pipeline::UpdateUniforms(P3DGrpCommandList cmd_list)
+void CShader::UpdateUniforms(P3DGrpCommandList cmd_list)
 {}
 
-void Pipeline::UpdateUniforms(P3DGrpCommandList cmd_list, XMFLOAT4X4* pxmf4x4World)
+void CShader::UpdateUniforms(P3DGrpCommandList cmd_list, XMFLOAT4X4* pxmf4x4World)
 {}
 
-void Pipeline::UpdateUniforms(P3DGrpCommandList cmd_list, CMaterialColors* pMaterialColors)
+void CShader::UpdateUniforms(P3DGrpCommandList cmd_list, CMaterialColors* pMaterialColors)
 {}
 
-void Pipeline::ReleaseUniforms()
+void CShader::ReleaseUniforms()
 {}
 
-void Pipeline::OnPrepareRender(P3DGrpCommandList cmd_list, int nPipelineState)
+void CShader::OnPrepareRender(P3DGrpCommandList cmd_list, int nPipelineState)
 {
 	if (m_ppd3dPipelineStates)
 	{
@@ -245,7 +245,7 @@ void Pipeline::OnPrepareRender(P3DGrpCommandList cmd_list, int nPipelineState)
 	}
 }
 
-void Pipeline::Render(P3DGrpCommandList cmd_list, GameCamera* pCamera, int nPipelineState)
+void CShader::Render(P3DGrpCommandList cmd_list, GameCamera* pCamera, int nPipelineState)
 {
 	OnPrepareRender(cmd_list, nPipelineState);
 }
@@ -273,14 +273,14 @@ D3D12_INPUT_LAYOUT_DESC CIlluminatedShader::CreateInputLayout()
 	return(d3dInputLayoutDesc);
 }
 
-ShaderBlob CIlluminatedShader::CreateVertexShader()
+D3DByteCode CIlluminatedShader::CreateVertexShader()
 {
-	return(Pipeline::CompileShaderFromFile(L"VertexShader.hlsl", "main", "vs_5_1", &m_pd3dVertexShaderBlob));
+	return(CShader::CompileShaderFromFile(L"VertexShader.hlsl", "main", "vs_5_1", &m_pd3dVertexD3DByteCode));
 }
 
-ShaderBlob CIlluminatedShader::CreatePixelShader()
+D3DByteCode CIlluminatedShader::CreatePixelShader()
 {
-	return(Pipeline::CompileShaderFromFile(L"PixelShader.hlsl", "main", "ps_5_1", &m_pd3dPixelShaderBlob));
+	return(CShader::CompileShaderFromFile(L"PixelShader.hlsl", "main", "ps_5_1", &m_pd3dPixelD3DByteCode));
 }
 
 void CIlluminatedShader::CreateShader(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature)
@@ -288,14 +288,14 @@ void CIlluminatedShader::CreateShader(P3DDevice device, P3DGrpCommandList cmd_li
 	m_nPipelineStates = 2;
 	m_ppd3dPipelineStates = new ID3D12PipelineState*[m_nPipelineStates];
 
-	Pipeline::CreateShader(device, cmd_list, signature);
+	CShader::CreateShader(device, cmd_list, signature);
 
 	pipeline_state_desc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
 
 	HRESULT hResult = device->CreateGraphicsPipelineState(&pipeline_state_desc, __uuidof(ID3D12PipelineState), (void**)&m_ppd3dPipelineStates[1]);
 
-	if (m_pd3dVertexShaderBlob) m_pd3dVertexShaderBlob->Release();
-	if (m_pd3dPixelShaderBlob) m_pd3dPixelShaderBlob->Release();
+	if (m_pd3dVertexD3DByteCode) m_pd3dVertexD3DByteCode->Release();
+	if (m_pd3dPixelD3DByteCode) m_pd3dPixelD3DByteCode->Release();
 
 	if (pipeline_state_desc.InputLayout.pInputElementDescs) delete[] pipeline_state_desc.InputLayout.pInputElementDescs;
 }

@@ -41,6 +41,52 @@ GraphicsCore::GraphicsCore(long width, long height)
 }
 
 GraphicsCore::~GraphicsCore()
+{}
+
+GraphicsCore& GraphicsCore::SetHWND(HWND window)
+{
+	myWindow = window;
+	return *this;
+}
+
+void GraphicsCore::Awake()
+{
+	CreateDirect3DDevice();
+	CreateCommanders();
+	CreateSwapChain();
+	CreateRenderTargetViews();
+	CreateDepthStencilView();
+}
+
+void GraphicsCore::Start()
+{
+	ResetCmdAllocator();
+	ResetCmdList();
+	for (auto& pipeline : myPipelines)
+	{
+		pipeline->Awake();
+	}
+	CloseCmdList();
+	P3DCommandList cmd_lists[] = { myCommandList };
+	ExecuteCmdList(cmd_lists, std::size(cmd_lists));
+
+	WaitForGpuComplete();
+
+	SetPipeline(0);
+}
+
+void GraphicsCore::Reset()
+{
+	for (auto& pipeline : myPipelines)
+	{
+		pipeline->Reset();
+	}
+}
+
+void GraphicsCore::Update(float delta_time)
+{}
+
+void GraphicsCore::Release()
 {
 	WaitForGpuComplete();
 
@@ -89,56 +135,55 @@ GraphicsCore::~GraphicsCore()
 #endif
 }
 
-GraphicsCore& GraphicsCore::SetHWND(HWND window)
+void GraphicsCore::WaitForGpuComplete()
 {
-	myWindow = window;
-	return *this;
-}
+	const auto signal = ++myFences[indexFrameBuffer];
+	SignalToFence(signal);
 
-void GraphicsCore::Awake()
-{
-	CreateDirect3DDevice();
-	CreateCommanders();
-	CreateSwapChain();
-	CreateRenderTargetViews();
-	CreateDepthStencilView();
-}
-
-void GraphicsCore::Start()
-{
-	ResetCmdList();
-	for (auto& pipeline : myPipelines)
+	if (myRenderFence->GetCompletedValue() < signal)
 	{
-		pipeline->Awake();
+		SetFenceEvent(eventFence, signal);
+
+		WaitForSingleObject(eventFence, INFINITE);
 	}
+}
+
+void GraphicsCore::PrepareRendering()
+{
+	ResetCmdAllocator();
+	ResetCmdList();
+	SetBarrier(barrierSwap);
+
+	auto cpu_rtv_handle = GetRTVHandle();
+	auto frame_ptr = static_cast<size_t>(indexFrameBuffer * szRtvDescIncrements);
+	AddtoDescriptor(cpu_rtv_handle, frame_ptr);
+	ClearRenderTargetView(cpu_rtv_handle);
+
+	auto cpu_dsv_handle = GetDSVHandle();
+	ClearDepthStencilView(cpu_dsv_handle);
+
+	ReadyOutputMerger(cpu_rtv_handle, cpu_dsv_handle);
+
+	currentPipeline->PrepareRendering();
+	currentPipeline->Render();
+}
+
+void GraphicsCore::Render()
+{
+	SetBarrier(barrierRender);
+
 	CloseCmdList();
 	P3DCommandList cmd_lists[] = { myCommandList };
 	ExecuteCmdList(cmd_lists, std::size(cmd_lists));
 
 	WaitForGpuComplete();
 
-	SetPipeline(0);
+	mySwapChain->Present(0, 0);
+
+	indexFrameBuffer = mySwapChain->GetCurrentBackBufferIndex();
+
+	WaitForGpuComplete();
 }
-
-void GraphicsCore::Reset()
-{
-	for (auto& pipeline : myPipelines)
-	{
-		pipeline->Reset();
-	}
-}
-
-void GraphicsCore::Update(float delta_time)
-{}
-
-void GraphicsCore::WaitForGpuComplete()
-{}
-
-void GraphicsCore::PrepareRendering()
-{}
-
-void GraphicsCore::Render()
-{}
 
 void GraphicsCore::ToggleFullscreen()
 {
@@ -678,7 +723,6 @@ D3D12_DEPTH_STENCIL_DESC GraphicsCore::CreateEmptyDepthStencilState() const
 void GraphicsCore::SetPipeline(const int index)
 {
 	currentPipeline = myPipelines[index];
-	currentPipeline->Start();
 }
 
 const GraphicsPipeline& GraphicsCore::GetPipeline(const int index) const
@@ -689,4 +733,9 @@ const GraphicsPipeline& GraphicsCore::GetPipeline(const int index) const
 GraphicsPipeline& GraphicsCore::GetPipeline(const int index)
 {
 	return *myPipelines.at(index);
+}
+
+P3DGrpCommandList GraphicsCore::GetCommandList()
+{
+	return myCommandList;
 }

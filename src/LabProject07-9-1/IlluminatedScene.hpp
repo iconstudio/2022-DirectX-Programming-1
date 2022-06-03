@@ -1,13 +1,13 @@
 #pragma once
 #include "Scene.h"
-#include "Shader.h"
+#include "Shader.hpp"
 #include "Player.h"
 #include "Light.hpp"
 
 class IlluminatedScene : public Scene
 {
 public:
-	IlluminatedScene(GameFramework& framework, HWND hwnd, const char* name);
+	IlluminatedScene(Framework& framework, HWND hwnd, const char* name);
 	virtual ~IlluminatedScene();
 
 	virtual void Awake(P3DDevice device, P3DGrpCommandList cmd_list) override;

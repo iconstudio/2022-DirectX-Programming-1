@@ -19,7 +19,10 @@ class GraphicsPipeline;
 class Shader;
 
 class Material;
+class RawMaterial;
+class Vertex;
 class Mesh;
+class PreMesh;
 class MeshPoint;
 
 class GameTerrain;

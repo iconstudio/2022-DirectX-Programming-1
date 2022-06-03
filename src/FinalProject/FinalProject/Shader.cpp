@@ -16,12 +16,7 @@ Shader::Shader(const char* version)
 {}
 
 Shader::~Shader()
-{
-	if (myBlob)
-	{
-		//(*myBlob)->Release();
-	}
-}
+{}
 
 void Shader::Load(const Filepath& filepath)
 {
@@ -39,19 +34,19 @@ void Shader::Load(const Filepath& filepath)
 	D3DByteCode result{};
 	if (myBlob)
 	{
-		(*myBlob)->Release();
+		myBlob->Release();
 		//myBlob.reset();
 
-		auto valid = D3DCreateBlob(code_size, myBlob.get());
+		auto valid = D3DCreateBlob(code_size, &myBlob);
 		if (FAILED(valid))
 		{
 			throw "기존 쉐이더의 바이트코드를 불러올 수 없음!";
 		}
 
-		memcpy((*myBlob)->GetBufferPointer(), bytecode, code_size);
+		memcpy(myBlob->GetBufferPointer(), bytecode, code_size);
 
-		result.BytecodeLength = (*myBlob)->GetBufferSize();
-		result.pShaderBytecode = (*myBlob)->GetBufferPointer();
+		result.BytecodeLength = myBlob->GetBufferSize();
+		result.pShaderBytecode = myBlob->GetBufferPointer();
 	}
 	else
 	{
@@ -60,6 +55,12 @@ void Shader::Load(const Filepath& filepath)
 	}
 
 	myCode = result;
+
+	if (myBlob)
+	{
+		myBlob->Release();
+		myBlob = nullptr;
+	}
 }
 
 void Shader::Complile(const Filepath& filepath, const char* entry)
@@ -88,13 +89,22 @@ void Shader::Complile(const Filepath& filepath, const char* entry)
 	if (error_blob)
 	{
 		error_contents = reinterpret_cast<char*>(error_blob->GetBufferPointer());
-		throw error_contents;
+		//throw error_contents; // 경고도 포함
+
+		WCHAR pstrDebug[256]{};
+		wsprintf(pstrDebug, L"%c", error_contents);
+
+		OutputDebugString(pstrDebug);
 	}
 
 	D3DByteCode bytecode{};
-	bytecode.BytecodeLength = (shader_blob)->GetBufferSize();
-	bytecode.pShaderBytecode = (shader_blob)->GetBufferPointer();
+	bytecode.BytecodeLength = shader_blob->GetBufferSize();
+	bytecode.pShaderBytecode = shader_blob->GetBufferPointer();
 
 	myCode = bytecode;
-	myBlob = unique_ptr<ID3DBlob*>(&shader_blob);
+
+	if (shader_blob)
+	{
+		shader_blob->Release();
+	}
 }

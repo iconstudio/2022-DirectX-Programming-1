@@ -3,20 +3,45 @@
 #define __PCH__
 #include "stdafx.h"
 
-class GameFramework;
-class Scene;
-class IlluminatedScene;
-
-class CMaterial;
-class Pipeline;
-class CLight;
-
+class Timer;
 class Transformer;
-class GameCamera;
+
+template<typename>
+class WeakSingleton;
+class DelegateObjet;
+class PlayableObjet;
+class PausableObjet;
+
+class Framework;
+class Scene;
+
+class GraphicsCore;
+class GraphicsPipeline;
+class Shader;
+class CShader;
+
+class Material;
+class Vertex;
+class Mesh;
+class PreMesh;
+class MeshPoint;
+
+class GameTerrain;
 class GameObject;
-class GameKinematicObject; // 정적임
-class GameEntity; // 동적임
+class GameCamera;
+
 enum class COLLISION_TAGS;
+class GameEntity;
+class GameKinematicObject;
+class GameModel;
+
+class Helicopter;
+class Player;
+class Enemy;
+class PlayerMissle;
+class EnemyMissile;
+class ParticleObjet;
+class Explosion;
 
 class Rock;
 class Tree;

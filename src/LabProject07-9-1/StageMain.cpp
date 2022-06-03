@@ -1,8 +1,8 @@
 #include "pch.hpp"
 #include "StageMain.hpp"
-#include "GameFramework.h"
+#include "Framework.hpp"
 
-StageMain::StageMain(GameFramework& framework, HWND hwnd)
+StageMain::StageMain(Framework& framework, HWND hwnd)
 	: Scene(framework, hwnd, "Main")
 {
 	constexpr float colors[] = { 1.0f, 1.0f, 1.0f, 1.0f };

@@ -2,12 +2,14 @@
 
 class Material
 {
+public:
+	Material(RawMaterial* info);
 	Material(const int id);
 	virtual ~Material();
 
 	void SetShader(const int id);
 
-	void UpdateUniforms(P3DGrpCommandList cmd_list);
+	virtual void PrepareRendering(P3DGrpCommandList cmdlist);
 
 	int myShaderID;
 

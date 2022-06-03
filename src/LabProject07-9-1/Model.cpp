@@ -3,7 +3,7 @@
 
 Model* Model::Load(ID3D12Device* device
 	, ID3D12GraphicsCommandList* cmd_list
-	, Pipeline* pipeline
+	, CShader* pipeline
 	, const char* pstrFileName)
 {
 	FILE* pInFile = NULL;
@@ -33,9 +33,7 @@ Model* Model::Load(ID3D12Device* device
 	}
 
 #ifdef _WITH_DEBUG_FRAME_HIERARCHY
-	TCHAR pstrDebug[256] = { 0 };
-	_stprintf_s(pstrDebug, 256, _T("Frame Hierarchy\n"));
-	OutputDebugString(pstrDebug);
+	OutputDebugString(L"Frame Hierarchy\n");
 
 	GameObject::PrintFrameInfo(root, NULL);
 #endif
@@ -197,7 +195,7 @@ RawMaterialsBox* Model::LoadRawMaterials(ID3D12Device* device, ID3D12GraphicsCom
 
 Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 	, ID3D12GraphicsCommandList* cmd_list
-	, Pipeline* pipeline
+	, CShader* pipeline
 	, FILE* pInFile)
 {
 	char token[64] = { '\0' };

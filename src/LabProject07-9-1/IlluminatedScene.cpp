@@ -1,7 +1,7 @@
 #include "pch.hpp"
 #include "IlluminatedScene.hpp"
 
-IlluminatedScene::IlluminatedScene(GameFramework& framework, HWND hwnd, const char* name)
+IlluminatedScene::IlluminatedScene(Framework& framework, HWND hwnd, const char* name)
 	: Scene(framework, hwnd, name)
 	, m_xmf4GlobalAmbient(XMFLOAT4(1, 1, 1, 1))
 {}

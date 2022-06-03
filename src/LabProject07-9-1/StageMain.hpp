@@ -4,7 +4,7 @@
 class StageMain : public Scene
 {
 public:
-	StageMain(GameFramework& framework, HWND hwnd);
+	StageMain(Framework& framework, HWND hwnd);
 
 	void Awake(P3DDevice device, P3DGrpCommandList cmd_list) override;
 	void Start() override;

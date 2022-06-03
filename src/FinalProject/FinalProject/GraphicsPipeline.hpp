@@ -24,6 +24,8 @@ public:
 	virtual void Start() override;
 	virtual void Reset() override;
 	virtual void Update(float delta_time) override;
+	virtual void PrepareRendering();
+	virtual void Render();
 
 	bool IsModified() const;
 
@@ -35,7 +37,7 @@ private:
 	P3DDevice dxDevice;
 	P3DGrpCommandList dxTaskList;
 
-	shared_ptr<P3DSignature> mySignature;
+	P3DSignature mySignature;
 	std::vector<D3D12_ROOT_PARAMETER> myShaderUniforms;
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC myDescription;

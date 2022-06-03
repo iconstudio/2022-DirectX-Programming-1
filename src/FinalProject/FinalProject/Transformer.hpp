@@ -4,6 +4,10 @@ class Transformer
 {
 public:
 	Transformer();
+	Transformer(const Transformer&) = default;
+	Transformer(Transformer&&) = default;
+	Transformer& operator=(const Transformer&) = default;
+	Transformer& operator=(Transformer&&) = default;
 	~Transformer();
 
 	XMFLOAT4X4& GetWorldMatrix();

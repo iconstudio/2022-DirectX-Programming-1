@@ -1,6 +1,6 @@
 #include "pch.hpp"
 #include "Player.h"
-#include "Shader.h"
+#include "Shader.hpp"
 #include "Model.hpp"
 
 constexpr COLLISION_TAGS CPlayer::GetTag() const noexcept

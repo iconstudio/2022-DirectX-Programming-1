@@ -1,4 +1,3 @@
-#pragma once
 #include "Basis.hlsli"
 
 cbuffer cbLights : register(b4)

@@ -37,6 +37,27 @@
     <Filter Include="소스 파일\Contents\Stages">
       <UniqueIdentifier>{7fbc34aa-37db-4316-a4b6-a59478f0a56c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\Components">
+      <UniqueIdentifier>{c0910535-a850-4470-99b5-f2df9c80686b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Graphics">
+      <UniqueIdentifier>{20653302-7275-4e3f-9fcd-d274312ce5df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Graphics">
+      <UniqueIdentifier>{735d5c2d-d61c-4fa8-8a7c-f9e936f6d867}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Components">
+      <UniqueIdentifier>{ce2419af-97e3-49b9-8234-4004c31118c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Systems">
+      <UniqueIdentifier>{9b32723d-dc6c-4f02-a632-fd455165b4a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Resources">
+      <UniqueIdentifier>{6545c295-e9f9-4907-8c27-154b22c9f0b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Generals">
+      <UniqueIdentifier>{7181ab4a-6b06-461f-86b6-7635b8f58fe3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -51,13 +72,10 @@
     <ClInclude Include="Terrains.hpp">
       <Filter>헤더 파일\Contents</Filter>
     </ClInclude>
-    <ClInclude Include="GameFramework.h">
+    <ClInclude Include="Framework.hpp">
       <Filter>헤더 파일\System</Filter>
     </ClInclude>
     <ClInclude Include="IlluminatedScene.hpp">
-      <Filter>헤더 파일\System</Filter>
-    </ClInclude>
-    <ClInclude Include="Shader.h">
       <Filter>헤더 파일\System</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
@@ -79,9 +97,6 @@
       <Filter>헤더 파일\System</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
-      <Filter>헤더 파일\System</Filter>
-    </ClInclude>
-    <ClInclude Include="Object.h">
       <Filter>헤더 파일\System</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
@@ -117,55 +132,31 @@
     <ClInclude Include="Vehicles.hpp">
       <Filter>헤더 파일\Contents</Filter>
     </ClInclude>
+    <ClInclude Include="Shader.hpp">
+      <Filter>헤더 파일\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsCore.hpp">
+      <Filter>헤더 파일\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsPipeline.hpp">
+      <Filter>헤더 파일\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="DelegateObjet.hpp">
+      <Filter>헤더 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="PausableObjet.hpp">
+      <Filter>헤더 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayableObjet.hpp">
+      <Filter>헤더 파일\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="WeakSingleton.hpp">
+      <Filter>헤더 파일\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectX.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="GameFramework.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Shader.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Timer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Material.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Light.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Arithmetics.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="pch.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Terrains.cpp">
       <Filter>소스 파일\Contents</Filter>
-    </ClCompile>
-    <ClCompile Include="IlluminatedScene.cpp">
-      <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>소스 파일\Contents</Filter>
@@ -179,14 +170,77 @@
     <ClCompile Include="StageMain.cpp">
       <Filter>소스 파일\Contents\Stages</Filter>
     </ClCompile>
-    <ClCompile Include="Transformer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Obstacles.cpp">
       <Filter>소스 파일\Contents</Filter>
     </ClCompile>
     <ClCompile Include="Vehicles.cpp">
       <Filter>소스 파일\Contents</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayableObjet.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="PausableObjet.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="DelegateObjet.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="WeakSingleton.cpp">
+      <Filter>소스 파일\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsPipeline.cpp">
+      <Filter>소스 파일\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsCore.cpp">
+      <Filter>소스 파일\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>소스 파일\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>소스 파일\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="GameFramework.cpp">
+      <Filter>소스 파일\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>소스 파일\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="IlluminatedScene.cpp">
+      <Filter>소스 파일\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>소스 파일\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>소스 파일\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>소스 파일\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>소스 파일\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>소스 파일\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>소스 파일\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Arithmetics.cpp">
+      <Filter>소스 파일\Generals</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>소스 파일\Generals</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>소스 파일\Generals</Filter>
+    </ClCompile>
+    <ClCompile Include="Transformer.cpp">
+      <Filter>소스 파일\Generals</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectX.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

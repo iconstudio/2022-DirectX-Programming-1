@@ -13,6 +13,7 @@ public:
 	void Start() override;
 	void Reset() override;
 	void Update(float delta_time) override;
+	void Release();
 
 	void WaitForGpuComplete();
 	void PrepareRendering();
@@ -26,6 +27,7 @@ public:
 	void SetPipeline(const int index);
 	const GraphicsPipeline& GetPipeline(const int index) const;
 	GraphicsPipeline& GetPipeline(const int index);
+	P3DGrpCommandList GetCommandList();
 
 	GraphicsPipeline CreateEmptyPipeline() const;
 	Shader CreateEmptyShader(const char* version) const;

@@ -59,12 +59,12 @@ public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
-	Pipeline* m_pShader = NULL;
+	CShader* m_pShader = NULL;
 
 	CMaterialColors* m_pMaterialColors = NULL;
 
 	void SetMaterialColors(CMaterialColors* pMaterialColors);
-	void SetShader(Pipeline* pShader);
+	void SetShader(CShader* pShader);
 
 	void UpdateUniforms(P3DGrpCommandList cmd_list);
 };

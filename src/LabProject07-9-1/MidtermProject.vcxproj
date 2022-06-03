@@ -156,21 +156,25 @@
   <ItemGroup>
     <ClInclude Include="Arithmetics.hpp" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="DelegateObjet.hpp" />
     <ClInclude Include="GameObject.hpp" />
+    <ClInclude Include="GraphicsCore.hpp" />
+    <ClInclude Include="GraphicsPipeline.hpp" />
     <ClInclude Include="IlluminatedScene.hpp" />
     <ClInclude Include="Light.hpp" />
-    <ClInclude Include="GameFramework.h" />
+    <ClInclude Include="Framework.hpp" />
     <ClInclude Include="DirectX.hpp" />
     <ClInclude Include="Material.hpp" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.hpp" />
-    <ClInclude Include="Object.h" />
     <ClInclude Include="Obstacles.hpp" />
+    <ClInclude Include="PausableObjet.hpp" />
     <ClInclude Include="pch.hpp" />
+    <ClInclude Include="PlayableObjet.hpp" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="Shader.h" />
+    <ClInclude Include="Shader.hpp" />
     <ClInclude Include="StageGame.hpp" />
     <ClInclude Include="StageGameEnd.hpp" />
     <ClInclude Include="StageMain.hpp" />
@@ -180,10 +184,14 @@
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Transformer.hpp" />
     <ClInclude Include="Vehicles.hpp" />
+    <ClInclude Include="WeakSingleton.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Arithmetics.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="DelegateObjet.cpp" />
+    <ClCompile Include="GraphicsCore.cpp" />
+    <ClCompile Include="GraphicsPipeline.cpp" />
     <ClCompile Include="IlluminatedScene.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="GameFramework.cpp" />
@@ -193,7 +201,9 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Obstacles.cpp" />
+    <ClCompile Include="PausableObjet.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="PlayableObjet.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -210,6 +220,7 @@
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Transformer.cpp" />
     <ClCompile Include="Vehicles.cpp" />
+    <ClCompile Include="WeakSingleton.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="myresource.rc" />

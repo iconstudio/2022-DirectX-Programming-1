@@ -28,10 +28,10 @@ void InitialzeGame(HWND hwnd)
 	gameFramework.SetHWND(hwnd).SetHInstance(gameClient).Awake();
 
 	auto vs_shader = gameRenderer.CreateEmptyShader("vs_5_1");
-	vs_shader.Complile("VertexShader.hlsl", "main");
+	vs_shader.Complile("shaders/VertexShader.hlsl", "main");
 
 	auto ps_shader = gameRenderer.CreateEmptyShader("ps_5_1");
-	ps_shader.Complile("VertexShader.hlsl", "main");
+	ps_shader.Complile("shaders/PixelShader.hlsl", "main");
 
 	UINT nInputElementDescs = 2;
 	auto attributes = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
@@ -95,9 +95,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			DispatchMessage(&msg);
 		}
 
-		gameFramework.Update(gameTimer.GetDeltaTime());
-		//gameFramework.Render();
+		const auto delta_time = gameTimer.GetDeltaTime();
+		gameFramework.Update(delta_time);
+		gameRenderer.Update(delta_time);
 	}
+
+	gameRenderer.Release();
 
 	return static_cast<int>(msg.wParam);
 }
@@ -159,11 +162,23 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 
 		case WM_TIMER:
 		{
-			KillTimer(hwnd, 0);
+			if (0 == wp)
+			{
+				KillTimer(hwnd, 0);
 
-			DialogBox(gameClient, MAKEINTRESOURCE(IDD_ABOUTBOX), hwnd, About);
+				DialogBox(gameClient, MAKEINTRESOURCE(IDD_ABOUTBOX), hwnd, About);
 
-			InitialzeGame(hwnd);
+				InitialzeGame(hwnd);
+
+				SetTimer(hwnd, 1, 10, NULL);
+			}
+			else
+			{
+				gameRenderer.PrepareRendering();
+				gameFramework.PrepareRendering();
+				gameFramework.Render();
+				gameRenderer.Render();
+			}
 		}
 		break;
 

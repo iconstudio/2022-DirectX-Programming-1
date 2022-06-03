@@ -76,13 +76,32 @@ namespace Vector3
 		return result;
 	}
 
-	inline XMFLOAT3 Subtract(const XMFLOAT3& vector1, const XMFLOAT3& vector2)
+	inline XMFLOAT3 Subtract(XMFLOAT3&& vector1, XMFLOAT3&& vector2)
 	{
 		XMFLOAT3 result{};
+		const auto&& fvector1 = std::forward<XMFLOAT3>(vector1);
+		const auto&& fvector2 = std::forward<XMFLOAT3>(vector2);
 
-		XMStoreFloat3(&result, XMLoadFloat3(&vector1) - XMLoadFloat3(&vector2));
+		const auto xmvector1 = XMLoadFloat3(&fvector1);
+		const auto xmvector2 = XMLoadFloat3(&fvector2);
+		XMStoreFloat3(&result, xmvector1 - xmvector2);
 
 		return result;
+	}
+
+	inline XMFLOAT3 Subtract(const XMFLOAT3& vector1, const XMFLOAT3& vector2)
+	{
+		return Subtract(XMFLOAT3(vector1), XMFLOAT3(vector2));
+	}
+
+	inline XMFLOAT3 Subtract(const XMFLOAT3& vector1, XMFLOAT3&& vector2)
+	{
+		return Subtract(XMFLOAT3(vector1), std::forward<XMFLOAT3>(vector2));
+	}
+
+	inline XMFLOAT3 Subtract(XMFLOAT3&& vector1, const XMFLOAT3& vector2)
+	{
+		return Subtract(std::forward<XMFLOAT3>(vector1), XMFLOAT3(vector2));
 	}
 
 	inline float DotProduct(const XMFLOAT3& vector1, const XMFLOAT3& vector2)
@@ -270,7 +289,7 @@ namespace Matrix4x4
 	inline XMFLOAT4X4 Multiply(XMFLOAT4X4&& lhs, XMFLOAT4X4&& rhs)
 	{
 		XMFLOAT4X4 result{};
-		
+
 		const auto&& mat1 = XMLoadFloat4x4(std::forward<XMFLOAT4X4*>(&lhs));
 		const auto&& mat2 = XMLoadFloat4x4(std::forward<XMFLOAT4X4*>(&rhs));
 

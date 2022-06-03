@@ -1,10 +1,10 @@
 #include "pch.hpp"
 #include "Scene.h"
-#include "Shader.h"
+#include "Shader.hpp"
 #include "Player.h"
 #include "Light.hpp"
 
-Scene::Scene(GameFramework& framework, HWND hwnd, const char* name)
+Scene::Scene(Framework& framework, HWND hwnd, const char* name)
 	: myName(name)
 	, myFramework(framework), handleWindow(hwnd)
 	, d3dDevice(nullptr), d3dTaskList(nullptr)

@@ -6,12 +6,7 @@ GraphicsPipeline::GraphicsPipeline(P3DDevice device, P3DGrpCommandList cmdlist)
 	: dxDevice(device), dxTaskList(cmdlist), mySignature(nullptr)
 	, myDescription(), myState(nullptr), isModified(false)
 {
-#ifdef _DEBUG
-	myDescription.Flags = D3D12_PIPELINE_STATE_FLAG_TOOL_DEBUG;
-#else
 	myDescription.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
-#endif
-
 	myDescription.NodeMask = 0;
 	myDescription.SampleMask = UINT_MAX;
 	myDescription.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
@@ -105,20 +100,21 @@ void GraphicsPipeline::CreateRootSignature()
 		error_blob->Release();
 	}
 
-	mySignature = shared_ptr<P3DSignature>(&signature);
+	mySignature = (signature);
 }
 
 void GraphicsPipeline::CreatePipelineState()
 {
 	if (isModified)
 	{
+		myDescription.pRootSignature = mySignature;
 		myDescription.VS = myShaders.at(0)->myCode;
 		myDescription.PS = myShaders.at(1)->myCode;
 
-		ID3D12PipelineState** state = nullptr;
+		ID3D12PipelineState* handle = nullptr;
 
 		auto uuid = __uuidof(ID3D12PipelineState);
-		auto place = reinterpret_cast<void**>(&state);
+		auto place = reinterpret_cast<void**>(&handle);
 		auto valid = dxDevice->CreateGraphicsPipelineState(&myDescription, uuid, place);
 		if (FAILED(valid))
 		{
@@ -126,21 +122,32 @@ void GraphicsPipeline::CreatePipelineState()
 		}
 		else
 		{
-			myState = unique_ptr<ID3D12PipelineState*>(state);
+			myState = unique_ptr<ID3D12PipelineState*>(&handle);
 		}
+
+		isModified = false;
+
 	}
 }
 
 void GraphicsPipeline::Start()
-{
-	dxTaskList->SetGraphicsRootSignature(*mySignature);
-}
+{}
 
 void GraphicsPipeline::Reset()
 {}
 
 void GraphicsPipeline::Update(float delta_time)
 {}
+
+void GraphicsPipeline::PrepareRendering()
+{
+	dxTaskList->SetGraphicsRootSignature(mySignature);
+}
+
+void GraphicsPipeline::Render()
+{
+
+}
 
 GraphicsPipeline& GraphicsPipeline::Attach(const D3D12_ROOT_PARAMETER& param)
 {
@@ -152,7 +159,7 @@ GraphicsPipeline& GraphicsPipeline::Attach(const D3D12_ROOT_PARAMETER& param)
 
 GraphicsPipeline& GraphicsPipeline::Attach(P3DSignature* signature)
 {
-	mySignature = unique_ptr<P3DSignature>(signature);
+	mySignature = *signature;
 
 	isModified = true;
 	return *this;
@@ -198,7 +205,7 @@ GraphicsPipeline& GraphicsPipeline::Attach(const D3D12_RASTERIZER_DESC& desc)
 
 GraphicsPipeline& GraphicsPipeline::Attach(D3D12_RASTERIZER_DESC&& desc)
 {
-	myDescription.RasterizerState = desc;
+	myDescription.RasterizerState = std::forward<D3D12_RASTERIZER_DESC>(desc);
 
 	isModified = true;
 	return *this;
@@ -214,7 +221,7 @@ GraphicsPipeline& GraphicsPipeline::Attach(const D3D12_BLEND_DESC& desc)
 
 GraphicsPipeline& GraphicsPipeline::Attach(D3D12_BLEND_DESC&& desc)
 {
-	myDescription.BlendState = desc;
+	myDescription.BlendState = std::forward<D3D12_BLEND_DESC>(desc);
 
 	isModified = true;
 	return *this;
@@ -230,7 +237,7 @@ GraphicsPipeline& GraphicsPipeline::Attach(const D3D12_DEPTH_STENCIL_DESC& desc)
 
 GraphicsPipeline& GraphicsPipeline::Attach(D3D12_DEPTH_STENCIL_DESC&& desc)
 {
-	myDescription.DepthStencilState = desc;
+	myDescription.DepthStencilState = std::forward<D3D12_DEPTH_STENCIL_DESC>(desc);
 
 	isModified = true;
 	return *this;

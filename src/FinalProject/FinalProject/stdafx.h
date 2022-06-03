@@ -113,7 +113,7 @@ public:
 
 template <>
 struct std::default_delete<IUnknown>
-{ // default deleter for unique_ptr
+{ 
 	constexpr default_delete() noexcept = default;
 
 	template <class _Ty2, enable_if_t<is_convertible_v<_Ty2*, IUnknown*>, int> = 0>
@@ -121,7 +121,21 @@ struct std::default_delete<IUnknown>
 
 	void operator()(IUnknown* _Ptr) const noexcept /* strengthened */
 	{ // delete a pointer
-		static_assert(0 < sizeof(IUnknown), "can't delete an incomplete type");
+		_Ptr->Release();
+		delete _Ptr;
+	}
+};
+
+template <>
+struct std::default_delete<ID3D12PipelineState>
+{
+	constexpr default_delete() noexcept = default;
+
+	template <class _Ty2, enable_if_t<is_convertible_v<_Ty2*, ID3D12PipelineState*>, int> = 0>
+	default_delete(const default_delete<_Ty2>&) noexcept {}
+
+	void operator()(ID3D12PipelineState* _Ptr) const noexcept /* strengthened */
+	{ // delete a pointer
 		_Ptr->Release();
 		delete _Ptr;
 	}

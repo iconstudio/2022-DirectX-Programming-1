@@ -1,7 +1,7 @@
 #include "pch.hpp"
 #include "StageGame.hpp"
-#include "GameFramework.h"
-#include "Object.h"
+#include "Framework.hpp"
+#include "GameObject.hpp"
 #include "Vehicles.hpp"
 #include "Terrains.hpp"
 #include "Obstacles.hpp"
@@ -11,7 +11,7 @@ float MakeRandom()
 	return (float(rand()) / float(RAND_MAX));
 }
 
-StageGame::StageGame(GameFramework& framework, HWND hwnd)
+StageGame::StageGame(Framework& framework, HWND hwnd)
 	: IlluminatedScene(framework, hwnd, "Game")
 	, myGoal(), playerSpawnPoint()
 	, myWalls()

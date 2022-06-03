@@ -4,7 +4,7 @@
 class StageGame : public IlluminatedScene
 {
 public:
-	StageGame(GameFramework& framework, HWND hwnd);
+	StageGame(Framework& framework, HWND hwnd);
 
 	void Awake(P3DDevice device, P3DGrpCommandList cmd_list) override;
 	void Start() override;

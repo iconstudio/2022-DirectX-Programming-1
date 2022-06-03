@@ -2,11 +2,11 @@
 #include "Scene.h"
 #include "Model.hpp"
 
-class GameFramework
+class Framework
 {
 public:
-	GameFramework(unsigned int width, unsigned int height);
-	~GameFramework();
+	Framework(unsigned int width, unsigned int height);
+	~Framework();
 
 	// 다이렉트X 초기화
 	void Awake(HINSTANCE hinstance, HWND window);
@@ -74,12 +74,12 @@ private:
 	void ExecuteCmdList(P3DCommandList list[], size_t count);
 
 	//
-	DESC_HANDLE& AddtoDescriptor(DESC_HANDLE& handle, const size_t increment);
-	DESC_HANDLE GetRTVHandle() const;
-	DESC_HANDLE GetDSVHandle() const;
-	void ClearRenderTargetView(DESC_HANDLE& handle, D3D12_RECT* erase_rects = nullptr, size_t erase_count = 0);
-	void ClearDepthStencilView(DESC_HANDLE& handle, float depth = 1.0f, UINT8 stencil = 0, D3D12_RECT* erase_rects = nullptr, size_t erase_count = 0);
-	void ReadyOutputMerger(DESC_HANDLE& rtv, DESC_HANDLE& dsv);
+	D3DHandle& AddtoDescriptor(D3DHandle& handle, const size_t increment);
+	D3DHandle GetRTVHandle() const;
+	D3DHandle GetDSVHandle() const;
+	void ClearRenderTargetView(D3DHandle& handle, D3D12_RECT* erase_rects = nullptr, size_t erase_count = 0);
+	void ClearDepthStencilView(D3DHandle& handle, float depth = 1.0f, UINT8 stencil = 0, D3D12_RECT* erase_rects = nullptr, size_t erase_count = 0);
+	void ReadyOutputMerger(D3DHandle& rtv, D3DHandle& dsv);
 
 	void SetFenceEvent(HANDLE signal, UINT64 limit);
 	void SignalToFence(UINT64 count);
@@ -134,5 +134,5 @@ private:
 	std::vector<shared_ptr<Scene>>::iterator myStageIterator;
 	shared_ptr<Scene> currentScene;
 	
-	Pipeline* myDefaultShader;
+	CShader* myDefaultShader;
 };

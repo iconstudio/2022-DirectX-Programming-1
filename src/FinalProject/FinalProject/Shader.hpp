@@ -14,5 +14,5 @@ public:
 	const std::string myVersion;
 
 	D3DByteCode myCode;
-	shared_ptr<ID3DBlob*> myBlob;
+	ID3DBlob* myBlob;
 };

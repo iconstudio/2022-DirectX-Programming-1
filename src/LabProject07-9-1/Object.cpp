@@ -1,7 +1,7 @@
 #include "pch.hpp"
-#include "Object.h"
+#include "GameObject.hpp"
 #include "Material.hpp"
-#include "Shader.h"
+#include "Shader.hpp"
 
 GameObject::GameObject()
 	: m_pstrFrameName()
@@ -62,7 +62,7 @@ void GameObject::SetMesh(CMesh* pMesh)
 	if (m_pMesh) m_pMesh->AddRef();
 }
 
-void GameObject::SetShader(Pipeline* pipeline)
+void GameObject::SetShader(CShader* pipeline)
 {
 	m_nMaterials = 1;
 	m_ppMaterials = new CMaterial * [m_nMaterials];
@@ -70,7 +70,7 @@ void GameObject::SetShader(Pipeline* pipeline)
 	m_ppMaterials[0]->SetShader(pipeline);
 }
 
-void GameObject::SetShader(int index, Pipeline* pipeline)
+void GameObject::SetShader(int index, CShader* pipeline)
 {
 	if (m_ppMaterials[index])
 	{

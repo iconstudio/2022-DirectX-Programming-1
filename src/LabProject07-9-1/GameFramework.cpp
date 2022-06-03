@@ -1,12 +1,12 @@
 #include "pch.hpp"
-#include "GameFramework.h"
+#include "Framework.hpp"
 #include "StageMain.hpp"
 #include "StageGame.hpp"
 #include "StageGameEnd.hpp"
-#include "Shader.h"
+#include "Shader.hpp"
 #include "Model.hpp"
 
-GameFramework::GameFramework(unsigned int width, unsigned int height)
+Framework::Framework(unsigned int width, unsigned int height)
 	: frameWidth(width), frameHeight(height)
 	, frameBasisColour{ 0.0f, 0.125f, 0.3f, 1.0f }
 	, isAntiAliasingEnabled(false), levelAntiAliasing(0)
@@ -49,7 +49,7 @@ GameFramework::GameFramework(unsigned int width, unsigned int height)
 	barrier_swap.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 }
 
-GameFramework::~GameFramework()
+Framework::~Framework()
 {
 	WaitForGpuComplete();
 
@@ -98,7 +98,7 @@ GameFramework::~GameFramework()
 #endif
 }
 
-void GameFramework::Awake(HINSTANCE hInstance, HWND hMainWnd)
+void Framework::Awake(HINSTANCE hInstance, HWND hMainWnd)
 {
 	myAppInstance = hInstance;
 	myWindow = hMainWnd;
@@ -110,7 +110,7 @@ void GameFramework::Awake(HINSTANCE hInstance, HWND hMainWnd)
 	CreateDepthStencilView();
 }
 
-void GameFramework::CreateDirect3DDevice()
+void Framework::CreateDirect3DDevice()
 {
 	HRESULT valid = 0;
 	IID uiid{};
@@ -226,7 +226,7 @@ void GameFramework::CreateDirect3DDevice()
 	}
 }
 
-void GameFramework::CreateCommanders()
+void Framework::CreateCommanders()
 {
 	HRESULT valid = 0;
 	IID uiid{};
@@ -271,7 +271,7 @@ void GameFramework::CreateCommanders()
 	}
 }
 
-void GameFramework::CreateSwapChain()
+void Framework::CreateSwapChain()
 {
 	DXGI_SWAP_CHAIN_DESC sw_desc{};
 	ZeroMemory(&sw_desc, sizeof(sw_desc));
@@ -314,7 +314,7 @@ void GameFramework::CreateSwapChain()
 	}
 }
 
-void GameFramework::CreateRenderTargetViews()
+void Framework::CreateRenderTargetViews()
 {
 	HRESULT valid = 0;
 	IID uiid{};
@@ -357,7 +357,7 @@ void GameFramework::CreateRenderTargetViews()
 	}
 }
 
-void GameFramework::CreateDepthStencilView()
+void Framework::CreateDepthStencilView()
 {
 	HRESULT valid = 0;
 	IID uiid{};
@@ -446,7 +446,7 @@ void GameFramework::CreateDepthStencilView()
 	myDevice->CreateDepthStencilView(myDepthStencilBuffer, &dsv_desc, cpu_ptr_handle);
 }
 
-void GameFramework::Start()
+void Framework::Start()
 {
 	ResetCmdList();
 	BuildPipeline();
@@ -468,7 +468,7 @@ void GameFramework::Start()
 	CleanupBuilds();
 }
 
-void GameFramework::BuildPipeline()
+void Framework::BuildPipeline()
 {
 	P3DSignature signature = nullptr;
 
@@ -543,7 +543,7 @@ void GameFramework::BuildPipeline()
 	myDefaultShader->InitializeUniforms(myDevice, myCommandList);
 }
 
-void GameFramework::BuildAssets()
+void Framework::BuildAssets()
 {
 	auto model_rallycar = RegisterModel("Model/RallyCar.bin", "RallyCar");
 	auto model_policecar = RegisterModel("Model/PoliceCar.bin", "PoliceCar");
@@ -553,7 +553,7 @@ void GameFramework::BuildAssets()
 	auto model_cactus = RegisterModel("Model/Cactus.bin", "Cactus");
 }
 
-void GameFramework::BuildStages()
+void Framework::BuildStages()
 {
 	auto room_main = RegisterScene(StageMain(*this, myWindow));
 	auto room_game = RegisterScene(StageGame(*this, myWindow));
@@ -580,24 +580,24 @@ void GameFramework::BuildStages()
 	}
 }
 
-void GameFramework::BuildWorld()
+void Framework::BuildWorld()
 {
 }
 
-void GameFramework::BuildParticles()
+void Framework::BuildParticles()
 {}
 
-void GameFramework::BuildPlayer()
+void Framework::BuildPlayer()
 {
 }
 
-void GameFramework::BuildTerrains()
+void Framework::BuildTerrains()
 {}
 
-void GameFramework::BuildObjects()
+void Framework::BuildObjects()
 {}
 
-void GameFramework::CleanupBuilds()
+void Framework::CleanupBuilds()
 {
 	if (currentScene)
 	{
@@ -605,7 +605,7 @@ void GameFramework::CleanupBuilds()
 	}
 }
 
-void GameFramework::Update(float elapsed_time)
+void Framework::Update(float elapsed_time)
 {
 	static UCHAR pKeysBuffer[256];
 	const auto input = GetKeyboardState(pKeysBuffer);
@@ -625,7 +625,7 @@ void GameFramework::Update(float elapsed_time)
 	}
 }
 
-void GameFramework::PrepareRendering()
+void Framework::PrepareRendering()
 {
 	ResetCmdAllocator();
 	ResetCmdList();
@@ -642,7 +642,7 @@ void GameFramework::PrepareRendering()
 	ReadyOutputMerger(cpu_rtv_handle, cpu_dsv_handle);
 }
 
-void GameFramework::Render()
+void Framework::Render()
 {
 	PrepareRendering();
 
@@ -664,7 +664,7 @@ void GameFramework::Render()
 	AfterRendering();
 }
 
-void GameFramework::AfterRendering()
+void Framework::AfterRendering()
 {
 	// 프레임 갱신
 	indexFrameBuffer = mySwapChain->GetCurrentBackBufferIndex();
@@ -672,7 +672,7 @@ void GameFramework::AfterRendering()
 	WaitForGpuComplete();
 }
 
-void GameFramework::WaitForGpuComplete()
+void Framework::WaitForGpuComplete()
 {
 	const auto signal = ++myFences[indexFrameBuffer];
 	SignalToFence(signal);
@@ -687,7 +687,7 @@ void GameFramework::WaitForGpuComplete()
 
 template<typename SceneType>
 	requires(std::is_base_of_v<Scene, SceneType>)
-constexpr shared_ptr<Scene> GameFramework::RegisterScene(SceneType&& stage)
+constexpr shared_ptr<Scene> Framework::RegisterScene(SceneType&& stage)
 {
 	auto handle = shared_ptr<SceneType>(std::forward<SceneType*>(new SceneType(stage)));
 	auto ptr = std::static_pointer_cast<Scene>(handle);
@@ -697,12 +697,12 @@ constexpr shared_ptr<Scene> GameFramework::RegisterScene(SceneType&& stage)
 	return ptr;
 }
 
-void GameFramework::AddStage(const shared_ptr<Scene>& stage)
+void Framework::AddStage(const shared_ptr<Scene>& stage)
 {
 	myStages.push_back(stage);
 }
 
-bool GameFramework::JumpToStage(const size_t index)
+bool Framework::JumpToStage(const size_t index)
 {
 	if (0 <= index && index < myStages.size())
 	{
@@ -723,7 +723,7 @@ bool GameFramework::JumpToStage(const size_t index)
 	return false;
 }
 
-bool GameFramework::JumpToStage(const std::vector<shared_ptr<Scene>>::iterator it)
+bool Framework::JumpToStage(const std::vector<shared_ptr<Scene>>::iterator it)
 {
 	myStageIterator = it;
 
@@ -737,7 +737,7 @@ bool GameFramework::JumpToStage(const std::vector<shared_ptr<Scene>>::iterator i
 	return nullptr != currentScene;
 }
 
-bool GameFramework::JumpToNextStage()
+bool Framework::JumpToNextStage()
 {
 	if (myStages.end() != myStageIterator)
 	{
@@ -747,7 +747,7 @@ bool GameFramework::JumpToNextStage()
 	return false;
 }
 
-shared_ptr<Model> GameFramework::RegisterModel(const char* path, const char* name)
+shared_ptr<Model> Framework::RegisterModel(const char* path, const char* name)
 {
 	auto handle = Model::Load(myDevice, myCommandList, myDefaultShader, path);
 	auto ptr = shared_ptr<Model>(handle);
@@ -757,32 +757,32 @@ shared_ptr<Model> GameFramework::RegisterModel(const char* path, const char* nam
 	return ptr;
 }
 
-weak_ptr<Scene> GameFramework::GetScene(const char* name) const
+weak_ptr<Scene> Framework::GetScene(const char* name) const
 {
 	return myScenes.find(name)->second;
 }
 
-weak_ptr<Scene> GameFramework::GetStage(const size_t index) const
+weak_ptr<Scene> Framework::GetStage(const size_t index) const
 {
 	return myStages.at(index);
 }
 
-weak_ptr<Scene> GameFramework::GetNextStage() const
+weak_ptr<Scene> Framework::GetNextStage() const
 {
 	return *(myStageIterator + 1);
 }
 
-weak_ptr<Scene> GameFramework::GetCurrentScene() const
+weak_ptr<Scene> Framework::GetCurrentScene() const
 {
 	return currentScene;
 }
 
-weak_ptr<Model> GameFramework::GetModel(const char* name) const
+weak_ptr<Model> Framework::GetModel(const char* name) const
 {
 	return myModels.find(name)->second;
 }
 
-void GameFramework::ToggleFullscreen()
+void Framework::ToggleFullscreen()
 {
 	HRESULT valid = 0;
 
@@ -844,7 +844,7 @@ void GameFramework::ToggleFullscreen()
 	CreateRenderTargetViews();
 }
 
-void GameFramework::OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
+void Framework::OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 {
 	if (currentScene)
 	{
@@ -852,7 +852,7 @@ void GameFramework::OnMouseEvent(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 	}
 }
 
-void GameFramework::OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
+void Framework::OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
 {
 	if (currentScene)
 	{
@@ -900,7 +900,7 @@ void GameFramework::OnKeyboardEvent(HWND hwnd, UINT msg, WPARAM key, LPARAM stat
 	}
 }
 
-void GameFramework::OnWindowsEvent(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+void Framework::OnWindowsEvent(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	if (currentScene)
 	{
@@ -915,7 +915,7 @@ void GameFramework::OnWindowsEvent(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	}
 }
 
-bool GameFramework::D3DAssert(HRESULT valid, const char* error)
+bool Framework::D3DAssert(HRESULT valid, const char* error)
 {
 	if (FAILED(valid))
 	{
@@ -928,46 +928,46 @@ bool GameFramework::D3DAssert(HRESULT valid, const char* error)
 	}
 }
 
-void GameFramework::ResetCmdAllocator()
+void Framework::ResetCmdAllocator()
 {
 	D3DAssert(myCommandAlloc->Reset()
 		, "명령어 할당자의 초기화 실패!");
 }
 
-void GameFramework::ResetCmdList(ID3D12PipelineState* pipeline)
+void Framework::ResetCmdList(ID3D12PipelineState* pipeline)
 {
 	D3DAssert(myCommandList->Reset(myCommandAlloc, pipeline)
 		, "명령어 리스트의 초기화 실패!");
 }
 
-void GameFramework::CloseCmdList()
+void Framework::CloseCmdList()
 {
 	D3DAssert(myCommandList->Close()
 		, "명령어 리스트의 닫기 실패");
 }
 
-void GameFramework::ExecuteCmdList(P3DCommandList list[], size_t count)
+void Framework::ExecuteCmdList(P3DCommandList list[], size_t count)
 {
 	myCommandQueue->ExecuteCommandLists(static_cast<UINT>(count), list);
 }
 
-DESC_HANDLE& GameFramework::AddtoDescriptor(DESC_HANDLE& handle, const size_t increment)
+D3DHandle& Framework::AddtoDescriptor(D3DHandle& handle, const size_t increment)
 {
 	handle.ptr += increment;
 	return handle;
 }
 
-DESC_HANDLE GameFramework::GetRTVHandle() const
+D3DHandle Framework::GetRTVHandle() const
 {
 	return heapRtvDesc->GetCPUDescriptorHandleForHeapStart();
 }
 
-DESC_HANDLE GameFramework::GetDSVHandle() const
+D3DHandle Framework::GetDSVHandle() const
 {
 	return heapDsvDesc->GetCPUDescriptorHandleForHeapStart();
 }
 
-inline void GameFramework::ClearRenderTargetView(DESC_HANDLE& handle
+inline void Framework::ClearRenderTargetView(D3DHandle& handle
 	, D3D12_RECT* erase_rects, size_t erase_count)
 {
 	myCommandList->ClearRenderTargetView(handle
@@ -975,7 +975,7 @@ inline void GameFramework::ClearRenderTargetView(DESC_HANDLE& handle
 		, static_cast<UINT>(erase_count), erase_rects);
 }
 
-void GameFramework::ClearDepthStencilView(DESC_HANDLE& handle
+void Framework::ClearDepthStencilView(D3DHandle& handle
 	, float depth, UINT8 stencil
 	, D3D12_RECT* erase_rects, size_t erase_count)
 {
@@ -985,25 +985,25 @@ void GameFramework::ClearDepthStencilView(DESC_HANDLE& handle
 		, static_cast<UINT>(erase_count), erase_rects);
 }
 
-void GameFramework::ReadyOutputMerger(DESC_HANDLE& rtv, DESC_HANDLE& dsv)
+void Framework::ReadyOutputMerger(D3DHandle& rtv, D3DHandle& dsv)
 {
 	constexpr BOOL is_single = TRUE;
 	myCommandList->OMSetRenderTargets(1, &rtv, is_single, &dsv);
 }
 
-void GameFramework::SetFenceEvent(HANDLE signal, UINT64 limit)
+void Framework::SetFenceEvent(HANDLE signal, UINT64 limit)
 {
 	D3DAssert(myRenderFence->SetEventOnCompletion(limit, eventFence)
 		, "렌더링 완료 이벤트 설정 실패!");
 }
 
-void GameFramework::SignalToFence(UINT64 count)
+void Framework::SignalToFence(UINT64 count)
 {
 	D3DAssert(myCommandQueue->Signal(myRenderFence, count)
 		, "명령 큐에 신호 보내기 실패!");
 }
 
-void GameFramework::SetBarrier(UINT type)
+void Framework::SetBarrier(UINT type)
 {
 	auto& barrier = myBarriers[type];
 	barrier.Transition.pResource = resSwapChainBackBuffers[indexFrameBuffer];

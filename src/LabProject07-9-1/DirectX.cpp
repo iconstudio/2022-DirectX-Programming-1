@@ -1,6 +1,6 @@
 #include "pch.hpp"
 #include "DirectX.hpp"
-#include "GameFramework.h"
+#include "Framework.hpp"
 #include "Timer.h"
 
 HINSTANCE appInstance;
@@ -11,7 +11,7 @@ WCHAR captionClass[MAX_LOADSTRING];
 WCHAR captionFrame[MAX_LOADSTRING];
 
 CGameTimer gameTimer{};
-GameFramework gameFramework{ FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
+Framework gameFramework{ FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
 
 ATOM MyRegisterClass(HINSTANCE);
 BOOL InitInstance(HINSTANCE, int);

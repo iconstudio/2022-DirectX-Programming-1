@@ -180,21 +180,21 @@ ID3D12Resource* CreateBufferResource(P3DDevice device, P3DGrpCommandList cmd_lis
 	return result;
 }
 
-DESC_HANDLE operator+(const DESC_HANDLE& handle, const size_t increment)
+D3DHandle operator+(const D3DHandle& handle, const size_t increment)
 {
-	DESC_HANDLE result = DESC_HANDLE(handle);
+	D3DHandle result = D3DHandle(handle);
 	result.ptr += increment;
 	return result;
 }
 
-DESC_HANDLE operator+(DESC_HANDLE&& handle, const size_t increment)
+D3DHandle operator+(D3DHandle&& handle, const size_t increment)
 {
-	DESC_HANDLE result = std::forward<DESC_HANDLE>(handle);
+	D3DHandle result = std::forward<D3DHandle>(handle);
 	result.ptr += increment;
 	return result;
 }
 
-DESC_HANDLE& operator+=(DESC_HANDLE& handle, const size_t increment)
+D3DHandle& operator+=(D3DHandle& handle, const size_t increment)
 {
 	handle.ptr += increment;
 	return handle;
