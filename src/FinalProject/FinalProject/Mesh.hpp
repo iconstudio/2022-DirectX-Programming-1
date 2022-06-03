@@ -1,4 +1,5 @@
 #pragma once
+#include "Vertex.hpp"
 
 class CMeshLoadInfo
 {
@@ -33,8 +34,10 @@ public:
 	Mesh(P3DDevice device, P3DGrpCommandList cmd_list, CMeshLoadInfo* pMeshInfo);
 	virtual ~Mesh();
 
-	virtual void ReleaseUploadBuffers();
+	virtual void Build();
+	virtual void Cleanup();
 
+	virtual void PrepareRendering();
 	virtual void Render(P3DGrpCommandList cmd_list, int nSubSet);
 
 protected:

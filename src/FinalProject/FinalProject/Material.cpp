@@ -28,3 +28,10 @@ void Material::PrepareRendering(P3DGrpCommandList cmdlist)
 	cmdlist->SetGraphicsRoot32BitConstants(1, 4, &(m_xmf4Specular), 24);
 	cmdlist->SetGraphicsRoot32BitConstants(1, 4, &(m_xmf4Emissive), 28);
 }
+
+RawMaterial::RawMaterial(const UINT type)
+	: myType(type)
+{}
+
+RawMaterial::~RawMaterial()
+{}

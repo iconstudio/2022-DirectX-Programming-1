@@ -181,6 +181,7 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Timer.hpp" />
     <ClInclude Include="Transformer.hpp" />
+    <ClInclude Include="Vertex.hpp" />
     <ClInclude Include="WeakSingleton.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -208,6 +209,7 @@
     <ClCompile Include="ShaderInput.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Transformer.cpp" />
+    <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="WeakSingleton.cpp" />
   </ItemGroup>
   <ItemGroup>

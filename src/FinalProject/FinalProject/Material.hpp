@@ -5,7 +5,7 @@ class Material
 public:
 	Material(RawMaterial* info);
 	Material(const int id);
-	virtual ~Material();
+	~Material();
 
 	void SetShader(const int id);
 

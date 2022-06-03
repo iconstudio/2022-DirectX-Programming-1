@@ -21,6 +21,8 @@ class Shader;
 class Material;
 class RawMaterial;
 class Vertex;
+class DiffusedVertex;
+class LightenVertex;
 class Mesh;
 class PreMesh;
 class MeshPoint;

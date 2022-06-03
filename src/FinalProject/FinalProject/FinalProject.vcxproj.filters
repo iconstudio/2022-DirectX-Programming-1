@@ -114,6 +114,9 @@
     <ClInclude Include="Light.hpp">
       <Filter>헤더 파일\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Vertex.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FinalProject.cpp">
@@ -175,6 +178,9 @@
     </ClCompile>
     <ClCompile Include="Light.cpp">
       <Filter>소스 파일\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Vertex.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
