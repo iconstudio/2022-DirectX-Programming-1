@@ -40,6 +40,9 @@
     <Filter Include="쉐이더 파일">
       <UniqueIdentifier>{0b47e7f2-823a-4f0f-8b64-a426487d07c8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="쉐이더 파일\Lighting">
+      <UniqueIdentifier>{637daf52-ad0c-4018-910f-5ec3416c3f82}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -158,17 +161,26 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="shaders\PixelShader.hlsl">
+    <FxCompile Include="PlainPixelShader.hlsl">
       <Filter>쉐이더 파일</Filter>
     </FxCompile>
-    <FxCompile Include="shaders\Light.hlsli">
+    <FxCompile Include="PlainVertexShader.hlsl">
       <Filter>쉐이더 파일</Filter>
     </FxCompile>
-    <FxCompile Include="shaders\VertexShader.hlsl">
+    <FxCompile Include="PlainShaders.hlsli">
       <Filter>쉐이더 파일</Filter>
     </FxCompile>
     <FxCompile Include="shaders\Basis.hlsli">
-      <Filter>쉐이더 파일</Filter>
+      <Filter>쉐이더 파일\Lighting</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\Light.hlsli">
+      <Filter>쉐이더 파일\Lighting</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\PixelShader.hlsl">
+      <Filter>쉐이더 파일\Lighting</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders\VertexShader.hlsl">
+      <Filter>쉐이더 파일\Lighting</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

@@ -48,9 +48,7 @@ struct VS_LIGHTING_OUTPUT
     float4 position : SV_POSITION;
     float3 positionW : POSITION;
     float3 normalW : NORMAL;
-#ifdef _WITH_VERTEX_LIGHTING
-	float4 color : COLOR;
-#endif
+
 };
 
 cbuffer cbCameraInfo : register(b1, space0)
