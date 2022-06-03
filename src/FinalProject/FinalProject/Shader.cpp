@@ -1,6 +1,14 @@
 ﻿#include "pch.hpp"
 #include "Shader.hpp"
 
+Shader::Shader(const Filepath& filepath, const char* entry, const char* version)
+	: isCompiled(false)
+	, myVersion(version)
+	, myCode(), myBlob(nullptr)
+{
+	Complile(filepath, entry);
+}
+
 Shader::Shader(const char* version)
 	: isCompiled(false)
 	, myVersion(version)

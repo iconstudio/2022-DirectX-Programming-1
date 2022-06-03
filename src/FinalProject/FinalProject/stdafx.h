@@ -75,6 +75,7 @@ struct std::default_delete<IUnknown>
 	void operator()(IUnknown* _Ptr) const noexcept /* strengthened */
 	{ // delete a pointer
 		static_assert(0 < sizeof(IUnknown), "can't delete an incomplete type");
+		_Ptr->Release();
 		delete _Ptr;
 	}
 };

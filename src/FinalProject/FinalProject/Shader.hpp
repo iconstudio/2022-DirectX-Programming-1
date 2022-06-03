@@ -2,6 +2,7 @@
 class Shader
 {
 public:
+	Shader(const Filepath& filepath, const char* entry, const char* version);
 	Shader(const char* version);
 	~Shader();
 

@@ -4,6 +4,8 @@
 #include "Timer.hpp"
 #include "Framework.hpp"
 #include "GraphicsCore.hpp"
+#include "GraphicsPipeline.hpp"
+#include "Shader.hpp"
 
 constexpr int MAX_LOADSTRING = 100;
 WCHAR captionTitle[MAX_LOADSTRING]{}; // 제목 표시줄 텍스트입니다.
@@ -21,10 +23,46 @@ Framework gameFramework{ gameRenderer, FRAME_BUFFER_W, FRAME_BUFFER_H };
 
 void InitialzeGame(HWND hwnd)
 {
-
-
 	gameRenderer.SetHWND(hwnd).Awake();
 	gameFramework.SetHWND(hwnd).SetHInstance(gameClient).Awake();
+
+	auto shader = gameRenderer.CreateEmptyShader("vs_5_1");
+	shader.Complile("VertexShader.hlsl", "main");
+
+	UINT nInputElementDescs = 2;
+	auto attributes = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+	attributes[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	attributes[1] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	auto io_layout = gameRenderer.CreateEmptyInputLayout();
+	io_layout.pInputElementDescs = attributes;
+	io_layout.NumElements = nInputElementDescs;
+
+	auto rs_dest = gameRenderer.CreateEmptyRasterizerState();
+
+	auto blend_dest = gameRenderer.CreateEmptyBlendState();
+	auto& target_desc = blend_dest.RenderTarget[0];
+	target_desc.BlendEnable = FALSE;
+	target_desc.LogicOpEnable = FALSE;
+	target_desc.SrcBlend = D3D12_BLEND_ONE;
+	target_desc.DestBlend = D3D12_BLEND_ZERO;
+	target_desc.BlendOp = D3D12_BLEND_OP_ADD;
+	target_desc.SrcBlendAlpha = D3D12_BLEND_ONE;
+	target_desc.DestBlendAlpha = D3D12_BLEND_ZERO;
+	target_desc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	target_desc.LogicOp = D3D12_LOGIC_OP_NOOP;
+	target_desc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	auto ds_dest = gameRenderer.CreateEmptyDepthStencilState();
+
+	auto pipeline = gameRenderer.CreateEmptyPipeline();
+	pipeline.Attach(shader);
+	pipeline.Attach(io_layout);
+	pipeline.Attach(rs_dest);
+	pipeline.Attach(blend_dest);
+	pipeline.Attach(ds_dest);
+	gameRenderer.RegisterPipeline(pipeline);
+
 	gameRenderer.Start();
 	gameFramework.Start();
 }

@@ -29,10 +29,10 @@ public:
 
 	GraphicsPipeline CreateEmptyPipeline() const;
 	Shader CreateEmptyShader(const char* version) const;
-	constexpr D3D12_INPUT_LAYOUT_DESC CreateEmptyInputLayout() const;
-	constexpr D3D12_RASTERIZER_DESC CreateEmptyRasterizerState() const;
-	constexpr D3D12_BLEND_DESC CreateEmptyBlendState() const;
-	constexpr D3D12_DEPTH_STENCIL_DESC CreateEmptyDepthStencilState() const;
+	D3D12_INPUT_LAYOUT_DESC CreateEmptyInputLayout() const;
+	D3D12_RASTERIZER_DESC CreateEmptyRasterizerState() const;
+	D3D12_BLEND_DESC CreateEmptyBlendState() const;
+	D3D12_DEPTH_STENCIL_DESC CreateEmptyDepthStencilState() const;
 
 private:
 	void CreateDirect3DDevice();
@@ -41,8 +41,32 @@ private:
 	void CreateRenderTargetViews();
 	void CreateDepthStencilView();
 
+	bool D3DAssert(HRESULT valid, const char* error);
+
+	//
+	void ResetCmdAllocator();
+	void ResetCmdList(ID3D12PipelineState* pipeline = nullptr);
+	void CloseCmdList();
+	void ExecuteCmdList(P3DCommandList list[], size_t count);
+
+	//
+	D3DHandle& AddtoDescriptor(D3DHandle& handle, const size_t increment);
+	D3DHandle GetRTVHandle() const;
+	D3DHandle GetDSVHandle() const;
+	void ClearRenderTargetView(D3DHandle& handle, D3D12_RECT* erase_rects = nullptr, size_t erase_count = 0);
+	void ClearDepthStencilView(D3DHandle& handle, float depth = 1.0f, UINT8 stencil = 0, D3D12_RECT* erase_rects = nullptr, size_t erase_count = 0);
+	void ReadyOutputMerger(D3DHandle& rtv, D3DHandle& dsv);
+
+	void SetFenceEvent(HANDLE signal, UINT64 limit);
+	void SignalToFence(UINT64 count);
+
+	const UINT barrierRender = 0;
+	const UINT barrierSwap = 1;
+	void SetBarrier(UINT type);
+
 	HWND myWindow;
 	const long frameWidth, frameHeight;
+	float frameColor[4];
 
 	IDXGIFactory4* myFactory;
 	IDXGISwapChain3* mySwapChain;

@@ -5,6 +5,9 @@
 
 GraphicsCore::GraphicsCore(long width, long height)
 	: myWindow(NULL), frameWidth(width), frameHeight(height)
+	, frameColor{ 0.0f, 0.0f, 0.0f, 0.0f }
+	, isAntiAliasingEnabled(false), levelAntiAliasing(0)
+	, indexFrameBuffer(0)
 	, myFactory(nullptr), myDevice(nullptr)
 	, myRenderFence(nullptr), myFences(), eventFence(NULL)
 	, myCommandList(nullptr), myCommandQueue(nullptr), myCommandAlloc(nullptr)
@@ -99,15 +102,21 @@ void GraphicsCore::Awake()
 	CreateSwapChain();
 	CreateRenderTargetViews();
 	CreateDepthStencilView();
-
-	for (auto& pipeline : myPipelines)
-	{
-		pipeline->Awake();
-	}
 }
 
 void GraphicsCore::Start()
 {
+	ResetCmdList();
+	for (auto& pipeline : myPipelines)
+	{
+		pipeline->Awake();
+	}
+	CloseCmdList();
+	P3DCommandList cmd_lists[] = { myCommandList };
+	ExecuteCmdList(cmd_lists, std::size(cmd_lists));
+
+	WaitForGpuComplete();
+
 	SetPipeline(0);
 }
 
@@ -509,6 +518,102 @@ void GraphicsCore::CreateDepthStencilView()
 	myDevice->CreateDepthStencilView(myDepthStencilBuffer, &dsv_desc, cpu_ptr_handle);
 }
 
+bool GraphicsCore::D3DAssert(HRESULT valid, const char* error)
+{
+	if (FAILED(valid))
+	{
+		throw error;
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
+void GraphicsCore::ResetCmdAllocator()
+{
+	D3DAssert(myCommandAlloc->Reset()
+		, "명령어 할당자의 초기화 실패!");
+}
+
+void GraphicsCore::ResetCmdList(ID3D12PipelineState* pipeline)
+{
+	D3DAssert(myCommandList->Reset(myCommandAlloc, pipeline)
+		, "명령어 리스트의 초기화 실패!");
+}
+
+void GraphicsCore::CloseCmdList()
+{
+	D3DAssert(myCommandList->Close()
+		, "명령어 리스트의 닫기 실패");
+}
+
+void GraphicsCore::ExecuteCmdList(P3DCommandList list[], size_t count)
+{
+	myCommandQueue->ExecuteCommandLists(static_cast<UINT>(count), list);
+}
+
+D3DHandle& GraphicsCore::AddtoDescriptor(D3DHandle& handle, const size_t increment)
+{
+	handle.ptr += increment;
+	return handle;
+}
+
+D3DHandle GraphicsCore::GetRTVHandle() const
+{
+	return heapRtvDesc->GetCPUDescriptorHandleForHeapStart();
+}
+
+D3DHandle GraphicsCore::GetDSVHandle() const
+{
+	return heapDsvDesc->GetCPUDescriptorHandleForHeapStart();
+}
+
+inline void GraphicsCore::ClearRenderTargetView(D3DHandle& handle
+	, D3D12_RECT* erase_rects, size_t erase_count)
+{
+	myCommandList->ClearRenderTargetView(handle
+		, frameColor
+		, static_cast<UINT>(erase_count), erase_rects);
+}
+
+void GraphicsCore::ClearDepthStencilView(D3DHandle& handle
+	, float depth, UINT8 stencil
+	, D3D12_RECT* erase_rects, size_t erase_count)
+{
+	myCommandList->ClearDepthStencilView(handle
+		, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL
+		, depth, stencil
+		, static_cast<UINT>(erase_count), erase_rects);
+}
+
+void GraphicsCore::ReadyOutputMerger(D3DHandle& rtv, D3DHandle& dsv)
+{
+	constexpr BOOL is_single = TRUE;
+	myCommandList->OMSetRenderTargets(1, &rtv, is_single, &dsv);
+}
+
+void GraphicsCore::SetFenceEvent(HANDLE signal, UINT64 limit)
+{
+	D3DAssert(myRenderFence->SetEventOnCompletion(limit, eventFence)
+		, "렌더링 완료 이벤트 설정 실패!");
+}
+
+void GraphicsCore::SignalToFence(UINT64 count)
+{
+	D3DAssert(myCommandQueue->Signal(myRenderFence, count)
+		, "명령 큐에 신호 보내기 실패!");
+}
+
+void GraphicsCore::SetBarrier(UINT type)
+{
+	auto& barrier = myBarriers[type];
+	barrier.Transition.pResource = resSwapChainBackBuffers[indexFrameBuffer];
+
+	myCommandList->ResourceBarrier(1, &barrier);
+}
+
 void GraphicsCore::RegisterPipeline(const GraphicsPipeline& pipeline)
 {
 	myPipelines.emplace_back(new GraphicsPipeline(pipeline));
@@ -529,12 +634,12 @@ Shader GraphicsCore::CreateEmptyShader(const char* version) const
 	return Shader(version);
 }
 
-constexpr D3D12_INPUT_LAYOUT_DESC GraphicsCore::CreateEmptyInputLayout() const
+D3D12_INPUT_LAYOUT_DESC GraphicsCore::CreateEmptyInputLayout() const
 {
 	return D3D12_INPUT_LAYOUT_DESC{ nullptr, 0 };
 }
 
-constexpr D3D12_RASTERIZER_DESC GraphicsCore::CreateEmptyRasterizerState() const
+D3D12_RASTERIZER_DESC GraphicsCore::CreateEmptyRasterizerState() const
 {
 	return D3D12_RASTERIZER_DESC{ D3D12_FILL_MODE_SOLID, D3D12_CULL_MODE_BACK
 		, FALSE, 0, 0.0f, 0.0f, TRUE
@@ -542,12 +647,12 @@ constexpr D3D12_RASTERIZER_DESC GraphicsCore::CreateEmptyRasterizerState() const
 		, D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF };
 }
 
-constexpr D3D12_BLEND_DESC GraphicsCore::CreateEmptyBlendState() const
+D3D12_BLEND_DESC GraphicsCore::CreateEmptyBlendState() const
 {
 	return D3D12_BLEND_DESC{ FALSE, FALSE };
 }
 
-constexpr D3D12_DEPTH_STENCIL_DESC GraphicsCore::CreateEmptyDepthStencilState() const
+D3D12_DEPTH_STENCIL_DESC GraphicsCore::CreateEmptyDepthStencilState() const
 {
 	return D3D12_DEPTH_STENCIL_DESC{ TRUE
 		, D3D12_DEPTH_WRITE_MASK_ALL, D3D12_COMPARISON_FUNC_LESS

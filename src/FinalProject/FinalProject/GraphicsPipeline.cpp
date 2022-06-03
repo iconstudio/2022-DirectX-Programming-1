@@ -112,6 +112,9 @@ void GraphicsPipeline::CreatePipelineState()
 {
 	if (isModified)
 	{
+		myDescription.VS = myShaders.at(0)->myCode;
+		myDescription.PS = myShaders.at(1)->myCode;
+
 		ID3D12PipelineState** state = nullptr;
 
 		auto uuid = __uuidof(ID3D12PipelineState);
@@ -142,6 +145,9 @@ void GraphicsPipeline::Update(float delta_time)
 GraphicsPipeline& GraphicsPipeline::Attach(const D3D12_ROOT_PARAMETER& param)
 {
 	myShaderUniforms.push_back(param);
+
+	isModified = true;
+	return *this;
 }
 
 GraphicsPipeline& GraphicsPipeline::Attach(P3DSignature* signature)

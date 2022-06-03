@@ -28,7 +28,7 @@ cbuffer cbCameraInfo : register(b1)
 cbuffer cbGameObjectInfo : register(b2)
 {
     matrix gmtxGameObject : packoffset(c0);
-    MATERIAL gMaterial : packoffset(c4);
+    //MATERIAL gMaterial : packoffset(c4);
 };
 
 VS_LIGHTING_OUTPUT main(VS_LIGHTING_INPUT input)
@@ -39,7 +39,7 @@ VS_LIGHTING_OUTPUT main(VS_LIGHTING_INPUT input)
     output.positionW = (float3) mul(float4(input.position, 1.0f), gmtxGameObject);
     output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
     output.normalW = normalize(output.normalW);
-    output.color = Lighting(output.positionW, output.normalW);
+   // output.color = Lighting(output.positionW, output.normalW);
 	
     return output;
 }
