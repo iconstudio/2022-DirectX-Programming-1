@@ -159,6 +159,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Arithmetics.hpp" />
     <ClInclude Include="FinalProject.h" />
     <ClInclude Include="DelegateObjet.hpp" />
     <ClInclude Include="Framework.hpp" />
@@ -176,9 +177,11 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Timer.hpp" />
+    <ClInclude Include="Transformer.hpp" />
     <ClInclude Include="WeakSingleton.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Arithmetics.cpp" />
     <ClCompile Include="FinalProject.cpp" />
     <ClCompile Include="Framework.cpp" />
     <ClCompile Include="GameObject.cpp" />
@@ -198,6 +201,7 @@
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderInput.cpp" />
     <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="Transformer.cpp" />
     <ClCompile Include="WeakSingleton.cpp" />
   </ItemGroup>
   <ItemGroup>

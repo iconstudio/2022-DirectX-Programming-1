@@ -64,6 +64,53 @@ using std::make_pair;
 using Filepath = std::filesystem::path;
 constexpr auto PI = std::numbers::pi;
 
+class XYZWrapper
+{
+public:
+	XYZWrapper(float& x, float& y, float& z)
+		: x(x), y(y), z(z)
+	{}
+
+	XYZWrapper(XMFLOAT3& position)
+		: XYZWrapper(position.x, position.y, position.z)
+	{}
+
+	XYZWrapper(XMFLOAT3&& position) = delete;
+
+	XYZWrapper& operator=(float list[3])
+	{
+		x = list[0];
+		y = list[1];
+		z = list[2];
+		return *this;
+	}
+
+	XYZWrapper& operator=(const XMFLOAT3& vector)
+	{
+		x = vector.x;
+		y = vector.y;
+		z = vector.z;
+		return *this;
+	}
+
+	XYZWrapper& operator=(XMFLOAT3&& vector)
+	{
+		x = std::forward<float>(vector.x);
+		y = std::forward<float>(vector.y);
+		z = std::forward<float>(vector.z);
+		return *this;
+	}
+
+	explicit operator XMFLOAT3() const noexcept
+	{
+		return XMFLOAT3(x, y, z);
+	}
+
+	float& x;
+	float& y;
+	float& z;
+};
+
 template <>
 struct std::default_delete<IUnknown>
 { // default deleter for unique_ptr
