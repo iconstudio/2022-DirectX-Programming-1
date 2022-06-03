@@ -1,61 +1,113 @@
 #pragma once
-#include "TaggedObject.hpp"
-#include "Shader.h"
-#include "Player.h"
-#include "Light.hpp"
 
-class CScene : public TaggedObject
+class Scene
 {
 public:
-	CScene(GameFramework& framework, const char* name);
-	virtual ~CScene();
+	Scene(GameFramework& framework, HWND hwnd, const char* name);
+	virtual ~Scene();
 
-	// 초기화
-	void Awake(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list);
-	virtual void Build();
+	virtual void Awake(P3DDevice device, P3DGrpCommandList cmd_list) = 0;
+	virtual void Start() = 0;
+	virtual void Reset() = 0;
+	virtual void Update(float elapsed_time) = 0;
+	virtual void Render() = 0;
 
-	// 시작
-	virtual void Start();
-	virtual void Reset();
-	virtual void Restart();
+	virtual void OnAwake() = 0;
+	virtual void OnInialized() = 0;
+	virtual void OnUpdate() = 0;
+	virtual void OnRender() = 0;
 
-	// 갱신
-	virtual void Update(float time_elapsed);
-	virtual void UpdateShaderVariables();
+	virtual void OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info) = 0;
+	virtual void OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state) = 0;
+	virtual void OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) = 0;
 
-	// 렌더링
-	void Render(GameCamera* pCamera = nullptr);
+	void SetCamera(GameCamera* cam);
+	void SetRootSignature(P3DSignature signature);
+	void SetBackgroundColor(const float colors[4]);
 
-	ID3D12RootSignature* GetGraphicsRootSignature();
-	ID3D12RootSignature const* GetGraphicsRootSignature() const;
+	template<typename ObjectType, typename GType = std::remove_cvref<ObjectType>>
+		requires(std::is_base_of_v<GType, GameObject>)
+	constexpr GType* CreateInstance(float x, float y, float z);
 
-	//
+	template<typename ObjectType, typename GType = std::remove_cvref<ObjectType>>
+		requires(std::is_base_of_v<GType, GameObject>)
+	constexpr GType* CreateInstance(float pos[3]);
+
+	template<typename ObjectType, typename GType = std::remove_cvref<ObjectType>>
+		requires(std::is_base_of_v<GType, GameObject>)
+	constexpr GType* CreateInstance(const XMFLOAT3& position);
+
+	template<typename ObjectType, typename GType = std::remove_cvref<ObjectType>>
+		requires(std::is_base_of_v<GType, GameObject>)
+	constexpr GType* CreateInstance(XMFLOAT3&& position);
+
+	GameObject* AddInstance(const shared_ptr<GameObject>& inst);
+	GameObject* AddInstance(shared_ptr<GameObject>&& inst);
+
+	const std::string& GetName() const noexcept;
+	shared_ptr<GameObject> GetInstance(const UINT index) const;
+
+	GameCamera* GetCamera() noexcept;
+	const GameCamera* GetCamera() const noexcept;
+	P3DSignature GetRootSignature();
+	P3DSignature const GetRootSignature() const;
+
+	float myBackgroundColor[4];
+
+protected:
+	virtual P3DSignature CreateGraphicsRootSignature();
 	virtual void ReleaseUploadBuffers();
-	virtual void ReleaseShaderVariables();
 
-	bool OnMouseEvent(HWND hWnd, UINT msg, WPARAM btn, LPARAM info);
-	bool OnKeyboardEvent(HWND hWnd, UINT msg, WPARAM key, LPARAM state);
-	bool OnWindowsEvent(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+	virtual void InitializeUniforms();
+	virtual void UpdateUniforms();
+	virtual void ReleaseUniforms();
 
-	CPlayer* m_pPlayer = NULL;
-	GameCamera* m_pCamera = NULL;
+	const std::string myName;
 
-private:
-	ID3D12RootSignature* CreateGraphicsRootSignature();
-	virtual void CreateShaderVariables();
+	HWND handleWindow;
+	GameFramework& myFramework;
 
-	ID3D12Device* d3dDevice;
-	ID3D12GraphicsCommandList* d3dTaskList;
-	ID3D12RootSignature* d3dShaderParameters;
+	P3DDevice d3dDevice;
+	P3DGrpCommandList d3dTaskList;
+
+	P3DSignature mySignature;
+	GameCamera* myCamera = nullptr;
 
 	std::vector<shared_ptr<GameObject>> myInstances;
 
-	CLight* m_pLights = NULL;
-	int m_nLights = 0;
-
-	XMFLOAT4 m_xmf4GlobalAmbient;
-	ID3D12Resource* m_pd3dcbLights = NULL;
-	LIGHTS* m_pcbMappedLights = NULL;
-
-	float lastDeltaTime = 0.0f;
+	POINT posCursor;
+	float lastDeltaTime;
 };
+
+template<typename ObjectType, typename GType>
+	requires(std::is_base_of_v<GType, GameObject>)
+constexpr GType* Scene::CreateInstance(float x, float y, float z)
+{
+	return CreateInstance<ObjectType, GType>(XMFLOAT3(x, y, z));
+}
+
+template<typename ObjectType, typename GType>
+	requires(std::is_base_of_v<GType, GameObject>)
+constexpr GType* Scene::CreateInstance(float pos[3])
+{
+	return CreateInstance<ObjectType, GType>(XMFLOAT3(pos));
+}
+
+template<typename ObjectType, typename GType>
+	requires(std::is_base_of_v<GType, GameObject>)
+constexpr GType* Scene::CreateInstance(const XMFLOAT3& position)
+{
+	return CreateInstance<ObjectType, GType>(XMFLOAT3(position));
+}
+
+template<typename ObjectType, typename GType>
+	requires(std::is_base_of_v<GType, GameObject>)
+constexpr GType* Scene::CreateInstance(XMFLOAT3&& position)
+{
+	auto handle = new GType();
+	handle->SetPosition(std::forward<XMFLOAT3>(position));
+
+	AddInstance(shared_ptr<GameObject>(handle));
+
+	return handle;
+}

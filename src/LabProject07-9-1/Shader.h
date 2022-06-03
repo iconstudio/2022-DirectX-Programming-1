@@ -2,11 +2,11 @@
 #include "Object.h"
 #include "Camera.h"
 
-class CShader
+class Pipeline
 {
 public:
-	CShader();
-	virtual ~CShader();
+	Pipeline();
+	virtual ~Pipeline();
 
 private:
 	int								m_nReferences = 0;
@@ -23,34 +23,34 @@ public:
 	virtual ShaderBlob CreateVertexShader();
 	virtual ShaderBlob CreatePixelShader();
 
-	ShaderBlob CompileShaderFromFile(WCHAR *pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob **ppd3dShaderBlob);
-	ShaderBlob ReadCompiledShaderFromFile(WCHAR *pszFileName, ID3DBlob **ppd3dShaderBlob=NULL);
+	ShaderBlob CompileShaderFromFile(const  WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob);
+	ShaderBlob ReadCompiledShaderFromFile(const WCHAR* pszFileName, ID3DBlob** ppd3dShaderBlob = NULL);
 
-	virtual void CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
+	virtual void CreateShader(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature);
 
-	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
-	virtual void ReleaseShaderVariables();
+	virtual void InitializeUniforms(P3DDevice device, P3DGrpCommandList cmd_list);
+	virtual void UpdateUniforms(P3DGrpCommandList cmd_list);
+	virtual void ReleaseUniforms();
 
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, XMFLOAT4X4 *pxmf4x4World);
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, CMaterialColors *pMaterialColors);
+	virtual void UpdateUniforms(P3DGrpCommandList cmd_list, XMFLOAT4X4* pxmf4x4World);
+	virtual void UpdateUniforms(P3DGrpCommandList cmd_list, CMaterialColors* pMaterialColors);
 
-	virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList, int nPipelineState=0);
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, GameCamera *pCamera, int nPipelineState=0);
+	virtual void OnPrepareRender(P3DGrpCommandList cmd_list, int nPipelineState = 0);
+	virtual void Render(P3DGrpCommandList cmd_list, GameCamera* pCamera, int nPipelineState = 0);
 
 protected:
-	ID3DBlob							*m_pd3dVertexShaderBlob = NULL;
-	ID3DBlob							*m_pd3dPixelShaderBlob = NULL;
+	ID3DBlob* m_pd3dVertexShaderBlob = NULL;
+	ID3DBlob* m_pd3dPixelShaderBlob = NULL;
 
 	int									m_nPipelineStates = 0;
-	ID3D12PipelineState					**m_ppd3dPipelineStates = NULL;
+	ID3D12PipelineState** m_ppd3dPipelineStates = NULL;
 
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC	m_d3dPipelineStateDesc;
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC	pipeline_state_desc;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-class CIlluminatedShader : public CShader
+class CIlluminatedShader : public Pipeline
 {
 public:
 	CIlluminatedShader();
@@ -60,8 +60,8 @@ public:
 	virtual ShaderBlob CreateVertexShader();
 	virtual ShaderBlob CreatePixelShader();
 
-	virtual void CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
+	virtual void CreateShader(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature);
 
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, GameCamera *pCamera, int nPipelineState = 0);
+	virtual void Render(P3DGrpCommandList cmd_list, GameCamera* pCamera, int nPipelineState = 0);
 };
 

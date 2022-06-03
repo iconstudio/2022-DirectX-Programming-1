@@ -1,6 +1,6 @@
 #pragma once
-#include "Player.h"
 #include "Scene.h"
+#include "Model.hpp"
 
 class GameFramework
 {
@@ -18,6 +18,8 @@ public:
 
 	// 게임 콘텐츠 초기화
 	void Start();
+	void BuildPipeline();
+	void BuildAssets();
 	void BuildStages();
 	void BuildWorld();
 	void BuildParticles();
@@ -38,30 +40,41 @@ public:
 	void WaitForGpuComplete();
 
 	// 장면 등록
-	template<typename SceneType>
-	shared_ptr<CScene> RegisterScene(SceneType&& scene);
-	// 스테이지 순서에 추가
-	void AddStage(const shared_ptr<CScene>& stage);
-	shared_ptr<CScene> GetCurrentScene() const;
-	shared_ptr<CScene> GetLastScene() const;
-	shared_ptr<CScene> PeekScene() const;
-	void PopScene();
+	template<typename SceneType> requires(std::is_base_of_v<Scene, SceneType>)
+	constexpr shared_ptr<Scene> RegisterScene(SceneType&& stage);
+
+	// 스테이지 등록
+	void AddStage(const shared_ptr<Scene>& stage);
+	bool JumpToStage(const size_t index);
+	bool JumpToStage(const std::vector<shared_ptr<Scene>>::iterator it);
+	bool JumpToNextStage();
+
+	shared_ptr<Model> RegisterModel(const char* path, const char* name);
+
+	weak_ptr<Scene> GetScene(const char* name) const;
+	weak_ptr<Scene> GetStage(const size_t index) const;
+	weak_ptr<Scene> GetNextStage() const;
+	weak_ptr<Scene> GetCurrentScene() const;
+	weak_ptr<Model> GetModel(const char* name) const;
 
 	// 전체화면 전환
 	void ToggleFullscreen();
 
 	void OnMouseEvent(HWND hWnd, UINT msg, WPARAM btn, LPARAM info);
 	void OnKeyboardEvent(HWND hWnd, UINT msg, WPARAM key, LPARAM state);
-	LRESULT CALLBACK OnWindowsEvent(HWND, UINT msg, WPARAM wp, LPARAM lp);
+	void OnWindowsEvent(HWND, UINT msg, WPARAM wp, LPARAM lp);
 
 private:
 	bool D3DAssert(HRESULT valid, const char* error);
 
+	//
 	void ResetCmdAllocator();
 	void ResetCmdList(ID3D12PipelineState* pipeline = nullptr);
 	void CloseCmdList();
-	void ExecuteCmdList(ID3D12CommandList* list[], UINT count);
+	void ExecuteCmdList(P3DCommandList list[], size_t count);
 
+	//
+	DESC_HANDLE& AddtoDescriptor(DESC_HANDLE& handle, const size_t increment);
 	DESC_HANDLE GetRTVHandle() const;
 	DESC_HANDLE GetDSVHandle() const;
 	void ClearRenderTargetView(DESC_HANDLE& handle, D3D12_RECT* erase_rects = nullptr, size_t erase_count = 0);
@@ -90,11 +103,12 @@ private:
 
 	IDXGIFactory4* myFactory;
 	IDXGISwapChain3* mySwapChain;
-	ID3D12Device* myDevice;
+	P3DDevice myDevice;
 
-	ID3D12GraphicsCommandList* myCommandList;
+	P3DGrpCommandList myCommandList;
 	ID3D12CommandQueue* myCommandQueue;
 	ID3D12CommandAllocator* myCommandAlloc;
+	P3DSignature myRootSignature;
 
 	ID3D12Resource* resSwapChainBackBuffers[numberFrameBuffers];
 	D3D12_RESOURCE_BARRIER myBarriers[numberFrameBuffers];
@@ -113,8 +127,12 @@ private:
 	ID3D12Debug* myDebugController;
 #endif
 
-	shared_ptr<CScene> currentScene, lastScene;
-	std::unordered_map<std::string, shared_ptr<CScene>> myScenes;
-	std::vector<shared_ptr<CScene>> myStages;
-	std::vector<shared_ptr<CScene>>::iterator myStageIterator;
+	std::unordered_map<std::string, shared_ptr<Model>> myModels;
+
+	std::unordered_map<std::string, shared_ptr<Scene>> myScenes;
+	std::vector<shared_ptr<Scene>> myStages;
+	std::vector<shared_ptr<Scene>>::iterator myStageIterator;
+	shared_ptr<Scene> currentScene;
+	
+	Pipeline* myDefaultShader;
 };

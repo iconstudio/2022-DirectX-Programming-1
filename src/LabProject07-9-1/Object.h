@@ -3,35 +3,47 @@
 #include "Material.hpp"
 #include "Camera.h"
 
+enum class COLLISION_TAGS
+{
+	NONE = 0,
+	ROCK,
+	TREE,
+	CAR,
+	PLAYER
+};
+
 class GameObject
 {
 public:
 	GameObject();
 	virtual ~GameObject();
 
-public:
 	void SetMesh(CMesh* pMesh);
-	void SetShader(CShader* pShader);
-	void SetShader(int nMaterial, CShader* pShader);
+	void SetShader(Pipeline* pShader);
+	void SetShader(int nMaterial, Pipeline* pShader);
 	void SetMaterial(int nMaterial, CMaterial* pMaterial);
+	void Attach(GameObject* pChild, bool bReferenceUpdate = false);
 
-	void SetChild(GameObject* pChild, bool bReferenceUpdate = false);
+	virtual constexpr COLLISION_TAGS GetTag() const noexcept;
 
-	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) {}
+	void SetOriginalCollider(const shared_ptr<BoundingOrientedBox>& box);
+	virtual void BuildCollider();
+	void UpdateCollider(const XMFLOAT4X4* mat);
 
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void BuildMaterials(P3DDevice device, P3DGrpCommandList cmd_list);
+	virtual void ReleaseUploadBuffers();
+
+	// °»½Å
+	virtual void Animate(float time_elapsed, XMFLOAT4X4* parent = nullptr);
 
 	virtual void OnPrepareRender() {}
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, GameCamera* pCamera = NULL);
+	virtual void Render(P3DGrpCommandList cmd_list, GameCamera* pCamera = NULL);
 
-	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void ReleaseShaderVariables();
-
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, CMaterial* pMaterial);
-
-	virtual void ReleaseUploadBuffers();
+	virtual void InitializeUniforms(P3DDevice device, P3DGrpCommandList cmd_list);
+	virtual void UpdateUniforms(P3DGrpCommandList cmd_list);
+	virtual void UpdateUniforms(P3DGrpCommandList cmd_list, XMFLOAT4X4* pxmf4x4World);
+	virtual void UpdateUniforms(P3DGrpCommandList cmd_list, CMaterial* pMaterial);
+	virtual void ReleaseUniforms();
 
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();
@@ -50,6 +62,9 @@ public:
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 	void Rotate(XMFLOAT4* pxmf4Quaternion);
 
+	virtual bool CheckCollisionWith(GameObject* other) const;
+	virtual void CollideWith(GameObject* other);
+
 	GameObject* GetParent() { return(m_pParent); }
 	void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 	GameObject* FindFrame(const char* pstrFrameName);
@@ -64,19 +79,15 @@ public:
 	int m_nMaterials = 0;
 	CMaterial** m_ppMaterials = NULL;
 
-	XMFLOAT4X4 m_xmf4x4Transform;
-	XMFLOAT4X4 m_xmf4x4World;
+	XMFLOAT4X4 localTransform;
+	XMFLOAT4X4 worldTransform;
 
 	GameObject* m_pParent = NULL;
 	GameObject* myChild = NULL;
 	GameObject* mySibling = NULL;
 
-public:
-	static MATERIALSLOADINFO* LoadMaterialsInfoFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
-	static CMeshLoadInfo* LoadMeshInfoFromFile(FILE* pInFile);
-
-	static GameObject* LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FILE* pInFile);
-	static GameObject* LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName);
+	shared_ptr<BoundingOrientedBox> staticCollider;
+	unique_ptr<BoundingOrientedBox> myCollider;
 
 	static void PrintFrameInfo(GameObject* pGameObject, GameObject* pParent);
 };
@@ -96,7 +107,7 @@ public:
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
 
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, GameCamera* pCamera = NULL);
+	virtual void Render(P3DGrpCommandList cmd_list, GameCamera* pCamera = NULL);
 };
 
 class CRevolvingObject : public GameObject
@@ -127,7 +138,7 @@ protected:
 	GameObject* m_pTailRotorFrame = NULL;
 
 public:
-	virtual void OnInitialize();
+	virtual void Awake();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 };
 
@@ -138,7 +149,7 @@ public:
 	virtual ~CApacheObject();
 
 public:
-	virtual void OnInitialize();
+	virtual void Awake();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 };
 
@@ -149,7 +160,7 @@ public:
 	virtual ~CGunshipObject();
 
 public:
-	virtual void OnInitialize();
+	virtual void Awake();
 };
 
 class CSuperCobraObject : public CHellicopterObject
@@ -159,7 +170,7 @@ public:
 	virtual ~CSuperCobraObject();
 
 public:
-	virtual void OnInitialize();
+	virtual void Awake();
 };
 
 class CMi24Object : public CHellicopterObject
@@ -169,5 +180,5 @@ public:
 	virtual ~CMi24Object();
 
 public:
-	virtual void OnInitialize();
+	virtual void Awake();
 };
