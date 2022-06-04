@@ -11,7 +11,6 @@ GraphicsCore::GraphicsCore(long width, long height)
 	, myFactory(nullptr), myDevice(nullptr)
 	, myRenderFence(nullptr), myFences(), eventFence(NULL)
 	, myCommandList(nullptr), myCommandQueue(nullptr), myCommandAlloc(nullptr)
-	, myRootSignature(nullptr)
 	, mySwapChain(nullptr), resSwapChainBackBuffers(), myBarriers()
 	, heapRtvDesc(nullptr), szRtvDescIncrements(0)
 	, myDepthStencilBuffer(nullptr)
@@ -110,9 +109,9 @@ void GraphicsCore::Release()
 		mySwapChain->Release();
 	}
 
-	if (myRootSignature)
+	for (auto& pipeline : myPipelines)
 	{
-		myRootSignature->Release();
+		pipeline->Release();
 	}
 
 	if (myCommandAlloc) myCommandAlloc->Release();
@@ -127,11 +126,23 @@ void GraphicsCore::Release()
 #if defined(_DEBUG)
 	if (myDebugController) myDebugController->Release();
 
-	IDXGIDebug1* pdxgiDebug = NULL;
-	DXGIGetDebugInterface1(0, __uuidof(IDXGIDebug1), (void**)&pdxgiDebug);
+	IDXGIDebug1* debugger = NULL;
 
-	HRESULT hResult = pdxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_DETAIL);
-	pdxgiDebug->Release();
+	auto uid = __uuidof(IDXGIDebug1);
+	auto place = reinterpret_cast<void**>(&debugger);
+	auto valid = DXGIGetDebugInterface1(0, uid, place);
+	if (FAILED(valid))
+	{
+		throw "디버그 정보 출력기의 생성 실패!";
+	}
+
+	valid = debugger->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
+	if (FAILED(valid))
+	{
+		throw "디버그 정보 출력 실패!";
+	}
+
+	debugger->Release();
 #endif
 }
 

@@ -84,7 +84,6 @@ private:
 	P3DGrpCommandList myCommandList;
 	ID3D12CommandQueue* myCommandQueue;
 	ID3D12CommandAllocator* myCommandAlloc;
-	P3DSignature myRootSignature;
 
 	static const UINT numberFrameBuffers = 2;
 	bool isAntiAliasingEnabled;

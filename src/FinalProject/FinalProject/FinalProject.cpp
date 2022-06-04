@@ -49,8 +49,8 @@ void InitialzeGame(HWND hwnd)
 	auto ds_dest = gameRenderer.CreateEmptyDepthStencilState();
 
 	auto pipeline = gameRenderer.CreateEmptyPipeline();
-	pipeline.Attach(vs_shader);
-	pipeline.Attach(ps_shader);
+	pipeline.AttachVertexShader(vs_shader);
+	pipeline.AttachPixelShader(ps_shader);
 	pipeline.Attach(io_layout);
 	pipeline.Attach(rs_dest);
 	pipeline.Attach(blend_dest);

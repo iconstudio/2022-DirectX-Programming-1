@@ -47,22 +47,20 @@ public:
 	XMFLOAT3 GetRight() const;
 	bool IsActivated() const;
 
+	void SetMesh(Mesh* handle);
+	void Attach(GameObject* child);
 	GameObject* FindFrame(const char* frame_name);
 
 	void OnUpdateTransform();
 	virtual void UpdateTransform();
 	virtual void UpdateTransform(const XMFLOAT4X4& parent);
 
-	std::string m_pstrFrameName;
+	std::string myName;
 
 	Transformer localTransform, worldTransform;
 	GameObject *mySibling, *myChild, *myParent;
-
-	int m_nMaterials;
-	Material** m_ppMaterials;
 	Mesh* m_pMesh;
 
 	bool isActivated;
 	bool transformModified;
 };
-

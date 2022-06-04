@@ -5,11 +5,10 @@
 #include "Mesh.hpp"
 
 GameObject::GameObject()
-	: m_pstrFrameName()
+	: myName(), m_pMesh(nullptr)
+	, isActivated(true)
 	, localTransform(), worldTransform()
 	, myParent(nullptr), mySibling(nullptr), myChild(nullptr)
-	, m_nMaterials(0), m_ppMaterials(nullptr), m_pMesh(nullptr)
-	, isActivated(true)
 	, transformModified(false)
 {}
 
@@ -38,7 +37,12 @@ GameObject::GameObject(XMFLOAT3&& position)
 }
 
 GameObject::~GameObject()
-{}
+{
+	if (m_pMesh)
+	{
+		delete m_pMesh;
+	}
+}
 
 void GameObject::Awake()
 {}
@@ -76,20 +80,9 @@ void GameObject::Render(P3DGrpCommandList cmdlist)
 {
 	PrepareRendering(cmdlist);
 
-	if (0 < m_nMaterials)
+	if (m_pMesh)
 	{
-		for (int i = 0; i < m_nMaterials; i++)
-		{
-			if (m_ppMaterials[i])
-			{
-				m_ppMaterials[i]->PrepareRendering(cmdlist);
-			}
-
-			if (m_pMesh)
-			{
-				m_pMesh->Render(cmdlist, i);
-			}
-		}
+		m_pMesh->Render(cmdlist);
 	}
 
 	if (mySibling)
@@ -128,9 +121,35 @@ bool GameObject::IsActivated() const
 	return isActivated;
 }
 
+void GameObject::SetMesh(Mesh* handle)
+{
+	m_pMesh = handle;
+}
+
+void GameObject::Attach(GameObject* child)
+{
+	if (child)
+	{
+		child->myParent = this;
+	}
+	if (myChild)
+	{
+		if (child)
+		{
+			child->mySibling = myChild->mySibling;
+		}
+
+		myChild->mySibling = child;
+	}
+	else
+	{
+		myChild = child;
+	}
+}
+
 GameObject* GameObject::FindFrame(const char* frame_name)
 {
-	if (frame_name == m_pstrFrameName)
+	if (frame_name == myName)
 	{
 		return this;
 	}

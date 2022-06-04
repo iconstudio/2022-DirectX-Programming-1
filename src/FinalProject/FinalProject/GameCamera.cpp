@@ -5,8 +5,15 @@
 
 GameCamera::GameCamera()
     : GameObject()
-    , myFieldOfView(60.0f)
 	, dxDevice(nullptr), dxTaskList(nullptr)
+	, m_d3dViewport(), m_d3dScissorRect(), myFieldOfView(60.0f)
+	, projectionView(Matrix4x4::Identity())
+	, m_xmf4x4InverseView(Matrix4x4::Identity())
+	, m_xmf4x4PerspectiveProject(Matrix4x4::Identity())
+	, projectionPerspective(Matrix4x4::Identity())
+	, m_xmf4x4ViewOrthographicProject(Matrix4x4::Identity())
+	, projectionOrthographic(Matrix4x4::Identity())
+	, staticCollider(), myCollider()
 	, m_pd3dcbCamera(nullptr), m_pcbMappedCamera(nullptr)
 {}
 
@@ -45,18 +52,22 @@ void GameCamera::PrepareRendering(P3DGrpCommandList cmdlist)
 	cmdlist->RSSetViewports(1, &m_d3dViewport);
 	cmdlist->RSSetScissorRects(1, &m_d3dScissorRect);
 
-	XMFLOAT4X4 xmf4x4View;
-	XMStoreFloat4x4(&xmf4x4View, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4View)));
-	::memcpy(&m_pcbMappedCamera->m_xmf4x4View, &xmf4x4View, sizeof(XMFLOAT4X4));
+	const auto myPosition = GetPosition();
 
-	XMFLOAT4X4 xmf4x4Projection;
-	XMStoreFloat4x4(&xmf4x4Projection, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Projection)));
-	::memcpy(&m_pcbMappedCamera->m_xmf4x4Projection, &xmf4x4Projection, sizeof(XMFLOAT4X4));
+	XMFLOAT4X4 xmf4x4View{};
+	XMStoreFloat4x4(&xmf4x4View, XMMatrixTranspose(XMLoadFloat4x4(&projectionView)));
 
-	::memcpy(&m_pcbMappedCamera->m_xmf3Position, &m_xmf3Position, sizeof(XMFLOAT3));
+	memcpy(&m_pcbMappedCamera->m_xmf4x4View, &xmf4x4View, sizeof(XMFLOAT4X4));
 
-	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
-	cmdlist->SetGraphicsRootConstantBufferView(0, d3dGpuVirtualAddress);
+	XMFLOAT4X4 xmf4x4Projection{};
+	XMStoreFloat4x4(&m_xmf4x4PerspectiveProject, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4PerspectiveProject)));
+
+	memcpy(&m_pcbMappedCamera->m_xmf4x4Projection, &xmf4x4Projection, sizeof(XMFLOAT4X4));
+
+	memcpy(&m_pcbMappedCamera->m_xmf3Position, &myPosition, sizeof(XMFLOAT3));
+
+	auto gpu_address = m_pd3dcbCamera->GetGPUVirtualAddress();
+	cmdlist->SetGraphicsRootConstantBufferView(0, gpu_address);
 }
 
 void GameCamera::Render(P3DGrpCommandList cmdlist)

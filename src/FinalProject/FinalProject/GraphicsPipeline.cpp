@@ -5,7 +5,10 @@
 GraphicsPipeline::GraphicsPipeline(P3DDevice device, P3DGrpCommandList cmdlist)
 	: dxDevice(device), dxTaskList(cmdlist), mySignature(nullptr)
 	, myDescription(), myState(nullptr), isModified(false)
+	, myVertexShader(nullptr), myPixelShader(nullptr)
 {
+	myShaderUniforms.reserve(5);
+
 	myDescription.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	myDescription.NodeMask = 0;
 	myDescription.SampleMask = UINT_MAX;
@@ -108,8 +111,8 @@ void GraphicsPipeline::CreatePipelineState()
 	if (isModified)
 	{
 		myDescription.pRootSignature = mySignature;
-		myDescription.VS = myShaders.at(0)->myCode;
-		myDescription.PS = myShaders.at(1)->myCode;
+		myDescription.VS = myVertexShader->myCode;
+		myDescription.PS = myPixelShader->myCode;
 
 		ID3D12PipelineState* handle = nullptr;
 
@@ -122,11 +125,10 @@ void GraphicsPipeline::CreatePipelineState()
 		}
 		else
 		{
-			myState = unique_ptr<ID3D12PipelineState*>(&handle);
+			myState = handle;
 		}
 
 		isModified = false;
-
 	}
 }
 
@@ -139,15 +141,36 @@ void GraphicsPipeline::Reset()
 void GraphicsPipeline::Update(float delta_time)
 {}
 
+void GraphicsPipeline::Release()
+{
+	if (mySignature)
+	{
+		mySignature->Release();
+		mySignature = nullptr;
+	}
+
+	if (myState)
+	{
+		myState->Release();
+		myState = nullptr;
+	}
+}
+
 void GraphicsPipeline::PrepareRendering()
 {
-	dxTaskList->SetGraphicsRootSignature(mySignature);
+	if (mySignature)
+	{
+		dxTaskList->SetGraphicsRootSignature(mySignature);
+	}
+
+	if (myState)
+	{
+		dxTaskList->SetPipelineState(myState);
+	}
 }
 
 void GraphicsPipeline::Render()
-{
-
-}
+{}
 
 GraphicsPipeline& GraphicsPipeline::Attach(const D3D12_ROOT_PARAMETER& param)
 {
@@ -165,16 +188,16 @@ GraphicsPipeline& GraphicsPipeline::Attach(P3DSignature* signature)
 	return *this;
 }
 
-GraphicsPipeline& GraphicsPipeline::Attach(const Shader& shader)
+GraphicsPipeline& GraphicsPipeline::AttachVertexShader(const Shader& shader)
 {
-	myShaders.emplace_back(new Shader(shader));
+	myVertexShader = make_shared<Shader>(shader);
 
 	return *this;
 }
 
-GraphicsPipeline& GraphicsPipeline::Attach(Shader&& shader)
+GraphicsPipeline& GraphicsPipeline::AttachPixelShader(const Shader& shader)
 {
-	myShaders.emplace_back(new Shader(std::forward<Shader>(shader)));
+	myPixelShader = make_shared<Shader>(shader);
 
 	return *this;
 }

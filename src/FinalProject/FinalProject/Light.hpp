@@ -1,7 +1,5 @@
 #pragma once
 
-constexpr auto MAX_LIGHTS = 16UL;
-
 class CLight
 {
 public:

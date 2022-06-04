@@ -4,7 +4,7 @@ class Material
 {
 public:
 	Material(RawMaterial* info);
-	Material(const int id);
+	Material& operator=(RawMaterial* info);
 	~Material();
 
 	void SetShader(const int id);

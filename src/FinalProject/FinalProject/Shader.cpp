@@ -16,7 +16,12 @@ Shader::Shader(const char* version)
 {}
 
 Shader::~Shader()
-{}
+{
+	if (myBlob)
+	{
+		myBlob->Release();
+	}
+}
 
 void Shader::Load(const Filepath& filepath)
 {
@@ -55,12 +60,6 @@ void Shader::Load(const Filepath& filepath)
 	}
 
 	myCode = result;
-
-	if (myBlob)
-	{
-		myBlob->Release();
-		myBlob = nullptr;
-	}
 }
 
 void Shader::Complile(const Filepath& filepath, const char* entry)
@@ -69,6 +68,10 @@ void Shader::Complile(const Filepath& filepath, const char* entry)
 #if defined(_DEBUG)
 	compile_options = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
+	if (!std::filesystem::exists(filepath))
+	{
+		throw "쉐이더 파일을 찾을 수 없음!";
+	}
 
 	const auto shader_path = filepath.c_str();
 
@@ -102,9 +105,10 @@ void Shader::Complile(const Filepath& filepath, const char* entry)
 	bytecode.pShaderBytecode = shader_blob->GetBufferPointer();
 
 	myCode = bytecode;
+	myBlob = shader_blob;
 
 	if (shader_blob)
 	{
-		shader_blob->Release();
+		isCompiled = true;
 	}
 }

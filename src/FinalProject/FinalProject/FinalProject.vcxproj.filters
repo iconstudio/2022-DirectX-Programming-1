@@ -120,6 +120,9 @@
     <ClInclude Include="GameCamera.hpp">
       <Filter>헤더 파일\System</Filter>
     </ClInclude>
+    <ClInclude Include="Model.hpp">
+      <Filter>헤더 파일\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FinalProject.cpp">
@@ -187,6 +190,12 @@
     </ClCompile>
     <ClCompile Include="GameCamera.cpp">
       <Filter>소스 파일\System</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>소스 파일\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

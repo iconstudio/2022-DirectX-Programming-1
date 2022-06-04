@@ -24,6 +24,7 @@ public:
 	virtual void OnWindow(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) override;
 
 	std::vector<shared_ptr<GameObject>> myInstances;
+	shared_ptr<GameCamera> myCamera;
 
 private:
 

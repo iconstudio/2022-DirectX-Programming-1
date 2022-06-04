@@ -52,8 +52,6 @@ void GameEntity::Reset()
 
 void GameEntity::Update(float delta_time)
 {
-	GameObject::Update(delta_time);
-
 	if (m_fRotationSpeed != 0.0f)
 	{
 		Rotate(m_xmf3RotationAxis, m_fRotationSpeed * delta_time, false);
@@ -73,6 +71,8 @@ void GameEntity::Update(float delta_time)
 			Speed -= deceleration;
 		}
 	}
+
+	GameObject::Update(delta_time);
 }
 void GameEntity::SetVelocity(const XMFLOAT3& vector)
 {
