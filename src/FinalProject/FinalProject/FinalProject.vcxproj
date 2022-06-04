@@ -163,6 +163,7 @@
     <ClInclude Include="FinalProject.h" />
     <ClInclude Include="DelegateObjet.hpp" />
     <ClInclude Include="Framework.hpp" />
+    <ClInclude Include="GameCamera.hpp" />
     <ClInclude Include="GameEntity.hpp" />
     <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="GraphicsCore.hpp" />
@@ -188,6 +189,7 @@
     <ClCompile Include="Arithmetics.cpp" />
     <ClCompile Include="FinalProject.cpp" />
     <ClCompile Include="Framework.cpp" />
+    <ClCompile Include="GameCamera.cpp" />
     <ClCompile Include="GameEntity.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GraphicsCore.cpp" />
