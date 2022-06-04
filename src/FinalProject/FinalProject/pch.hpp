@@ -30,6 +30,7 @@ class MeshPoint;
 class GameTerrain;
 class GameObject;
 class GameCamera;
+class GameCameraBlob;
 
 class GameEntity;
 class GameModel;
@@ -44,5 +45,6 @@ class Explosion;
 
 constexpr long FRAME_BUFFER_W = 800L;
 constexpr long FRAME_BUFFER_H = 600L;
+constexpr float FRAME_BUFFER_ASPECT = float(800L) / float(600L);
 
 #endif //PCH_H
