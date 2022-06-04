@@ -64,6 +64,13 @@ using std::make_pair;
 using Filepath = std::filesystem::path;
 constexpr auto PI = std::numbers::pi;
 
+extern ID3D12Resource* CreateBufferResource(P3DDevice device
+	, P3DGrpCommandList cmd_list
+	, void* origin_data, UINT origin_size
+	, D3D12_HEAP_TYPE heap_type = D3D12_HEAP_TYPE_UPLOAD
+	, D3D12_RESOURCE_STATES state = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
+	, ID3D12Resource** buffer = NULL);
+
 class XYZWrapper
 {
 public:
