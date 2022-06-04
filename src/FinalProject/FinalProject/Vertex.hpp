@@ -36,6 +36,5 @@ public:
 	LightenVertex(XMFLOAT3&& position);
 	virtual ~LightenVertex();
 
-	XMFLOAT3 myNormal
-;
+	XMFLOAT3 myNormal;
 };
