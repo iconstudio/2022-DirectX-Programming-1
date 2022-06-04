@@ -1,6 +1,5 @@
 #include "pch.hpp"
 #include "GraphicsPipeline.hpp"
-#include "GraphicsCore.hpp"
 #include "Shader.hpp"
 
 GraphicsPipeline::GraphicsPipeline(P3DDevice device, P3DGrpCommandList cmdlist)
@@ -53,16 +52,6 @@ void GraphicsPipeline::CreateUniforms()
 	param2.Descriptor.RegisterSpace = 0;
 	param2.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	Attach(param2);
-
-
-	UINT aligned_sz = ((sizeof(GameCameraBlob) + 255) & ~255);
-	m_pd3dcbCamera = ::CreateBufferResource(dxDevice, dxTaskList
-		, NULL, aligned_sz
-		, D3D12_HEAP_TYPE_UPLOAD
-		, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
-		, NULL);
-
-	m_pd3dcbCamera->Map(0, NULL, (void**)&m_pcbMappedCamera);
 }
 
 void GraphicsPipeline::CreateRootSignature()

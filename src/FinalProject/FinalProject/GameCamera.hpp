@@ -7,18 +7,19 @@ public:
 	GameCamera();
 	virtual ~GameCamera();
 
-	void SetViewport(float width, float height);
-	void SetFOVAngle(float angle);
-
-	void CreatePerspectiveProjectionMatrix(float znear, float zfar);
-	void CreateOrthographicProjectionMatrix(float znear, float zfar, float width, float height);
-
 	virtual void Awake() override;
 	virtual void Start() override;
 	virtual void Reset() override;
 	virtual void Update(float delta_time) override;
 	virtual void PrepareRendering(P3DGrpCommandList cmdlist);
 	virtual void Render(P3DGrpCommandList cmdlist);
+
+	void Init(P3DDevice device, P3DGrpCommandList cmdlist);
+	void SetViewport(float width, float height);
+	void SetFOVAngle(float angle);
+
+	void CreatePerspectiveProjectionMatrix(float znear, float zfar);
+	void CreateOrthographicProjectionMatrix(float znear, float zfar, float width, float height);
 
 	void GenerateViewMatrix();
 
@@ -27,6 +28,12 @@ public:
 	bool IsInFrustum(const BoundingSphere& collider) const;
 
 	float myRoll, myYaw, myPitch;
+
+	P3DDevice dxDevice;
+	P3DGrpCommandList dxTaskList;
+
+	ID3D12Resource* m_pd3dcbCamera;
+	GameCameraBlob* m_pcbMappedCamera;
 
 	D3D12_VIEWPORT m_d3dViewport;
 	D3D12_RECT m_d3dScissorRect;

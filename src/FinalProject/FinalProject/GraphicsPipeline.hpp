@@ -41,8 +41,6 @@ private:
 	std::vector<D3D12_ROOT_PARAMETER> myShaderUniforms;
 
 	//shared_ptr<GameCamera> mainCamera;
-	ID3D12Resource* m_pd3dcbCamera;
-	GameCameraBlob* m_pcbMappedCamera;
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC myDescription;
 	shared_ptr<ID3D12PipelineState*> myState;

@@ -1,10 +1,13 @@
 #include "pch.hpp"
 #include "GameCamera.hpp"
 #include "Arithmetics.hpp"
+#include "GraphicsCore.hpp"
 
 GameCamera::GameCamera()
     : GameObject()
     , myFieldOfView(60.0f)
+	, dxDevice(nullptr), dxTaskList(nullptr)
+	, m_pd3dcbCamera(nullptr), m_pcbMappedCamera(nullptr)
 {}
 
 GameCamera::~GameCamera()
@@ -15,7 +18,21 @@ void GameCamera::Awake()
 }
 
 void GameCamera::Start()
-{}
+{
+	UINT aligned_sz = ((sizeof(GameCameraBlob) + 255) & ~255);
+	m_pd3dcbCamera = ::CreateBufferResource(dxDevice, dxTaskList
+		, NULL, aligned_sz
+		, D3D12_HEAP_TYPE_UPLOAD
+		, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
+		, NULL);
+
+	auto place = reinterpret_cast<void**>(&m_pcbMappedCamera);
+	auto valid = m_pd3dcbCamera->Map(0, NULL, place);
+	if (FAILED(valid))
+	{
+		throw "카메라 초기화 실패!";
+	}
+}
 
 void GameCamera::Reset()
 {}
@@ -27,11 +44,29 @@ void GameCamera::PrepareRendering(P3DGrpCommandList cmdlist)
 {
 	cmdlist->RSSetViewports(1, &m_d3dViewport);
 	cmdlist->RSSetScissorRects(1, &m_d3dScissorRect);
+
+	XMFLOAT4X4 xmf4x4View;
+	XMStoreFloat4x4(&xmf4x4View, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4View)));
+	::memcpy(&m_pcbMappedCamera->m_xmf4x4View, &xmf4x4View, sizeof(XMFLOAT4X4));
+
+	XMFLOAT4X4 xmf4x4Projection;
+	XMStoreFloat4x4(&xmf4x4Projection, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Projection)));
+	::memcpy(&m_pcbMappedCamera->m_xmf4x4Projection, &xmf4x4Projection, sizeof(XMFLOAT4X4));
+
+	::memcpy(&m_pcbMappedCamera->m_xmf3Position, &m_xmf3Position, sizeof(XMFLOAT3));
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
+	cmdlist->SetGraphicsRootConstantBufferView(0, d3dGpuVirtualAddress);
 }
 
 void GameCamera::Render(P3DGrpCommandList cmdlist)
 {}
 
+void GameCamera::Init(P3DDevice device, P3DGrpCommandList cmdlist)
+{
+	dxDevice = device;
+	dxTaskList = cmdlist;
+}
 
 void GameCamera::SetViewport(float width, float height)
 {
