@@ -97,11 +97,11 @@ void Scene::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 {
 	switch (msg)
 	{
-		case WM_KEYDOWN:
+		case WM_LBUTTONDOWN:
 		{}
 		break;
 
-		case WM_KEYUP:
+		case WM_LBUTTONUP:
 		{}
 		break;
 
@@ -115,6 +115,14 @@ void Scene::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
 {
 	switch (msg)
 	{
+		case WM_KEYDOWN:
+		{}
+		break;
+
+		case WM_KEYUP:
+		{}
+		break;
+
 		default:
 		{}
 		break;

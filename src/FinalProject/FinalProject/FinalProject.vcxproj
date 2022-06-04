@@ -160,6 +160,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Arithmetics.hpp" />
+    <ClInclude Include="CubeMesh.hpp" />
     <ClInclude Include="FinalProject.h" />
     <ClInclude Include="DelegateObjet.hpp" />
     <ClInclude Include="Framework.hpp" />
@@ -188,6 +189,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Arithmetics.cpp" />
+    <ClCompile Include="CubeMesh.cpp" />
     <ClCompile Include="FinalProject.cpp" />
     <ClCompile Include="Framework.cpp" />
     <ClCompile Include="GameCamera.cpp" />

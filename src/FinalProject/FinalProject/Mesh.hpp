@@ -33,15 +33,15 @@ public:
 class Mesh
 {
 public:
-	Mesh(P3DDevice device, P3DGrpCommandList cmd_list, RawMesh* pMeshInfo);
+	Mesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw);
 	virtual ~Mesh();
 
-	virtual void Build();
+	virtual void Build(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw);
 	virtual void Cleanup();
 
 	virtual void PrepareRendering(P3DGrpCommandList cmdlist);
 	virtual void Render(P3DGrpCommandList cmdlist);
-	virtual void Render(P3DGrpCommandList cmd_list, int nSubSet);
+	virtual void Render(P3DGrpCommandList cmdlist, int nSubSet);
 
 	D3D12_PRIMITIVE_TOPOLOGY typePrimitive = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT m_nSlot = 0;
