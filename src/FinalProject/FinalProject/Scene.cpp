@@ -83,6 +83,14 @@ void Scene::Render(P3DGrpCommandList cmdlist)
 	}
 }
 
+void Scene::Release()
+{
+	if (myCamera)
+	{
+		myCamera->Release();
+	}
+}
+
 void Scene::SetCamera(const shared_ptr<GameCamera>& cam)
 {
 	myCamera = cam;

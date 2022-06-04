@@ -4,16 +4,16 @@
 #include "GraphicsCore.hpp"
 
 GameCamera::GameCamera()
-    : GameObject()
+	: GameObject()
 	, myRoll(0.0f), myYaw(0.0f), myPitch(0.0f)
 	, dxDevice(nullptr), dxTaskList(nullptr)
 	, m_d3dViewport(), m_d3dScissorRect(), myFieldOfView(60.0f)
 	, projectionView(Matrix4x4::Identity())
-	, m_xmf4x4InverseView(Matrix4x4::Identity())
+	//, m_xmf4x4InverseView(Matrix4x4::Identity())
 	, m_xmf4x4PerspectiveProject(Matrix4x4::Identity())
-	, projectionPerspective(Matrix4x4::Identity())
+	//, projectionPerspective(Matrix4x4::Identity())
 	, m_xmf4x4ViewOrthographicProject(Matrix4x4::Identity())
-	, projectionOrthographic(Matrix4x4::Identity())
+	//, projectionOrthographic(Matrix4x4::Identity())
 	, staticCollider(), myCollider()
 	, m_pd3dcbCamera(nullptr), m_pcbMappedCamera(nullptr)
 {}
@@ -22,8 +22,7 @@ GameCamera::~GameCamera()
 {}
 
 void GameCamera::Awake()
-{
-}
+{}
 
 void GameCamera::Start()
 {
@@ -46,7 +45,9 @@ void GameCamera::Reset()
 {}
 
 void GameCamera::Update(float delta_time)
-{}
+{
+	GenerateViewMatrix();
+}
 
 void GameCamera::PrepareRendering(P3DGrpCommandList cmdlist)
 {
@@ -67,12 +68,21 @@ void GameCamera::PrepareRendering(P3DGrpCommandList cmdlist)
 
 	memcpy(&m_pcbMappedCamera->m_xmf3Position, &myPosition, sizeof(XMFLOAT3));
 
-	auto gpu_address = m_pd3dcbCamera->GetGPUVirtualAddress();
+	const auto gpu_address = m_pd3dcbCamera->GetGPUVirtualAddress();
 	cmdlist->SetGraphicsRootConstantBufferView(0, gpu_address);
 }
 
 void GameCamera::Render(P3DGrpCommandList cmdlist)
 {}
+
+void GameCamera::Release()
+{
+	if (m_pd3dcbCamera)
+	{
+		m_pd3dcbCamera->Unmap(0, NULL);
+		m_pd3dcbCamera->Release();
+	}
+}
 
 void GameCamera::Init(P3DDevice device, P3DGrpCommandList cmdlist)
 {
@@ -82,13 +92,13 @@ void GameCamera::Init(P3DDevice device, P3DGrpCommandList cmdlist)
 
 void GameCamera::SetViewport(float width, float height)
 {
-    m_d3dViewport = { 0, 0, width, height, 0.0f, 1.0f };
-    m_d3dScissorRect = { 0, 0, (long)width , (long)height };
+	m_d3dViewport = { 0, 0, width, height, 0.0f, 1.0f };
+	m_d3dScissorRect = { 0, 0, (long)width , (long)height };
 }
 
 void GameCamera::SetFOVAngle(float angle)
 {
-    myFieldOfView = angle;
+	myFieldOfView = angle;
 }
 
 void GameCamera::CreatePerspectiveProjectionMatrix(float znear, float zfar)
@@ -109,7 +119,7 @@ void GameCamera::CreateOrthographicProjectionMatrix(float znear, float zfar, flo
 
 void GameCamera::GenerateViewMatrix()
 {
-	auto& myRight =  worldTransform.GetRight();
+	auto& myRight = worldTransform.GetRight();
 	auto& myUp = worldTransform.GetUp();
 	auto& myLook = worldTransform.GetLook();
 	auto myPosition = XMFLOAT3(worldTransform.GetPosition());
@@ -140,10 +150,10 @@ void GameCamera::GenerateViewMatrix()
 	projectionView._43 = -Vector3::DotProduct(myPosition, XMFLOAT3(myLook));
 
 	// 원근 투영 행렬
-	projectionPerspective = Matrix4x4::Multiply(projectionView, m_xmf4x4PerspectiveProject);
+	//projectionPerspective = Matrix4x4::Multiply(projectionView, m_xmf4x4PerspectiveProject);
 
 	// 직교 투영 행렬
-	projectionOrthographic = Matrix4x4::Multiply(projectionView, m_xmf4x4ViewOrthographicProject);
+	//projectionOrthographic = Matrix4x4::Multiply(projectionView, m_xmf4x4ViewOrthographicProject);
 
 	// 카메라를 위한 월드 변환 행렬
 	// 충돌체를 월드 위치로 옮긴다.

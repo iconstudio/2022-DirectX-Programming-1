@@ -18,6 +18,7 @@ public:
 	virtual void Update(float delta_time) override;
 	virtual	void PrepareRendering(P3DGrpCommandList cmdlist);
 	virtual void Render(P3DGrpCommandList cmdlist);
+	virtual void Release();
 
 	void SetCamera(const shared_ptr<GameCamera>& cam);
 

@@ -7,12 +7,13 @@ public:
 	GameCamera();
 	virtual ~GameCamera();
 
-	virtual void Awake() override;
-	virtual void Start() override;
-	virtual void Reset() override;
-	virtual void Update(float delta_time) override;
-	virtual void PrepareRendering(P3DGrpCommandList cmdlist);
-	virtual void Render(P3DGrpCommandList cmdlist);
+	void Awake() override;
+	void Start() override;
+	void Reset() override;
+	void Update(float delta_time) override;
+	void PrepareRendering(P3DGrpCommandList cmdlist);
+	void Render(P3DGrpCommandList cmdlist);
+	void Release();
 
 	void Init(P3DDevice device, P3DGrpCommandList cmdlist);
 	void SetViewport(float width, float height);
@@ -41,13 +42,13 @@ private:
 	float myFieldOfView;
 
 	XMFLOAT4X4 projectionView;
-	XMFLOAT4X4 m_xmf4x4InverseView;
+	//XMFLOAT4X4 m_xmf4x4InverseView;
 
 	XMFLOAT4X4 m_xmf4x4PerspectiveProject;
-	XMFLOAT4X4 projectionPerspective;
+	//XMFLOAT4X4 projectionPerspective;
 
 	XMFLOAT4X4 m_xmf4x4ViewOrthographicProject;
-	XMFLOAT4X4 projectionOrthographic;
+	//XMFLOAT4X4 projectionOrthographic;
 
 	BoundingFrustum	staticCollider;
 	BoundingFrustum	myCollider;
