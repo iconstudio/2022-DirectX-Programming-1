@@ -65,7 +65,7 @@ void GraphicsPipeline::CreateRootSignature()
 	auto flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 
 	D3D12_ROOT_SIGNATURE_DESC signature_desc{};
-	signature_desc.NumParameters = myShaderUniforms.size();
+	signature_desc.NumParameters = static_cast<UINT>(myShaderUniforms.size());
 	signature_desc.pParameters = myShaderUniforms.data();
 	signature_desc.NumStaticSamplers = 0;
 	signature_desc.pStaticSamplers = nullptr;
@@ -141,21 +141,6 @@ void GraphicsPipeline::Reset()
 void GraphicsPipeline::Update(float delta_time)
 {}
 
-void GraphicsPipeline::Release()
-{
-	if (mySignature)
-	{
-		mySignature->Release();
-		mySignature = nullptr;
-	}
-
-	if (myState)
-	{
-		myState->Release();
-		myState = nullptr;
-	}
-}
-
 void GraphicsPipeline::PrepareRendering()
 {
 	if (mySignature)
@@ -171,6 +156,21 @@ void GraphicsPipeline::PrepareRendering()
 
 void GraphicsPipeline::Render()
 {}
+
+void GraphicsPipeline::Release()
+{
+	if (mySignature)
+	{
+		mySignature->Release();
+		mySignature = nullptr;
+	}
+
+	if (myState)
+	{
+		myState->Release();
+		myState = nullptr;
+	}
+}
 
 GraphicsPipeline& GraphicsPipeline::Attach(const D3D12_ROOT_PARAMETER& param)
 {

@@ -34,6 +34,7 @@ public:
 	void SetPipeline(const int index);
 	const GraphicsPipeline& GetPipeline(const int index) const;
 	GraphicsPipeline& GetPipeline(const int index);
+	P3DDevice GetDevice();
 	P3DGrpCommandList GetCommandList();
 
 	GraphicsPipeline CreateEmptyPipeline() const;

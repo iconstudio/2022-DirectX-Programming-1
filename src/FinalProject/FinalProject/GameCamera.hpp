@@ -27,6 +27,7 @@ public:
 	bool IsInFrustum(const BoundingOrientedBox& collider) const;
 	bool IsInFrustum(const BoundingSphere& collider) const;
 
+private:
 	float myRoll, myYaw, myPitch;
 
 	P3DDevice dxDevice;

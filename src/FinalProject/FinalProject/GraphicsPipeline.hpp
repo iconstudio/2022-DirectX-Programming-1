@@ -24,10 +24,9 @@ public:
 	virtual void Start() override;
 	virtual void Reset() override;
 	virtual void Update(float delta_time) override;
-	virtual void Release();
-
 	virtual void PrepareRendering();
 	virtual void Render();
+	virtual void Release();
 
 	bool IsModified() const;
 

@@ -21,9 +21,7 @@ public:
 	void PrepareRendering();
 	void Render();
 
-	template<typename SceneType>
-		requires(std::is_base_of_v<Scene, SceneType>)
-	constexpr shared_ptr<Scene> RegisterScene(SceneType&& stage);
+	shared_ptr<Scene> RegisterScene(Scene&& stage);
 
 	void AddStage(const shared_ptr<Scene>& stage);
 	bool JumpToStage(const size_t index);

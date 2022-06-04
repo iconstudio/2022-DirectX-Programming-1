@@ -143,16 +143,13 @@ void Framework::OnWindow(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	}
 }
 
-template<typename SceneType>
-	requires(std::is_base_of_v<Scene, SceneType>)
-constexpr shared_ptr<Scene> Framework::RegisterScene(SceneType&& stage)
+shared_ptr<Scene> Framework::RegisterScene(Scene&& stage)
 {
-	auto handle = shared_ptr<SceneType>(std::forward<SceneType*>(new SceneType(stage)));
-	auto ptr = std::static_pointer_cast<Scene>(handle);
+	auto handle = make_shared<Scene>(std::forward<Scene>(stage));
 
-	myScenes.try_emplace(ptr->GetName(), ptr);
+	myScenes.try_emplace(handle->GetName(), handle);
 
-	return ptr;
+	return handle;
 }
 
 void Framework::AddStage(const shared_ptr<Scene>& stage)
@@ -164,8 +161,6 @@ bool Framework::JumpToStage(const size_t index)
 {
 	if (0 <= index && index < myStages.size())
 	{
-		mySystem.WaitForGpuComplete();
-
 		myStageIterator = myStages.begin() + index;
 
 		const auto& target = GetStage(index);
@@ -186,8 +181,6 @@ bool Framework::JumpToStage(const size_t index)
 bool Framework::JumpToStage(const std::vector<shared_ptr<Scene>>::iterator it)
 {
 	myStageIterator = it;
-
-	mySystem.WaitForGpuComplete();
 
 	if (currentScene)
 	{

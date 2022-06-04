@@ -5,6 +5,8 @@
 #include "Framework.hpp"
 #include "GraphicsCore.hpp"
 #include "GraphicsPipeline.hpp"
+#include "Scene.hpp"
+#include "GameCamera.hpp"
 #include "Shader.hpp"
 
 constexpr int MAX_LOADSTRING = 100;
@@ -24,8 +26,21 @@ Framework gameFramework{ gameRenderer, FRAME_BUFFER_W, FRAME_BUFFER_H };
 
 void InitialzeGame(HWND hwnd)
 {
-	gameRenderer.SetHWND(hwnd).Awake();
+	auto camera = make_shared<GameCamera>();
+	camera->SetViewport(float(FRAME_BUFFER_W), float(FRAME_BUFFER_H));
+	camera->SetFOVAngle(60.0f);
+	camera->CreatePerspectiveProjectionMatrix(1.0f, 1000.0f);
+	camera->CreateOrthographicProjectionMatrix(1.0f, 1000.0f, float(FRAME_BUFFER_W), float(FRAME_BUFFER_H));
+	camera->GenerateViewMatrix();
+
+	auto testbed = gameFramework.RegisterScene(Scene(gameFramework, "Test Scene"));
+	testbed->SetCamera(camera);
+
+	gameFramework.AddStage(testbed);
+
 	gameFramework.SetHWND(hwnd).SetHInstance(gameClient).Awake();
+	gameRenderer.SetHWND(hwnd).Awake();
+	camera->Init(gameRenderer.GetDevice(), gameRenderer.GetCommandList());
 
 	auto vs_shader = gameRenderer.CreateEmptyShader("vs_5_1");
 	vs_shader.Complile("shaders/VertexShader.hlsl", "main");

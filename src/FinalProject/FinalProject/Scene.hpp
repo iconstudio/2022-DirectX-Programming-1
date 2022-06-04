@@ -19,9 +19,15 @@ public:
 	virtual	void PrepareRendering(P3DGrpCommandList cmdlist);
 	virtual void Render(P3DGrpCommandList cmdlist);
 
+	void SetCamera(const shared_ptr<GameCamera>& cam);
+
+	const std::string& GetName() const;
+
 	virtual void OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info) override;
 	virtual void OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state) override;
 	virtual void OnWindow(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) override;
+
+	const std::string myName;
 
 	std::vector<shared_ptr<GameObject>> myInstances;
 	shared_ptr<GameCamera> myCamera;

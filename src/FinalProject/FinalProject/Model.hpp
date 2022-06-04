@@ -8,7 +8,7 @@ public:
 
 Model* Load(P3DDevice device
 	, P3DGrpCommandList cmdlist
-	, const char* pstrFileName);
+	, const char* filepath);
 
 Model* LoadFrameHierarchyFromFile(P3DDevice device
 	, P3DGrpCommandList cmdlist

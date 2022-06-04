@@ -99,6 +99,7 @@ RawMesh* LoadRawMesh(FILE* pInFile)
 		{
 			nIndices = ReadIntegerFromFile(pInFile);
 
+			// 모든 메쉬에서 색인된 정점 불러오기
 			if (nIndices > 0)
 			{
 				raw->m_pnIndices = new UINT[nIndices];

@@ -5,6 +5,7 @@
 
 GameCamera::GameCamera()
     : GameObject()
+	, myRoll(0.0f), myYaw(0.0f), myPitch(0.0f)
 	, dxDevice(nullptr), dxTaskList(nullptr)
 	, m_d3dViewport(), m_d3dScissorRect(), myFieldOfView(60.0f)
 	, projectionView(Matrix4x4::Identity())

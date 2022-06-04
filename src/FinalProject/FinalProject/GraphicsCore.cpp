@@ -746,6 +746,11 @@ GraphicsPipeline& GraphicsCore::GetPipeline(const int index)
 	return *myPipelines.at(index);
 }
 
+P3DDevice GraphicsCore::GetDevice()
+{
+	return myDevice;
+}
+
 P3DGrpCommandList GraphicsCore::GetCommandList()
 {
 	return myCommandList;

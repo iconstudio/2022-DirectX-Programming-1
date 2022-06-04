@@ -5,6 +5,7 @@
 
 Scene::Scene(Framework& framework, const char* name)
 	: WeakSingleton(framework)
+	, myName(name)
 	, myCamera(nullptr)
 {}
 
@@ -18,17 +19,30 @@ void Scene::Awake()
 		instance->Awake();
 	}
 
-	myCamera->Awake();
+	if (myCamera)
+	{
+		myCamera->Awake();
+	}
 }
 
 void Scene::Start()
 {
-	myCamera->Start();
+	if (myCamera)
+	{
+		myCamera->Start();
+	}
+	else
+	{
+		throw "카메라가 없음!";
+	}
 }
 
 void Scene::Reset()
 {
-	myCamera->Reset();
+	if (myCamera)
+	{
+		myCamera->Reset();
+	}
 }
 
 void Scene::Update(float delta_time)
@@ -38,29 +52,81 @@ void Scene::Update(float delta_time)
 		instance->Update(delta_time);
 	}
 
-	myCamera->Update(delta_time);
+	if (myCamera)
+	{
+		myCamera->Update(delta_time);
+	}
 }
 
 void Scene::PrepareRendering(P3DGrpCommandList cmdlist)
 {
-	myCamera->PrepareRendering(cmdlist);
+	if (myCamera)
+	{
+		myCamera->PrepareRendering(cmdlist);
+	}
+	else
+	{
+		throw "카메라가 없음!";
+	}
 }
 
 void Scene::Render(P3DGrpCommandList cmdlist)
 {
-	myCamera->Render(cmdlist);
-
-	for (auto& instance : myInstances)
+	if (myCamera)
 	{
-		instance->Render(cmdlist);
+		myCamera->Render(cmdlist);
+
+		for (auto& instance : myInstances)
+		{
+			instance->Render(cmdlist);
+		}
 	}
 }
 
+void Scene::SetCamera(const shared_ptr<GameCamera>& cam)
+{
+	myCamera = cam;
+}
+
+const std::string& Scene::GetName() const
+{
+	return myName;
+}
+
 void Scene::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
-{}
+{
+	switch (msg)
+	{
+		case WM_KEYDOWN:
+		{}
+		break;
+
+		case WM_KEYUP:
+		{}
+		break;
+
+		default:
+		{}
+		break;
+	}
+}
 
 void Scene::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
-{}
+{
+	switch (msg)
+	{
+		default:
+		{}
+		break;
+	}
+}
 
 void Scene::OnWindow(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
-{}
+{
+	switch (msg)
+	{
+		default:
+		{}
+		break;
+	}
+}
