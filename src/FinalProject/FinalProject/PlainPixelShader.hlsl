@@ -1,4 +1,6 @@
-float4 main() : SV_TARGET
+#include "PlainShaders.hlsli"
+
+float4 main(VS_DIFFUSED_OUTPUT diffuse) : SV_TARGET
 {
-	return float4(1.0f, 1.0f, 1.0f, 1.0f);
+	return diffuse.colour;
 }

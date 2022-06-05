@@ -19,7 +19,7 @@ Shader::~Shader()
 {
 	if (myBlob)
 	{
-		myBlob->Release();
+		//myBlob->Release();
 	}
 }
 
@@ -94,10 +94,10 @@ void Shader::Complile(const Filepath& filepath, const char* entry)
 		error_contents = reinterpret_cast<char*>(error_blob->GetBufferPointer());
 		//throw error_contents; // 경고도 포함
 
-		WCHAR pstrDebug[256]{};
-		wsprintf(pstrDebug, L"%c", error_contents);
+		CHAR pstrDebug[256]{};
+		snprintf(pstrDebug, 256, "%s", error_contents);
 
-		OutputDebugString(pstrDebug);
+		OutputDebugStringA(pstrDebug);
 	}
 
 	D3DByteCode bytecode{};

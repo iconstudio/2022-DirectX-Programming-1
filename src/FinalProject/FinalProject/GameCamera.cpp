@@ -72,7 +72,7 @@ void GameCamera::PrepareRendering(P3DGrpCommandList cmdlist)
 	cmdlist->SetGraphicsRootConstantBufferView(0, gpu_address);
 }
 
-void GameCamera::Render(P3DGrpCommandList cmdlist)
+void GameCamera::Render(P3DGrpCommandList cmdlist) const
 {}
 
 void GameCamera::Release()

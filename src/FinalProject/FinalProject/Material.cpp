@@ -28,7 +28,7 @@ void Material::SetShader(const int id)
 	myShaderID = id;
 }
 
-void Material::PrepareRendering(P3DGrpCommandList cmdlist)
+void Material::PrepareRendering(P3DGrpCommandList cmdlist) const
 {
 	cmdlist->SetGraphicsRoot32BitConstants(1, 4, &(m_xmf4Ambient), 16);
 	cmdlist->SetGraphicsRoot32BitConstants(1, 4, &(m_xmf4Diffuse), 20);

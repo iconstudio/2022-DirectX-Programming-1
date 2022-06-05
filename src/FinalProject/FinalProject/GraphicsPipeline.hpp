@@ -30,7 +30,7 @@ public:
 
 	bool IsModified() const;
 
-private:
+protected:
 	virtual void CreateUniforms();
 	void CreateRootSignature();
 	void CreatePipelineState();

@@ -40,7 +40,8 @@ GameObject::~GameObject()
 {
 	if (m_pMesh)
 	{
-		delete m_pMesh;
+		// todo: shared_ptr
+		//delete m_pMesh;
 	}
 }
 
@@ -65,7 +66,7 @@ void GameObject::Update(float delta_time)
 	}
 }
 
-void GameObject::PrepareRendering(P3DGrpCommandList cmdlist)
+void GameObject::PrepareRendering(P3DGrpCommandList cmdlist) const
 {
 	XMFLOAT4X4 xmf4x4World{};
 
@@ -76,7 +77,7 @@ void GameObject::PrepareRendering(P3DGrpCommandList cmdlist)
 	cmdlist->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 }
 
-void GameObject::Render(P3DGrpCommandList cmdlist)
+void GameObject::Render(P3DGrpCommandList cmdlist) const
 {
 	PrepareRendering(cmdlist);
 

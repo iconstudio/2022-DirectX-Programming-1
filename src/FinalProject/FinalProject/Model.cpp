@@ -287,7 +287,9 @@ Model* LoadFrameHierarchyFromFile(ID3D12Device* device
 				if (raw->m_nType & VERTEXT_NORMAL)
 				{
 					// 메쉬 생성
-					skeleton = new Mesh(device, cmdlist, raw);
+					skeleton = new Mesh;
+					skeleton->Awake(device, cmdlist, raw);
+					skeleton->Release();
 				}
 
 				if (skeleton)

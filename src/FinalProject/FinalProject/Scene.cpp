@@ -58,7 +58,7 @@ void Scene::Update(float delta_time)
 	}
 }
 
-void Scene::PrepareRendering(P3DGrpCommandList cmdlist)
+void Scene::PrepareRendering(P3DGrpCommandList cmdlist) const
 {
 	if (myCamera)
 	{
@@ -70,7 +70,7 @@ void Scene::PrepareRendering(P3DGrpCommandList cmdlist)
 	}
 }
 
-void Scene::Render(P3DGrpCommandList cmdlist)
+void Scene::Render(P3DGrpCommandList cmdlist) const
 {
 	if (myCamera)
 	{
@@ -94,6 +94,16 @@ void Scene::Release()
 void Scene::SetCamera(const shared_ptr<GameCamera>& cam)
 {
 	myCamera = cam;
+}
+
+void Scene::AddInstance(const shared_ptr<GameObject>& ptr)
+{
+	myInstances.push_back(ptr);
+}
+
+void Scene::AddInstance(shared_ptr<GameObject>&& ptr)
+{
+	myInstances.push_back(std::forward<shared_ptr<GameObject>>(ptr));
 }
 
 const std::string& Scene::GetName() const

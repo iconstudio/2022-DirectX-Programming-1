@@ -33,15 +33,17 @@ public:
 class Mesh
 {
 public:
-	Mesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw);
+	Mesh();
 	virtual ~Mesh();
 
-	virtual void Build(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw);
-	virtual void Cleanup();
+	void AddMaterial(Material* mat);
 
-	virtual void PrepareRendering(P3DGrpCommandList cmdlist);
-	virtual void Render(P3DGrpCommandList cmdlist);
-	virtual void Render(P3DGrpCommandList cmdlist, int nSubSet);
+	virtual void Awake(P3DDevice device, P3DGrpCommandList cmdlist);
+	virtual void Awake(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw);
+	virtual void Release();
+	virtual void PrepareRendering(P3DGrpCommandList cmdlist) const;
+	virtual void Render(P3DGrpCommandList cmdlist) const;
+	virtual void Render(P3DGrpCommandList cmdlist, int index) const;
 
 	D3D12_PRIMITIVE_TOPOLOGY typePrimitive = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT m_nSlot = 0;
@@ -53,16 +55,16 @@ public:
 	std::vector<Material*> myMaterials;
 
 protected:
-	ID3D12Resource* m_pd3dPositionBuffer;
-	ID3D12Resource* m_pd3dPositionUploadBuffer;
-	D3D12_VERTEX_BUFFER_VIEW m_d3dPositionBufferView;
+	ID3D12Resource* mPositionBuffer;
+	ID3D12Resource* myPositionUploadBuffer;
+	D3D12_VERTEX_BUFFER_VIEW myPositionBufferView;
 
 	int numberSubMeshes;
 	int* numberSubMeshesIndexes;
 
-	ID3D12Resource** m_ppd3dSubSetIndexBuffers;
-	ID3D12Resource** m_ppd3dSubSetIndexUploadBuffers;
-	D3D12_INDEX_BUFFER_VIEW* m_pd3dSubSetIndexBufferViews;
+	ID3D12Resource** myIndexBuffers;
+	ID3D12Resource** myIndexUploadBuffers;
+	D3D12_INDEX_BUFFER_VIEW* myIndexBufferViews;
 
 	ID3D12Resource* m_pd3dNormalBuffer;
 	ID3D12Resource* m_pd3dNormalUploadBuffer;

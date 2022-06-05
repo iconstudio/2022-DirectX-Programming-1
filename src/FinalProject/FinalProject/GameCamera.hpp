@@ -12,7 +12,7 @@ public:
 	void Reset() override;
 	void Update(float delta_time) override;
 	void PrepareRendering(P3DGrpCommandList cmdlist);
-	void Render(P3DGrpCommandList cmdlist);
+	void Render(P3DGrpCommandList cmdlist) const;
 	void Release();
 
 	void Init(P3DDevice device, P3DGrpCommandList cmdlist);

@@ -6,7 +6,11 @@
 #include "GraphicsCore.hpp"
 #include "GraphicsPipeline.hpp"
 #include "Scene.hpp"
+#include "IlluminatedScene.hpp"
+#include "Material.hpp"
 #include "GameCamera.hpp"
+#include "CubeMesh.hpp"
+#include "GameEntity.hpp"
 #include "Shader.hpp"
 
 constexpr int MAX_LOADSTRING = 100;
@@ -24,23 +28,13 @@ Timer gameTimer{ 100.0f };
 GraphicsCore gameRenderer{ FRAME_BUFFER_W, FRAME_BUFFER_H };
 Framework gameFramework{ gameRenderer, FRAME_BUFFER_W, FRAME_BUFFER_H };
 
+CubeMesh* test_cube1, * test_cube2;
+Material* default_material;
+
 void InitialzeGame(HWND hwnd)
 {
-	auto camera = make_shared<GameCamera>();
-	camera->SetViewport(float(FRAME_BUFFER_W), float(FRAME_BUFFER_H));
-	camera->SetFOVAngle(60.0f);
-	camera->CreatePerspectiveProjectionMatrix(1.0f, 1000.0f);
-	camera->CreateOrthographicProjectionMatrix(1.0f, 1000.0f, float(FRAME_BUFFER_W), float(FRAME_BUFFER_H));
-	camera->GenerateViewMatrix();
-
-	auto testbed = gameFramework.RegisterScene(Scene(gameFramework, "Test Scene"));
-	testbed->SetCamera(camera);
-
-	gameFramework.AddStage(testbed);
-
-	gameFramework.SetHWND(hwnd).SetHInstance(gameClient).Awake();
+	//
 	gameRenderer.SetHWND(hwnd).Awake();
-	camera->Init(gameRenderer.GetDevice(), gameRenderer.GetCommandList());
 
 	auto vs_shader = gameRenderer.CreateEmptyShader("vs_5_1");
 	vs_shader.Complile("shaders/VertexShader.hlsl", "main");
@@ -71,6 +65,45 @@ void InitialzeGame(HWND hwnd)
 	pipeline.Attach(blend_dest);
 	pipeline.Attach(ds_dest);
 	gameRenderer.RegisterPipeline(pipeline);
+
+	auto dxdevice = gameRenderer.GetDevice();
+	auto dxcmdlist = gameRenderer.GetCommandList();
+
+	//
+	auto camera = make_shared<GameCamera>();
+	camera->SetViewport(float(FRAME_BUFFER_W), float(FRAME_BUFFER_H));
+	camera->SetFOVAngle(60.0f);
+	camera->CreatePerspectiveProjectionMatrix(1.0f, 1000.0f);
+	camera->CreateOrthographicProjectionMatrix(1.0f, 1000.0f, float(FRAME_BUFFER_W), float(FRAME_BUFFER_H));
+	camera->GenerateViewMatrix();
+
+	auto testbed = gameFramework.RegisterScene(IlluminatedScene(gameFramework, "Test Scene", dxdevice, dxcmdlist));
+	gameFramework.AddStage(testbed);
+
+	camera->Init(dxdevice, dxcmdlist);
+	testbed->SetCamera(camera);
+
+	auto temp_mat = new RawMaterial();
+	temp_mat->m_xmf4AlbedoColor = { 1.0f, 0.0f, 0.0f, 1.0f };
+	default_material = new Material(temp_mat);
+	delete temp_mat;
+
+	test_cube1 = new CubeMesh;
+	test_cube1->AddMaterial(default_material);
+	test_cube2 = new CubeMesh;
+	test_cube2->AddMaterial(default_material);
+
+	auto test_inst1 = testbed->CreateInstance<GameEntity>(0.0f, 0.0f, 1.0f);
+	test_inst1->SetMesh(test_cube1);
+	auto test_inst2 = testbed->CreateInstance<GameEntity>(10.0f, 0.0f, 0.0f);
+	test_inst2->SetMesh(test_cube2);
+	auto test_inst3 = testbed->CreateInstance<GameEntity>(0.0f, 1.0f, -3.0f);
+	test_inst3->SetMesh(test_cube1);
+
+	gameFramework.SetHWND(hwnd).SetHInstance(gameClient).Awake();
+
+	test_cube1->Awake(dxdevice, dxcmdlist);
+	test_cube2->Awake(dxdevice, dxcmdlist);
 
 	gameRenderer.Start();
 	gameFramework.Start();
@@ -191,6 +224,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 			{
 				gameRenderer.PrepareRendering();
 				gameFramework.PrepareRendering();
+				test_cube1->Render(gameRenderer.GetCommandList());
+				test_cube2->Render(gameRenderer.GetCommandList());
 				gameFramework.Render();
 				gameRenderer.Render();
 			}

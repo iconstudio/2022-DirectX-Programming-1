@@ -3,45 +3,50 @@
 #include "Material.hpp"
 #include <numeric>
 
-Mesh::Mesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw)
+Mesh::Mesh()
 	: myMaterials()
-	, m_pd3dPositionBuffer(nullptr), m_pd3dPositionUploadBuffer(nullptr)
-	, m_d3dPositionBufferView()
+	, mPositionBuffer(nullptr), myPositionUploadBuffer(nullptr)
+	, myPositionBufferView()
 	, numberSubMeshes(0), numberSubMeshesIndexes(nullptr)
-	, m_ppd3dSubSetIndexBuffers(nullptr), m_ppd3dSubSetIndexUploadBuffers(nullptr)
-	, m_pd3dSubSetIndexBufferViews(nullptr)
+	, myIndexBuffers(nullptr), myIndexUploadBuffers(nullptr)
+	, myIndexBufferViews(nullptr)
 	, m_pd3dNormalBuffer(nullptr), m_pd3dNormalUploadBuffer(nullptr)
 	, m_d3dNormalBufferView()
-{
-	Build(device, cmdlist, raw);
-	Cleanup();
-}
+{}
 
 Mesh::~Mesh()
 {
 	myMaterials.erase(myMaterials.begin(), myMaterials.end());
 }
 
-void Mesh::Build(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw)
+void Mesh::AddMaterial(Material* mat)
+{
+	myMaterials.push_back(mat);
+}
+
+void Mesh::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
+{}
+
+void Mesh::Awake(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw)
 {
 	numberVertices = raw->numberVertices;
 	m_nType = raw->m_nType;
 
 	// 서술자 & 서술자 힙이 필요없다.
-	m_pd3dPositionBuffer = ::CreateBufferResource(device, cmdlist, raw->m_pxmf3Positions, sizeof(XMFLOAT3) * numberVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
+	mPositionBuffer = ::CreateBufferResource(device, cmdlist, raw->m_pxmf3Positions, sizeof(XMFLOAT3) * numberVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &myPositionUploadBuffer);
 
-	m_d3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
-	m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
-	m_d3dPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * numberVertices;
+	myPositionBufferView.BufferLocation = mPositionBuffer->GetGPUVirtualAddress();
+	myPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
+	myPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * numberVertices;
 
 	numberSubMeshes = raw->numberSubMeshes;
 	if (numberSubMeshes > 0)
 	{
 		// 렌더링 용 업로드 버퍼
-		m_ppd3dSubSetIndexUploadBuffers = new ID3D12Resource * [numberSubMeshes];
+		myIndexUploadBuffers = new ID3D12Resource * [numberSubMeshes];
 
-		m_ppd3dSubSetIndexBuffers = new ID3D12Resource * [numberSubMeshes];
-		m_pd3dSubSetIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[numberSubMeshes];
+		myIndexBuffers = new ID3D12Resource * [numberSubMeshes];
+		myIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[numberSubMeshes];
 
 		numberSubMeshesIndexes = new int[numberSubMeshes];
 
@@ -50,17 +55,17 @@ void Mesh::Build(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw)
 			const auto& submeshes_count = raw->numberSubMeshesIndexes[i];
 			numberSubMeshesIndexes[i] = submeshes_count;
 
-			auto& buffer = m_ppd3dSubSetIndexBuffers[i];
-			auto& buffer_view = m_pd3dSubSetIndexBufferViews[i];
+			auto& buffer = myIndexBuffers[i];
+			auto& buffer_view = myIndexBufferViews[i];
 
 			const auto& origin_indices = raw->indexSubMeshes[i];
-			const auto& origin_indices_count = numberSubMeshesIndexes[i]
+			const auto& origin_indices_count = numberSubMeshesIndexes[i];
 
-			m_ppd3dSubSetIndexBuffers[i] = CreateBufferResource(device, cmdlist
+			myIndexBuffers[i] = CreateBufferResource(device, cmdlist
 				, origin_indices, sizeof(UINT) * origin_indices_count
 				, D3D12_HEAP_TYPE_DEFAULT
 				, D3D12_RESOURCE_STATE_INDEX_BUFFER
-				, &m_ppd3dSubSetIndexUploadBuffers[i]);
+				, &myIndexUploadBuffers[i]);
 
 			buffer_view.BufferLocation = buffer->GetGPUVirtualAddress();
 			buffer_view.Format = DXGI_FORMAT_R32_UINT;
@@ -69,36 +74,86 @@ void Mesh::Build(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw)
 	}
 }
 
-void Mesh::Cleanup()
-{}
-
-void Mesh::PrepareRendering(P3DGrpCommandList cmdlist)
-{}
-
-void Mesh::Render(P3DGrpCommandList cmdlist)
+void Mesh::Release()
 {
-	for (int i = 0; i < myMaterials.size(); i++)
+	if (myPositionUploadBuffer)
 	{
-		auto& mat = myMaterials.at(i);
-		mat->PrepareRendering(cmdlist);
+		myPositionUploadBuffer->Release();
+	}
+	myPositionUploadBuffer = nullptr;
 
-		Render(cmdlist, i);
+	if (0 < numberSubMeshes && myIndexUploadBuffers)
+	{
+		for (int i = 0; i < numberSubMeshes; i++)
+		{
+			if (myIndexUploadBuffers[i])
+			{
+				myIndexUploadBuffers[i]->Release();
+			}
+		}
+
+		if (myIndexUploadBuffers)
+		{
+			delete[] myIndexUploadBuffers;
+		}
+
+		myIndexUploadBuffers = nullptr;
 	}
 }
 
-void Mesh::Render(P3DGrpCommandList cmdlist, int nSubSet)
+void Mesh::PrepareRendering(P3DGrpCommandList cmdlist) const
+{}
+
+void Mesh::Render(P3DGrpCommandList cmdlist) const
+{
+	int mesh_index = 0;
+
+	size_t mat_index = 0;
+	const auto mat_count = myMaterials.size();
+	const Material* mat = myMaterials.at(mat_index);
+	while (true)
+	{
+		mat->PrepareRendering(cmdlist);
+		
+		Render(cmdlist, mesh_index);
+
+		if (mat_index < mat_count - 1)
+		{
+			mat = myMaterials.at(++mat_index);
+		}
+
+		if (mesh_index < numberSubMeshes - 1)
+		{
+			mesh_index++;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	//for (int i = 0; i < mat_count; i++)
+	{
+		//auto& mat = myMaterials.at(i);
+		//mat->PrepareRendering(cmdlist);
+
+		//Render(cmdlist, i);
+	}
+}
+
+void Mesh::Render(P3DGrpCommandList cmdlist, int index) const
 {
 	cmdlist->IASetPrimitiveTopology(typePrimitive);
 
 	// 모든 정점을 넘긴다.
-	cmdlist->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
+	cmdlist->IASetVertexBuffers(m_nSlot, 1, &myPositionBufferView);
 
-	if ((numberSubMeshes > 0) && (nSubSet < numberSubMeshes))
+	if (0 < numberSubMeshes && index < numberSubMeshes)
 	{
 		// 하위 메쉬의 색인된 정점을 넘긴다.
-		cmdlist->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));
+		cmdlist->IASetIndexBuffer(&(myIndexBufferViews[index]));
 		// 하위 메쉬를 그린다. 
-		cmdlist->DrawIndexedInstanced(numberSubMeshesIndexes[nSubSet], 1
+		cmdlist->DrawIndexedInstanced(numberSubMeshesIndexes[index], 1
 			, 0 // 색인된 정점
 			, 0 // 정점 위치 시작점
 			, 0); // 인스턴스 시작점 (ID)
@@ -119,7 +174,7 @@ RawMesh::~RawMesh()
 	if (m_pxmf4Colors) delete[] m_pxmf4Colors;
 	if (m_pxmf3Normals) delete[] m_pxmf3Normals;
 
-	if (m_nMaterials > 0)
+	if (0 < m_nMaterials)
 	{
 		for (int i = 0; i < m_nMaterials; i++)
 		{

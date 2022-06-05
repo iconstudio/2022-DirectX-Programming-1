@@ -16,11 +16,30 @@ public:
 	virtual void Start() override;
 	virtual void Reset() override;
 	virtual void Update(float delta_time) override;
-	virtual	void PrepareRendering(P3DGrpCommandList cmdlist);
-	virtual void Render(P3DGrpCommandList cmdlist);
+	virtual	void PrepareRendering(P3DGrpCommandList cmdlist) const;
+	virtual void Render(P3DGrpCommandList cmdlist) const;
 	virtual void Release();
 
 	void SetCamera(const shared_ptr<GameCamera>& cam);
+
+	void AddInstance(const shared_ptr<GameObject>& ptr);
+	void AddInstance(shared_ptr<GameObject>&& ptr);
+
+	template<typename ObjectType>
+		requires(std::is_base_of_v<GameEntity, ObjectType>)
+	ObjectType* CreateInstance(float x, float y, float z);
+
+	template<typename ObjectType>
+		requires(std::is_base_of_v<GameEntity, ObjectType>)
+	ObjectType* CreateInstance(float pos[3]);
+
+	template<typename ObjectType>
+		requires(std::is_base_of_v<GameEntity, ObjectType>)
+	ObjectType* CreateInstance(const XMFLOAT3& position);
+
+	template<typename ObjectType>
+		requires(std::is_base_of_v<GameEntity, ObjectType>)
+	ObjectType* CreateInstance(XMFLOAT3&& position);
 
 	const std::string& GetName() const;
 
@@ -36,3 +55,51 @@ public:
 private:
 
 };
+
+template<typename ObjectType>
+	requires(std::is_base_of_v<GameEntity, ObjectType>)
+inline ObjectType* Scene::CreateInstance(float x, float y, float z)
+{
+	ObjectType* handle = new ObjectType();
+	handle->SetPosition(x, y, z);
+
+	AddInstance(shared_ptr<GameObject>(handle));
+
+	return handle;
+}
+
+template<typename ObjectType>
+	requires(std::is_base_of_v<GameEntity, ObjectType>)
+inline ObjectType* Scene::CreateInstance(float pos[3])
+{
+	ObjectType* handle = new ObjectType();
+	handle->SetPosition(pos);
+
+	AddInstance(shared_ptr<GameObject>(handle));
+
+	return handle;
+}
+
+template<typename ObjectType>
+	requires(std::is_base_of_v<GameEntity, ObjectType>)
+inline ObjectType* Scene::CreateInstance(const XMFLOAT3& position)
+{
+	ObjectType* handle = new ObjectType();
+	handle->SetPosition(position);
+
+	AddInstance(shared_ptr<GameObject>(handle));
+
+	return handle;
+}
+
+template<typename ObjectType>
+	requires(std::is_base_of_v<GameEntity, ObjectType>)
+inline ObjectType* Scene::CreateInstance(XMFLOAT3&& position)
+{
+	ObjectType* handle = new ObjectType();
+	handle->SetPosition(std::forward<XMFLOAT3>(position));
+
+	AddInstance(shared_ptr<GameObject>(handle));
+
+	return handle;
+}

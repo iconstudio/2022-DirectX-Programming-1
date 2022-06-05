@@ -9,7 +9,7 @@ public:
 
 	void SetShader(const int id);
 
-	virtual void PrepareRendering(P3DGrpCommandList cmdlist);
+	virtual void PrepareRendering(P3DGrpCommandList cmdlist) const;
 
 	int myShaderID;
 

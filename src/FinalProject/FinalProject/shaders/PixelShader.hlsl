@@ -7,8 +7,9 @@ float4 main(VS_LIGHTING_OUTPUT input) : SV_TARGET
 #else
     input.normalW = normalize(input.normalW);
     
-    float4 color = Lighting(input.positionW, input.normalW);
-    return (color);
+    return gMaterial.m_cDiffuse;
+    //float4 color = Lighting(input.positionW, input.normalW);
+    //return (color);
 #endif
 }
 

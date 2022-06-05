@@ -5,7 +5,7 @@
 
 GraphicsCore::GraphicsCore(long width, long height)
 	: myWindow(NULL), frameWidth(width), frameHeight(height)
-	, frameColor{ 0.0f, 0.0f, 0.0f, 0.0f }
+	, frameColor{ 0.4f, 0.4f, 0.4f, 1.0f }
 	, isAntiAliasingEnabled(false), levelAntiAliasing(0)
 	, indexFrameBuffer(0)
 	, myFactory(nullptr), myDevice(nullptr)
@@ -55,12 +55,14 @@ void GraphicsCore::Awake()
 	CreateSwapChain();
 	CreateRenderTargetViews();
 	CreateDepthStencilView();
+
+	// 작업 가능
+	ResetCmdAllocator();
+	ResetCmdList();
 }
 
 void GraphicsCore::Start()
 {
-	ResetCmdAllocator();
-	ResetCmdList();
 	for (auto& pipeline : myPipelines)
 	{
 		pipeline->Awake();
