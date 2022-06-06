@@ -43,14 +43,14 @@ Model* Model::Load(ID3D12Device* device
 	return root;
 }
 
-CMeshLoadInfo* Model::LoadRawMesh(FILE* pInFile)
+RawMesh* Model::LoadRawMesh(FILE* pInFile)
 {
 	char token[64] = { '\0' };
 	UINT nReads = 0;
 
 	int nPositions = 0, nColors = 0, nNormals = 0, nIndices = 0, nSubMeshes = 0, nSubIndices = 0;
 
-	CMeshLoadInfo* pMeshInfo = new CMeshLoadInfo;
+	RawMesh* pMeshInfo = new RawMesh;
 
 	pMeshInfo->m_nVertices = ::ReadIntegerFromFile(pInFile);
 	::ReadStringFromFile(pInFile, pMeshInfo->m_pstrMeshName);
@@ -232,13 +232,13 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 		}
 		else if (!strcmp(token, "<Mesh>:"))
 		{
-			CMeshLoadInfo* pMeshInfo = root->LoadRawMesh(pInFile);
+			RawMesh* pMeshInfo = root->LoadRawMesh(pInFile);
 			if (pMeshInfo)
 			{
-				CMesh* pMesh = NULL;
+				COriginalMesh* pMesh = NULL;
 				if (pMeshInfo->m_nType & VERTEXT_NORMAL)
 				{
-					pMesh = new CMeshIlluminatedFromFile(device, cmd_list, pMeshInfo);
+					pMesh = new CLightenMesh(device, cmd_list, pMeshInfo);
 				}
 				if (pMesh) root->SetMesh(pMesh);
 				delete pMeshInfo;

@@ -1,13 +1,7 @@
-//-----------------------------------------------------------------------------
-// File: GameObject.cpp
-//-----------------------------------------------------------------------------
-
 #include "pch.hpp"
 #include "Mesh.h"
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
-//
-CMeshLoadInfo::~CMeshLoadInfo()
+RawMesh::~RawMesh()
 {
 	if (m_pxmf3Positions) delete[] m_pxmf3Positions;
 	if (m_pxmf4Colors) delete[] m_pxmf4Colors;
@@ -21,7 +15,7 @@ CMeshLoadInfo::~CMeshLoadInfo()
 	if (m_ppnSubSetIndices) delete[] m_ppnSubSetIndices;
 }
 
-CMeshFromFile::CMeshFromFile(P3DDevice device, P3DGrpCommandList cmd_list, CMeshLoadInfo* pMeshInfo)
+COriginalMesh::COriginalMesh(P3DDevice device, P3DGrpCommandList cmd_list, RawMesh* pMeshInfo)
 {
 	m_nVertices = pMeshInfo->m_nVertices;
 	m_nType = pMeshInfo->m_nType;
@@ -54,7 +48,7 @@ CMeshFromFile::CMeshFromFile(P3DDevice device, P3DGrpCommandList cmd_list, CMesh
 	}
 }
 
-CMeshFromFile::~CMeshFromFile()
+COriginalMesh::~COriginalMesh()
 {
 	if (m_pd3dPositionBuffer) m_pd3dPositionBuffer->Release();
 
@@ -71,11 +65,10 @@ CMeshFromFile::~CMeshFromFile()
 	}
 }
 
-void CMeshFromFile::ReleaseUploadBuffers()
+void COriginalMesh::ReleaseUploadBuffers()
 {
-	CMesh::ReleaseUploadBuffers();
-
 	if (m_pd3dPositionUploadBuffer) m_pd3dPositionUploadBuffer->Release();
+
 	m_pd3dPositionUploadBuffer = NULL;
 
 	if ((m_nSubMeshes > 0) && m_ppd3dSubSetIndexUploadBuffers)
@@ -89,7 +82,7 @@ void CMeshFromFile::ReleaseUploadBuffers()
 	}
 }
 
-void CMeshFromFile::Render(P3DGrpCommandList cmd_list, int nSubSet)
+void COriginalMesh::Render(P3DGrpCommandList cmd_list, int nSubSet)
 {
 	cmd_list->IASetPrimitiveTopology(typePrimitive);
 	cmd_list->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
@@ -104,7 +97,7 @@ void CMeshFromFile::Render(P3DGrpCommandList cmd_list, int nSubSet)
 	}
 }
 
-CMeshIlluminatedFromFile::CMeshIlluminatedFromFile(P3DDevice device, P3DGrpCommandList cmd_list, CMeshLoadInfo* pMeshInfo) : CMeshFromFile::CMeshFromFile(device, cmd_list, pMeshInfo)
+CLightenMesh::CLightenMesh(P3DDevice device, P3DGrpCommandList cmd_list, RawMesh* pMeshInfo) : COriginalMesh::COriginalMesh(device, cmd_list, pMeshInfo)
 {
 	m_pd3dNormalBuffer = ::CreateBufferResource(device, cmd_list, pMeshInfo->m_pxmf3Normals, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dNormalUploadBuffer);
 
@@ -113,20 +106,20 @@ CMeshIlluminatedFromFile::CMeshIlluminatedFromFile(P3DDevice device, P3DGrpComma
 	m_d3dNormalBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
 }
 
-CMeshIlluminatedFromFile::~CMeshIlluminatedFromFile()
+CLightenMesh::~CLightenMesh()
 {
 	if (m_pd3dNormalBuffer) m_pd3dNormalBuffer->Release();
 }
 
-void CMeshIlluminatedFromFile::ReleaseUploadBuffers()
+void CLightenMesh::ReleaseUploadBuffers()
 {
-	CMeshFromFile::ReleaseUploadBuffers();
+	COriginalMesh::ReleaseUploadBuffers();
 
 	if (m_pd3dNormalUploadBuffer) m_pd3dNormalUploadBuffer->Release();
 	m_pd3dNormalUploadBuffer = NULL;
 }
 
-void CMeshIlluminatedFromFile::Render(P3DGrpCommandList cmd_list, int nSubSet)
+void CLightenMesh::Render(P3DGrpCommandList cmd_list, int nSubSet)
 {
 	cmd_list->IASetPrimitiveTopology(typePrimitive);
 	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[2] = { m_d3dPositionBufferView, m_d3dNormalBufferView };

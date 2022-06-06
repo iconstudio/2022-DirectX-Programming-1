@@ -18,7 +18,7 @@ public:
 	GameObject();
 	virtual ~GameObject();
 
-	void SetMesh(CMesh* pMesh);
+	void SetMesh(COriginalMesh* pMesh);
 	void SetShader(Pipeline* pShader);
 	void SetShader(int nMaterial, Pipeline* pShader);
 	void SetMaterial(int nMaterial, CMaterial* pMaterial);
@@ -73,8 +73,8 @@ public:
 
 	char m_pstrFrameName[256];
 
-	//shared_ptr<CMesh> m_pMesh;
-	CMesh* m_pMesh = nullptr;
+	//shared_ptr<COriginalMesh> m_pMesh;
+	COriginalMesh* m_pMesh = nullptr;
 
 	int m_nMaterials = 0;
 	CMaterial** m_ppMaterials = NULL;
