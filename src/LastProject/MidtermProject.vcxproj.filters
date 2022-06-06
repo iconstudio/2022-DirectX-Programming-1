@@ -81,7 +81,7 @@
     <ClInclude Include="Scene.h">
       <Filter>헤더 파일\System</Filter>
     </ClInclude>
-    <ClInclude Include="Object.h">
+    <ClInclude Include="GameObject.hpp">
       <Filter>헤더 파일\System</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
@@ -137,7 +137,7 @@
     <ClCompile Include="Mesh.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Object.cpp">
+    <ClCompile Include="GameObject.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">

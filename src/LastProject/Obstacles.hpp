@@ -1,5 +1,5 @@
 #pragma once
-#include "Object.h"
+#include "GameObject.hpp"
 
 class Rock : public GameObject
 {

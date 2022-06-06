@@ -5,7 +5,7 @@
 IlluminatedScene::IlluminatedScene(Framework& framework, const char* name, P3DDevice device, P3DGrpCommandList cmdlist)
 	: Scene(framework, name)
 	, dxDevice(device), dxTaskList(cmdlist)
-	, m_xmf4GlobalAmbient(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f))
+	, m_xmf4GlobalAmbient(XMFLOAT4(0.1f, 0.1f, 0.1f, 0.5f))
 {}
 
 void IlluminatedScene::Awake()
@@ -30,6 +30,8 @@ void IlluminatedScene::Awake()
 void IlluminatedScene::Start()
 {
 	Scene::Start();
+
+	GetCursorPos(&posCursor);
 
 	//
 	m_xmf4GlobalAmbient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);

@@ -70,9 +70,9 @@ void CubeMesh::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	numberVertices = 8;
 	m_nType = VERTEXT_COLOR | VERTEXT_POSITION | VERTEXT_NORMAL;
 
-	const auto peek = reinterpret_cast<void*>(CubeVertex);
-	// sizeof(DiffusedVertex) * numberVertices
-	constexpr auto sz = sizeof(CubeVertex);
+	const auto peek = reinterpret_cast<const void*>(CubePositions);
+	// sizeof(XMFLOAT3) * numberVertices
+	constexpr auto sz = sizeof(CubePositions);
 	mPositionBuffer = CreateBufferResource(device, cmdlist
 		, peek, sz
 		, D3D12_HEAP_TYPE_DEFAULT
@@ -80,8 +80,8 @@ void CubeMesh::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 		, &myPositionUploadBuffer);
 
 	myPositionBufferView.BufferLocation = mPositionBuffer->GetGPUVirtualAddress();
-	myPositionBufferView.StrideInBytes = sizeof(DiffusedVertex);
-	myPositionBufferView.SizeInBytes = sz;
+	myPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
+	myPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * numberVertices;
 
 	numberSubMeshes = 6;
 

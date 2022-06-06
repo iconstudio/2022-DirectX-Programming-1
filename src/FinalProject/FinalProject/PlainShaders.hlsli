@@ -11,6 +11,7 @@ struct VS_PLAIN_INPUT
     float4 colour : COLOR;
 };
 
+/*
 cbuffer Camera : register(b0)
 {
     matrix myCameraMatrix : packoffset(c0);
@@ -28,3 +29,4 @@ cbuffer TestInstance : register(b2)
     float myTestPos : packoffset(c0);
     float myTestColour : packoffset(c2);
 };
+//*/

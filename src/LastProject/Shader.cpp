@@ -21,25 +21,25 @@ Pipeline::~Pipeline()
 	}
 }
 
-ShaderBlob Pipeline::CreateVertexShader()
+D3DByteCode Pipeline::CreateVertexShader()
 {
-	ShaderBlob d3dShaderByteCode{};
+	D3DByteCode d3dShaderByteCode{};
 	d3dShaderByteCode.BytecodeLength = 0;
 	d3dShaderByteCode.pShaderBytecode = NULL;
 
 	return(d3dShaderByteCode);
 }
 
-ShaderBlob Pipeline::CreatePixelShader()
+D3DByteCode Pipeline::CreatePixelShader()
 {
-	ShaderBlob d3dShaderByteCode{};
+	D3DByteCode d3dShaderByteCode{};
 	d3dShaderByteCode.BytecodeLength = 0;
 	d3dShaderByteCode.pShaderBytecode = NULL;
 
 	return(d3dShaderByteCode);
 }
 
-ShaderBlob Pipeline::CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob)
+D3DByteCode Pipeline::CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob)
 {
 	UINT nCompileFlags = 0;
 #if defined(_DEBUG)
@@ -64,7 +64,7 @@ ShaderBlob Pipeline::CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszS
 		pErrorString = (char*)pd3dErrorBlob->GetBufferPointer();
 	}
 
-	ShaderBlob d3dShaderByteCode{};
+	D3DByteCode d3dShaderByteCode{};
 	d3dShaderByteCode.BytecodeLength = (*ppd3dShaderBlob)->GetBufferSize();
 	d3dShaderByteCode.pShaderBytecode = (*ppd3dShaderBlob)->GetBufferPointer();
 
@@ -81,7 +81,7 @@ ShaderBlob Pipeline::CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszS
 #include <sstream>
 #endif
 
-ShaderBlob Pipeline::ReadCompiledShaderFromFile(const WCHAR* pszFileName, ID3DBlob** ppd3dShaderBlob)
+D3DByteCode Pipeline::ReadCompiledShaderFromFile(const WCHAR* pszFileName, ID3DBlob** ppd3dShaderBlob)
 {
 	UINT nReadBytes = 0;
 #ifdef _WITH_WFOPEN
@@ -104,7 +104,7 @@ ShaderBlob Pipeline::ReadCompiledShaderFromFile(const WCHAR* pszFileName, ID3DBl
 	ifsFile.close();
 #endif
 
-	ShaderBlob d3dShaderByteCode;
+	D3DByteCode d3dShaderByteCode;
 	if (ppd3dShaderBlob)
 	{
 		*ppd3dShaderBlob = NULL;
@@ -273,12 +273,12 @@ D3D12_INPUT_LAYOUT_DESC CIlluminatedShader::CreateInputLayout()
 	return(d3dInputLayoutDesc);
 }
 
-ShaderBlob CIlluminatedShader::CreateVertexShader()
+D3DByteCode CIlluminatedShader::CreateVertexShader()
 {
 	return(Pipeline::CompileShaderFromFile(L"VertexShader.hlsl", "main", "vs_5_1", &m_pd3dVertexShaderBlob));
 }
 
-ShaderBlob CIlluminatedShader::CreatePixelShader()
+D3DByteCode CIlluminatedShader::CreatePixelShader()
 {
 	return(Pipeline::CompileShaderFromFile(L"PixelShader.hlsl", "main", "ps_5_1", &m_pd3dPixelShaderBlob));
 }

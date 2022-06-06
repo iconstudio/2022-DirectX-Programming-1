@@ -1,10 +1,11 @@
 #include "pch.hpp"
 #include "StageGame.hpp"
 #include "GameFramework.h"
-#include "Object.h"
+#include "GameObject.hpp"
 #include "Vehicles.hpp"
 #include "Terrains.hpp"
 #include "Obstacles.hpp"
+#include "Arithmetics.hpp"
 
 float MakeRandom()
 {

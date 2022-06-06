@@ -1,5 +1,5 @@
 #pragma once
-#include "Object.h"
+#include "GameObject.hpp"
 
 class Model : public GameObject
 {
@@ -16,5 +16,4 @@ public:
 
 	static RawMesh* LoadRawMesh(FILE* pInFile);
 	static RawMaterialsBox* LoadRawMaterials(P3DDevice device, P3DGrpCommandList cmd_list, FILE* pInFile);
-
 };

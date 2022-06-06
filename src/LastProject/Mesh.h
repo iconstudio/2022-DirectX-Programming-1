@@ -63,6 +63,8 @@ public:
 
 	virtual void ReleaseUploadBuffers();
 
+	virtual void Render(P3DGrpCommandList cmdlist, int nSubSet);
+
 protected:
 	ID3D12Resource* m_pd3dPositionBuffer = NULL;
 	ID3D12Resource* m_pd3dPositionUploadBuffer = NULL;
@@ -74,9 +76,6 @@ protected:
 	ID3D12Resource** m_ppd3dSubSetIndexBuffers = NULL;
 	ID3D12Resource** m_ppd3dSubSetIndexUploadBuffers = NULL;
 	D3D12_INDEX_BUFFER_VIEW* m_pd3dSubSetIndexBufferViews = NULL;
-
-public:
-	virtual void Render(P3DGrpCommandList cmdlist, int nSubSet);
 };
 
 class CIlluminatedMesh : public CIndexedMesh

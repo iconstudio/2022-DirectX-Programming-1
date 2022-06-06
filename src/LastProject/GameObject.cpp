@@ -1,7 +1,8 @@
 #include "pch.hpp"
-#include "Object.h"
+#include "GameObject.hpp"
 #include "Material.hpp"
 #include "Shader.h"
+#include "Arithmetics.hpp"
 
 GameObject::GameObject()
 	: m_pstrFrameName()
@@ -348,7 +349,7 @@ void GameObject::PrintFrameInfo(GameObject* root, GameObject* pParent)
 {
 	TCHAR pstrDebug[256] = { 0 };
 
-	_stprintf_s(pstrDebug, 256, _T("(Frame: %p) (Parent: %p)\n"), root, pParent);
+	wsprintf(pstrDebug, L"(Frame: %p) (Parent: %p)\n", root, pParent);
 	OutputDebugString(pstrDebug);
 
 	if (root->mySibling) GameObject::PrintFrameInfo(root->mySibling, pParent);

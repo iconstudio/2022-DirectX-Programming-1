@@ -951,23 +951,23 @@ void GameFramework::ExecuteCmdList(P3DCommandList list[], size_t count)
 	myCommandQueue->ExecuteCommandLists(static_cast<UINT>(count), list);
 }
 
-DESC_HANDLE& GameFramework::AddtoDescriptor(DESC_HANDLE& handle, const size_t increment)
+D3DHandle& GameFramework::AddtoDescriptor(D3DHandle& handle, const size_t increment)
 {
 	handle.ptr += increment;
 	return handle;
 }
 
-DESC_HANDLE GameFramework::GetRTVHandle() const
+D3DHandle GameFramework::GetRTVHandle() const
 {
 	return heapRtvDesc->GetCPUDescriptorHandleForHeapStart();
 }
 
-DESC_HANDLE GameFramework::GetDSVHandle() const
+D3DHandle GameFramework::GetDSVHandle() const
 {
 	return heapDsvDesc->GetCPUDescriptorHandleForHeapStart();
 }
 
-inline void GameFramework::ClearRenderTargetView(DESC_HANDLE& handle
+inline void GameFramework::ClearRenderTargetView(D3DHandle& handle
 	, D3D12_RECT* erase_rects, size_t erase_count)
 {
 	myCommandList->ClearRenderTargetView(handle
@@ -975,7 +975,7 @@ inline void GameFramework::ClearRenderTargetView(DESC_HANDLE& handle
 		, static_cast<UINT>(erase_count), erase_rects);
 }
 
-void GameFramework::ClearDepthStencilView(DESC_HANDLE& handle
+void GameFramework::ClearDepthStencilView(D3DHandle& handle
 	, float depth, UINT8 stencil
 	, D3D12_RECT* erase_rects, size_t erase_count)
 {
@@ -985,7 +985,7 @@ void GameFramework::ClearDepthStencilView(DESC_HANDLE& handle
 		, static_cast<UINT>(erase_count), erase_rects);
 }
 
-void GameFramework::ReadyOutputMerger(DESC_HANDLE& rtv, DESC_HANDLE& dsv)
+void GameFramework::ReadyOutputMerger(D3DHandle& rtv, D3DHandle& dsv)
 {
 	constexpr BOOL is_single = TRUE;
 	myCommandList->OMSetRenderTargets(1, &rtv, is_single, &dsv);

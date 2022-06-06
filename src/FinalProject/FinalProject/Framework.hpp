@@ -21,7 +21,9 @@ public:
 	void PrepareRendering();
 	void Render();
 
-	shared_ptr<Scene> RegisterScene(Scene&& stage);
+	template<typename SceneType>
+		requires(std::is_base_of_v<Scene, SceneType>)
+	shared_ptr<Scene> RegisterScene(SceneType&& stage);
 
 	void AddStage(const shared_ptr<Scene>& stage);
 	bool JumpToStage(const size_t index);
@@ -47,3 +49,15 @@ private:
 	std::vector<shared_ptr<Scene>>::iterator myStageIterator;
 	shared_ptr<Scene> currentScene;
 };
+
+template<typename SceneType>
+	requires(std::is_base_of_v<Scene, SceneType>)
+inline shared_ptr<Scene> Framework::RegisterScene(SceneType&& stage)
+{
+	auto handle = make_shared<SceneType>(std::forward<SceneType>(stage));
+	auto ptr = std::static_pointer_cast<Scene>(handle);
+
+	myScenes.try_emplace(handle->GetName(), ptr);
+
+	return ptr;
+}

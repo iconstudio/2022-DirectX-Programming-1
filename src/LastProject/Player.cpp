@@ -2,6 +2,7 @@
 #include "Player.h"
 #include "Shader.h"
 #include "Model.hpp"
+#include "Arithmetics.hpp"
 
 constexpr COLLISION_TAGS CPlayer::GetTag() const noexcept
 {
