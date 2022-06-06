@@ -52,6 +52,9 @@ public:
 	std::vector<shared_ptr<GameObject>> myInstances;
 	shared_ptr<GameCamera> myCamera;
 
+	POINT posCursor;
+	float lastDeltaTime;
+
 private:
 
 };

@@ -7,6 +7,7 @@ Scene::Scene(Framework& framework, const char* name)
 	: WeakSingleton(framework)
 	, myName(name)
 	, myCamera(nullptr)
+	, posCursor(), lastDeltaTime(0.0f)
 {}
 
 Scene::~Scene()
@@ -47,6 +48,8 @@ void Scene::Reset()
 
 void Scene::Update(float delta_time)
 {
+	lastDeltaTime = delta_time;
+
 	for (auto& instance : myInstances)
 	{
 		instance->Update(delta_time);

@@ -2,8 +2,7 @@
 #include "Material.hpp"
 
 Material::Material(RawMaterial* info)
-	: myShaderID(0)
-	, m_xmf4Diffuse(info->m_xmf4AlbedoColor)
+	: m_xmf4Diffuse(info->m_xmf4AlbedoColor)
 	, m_xmf4Specular(info->m_xmf4SpecularColor)
 	, m_xmf4Emissive(info->m_xmf4EmissiveColor)
 {
@@ -22,11 +21,6 @@ Material& Material::operator=(RawMaterial* info)
 
 Material::~Material()
 {}
-
-void Material::SetShader(const int id)
-{
-	myShaderID = id;
-}
 
 void Material::PrepareRendering(P3DGrpCommandList cmdlist) const
 {

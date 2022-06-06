@@ -1,13 +1,13 @@
-struct VS_DIFFUSED_INPUT
+struct VS_PLAIN_OUTPUT
 {
-    float3 position : POSITION;
+    float4 position : SV_POSITION;
+    float3 position_world : POSITION;
     float4 colour : COLOR;
 };
 
-struct VS_DIFFUSED_OUTPUT
+struct VS_PLAIN_INPUT
 {
-    float3 position : SV_POSITION;
-    float3 position_world : POSITION;
+    float3 position : POSITION;
     float4 colour : COLOR;
 };
 

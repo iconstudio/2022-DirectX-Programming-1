@@ -1,5 +1,6 @@
 #include "pch.hpp"
 #include "IlluminatedScene.hpp"
+#include "GameCamera.hpp"
 
 IlluminatedScene::IlluminatedScene(Framework& framework, const char* name, P3DDevice device, P3DGrpCommandList cmdlist)
 	: Scene(framework, name)
@@ -29,6 +30,57 @@ void IlluminatedScene::Awake()
 void IlluminatedScene::Start()
 {
 	Scene::Start();
+
+	//
+	m_xmf4GlobalAmbient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
+	//
+	numberLights = 4;
+	myLights = new CLight[numberLights];
+	ZeroMemory(myLights, sizeof(CLight) * numberLights);
+
+	myLights[0].m_bEnable = true;
+	myLights[0].m_nType = POINT_LIGHT;
+	myLights[0].m_fRange = 1000.0f;
+	myLights[0].m_xmf4Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	myLights[0].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.0f, 0.0f, 1.0f);
+	myLights[0].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
+	myLights[0].m_xmf3Position = XMFLOAT3(30.0f, 30.0f, 30.0f);
+	myLights[0].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	myLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
+
+	myLights[1].m_bEnable = true;
+	myLights[1].m_nType = SPOT_LIGHT;
+	myLights[1].m_fRange = 500.0f;
+	myLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	myLights[1].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
+	myLights[1].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
+	myLights[1].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
+	myLights[1].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	myLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	myLights[1].m_fFalloff = 8.0f;
+	myLights[1].m_fPhi = (float)cos(XMConvertToRadians(45.0f));
+	myLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+
+	myLights[2].m_bEnable = true;
+	myLights[2].m_nType = DIRECTIONAL_LIGHT;
+	myLights[2].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	myLights[2].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.8f, 0.6f, 1.0f);
+	myLights[2].m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.0f);
+	myLights[2].m_xmf3Direction = XMFLOAT3(1.0f, -0.5f, 0.0f);
+
+	myLights[3].m_bEnable = true;
+	myLights[3].m_nType = SPOT_LIGHT;
+	myLights[3].m_fRange = 600.0f;
+	myLights[3].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	myLights[3].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.7f, 0.0f, 1.0f);
+	myLights[3].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
+	myLights[3].m_xmf3Position = XMFLOAT3(50.0f, 30.0f, 30.0f);
+	myLights[3].m_xmf3Direction = XMFLOAT3(0.0f, 1.0f, 1.0f);
+	myLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	myLights[3].m_fFalloff = 8.0f;
+	myLights[3].m_fPhi = (float)cos(XMConvertToRadians(90.0f));
+	myLights[3].m_fTheta = (float)cos(XMConvertToRadians(30.0f));
 }
 
 void IlluminatedScene::Reset()
@@ -39,6 +91,25 @@ void IlluminatedScene::Reset()
 void IlluminatedScene::Update(float delta_time)
 {
 	Scene::Update(delta_time);
+
+	float cxDelta = 0.0f;
+	POINT ptCursorPos;
+
+	//if (GetCapture() == handleWindow)
+	{
+		SetCursor(NULL);
+		GetCursorPos(&ptCursorPos);
+		cxDelta = (float)(ptCursorPos.x - posCursor.x) / 3.0f;
+		SetCursorPos(posCursor.x, posCursor.y);
+	}
+
+	if (myCamera && (cxDelta != 0.0f))
+	{
+		if (cxDelta)
+		{
+			myCamera->Rotate(0.0f, cxDelta, 0.0f);
+		}
+	}
 }
 
 void IlluminatedScene::PrepareRendering(P3DGrpCommandList cmdlist) const
@@ -55,6 +126,9 @@ void IlluminatedScene::PrepareRendering(P3DGrpCommandList cmdlist) const
 void IlluminatedScene::Render(P3DGrpCommandList cmdlist) const
 {
 	Scene::Render(cmdlist);
+
+	auto gpu_lights_address = m_pd3dcbLights->GetGPUVirtualAddress();
+	cmdlist->SetGraphicsRootConstantBufferView(2, gpu_lights_address);
 }
 
 void IlluminatedScene::Release()

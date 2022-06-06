@@ -31,32 +31,50 @@ Framework gameFramework{ gameRenderer, FRAME_BUFFER_W, FRAME_BUFFER_H };
 CubeMesh* test_cube1, * test_cube2;
 Material* default_material;
 
+auto vs_shader = gameRenderer.CreateEmptyShader("vs_5_1");
+auto ps_shader = gameRenderer.CreateEmptyShader("ps_5_1");
+auto pl_vs_shader = gameRenderer.CreateEmptyShader("vs_5_1");
+auto pl_ps_shader = gameRenderer.CreateEmptyShader("ps_5_1");
+
 void InitialzeGame(HWND hwnd)
 {
 	//
 	gameRenderer.SetHWND(hwnd).Awake();
 
-	auto vs_shader = gameRenderer.CreateEmptyShader("vs_5_1");
 	vs_shader.Complile("shaders/VertexShader.hlsl", "main");
-
-	auto ps_shader = gameRenderer.CreateEmptyShader("ps_5_1");
 	ps_shader.Complile("shaders/PixelShader.hlsl", "main");
+	pl_vs_shader.Complile("PlainVertexShader.hlsl", "main");
+	pl_ps_shader.Complile("PlainPixelShader.hlsl", "main");
 
 	UINT nInputElementDescs = 2;
+	auto pl_attributes = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+	pl_attributes[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT
+		, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pl_attributes[1] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	auto pl_io_layout = gameRenderer.CreateEmptyInputLayout();
+	pl_io_layout.pInputElementDescs = pl_attributes;
+	pl_io_layout.NumElements = nInputElementDescs;
+	auto rs_dest = gameRenderer.CreateEmptyRasterizerState();
+	auto blend_dest = gameRenderer.CreateEmptyBlendState();
+	auto ds_dest = gameRenderer.CreateEmptyDepthStencilState();
+	auto pl_pipeline = gameRenderer.CreateEmptyPipeline();
+	pl_pipeline.AttachVertexShader(pl_vs_shader);
+	pl_pipeline.AttachPixelShader(pl_ps_shader);
+	pl_pipeline.Attach(pl_io_layout);
+	pl_pipeline.Attach(rs_dest);
+	pl_pipeline.Attach(blend_dest);
+	pl_pipeline.Attach(ds_dest);
+	gameRenderer.RegisterPipeline(pl_pipeline);
+
 	auto attributes = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
-	attributes[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	attributes[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT
+		, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	attributes[1] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
 	auto io_layout = gameRenderer.CreateEmptyInputLayout();
 	io_layout.pInputElementDescs = attributes;
 	io_layout.NumElements = nInputElementDescs;
-
-	auto rs_dest = gameRenderer.CreateEmptyRasterizerState();
-
-	auto blend_dest = gameRenderer.CreateEmptyBlendState();
-
-	auto ds_dest = gameRenderer.CreateEmptyDepthStencilState();
-
 	auto pipeline = gameRenderer.CreateEmptyPipeline();
 	pipeline.AttachVertexShader(vs_shader);
 	pipeline.AttachPixelShader(ps_shader);
@@ -84,7 +102,7 @@ void InitialzeGame(HWND hwnd)
 	testbed->SetCamera(camera);
 
 	auto temp_mat = new RawMaterial();
-	temp_mat->m_xmf4AlbedoColor = { 1.0f, 0.0f, 0.0f, 1.0f };
+	temp_mat->m_xmf4AlbedoColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 	default_material = new Material(temp_mat);
 	delete temp_mat;
 
@@ -93,12 +111,12 @@ void InitialzeGame(HWND hwnd)
 	test_cube2 = new CubeMesh;
 	test_cube2->AddMaterial(default_material);
 
-	auto test_inst1 = testbed->CreateInstance<GameEntity>(0.0f, 0.0f, 1.0f);
-	test_inst1->SetMesh(test_cube1);
-	auto test_inst2 = testbed->CreateInstance<GameEntity>(10.0f, 0.0f, 0.0f);
-	test_inst2->SetMesh(test_cube2);
-	auto test_inst3 = testbed->CreateInstance<GameEntity>(0.0f, 1.0f, -3.0f);
-	test_inst3->SetMesh(test_cube1);
+	//auto test_inst1 = testbed->CreateInstance<GameEntity>(0.0f, 0.0f, 1.0f);
+	//test_inst1->SetMesh(test_cube1);
+	//auto test_inst2 = testbed->CreateInstance<GameEntity>(10.0f, 0.0f, 0.0f);
+	//test_inst2->SetMesh(test_cube2);
+	//auto test_inst3 = testbed->CreateInstance<GameEntity>(0.0f, 1.0f, -3.0f);
+	//test_inst3->SetMesh(test_cube1);
 
 	gameFramework.SetHWND(hwnd).SetHInstance(gameClient).Awake();
 
@@ -106,6 +124,7 @@ void InitialzeGame(HWND hwnd)
 	test_cube2->Awake(dxdevice, dxcmdlist);
 
 	gameRenderer.Start();
+	gameRenderer.SetPipeline(0);
 	gameFramework.Start();
 }
 

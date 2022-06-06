@@ -1,6 +1,11 @@
 #include "pch.hpp"
 #include "TestPipeline.hpp"
 
+void TestPipeline::Release()
+{
+	GraphicsPipeline::Release();
+}
+
 void TestPipeline::CreateUniforms()
 {
 	// Camera
@@ -21,7 +26,7 @@ void TestPipeline::CreateUniforms()
 	Attach(param1);
 
 	UINT aligned_sz = ((sizeof(TestInstanceBlob) + 255) & ~255);
-	myInstanceInfo = ::CreateBufferResource(dxDevice, dxTaskList
+	myInstanceInfo = CreateBufferResource(dxDevice, dxTaskList
 		, NULL, aligned_sz
 		, D3D12_HEAP_TYPE_UPLOAD
 		, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER

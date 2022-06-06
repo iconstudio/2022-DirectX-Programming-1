@@ -4,7 +4,7 @@
 #include <numeric>
 
 Mesh::Mesh()
-	: myMaterials()
+	: myShaderID(0), myMaterials()
 	, mPositionBuffer(nullptr), myPositionUploadBuffer(nullptr)
 	, myPositionBufferView()
 	, numberSubMeshes(0), numberSubMeshesIndexes(nullptr)
@@ -17,6 +17,11 @@ Mesh::Mesh()
 Mesh::~Mesh()
 {
 	myMaterials.erase(myMaterials.begin(), myMaterials.end());
+}
+
+void Mesh::SetShader(const int id)
+{
+	myShaderID = id;
 }
 
 void Mesh::AddMaterial(Material* mat)

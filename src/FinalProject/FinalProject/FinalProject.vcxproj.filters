@@ -46,6 +46,9 @@
     <Filter Include="헤더 파일\Contents">
       <UniqueIdentifier>{aa9cb57a-9952-4bec-8a0e-31c0bf228e6c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Contents">
+      <UniqueIdentifier>{f6c4ba62-791a-4cef-8f6f-a1827bcaa4ca}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -126,14 +129,14 @@
     <ClInclude Include="Model.hpp">
       <Filter>헤더 파일\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="CubeMesh.hpp">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="IlluminatedScene.hpp">
-      <Filter>헤더 파일</Filter>
+      <Filter>헤더 파일\System</Filter>
+    </ClInclude>
+    <ClInclude Include="CubeMesh.hpp">
+      <Filter>헤더 파일\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="TestPipeline.hpp">
-      <Filter>헤더 파일</Filter>
+      <Filter>헤더 파일\Contents</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -209,14 +212,14 @@
     <ClCompile Include="Model.cpp">
       <Filter>소스 파일\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="CubeMesh.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="IlluminatedScene.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\System</Filter>
+    </ClCompile>
+    <ClCompile Include="CubeMesh.cpp">
+      <Filter>소스 파일\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="TestPipeline.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\Contents</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -143,14 +143,14 @@ void GraphicsPipeline::Update(float delta_time)
 
 void GraphicsPipeline::PrepareRendering()
 {
-	if (mySignature)
-	{
-		dxTaskList->SetGraphicsRootSignature(mySignature);
-	}
-
 	if (myState)
 	{
 		dxTaskList->SetPipelineState(myState);
+	}
+
+	if (mySignature)
+	{
+		dxTaskList->SetGraphicsRootSignature(mySignature);
 	}
 }
 

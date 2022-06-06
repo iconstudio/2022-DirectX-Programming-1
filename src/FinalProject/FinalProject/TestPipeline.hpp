@@ -10,8 +10,10 @@ struct TestInstanceBlob
 class TestPipeline : public GraphicsPipeline
 {
 public:
+	virtual void Release() override;
+
 	ID3D12Resource* myInstanceInfo;
-	GameCameraBlob* myMappedInstance;
+	TestInstanceBlob* myMappedInstance;
 
 protected:
 	virtual void CreateUniforms();

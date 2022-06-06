@@ -72,8 +72,6 @@ void GraphicsCore::Start()
 	ExecuteCmdList(cmd_lists, std::size(cmd_lists));
 
 	WaitForGpuComplete();
-
-	SetPipeline(0);
 }
 
 void GraphicsCore::Reset()
@@ -699,7 +697,8 @@ D3D12_INPUT_LAYOUT_DESC GraphicsCore::CreateEmptyInputLayout() const
 
 D3D12_RASTERIZER_DESC GraphicsCore::CreateEmptyRasterizerState() const
 {
-	return D3D12_RASTERIZER_DESC{ D3D12_FILL_MODE_SOLID, D3D12_CULL_MODE_BACK
+	// D3D12_CULL_MODE_BACK
+	return D3D12_RASTERIZER_DESC{ D3D12_FILL_MODE_SOLID, D3D12_CULL_MODE_NONE
 		, FALSE, 0, 0.0f, 0.0f, TRUE
 		, FALSE, FALSE, 0
 		, D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF };

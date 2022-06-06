@@ -10,30 +10,30 @@ public:
 	Vertex(XMFLOAT3&& position);
 	virtual ~Vertex();
 
-	XMFLOAT3 myPosition;
+	const XMFLOAT3 myPosition;
 };
 
 class DiffusedVertex : public Vertex
 {
 public:
-	DiffusedVertex(COLORREF colour = 0);
-	DiffusedVertex(float x, float y, float z, COLORREF colour);
-	DiffusedVertex(float position[3], COLORREF colour);
-	DiffusedVertex(const XMFLOAT3& position, COLORREF colour);
-	DiffusedVertex(XMFLOAT3&& position, COLORREF colour);
+	DiffusedVertex(XMFLOAT4 colour);
+	DiffusedVertex(float x, float y, float z, XMFLOAT4 colour);
+	DiffusedVertex(float position[3], XMFLOAT4 colour);
+	DiffusedVertex(const XMFLOAT3& position, XMFLOAT4 colour);
+	DiffusedVertex(XMFLOAT3&& position, XMFLOAT4 colour);
 	virtual ~DiffusedVertex();
 
-	XMFLOAT3 myColour;
+	const XMFLOAT4 myColour;
 };
 
 class LightenVertex : public Vertex
 {
 public:
-	LightenVertex();
-	LightenVertex(float x, float y, float z);
-	LightenVertex(float position[3]);
-	LightenVertex(const XMFLOAT3& position);
-	LightenVertex(XMFLOAT3&& position);
+	LightenVertex(const XMFLOAT3 normal);
+	LightenVertex(float x, float y, float z, const XMFLOAT3 normal);
+	LightenVertex(float position[3], const XMFLOAT3 normal);
+	LightenVertex(const XMFLOAT3& position, const XMFLOAT3 normal);
+	LightenVertex(XMFLOAT3&& position, const XMFLOAT3 normal);
 	virtual ~LightenVertex();
 
 	XMFLOAT3 myNormal;

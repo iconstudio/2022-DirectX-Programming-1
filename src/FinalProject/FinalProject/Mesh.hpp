@@ -36,6 +36,8 @@ public:
 	Mesh();
 	virtual ~Mesh();
 
+	void SetShader(const int id);
+
 	void AddMaterial(Material* mat);
 
 	virtual void Awake(P3DDevice device, P3DGrpCommandList cmdlist);
@@ -44,6 +46,8 @@ public:
 	virtual void PrepareRendering(P3DGrpCommandList cmdlist) const;
 	virtual void Render(P3DGrpCommandList cmdlist) const;
 	virtual void Render(P3DGrpCommandList cmdlist, int index) const;
+
+	int myShaderID;
 
 	D3D12_PRIMITIVE_TOPOLOGY typePrimitive = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT m_nSlot = 0;

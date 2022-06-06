@@ -7,11 +7,7 @@ public:
 	Material& operator=(RawMaterial* info);
 	~Material();
 
-	void SetShader(const int id);
-
 	virtual void PrepareRendering(P3DGrpCommandList cmdlist) const;
-
-	int myShaderID;
 
 	XMFLOAT4 m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	XMFLOAT4 m_xmf4Diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);

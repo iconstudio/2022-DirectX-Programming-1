@@ -33,6 +33,7 @@ class GameTerrain;
 class GameObject;
 class GameCamera;
 struct GameCameraBlob;
+struct TestInstanceBlob;
 
 class GameEntity;
 class GameModel;
