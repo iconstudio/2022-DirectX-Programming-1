@@ -37,6 +37,9 @@
     <Filter Include="소스 파일\Contents\Stages">
       <UniqueIdentifier>{7fbc34aa-37db-4316-a4b6-a59478f0a56c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\Graphics">
+      <UniqueIdentifier>{29117785-16d0-4fbb-9dc4-67dd9038f9a4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
