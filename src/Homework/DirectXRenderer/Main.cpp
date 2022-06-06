@@ -1,15 +1,17 @@
 #include "pch.hpp"
 #include "Main.hpp"
 #include "GameFramework.hpp"
+#include "GameTimer.hpp"
 
 #define MAX_LOADSTRING 100
 
 // 전역 변수:
-HINSTANCE hInst;								// 현재 인스턴스입니다.
-TCHAR szTitle[MAX_LOADSTRING];					// 제목 표시줄 텍스트입니다.
-TCHAR szWindowClass[MAX_LOADSTRING];			// 기본 창 클래스 이름입니다.
+HINSTANCE hInst; // 현재 인스턴스입니다.
+TCHAR szTitle[MAX_LOADSTRING]; // 제목 표시줄 텍스트입니다.
+TCHAR szWindowClass[MAX_LOADSTRING]; // 기본 창 클래스 이름입니다.
 
-GameFramework gGameFramework;
+Timer gameTimer{};
+GameFramework gameFramework{};
 
 ATOM				MyRegisterClass(HINSTANCE instance);
 BOOL				InitInstance(HINSTANCE instance, int show);
@@ -32,9 +34,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		return FALSE;
 	}
 
-	MSG msg;
+	MSG msg{};
 	while (true)
 	{
+		gameTimer.Tick(0.0f);
+
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			if (msg.message == WM_QUIT) break;
@@ -42,10 +46,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		else
-		{
-			gGameFramework.Update();
-		}
+
+		gameFramework.Update();
+		//gameFramework.Update(gameTimer.GetTimeElapsed());
+		//gameFramework.Render();
 	}
 
 	return (int)msg.wParam;
@@ -67,7 +71,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 		case WM_TIMER:
 		{
-			gGameFramework.PrepareRendering();
+			gameFramework.PrepareRendering();
 
 			InvalidateRect(hwnd, NULL, FALSE);
 		}
@@ -77,7 +81,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		{
 			hdc = BeginPaint(hwnd, &ps);
 
-			gGameFramework.Render(hdc);
+			gameFramework.Render(hdc);
 
 			EndPaint(hwnd, &ps);
 		}
@@ -91,7 +95,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 		default:
 		{
-			return gGameFramework.OnWindows(hwnd, msg, wparam, lparam);
+			return gameFramework.OnWindows(hwnd, msg, wparam, lparam);
 		}
 	}
 
@@ -137,8 +141,8 @@ BOOL InitInstance(HINSTANCE instance, int nCmdShow)
 		return(FALSE);
 	}
 
-	gGameFramework.Awake(instance, hMainWnd, std::move(rect));
-	gGameFramework.Start();
+	gameFramework.Awake(instance, hMainWnd, std::move(rect));
+	gameFramework.Start();
 
 	ShowWindow(hMainWnd, nCmdShow);
 	UpdateWindow(hMainWnd);

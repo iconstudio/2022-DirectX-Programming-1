@@ -77,7 +77,7 @@ unsigned long Timer::GetFrameRate(LPTSTR lpszString, int nCharacters)
 	if (lpszString)
 	{
 		_itow_s(m_nCurrentFrameRate, lpszString, nCharacters, 10);
-		wcscat_s(lpszString, nCharacters, _T(" FPS)"));
+		wcscat_s(lpszString, nCharacters, L" FPS)");
 	}
 
 	return(m_nCurrentFrameRate);
@@ -96,7 +96,8 @@ float Timer::GetTotalTime()
 
 void Timer::Reset()
 {
-	__int64 nPerformanceCounter;
+	__int64 nPerformanceCounter{};
+
 	::QueryPerformanceCounter((LARGE_INTEGER*)&nPerformanceCounter);
 
 	m_nBasePerformanceCounter = nPerformanceCounter;
@@ -107,7 +108,8 @@ void Timer::Reset()
 
 void Timer::Start()
 {
-	__int64 nPerformanceCounter;
+	__int64 nPerformanceCounter{};
+
 	::QueryPerformanceCounter((LARGE_INTEGER*)&nPerformanceCounter);
 	if (m_bStopped)
 	{

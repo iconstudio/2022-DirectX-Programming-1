@@ -55,7 +55,7 @@ constexpr COLLISION_TAGS GameObject::GetTag() const noexcept
 	return COLLISION_TAGS::NONE;
 }
 
-void GameObject::SetMesh(CMesh* pMesh)
+void GameObject::SetMesh(COriginalMesh* pMesh)
 {
 	if (m_pMesh) m_pMesh->Release();
 	m_pMesh = pMesh;
