@@ -34,7 +34,7 @@ Model* Model::Load(ID3D12Device* device
 
 #ifdef _WITH_DEBUG_FRAME_HIERARCHY
 	TCHAR pstrDebug[256] = { 0 };
-	_stprintf_s(pstrDebug, 256, _T("Frame Hierarchy\n"));
+	wsprintf(pstrDebug, L"Frame Hierarchy\n");
 	OutputDebugString(pstrDebug);
 
 	GameObject::PrintFrameInfo(root, NULL);
