@@ -193,7 +193,7 @@ D3D12_BLEND_DESC Pipeline::CreateBlendState()
 	return(d3dBlendDesc);
 }
 
-void Pipeline::CreateShader(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature)
+void Pipeline::CreateShader(P3DDevice device, P3DGrpCommandList cmdlist, P3DSignature signature)
 {
 	ZeroMemory(&pipeline_state_desc, sizeof(pipeline_state_desc));
 
@@ -222,36 +222,29 @@ void Pipeline::CreateShader(P3DDevice device, P3DGrpCommandList cmd_list, P3DSig
 	}
 }
 
-void Pipeline::InitializeUniforms(P3DDevice device, P3DGrpCommandList cmd_list)
+void Pipeline::InitializeUniforms(P3DDevice device, P3DGrpCommandList cmdlist)
 {}
 
-void Pipeline::UpdateUniforms(P3DGrpCommandList cmd_list)
+void Pipeline::UpdateUniforms(P3DGrpCommandList cmdlist)
 {}
 
-void Pipeline::UpdateUniforms(P3DGrpCommandList cmd_list, XMFLOAT4X4* pxmf4x4World)
+void Pipeline::UpdateUniforms(P3DGrpCommandList cmdlist, XMFLOAT4X4* pxmf4x4World)
 {}
 
-void Pipeline::UpdateUniforms(P3DGrpCommandList cmd_list, CMaterialColors* pMaterialColors)
+void Pipeline::UpdateUniforms(P3DGrpCommandList cmdlist, CMaterialColors* pMaterialColors)
 {}
 
 void Pipeline::ReleaseUniforms()
 {}
 
-void Pipeline::OnPrepareRender(P3DGrpCommandList cmd_list, int nPipelineState)
+void Pipeline::PrepareRendering(P3DGrpCommandList cmdlist, int index)
 {
 	if (m_ppd3dPipelineStates)
 	{
-		cmd_list->SetPipelineState(m_ppd3dPipelineStates[nPipelineState]);
+		cmdlist->SetPipelineState(m_ppd3dPipelineStates[index]);
 	}
 }
 
-void Pipeline::Render(P3DGrpCommandList cmd_list, GameCamera* pCamera, int nPipelineState)
-{
-	OnPrepareRender(cmd_list, nPipelineState);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
 CIlluminatedShader::CIlluminatedShader()
 {}
 
@@ -283,12 +276,12 @@ D3DByteCode CIlluminatedShader::CreatePixelShader()
 	return(Pipeline::CompileShaderFromFile(L"PixelShader.hlsl", "main", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
 
-void CIlluminatedShader::CreateShader(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature)
+void CIlluminatedShader::CreateShader(P3DDevice device, P3DGrpCommandList cmdlist, P3DSignature signature)
 {
 	m_nPipelineStates = 2;
 	m_ppd3dPipelineStates = new ID3D12PipelineState*[m_nPipelineStates];
 
-	Pipeline::CreateShader(device, cmd_list, signature);
+	Pipeline::CreateShader(device, cmdlist, signature);
 
 	pipeline_state_desc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
 
@@ -300,7 +293,7 @@ void CIlluminatedShader::CreateShader(P3DDevice device, P3DGrpCommandList cmd_li
 	if (pipeline_state_desc.InputLayout.pInputElementDescs) delete[] pipeline_state_desc.InputLayout.pInputElementDescs;
 }
 
-void CIlluminatedShader::Render(P3DGrpCommandList cmd_list, GameCamera* pCamera, int nPipelineState)
+void CIlluminatedShader::PrepareRendering(P3DGrpCommandList cmdlist, int index)
 {
-	OnPrepareRender(cmd_list, nPipelineState);
+	Pipeline::PrepareRendering(cmdlist, index);
 }

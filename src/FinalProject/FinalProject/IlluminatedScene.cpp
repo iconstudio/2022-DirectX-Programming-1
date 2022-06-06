@@ -5,6 +5,7 @@
 IlluminatedScene::IlluminatedScene(Framework& framework, const char* name, P3DDevice device, P3DGrpCommandList cmdlist)
 	: Scene(framework, name)
 	, dxDevice(device), dxTaskList(cmdlist)
+	//, myTestVertices()
 	, m_xmf4GlobalAmbient(XMFLOAT4(0.1f, 0.1f, 0.1f, 0.5f))
 {}
 

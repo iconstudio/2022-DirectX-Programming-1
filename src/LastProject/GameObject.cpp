@@ -6,8 +6,11 @@
 
 GameObject::GameObject()
 	: m_pstrFrameName()
+	, myMaterials()
 {
 	ZeroMemory(m_pstrFrameName, sizeof(m_pstrFrameName));
+
+	myMaterials.reserve(10);
 
 	localTransform = Matrix4x4::Identity();
 	worldTransform = Matrix4x4::Identity();
@@ -20,17 +23,9 @@ GameObject::~GameObject()
 		m_pMesh->Release();
 	}
 
-	if (m_nMaterials > 0)
+	if (0 < myMaterials.size())
 	{
-		for (int i = 0; i < m_nMaterials; i++)
-		{
-			if (m_ppMaterials[i]) m_ppMaterials[i]->Release();
-		}
-	}
-
-	if (m_ppMaterials)
-	{
-		delete[] m_ppMaterials;
+		myMaterials.erase(myMaterials.begin(), myMaterials.end());
 	}
 }
 
@@ -40,9 +35,14 @@ void GameObject::Attach(GameObject* pChild, bool bReferenceUpdate)
 	{
 		pChild->m_pParent = this;
 	}
+
 	if (myChild)
 	{
-		if (pChild) pChild->mySibling = myChild->mySibling;
+		if (pChild)
+		{
+			pChild->mySibling = myChild->mySibling;
+		}
+
 		myChild->mySibling = pChild;
 	}
 	else
@@ -58,36 +58,45 @@ constexpr COLLISION_TAGS GameObject::GetTag() const noexcept
 
 void GameObject::SetMesh(Mesh* pMesh)
 {
-	if (m_pMesh) m_pMesh->Release();
+	if (m_pMesh)
+	{
+		m_pMesh->Release();
+	}
+
 	m_pMesh = pMesh;
-	if (m_pMesh) m_pMesh->AddRef();
+
+	if (m_pMesh)
+	{
+		m_pMesh->AddRef();
+	}
 }
 
 void GameObject::SetShader(Pipeline* pipeline)
 {
-	m_nMaterials = 1;
-	m_ppMaterials = new CMaterial * [m_nMaterials];
-	m_ppMaterials[0] = new CMaterial();
-	m_ppMaterials[0]->SetShader(pipeline);
+	myMaterials.clear();
+
+	auto& new_mat = myMaterials.emplace_back();
+	new_mat->SetShader(pipeline);
 }
 
 void GameObject::SetShader(int index, Pipeline* pipeline)
 {
-	if (m_ppMaterials[index])
+	auto& indexed_mat = myMaterials.at(index);
+
+	if (indexed_mat)
 	{
-		m_ppMaterials[index]->SetShader(pipeline);
+		indexed_mat->SetShader(pipeline);
 	}
 }
 
 void GameObject::SetMaterial(int index, CMaterial* mat)
 {
-	if (m_ppMaterials[index])
-		m_ppMaterials[index]->Release();
+	if (myMaterials.size() - 1 < index)
+	{
+		throw "잘못된 재질 위치에 할당함!";
+	}
 
-	m_ppMaterials[index] = mat;
-
-	if (m_ppMaterials[index])
-		m_ppMaterials[index]->AddRef();
+	myMaterials[index] = mat;
 }
 
 void GameObject::Animate(float time_elapsed, XMFLOAT4X4* parent)
@@ -127,58 +136,67 @@ GameObject* GameObject::FindFrame(const char* name)
 	return nullptr;
 }
 
-void GameObject::Render(P3DGrpCommandList cmd_list, GameCamera* pCamera)
+void GameObject::Render(P3DGrpCommandList cmdlist, GameCamera* pCamera)
 {
 	OnPrepareRender();
 
-	UpdateUniforms(cmd_list, &worldTransform);
+	UpdateUniforms(cmdlist, &worldTransform);
 
-	if (0 < m_nMaterials)
+	const auto mat_count = myMaterials.size();
+	if (0 < mat_count)
 	{
-		for (int i = 0; i < m_nMaterials; i++)
+		for (int i = 0; i < mat_count; i++)
 		{
-			if (m_ppMaterials[i])
+			auto& mat = myMaterials.at(i);
+			if (mat)
 			{
-				auto& pipeline = m_ppMaterials[i]->m_pShader;
+				auto& pipeline = mat->m_pShader;
 				if (pipeline)
 				{
-					pipeline->Render(cmd_list, pCamera);
+					pipeline->PrepareRendering(cmdlist, 0);
 				}
 				else
 				{
 					throw "파이프라인과 쉐이더가 존재하지 않음!";
 				}
 
-				m_ppMaterials[i]->UpdateUniforms(cmd_list);
+				mat->PrepareRendering(cmdlist);
 			}
 
 			if (m_pMesh)
 			{
-				m_pMesh->Render(cmd_list, i);
+				m_pMesh->Render(cmdlist, i);
 			}
 		}
 	}
 
-	if (mySibling) mySibling->Render(cmd_list, pCamera);
-	if (myChild) myChild->Render(cmd_list, pCamera);
+	if (mySibling)
+	{
+		mySibling->Render(cmdlist, pCamera);
+	}
+
+	if (myChild)
+	{
+		myChild->Render(cmdlist, pCamera);
+	}
 }
 
-void GameObject::InitializeUniforms(P3DDevice device, P3DGrpCommandList cmd_list)
+void GameObject::InitializeUniforms(P3DDevice device, P3DGrpCommandList cmdlist)
 {}
 
-void GameObject::UpdateUniforms(P3DGrpCommandList cmd_list)
+void GameObject::UpdateUniforms(P3DGrpCommandList cmdlist)
 {}
 
-void GameObject::UpdateUniforms(P3DGrpCommandList cmd_list, XMFLOAT4X4* pxmf4x4World)
+void GameObject::UpdateUniforms(P3DGrpCommandList cmdlist, XMFLOAT4X4* pxmf4x4World)
 {
 	XMFLOAT4X4 xmf4x4World{};
 
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
 
-	cmd_list->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+	cmdlist->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 }
 
-void GameObject::UpdateUniforms(P3DGrpCommandList cmd_list, CMaterial* pMaterial)
+void GameObject::UpdateUniforms(P3DGrpCommandList cmdlist, CMaterial* pMaterial)
 {}
 
 void GameObject::ReleaseUniforms()
@@ -212,7 +230,7 @@ void GameObject::UpdateCollider(const XMFLOAT4X4* mat)
 	}
 }
 
-void GameObject::BuildMaterials(P3DDevice device, P3DGrpCommandList cmd_list)
+void GameObject::BuildMaterials(P3DDevice device, P3DGrpCommandList cmdlist)
 {}
 
 void GameObject::ReleaseUploadBuffers()
@@ -374,9 +392,9 @@ void CRotatingObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	GameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
-void CRotatingObject::Render(ID3D12GraphicsCommandList* cmd_list, GameCamera* pCamera)
+void CRotatingObject::Render(ID3D12GraphicsCommandList* cmdlist, GameCamera* pCamera)
 {
-	GameObject::Render(cmd_list, pCamera);
+	GameObject::Render(cmdlist, pCamera);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

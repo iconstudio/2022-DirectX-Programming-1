@@ -11,7 +11,7 @@ struct VS_PLAIN_INPUT
     float4 colour : COLOR;
 };
 
-/*
+//*
 cbuffer Camera : register(b0)
 {
     matrix myCameraMatrix : packoffset(c0);

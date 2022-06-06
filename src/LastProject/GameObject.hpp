@@ -18,11 +18,11 @@ public:
 	GameObject();
 	virtual ~GameObject();
 
-	void SetMesh(Mesh* pMesh);
-	void SetShader(Pipeline* pShader);
-	void SetShader(int nMaterial, Pipeline* pShader);
-	void SetMaterial(int nMaterial, CMaterial* pMaterial);
-	void Attach(GameObject* pChild, bool bReferenceUpdate = false);
+	void SetMesh(Mesh* mesh);
+	void SetShader(Pipeline* pipeline);
+	void SetShader(int index, Pipeline* pipeline);
+	void SetMaterial(int index, CMaterial* mat);
+	void Attach(GameObject* child, bool bReferenceUpdate = false);
 
 	virtual constexpr COLLISION_TAGS GetTag() const noexcept;
 
@@ -30,19 +30,19 @@ public:
 	virtual void BuildCollider();
 	void UpdateCollider(const XMFLOAT4X4* mat);
 
-	virtual void BuildMaterials(P3DDevice device, P3DGrpCommandList cmd_list);
+	virtual void BuildMaterials(P3DDevice device, P3DGrpCommandList cmdlist);
 	virtual void ReleaseUploadBuffers();
 
 	// °»½Å
 	virtual void Animate(float time_elapsed, XMFLOAT4X4* parent = nullptr);
 
 	virtual void OnPrepareRender() {}
-	virtual void Render(P3DGrpCommandList cmd_list, GameCamera* pCamera = NULL);
+	virtual void Render(P3DGrpCommandList cmdlist, GameCamera* pCamera = NULL);
 
-	virtual void InitializeUniforms(P3DDevice device, P3DGrpCommandList cmd_list);
-	virtual void UpdateUniforms(P3DGrpCommandList cmd_list);
-	virtual void UpdateUniforms(P3DGrpCommandList cmd_list, XMFLOAT4X4* pxmf4x4World);
-	virtual void UpdateUniforms(P3DGrpCommandList cmd_list, CMaterial* pMaterial);
+	virtual void InitializeUniforms(P3DDevice device, P3DGrpCommandList cmdlist);
+	virtual void UpdateUniforms(P3DGrpCommandList cmdlist);
+	virtual void UpdateUniforms(P3DGrpCommandList cmdlist, XMFLOAT4X4* pxmf4x4World);
+	virtual void UpdateUniforms(P3DGrpCommandList cmdlist, CMaterial* pMaterial);
 	virtual void ReleaseUniforms();
 
 	XMFLOAT3 GetPosition();
@@ -76,8 +76,7 @@ public:
 	//shared_ptr<Mesh> m_pMesh;
 	Mesh* m_pMesh = nullptr;
 
-	int m_nMaterials = 0;
-	CMaterial** m_ppMaterials = NULL;
+	std::vector<CMaterial*> myMaterials;
 
 	XMFLOAT4X4 localTransform;
 	XMFLOAT4X4 worldTransform;
@@ -107,7 +106,7 @@ public:
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
 
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
-	virtual void Render(P3DGrpCommandList cmd_list, GameCamera* pCamera = NULL);
+	virtual void Render(P3DGrpCommandList cmdlist, GameCamera* pCamera = NULL);
 };
 
 class CRevolvingObject : public GameObject

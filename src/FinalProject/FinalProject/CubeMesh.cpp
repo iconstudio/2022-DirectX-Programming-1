@@ -29,15 +29,15 @@ constexpr XMFLOAT3 CubePositions[] = {
 };
 
 constexpr XMFLOAT4 CubeColours[] = {
-	{1.0f, 1.0f, 1.0f, 1.0f}, // 0
-	{1.0f, 1.0f, 1.0f, 1.0f}, // 1
-	{1.0f, 1.0f, 1.0f, 1.0f}, // 2
-	{1.0f, 1.0f, 1.0f, 1.0f}, // 3
+	{1.0f, 0.0f, 1.0f, 1.0f}, // 0
+	{1.0f, 0.0f, 1.0f, 1.0f}, // 1
+	{1.0f, 0.0f, 1.0f, 1.0f}, // 2
+	{1.0f, 0.0f, 1.0f, 1.0f}, // 3
 
-	{1.0f, 1.0f, 1.0f, 1.0f}, // 4
-	{1.0f, 1.0f, 1.0f, 1.0f}, // 5
-	{1.0f, 1.0f, 1.0f, 1.0f}, // 6
-	{1.0f, 1.0f, 1.0f, 1.0f}, // 7
+	{1.0f, 0.0f, 1.0f, 1.0f}, // 4
+	{1.0f, 0.0f, 1.0f, 1.0f}, // 5
+	{1.0f, 0.0f, 1.0f, 1.0f}, // 6
+	{1.0f, 0.0f, 1.0f, 1.0f}, // 7
 };
 
 DiffusedVertex CubeVertex[] = {
@@ -80,10 +80,10 @@ void CubeMesh::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 		, &myPositionUploadBuffer);
 
 	myPositionBufferView.BufferLocation = mPositionBuffer->GetGPUVirtualAddress();
-	myPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
-	myPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * numberVertices;
+	myPositionBufferView.StrideInBytes = sizeof(DiffusedVertex);
+	myPositionBufferView.SizeInBytes = sz;
 
-	numberSubMeshes = 6;
+	numberSubMeshes = 0;
 
 	// 렌더링 용 업로드 버퍼
 	myIndexUploadBuffers = new ID3D12Resource * [numberSubMeshes];

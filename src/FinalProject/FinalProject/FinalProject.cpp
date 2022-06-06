@@ -11,6 +11,7 @@
 #include "GameCamera.hpp"
 #include "CubeMesh.hpp"
 #include "GameEntity.hpp"
+#include "Model.hpp"
 #include "Shader.hpp"
 
 constexpr int MAX_LOADSTRING = 100;
@@ -111,17 +112,22 @@ void InitialzeGame(HWND hwnd)
 	test_cube2 = new CubeMesh;
 	test_cube2->AddMaterial(default_material);
 
-	//auto test_inst1 = testbed->CreateInstance<GameEntity>(0.0f, 0.0f, 1.0f);
-	//test_inst1->SetMesh(test_cube1);
-	//auto test_inst2 = testbed->CreateInstance<GameEntity>(10.0f, 0.0f, 0.0f);
-	//test_inst2->SetMesh(test_cube2);
-	//auto test_inst3 = testbed->CreateInstance<GameEntity>(0.0f, 1.0f, -3.0f);
-	//test_inst3->SetMesh(test_cube1);
-
-	gameFramework.SetHWND(hwnd).SetHInstance(gameClient).Awake();
-
 	test_cube1->Awake(dxdevice, dxcmdlist);
 	test_cube2->Awake(dxdevice, dxcmdlist);
+
+	auto test_model = Load(dxdevice, dxcmdlist, "Model/Tree.bin");
+
+	auto test_inst1 = testbed->CreateInstance<GameEntity>(0.0f, 0.0f, 1.0f);
+	test_inst1->SetMesh(test_cube1);
+	test_inst1->Attach(test_model);
+	auto test_inst2 = testbed->CreateInstance<GameEntity>(10.0f, 0.0f, 0.0f);
+	test_inst2->SetMesh(test_cube2);
+	test_inst2->Attach(test_model);
+	auto test_inst3 = testbed->CreateInstance<GameEntity>(0.0f, 1.0f, -3.0f);
+	test_inst3->SetMesh(test_cube1);
+	test_inst3->Attach(test_model);
+
+	gameFramework.SetHWND(hwnd).SetHInstance(gameClient).Awake();
 
 	gameRenderer.Start();
 	gameRenderer.SetPipeline(0);

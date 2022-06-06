@@ -31,7 +31,7 @@ BYTE ReadStringFromFile(FILE* file, char* token)
 	return(nStrLength);
 }
 
-ID3D12Resource* CreateBufferResource(P3DDevice device, P3DGrpCommandList cmd_list
+ID3D12Resource* CreateBufferResource(P3DDevice device, P3DGrpCommandList cmdlist
 	, const void* data, UINT data_sz
 	, D3D12_HEAP_TYPE type
 	, D3D12_RESOURCE_STATES states
@@ -134,7 +134,7 @@ ID3D12Resource* CreateBufferResource(P3DDevice device, P3DGrpCommandList cmd_lis
 					mapped_buffer->Unmap(0, NULL);
 
 					// 읽어온 자원을 CPU 메모리로 복사
-					cmd_list->CopyResource(result, *upload_buffer);
+					cmdlist->CopyResource(result, *upload_buffer);
 
 					// 복사가 끝날 때 까지 접근 금지
 					D3D12_RESOURCE_BARRIER barrier;
@@ -147,7 +147,7 @@ ID3D12Resource* CreateBufferResource(P3DDevice device, P3DGrpCommandList cmd_lis
 					barrier.Transition.StateAfter = states;
 					barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
-					cmd_list->ResourceBarrier(1, &barrier);
+					cmdlist->ResourceBarrier(1, &barrier);
 				}
 			}
 			break;

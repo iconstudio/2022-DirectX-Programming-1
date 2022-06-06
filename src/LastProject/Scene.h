@@ -6,7 +6,7 @@ public:
 	Scene(GameFramework& framework, HWND hwnd, const char* name);
 	virtual ~Scene();
 
-	virtual void Awake(P3DDevice device, P3DGrpCommandList cmd_list) = 0;
+	virtual void Awake(P3DDevice device, P3DGrpCommandList cmdlist) = 0;
 	virtual void Start() = 0;
 	virtual void Reset() = 0;
 	virtual void Update(float elapsed_time) = 0;

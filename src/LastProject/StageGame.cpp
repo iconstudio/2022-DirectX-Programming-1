@@ -76,9 +76,9 @@ void StageGame::ProcessInput(UCHAR* pKeysBuffer)
 	}
 }
 
-void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmd_list)
+void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
-	IlluminatedScene::Awake(device, cmd_list);
+	IlluminatedScene::Awake(device, cmdlist);
 }
 
 void StageGame::Start()

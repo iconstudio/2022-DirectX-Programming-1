@@ -25,9 +25,6 @@
     <Filter Include="헤더 파일\System">
       <UniqueIdentifier>{a6e26c70-9f53-4a7b-b056-4adc7b7708e9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일\Resources">
-      <UniqueIdentifier>{a50bb882-24bd-40a5-bcca-028f1da68972}</UniqueIdentifier>
-    </Filter>
     <Filter Include="헤더 파일\Generals">
       <UniqueIdentifier>{b29b328e-723d-4677-8f12-479acc150def}</UniqueIdentifier>
     </Filter>
@@ -36,6 +33,12 @@
     </Filter>
     <Filter Include="소스 파일\Contents\Stages">
       <UniqueIdentifier>{7fbc34aa-37db-4316-a4b6-a59478f0a56c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Graphics">
+      <UniqueIdentifier>{a50bb882-24bd-40a5-bcca-028f1da68972}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Components">
+      <UniqueIdentifier>{647dceb3-fce0-42e0-930e-82cf424cbb61}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -64,16 +67,16 @@
       <Filter>헤더 파일\Contents</Filter>
     </ClInclude>
     <ClInclude Include="Light.hpp">
-      <Filter>헤더 파일\Resources</Filter>
+      <Filter>헤더 파일\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Material.hpp">
-      <Filter>헤더 파일\Resources</Filter>
+      <Filter>헤더 파일\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Mesh.h">
-      <Filter>헤더 파일\Resources</Filter>
+      <Filter>헤더 파일\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Model.hpp">
-      <Filter>헤더 파일\Resources</Filter>
+      <Filter>헤더 파일\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Timer.h">
       <Filter>헤더 파일\System</Filter>
@@ -118,7 +121,10 @@
       <Filter>헤더 파일\Contents</Filter>
     </ClInclude>
     <ClInclude Include="CubeMesh.hpp">
-      <Filter>헤더 파일\Resources</Filter>
+      <Filter>헤더 파일\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.hpp">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

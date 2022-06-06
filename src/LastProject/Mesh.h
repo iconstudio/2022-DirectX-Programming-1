@@ -25,8 +25,8 @@ protected:
 
 public:
 	UINT GetType() { return(m_nType); }
-	virtual void Render(P3DGrpCommandList cmd_list) {}
-	virtual void Render(P3DGrpCommandList cmd_list, int nSubSet) {}
+	virtual void Render(P3DGrpCommandList cmdlist) {}
+	virtual void Render(P3DGrpCommandList cmdlist, int nSubSet) {}
 };
 
 class RawMesh

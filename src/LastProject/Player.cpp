@@ -43,15 +43,15 @@ CPlayer::~CPlayer()
 	}
 }
 
-void CPlayer::InitializeUniforms(P3DDevice device, P3DGrpCommandList cmd_list)
+void CPlayer::InitializeUniforms(P3DDevice device, P3DGrpCommandList cmdlist)
 {
 	if (myCamera)
 	{
-		myCamera->InitializeUniforms(device, cmd_list);
+		myCamera->InitializeUniforms(device, cmdlist);
 	}
 }
 
-void CPlayer::UpdateUniforms(P3DGrpCommandList cmd_list)
+void CPlayer::UpdateUniforms(P3DGrpCommandList cmdlist)
 {}
 
 void CPlayer::ReleaseUniforms()
@@ -343,26 +343,26 @@ void CPlayer::OnPrepareRender()
 	UpdateTransform(NULL);
 }
 
-void CPlayer::Render(P3DGrpCommandList cmd_list, GameCamera* pCamera)
+void CPlayer::Render(P3DGrpCommandList cmdlist, GameCamera* pCamera)
 {
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
 
 	if (nCameraMode == THIRD_PERSON_CAMERA)
 	{
-		GameObject::Render(cmd_list, pCamera);
+		GameObject::Render(cmdlist, pCamera);
 	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CAirplanePlayer
 
-CAirplanePlayer::CAirplanePlayer(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature)
+CAirplanePlayer::CAirplanePlayer(P3DDevice device, P3DGrpCommandList cmdlist, P3DSignature signature)
 {
 	myCamera = ChangeCamera(THIRD_PERSON_CAMERA, 10.0f);
 
 	Awake();
 
-	InitializeUniforms(device, cmd_list);
+	InitializeUniforms(device, cmdlist);
 }
 
 CAirplanePlayer::~CAirplanePlayer()

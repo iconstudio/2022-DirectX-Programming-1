@@ -1,6 +1,7 @@
 #pragma once
 #include "Scene.hpp"
 #include "Light.hpp"
+#include "Vertex.hpp"
 
 class IlluminatedScene : public Scene
 {
@@ -17,6 +18,8 @@ public:
 
 	P3DDevice dxDevice;
 	P3DGrpCommandList dxTaskList;
+
+	//DiffusedVertex myTestVertices[24];
 
 	CLight* myLights = NULL;
 	int numberLights = 0;
