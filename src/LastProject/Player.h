@@ -7,7 +7,7 @@
 #define DIR_UP					0x10
 #define DIR_DOWN				0x20
 
-#include "Object.h"
+#include "GameObject.hpp"
 #include "Camera.h"
 
 class CPlayer : public GameObject
@@ -85,22 +85,22 @@ public:
 	virtual void OnCameraUpdateCallback(float fTimeElapsed) {}
 	void SetCameraUpdatedContext(LPVOID pContext) { m_pCameraUpdatedContext = pContext; }
 
-	virtual void InitializeUniforms(P3DDevice device, P3DGrpCommandList cmd_list);
+	virtual void InitializeUniforms(P3DDevice device, P3DGrpCommandList cmdlist);
 	virtual void ReleaseUniforms();
-	virtual void UpdateUniforms(P3DGrpCommandList cmd_list);
+	virtual void UpdateUniforms(P3DGrpCommandList cmdlist);
 
 	GameCamera* OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode);
 
 	virtual GameCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(NULL); }
 	virtual void OnPrepareRender();
-	virtual void Render(P3DGrpCommandList cmd_list, GameCamera* pCamera = NULL);
+	virtual void Render(P3DGrpCommandList cmdlist, GameCamera* pCamera = NULL);
 
 };
 
 class CAirplanePlayer : public CPlayer
 {
 public:
-	CAirplanePlayer(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature);
+	CAirplanePlayer(P3DDevice device, P3DGrpCommandList cmdlist, P3DSignature signature);
 	virtual ~CAirplanePlayer();
 
 	virtual void Awake();

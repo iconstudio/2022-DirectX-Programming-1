@@ -170,7 +170,7 @@ std::vector<RawMaterial*> LoadRawMaterials(ID3D12Device* device, ID3D12GraphicsC
 			process_index = ReadIntegerFromFile(pInFile);
 			process_mat = new RawMaterial(0);
 
-			result[process_index] = process_mat;
+			result.push_back(process_mat);
 		}
 		else
 		{

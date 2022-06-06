@@ -52,13 +52,6 @@ public:
 	CMaterial();
 	virtual ~CMaterial();
 
-private:
-	int m_nReferences = 0;
-
-public:
-	void AddRef() { m_nReferences++; }
-	void Release() { if (--m_nReferences <= 0) delete this; }
-
 	Pipeline* m_pShader = NULL;
 
 	CMaterialColors* m_pMaterialColors = NULL;
@@ -66,5 +59,5 @@ public:
 	void SetMaterialColors(CMaterialColors* pMaterialColors);
 	void SetShader(Pipeline* pShader);
 
-	void UpdateUniforms(P3DGrpCommandList cmd_list);
+	void PrepareRendering(P3DGrpCommandList cmdlist);
 };

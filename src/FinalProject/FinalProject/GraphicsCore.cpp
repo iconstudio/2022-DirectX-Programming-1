@@ -5,7 +5,7 @@
 
 GraphicsCore::GraphicsCore(long width, long height)
 	: myWindow(NULL), frameWidth(width), frameHeight(height)
-	, frameColor{ 0.4f, 0.4f, 0.4f, 1.0f }
+	, frameColor{ 0.4f, 0.8f, 0.4f, 1.0f }
 	, isAntiAliasingEnabled(false), levelAntiAliasing(0)
 	, indexFrameBuffer(0)
 	, myFactory(nullptr), myDevice(nullptr)

@@ -1,13 +1,13 @@
 #include "pch.hpp"
 #include "Model.hpp"
 
-Model* Model::Load(ID3D12Device* device
-	, ID3D12GraphicsCommandList* cmd_list
+Model* Model::Load(P3DDevice device
+	, P3DGrpCommandList cmdlist
 	, Pipeline* pipeline
-	, const char* pstrFileName)
+	, const char* filepath)
 {
 	FILE* pInFile = NULL;
-	fopen_s(&pInFile, pstrFileName, "rb");
+	fopen_s(&pInFile, filepath, "rb");
 	if (!pInFile)
 	{
 		throw "모델 파일을 불러올 수 없습니다!";
@@ -15,16 +15,16 @@ Model* Model::Load(ID3D12Device* device
 
 	rewind(pInFile);
 
-	Model* root = NULL;
+	Model* root = nullptr;
 	char token[64] = { '\0' };
 
 	while (true)
 	{
-		::ReadStringFromFile(pInFile, token);
+		ReadStringFromFile(pInFile, token);
 
 		if (!strcmp(token, "<Hierarchy>:"))
 		{
-			root = Model::LoadFrameHierarchyFromFile(device, cmd_list, pipeline, pInFile);
+			root = LoadFrameHierarchyFromFile(device, cmdlist, pipeline, pInFile);
 		}
 		else if (!strcmp(token, "</Hierarchy>"))
 		{
@@ -33,9 +33,7 @@ Model* Model::Load(ID3D12Device* device
 	}
 
 #ifdef _WITH_DEBUG_FRAME_HIERARCHY
-	TCHAR pstrDebug[256] = { 0 };
-	_stprintf_s(pstrDebug, 256, _T("Frame Hierarchy\n"));
-	OutputDebugString(pstrDebug);
+	OutputDebugString(L"Frame Hierarchy\n");
 
 	GameObject::PrintFrameInfo(root, NULL);
 #endif
@@ -135,17 +133,16 @@ RawMesh* Model::LoadRawMesh(FILE* pInFile)
 	return(pMeshInfo);
 }
 
-RawMaterialsBox* Model::LoadRawMaterials(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, FILE* pInFile)
+std::vector<RawMaterial*> Model::LoadRawMaterials(ID3D12Device* device, ID3D12GraphicsCommandList* cmdlist, FILE* pInFile)
 {
 	char token[64] = { '\0' };
 	UINT nReads = 0;
 
-	int nMaterial = 0;
+	int mat_index = 0;
+	RawMaterial* raw_mat = nullptr;
 
-	RawMaterialsBox* pMaterialsInfo = new RawMaterialsBox;
-
-	pMaterialsInfo->m_nMaterials = ::ReadIntegerFromFile(pInFile);
-	pMaterialsInfo->m_pMaterials = new RawMaterial[pMaterialsInfo->m_nMaterials];
+	std::vector<RawMaterial*> result{};
+	result.reserve(ReadIntegerFromFile(pInFile));
 
 	for (; ; )
 	{
@@ -153,50 +150,53 @@ RawMaterialsBox* Model::LoadRawMaterials(ID3D12Device* device, ID3D12GraphicsCom
 
 		if (!strcmp(token, "<Material>:"))
 		{
-			nMaterial = ::ReadIntegerFromFile(pInFile);
+			raw_mat = new RawMaterial;
+			result.push_back(raw_mat);
+
+			mat_index = ReadIntegerFromFile(pInFile);
 		}
 		else if (!strcmp(token, "<AlbedoColor>:"))
 		{
-			nReads = (UINT)::fread(&(pMaterialsInfo->m_pMaterials[nMaterial].m_xmf4AlbedoColor), sizeof(float), 4, pInFile);
+			nReads = (UINT)::fread(&(raw_mat->m_xmf4AlbedoColor), sizeof(float), 4, pInFile);
 		}
 		else if (!strcmp(token, "<EmissiveColor>:"))
 		{
-			nReads = (UINT)::fread(&(pMaterialsInfo->m_pMaterials[nMaterial].m_xmf4EmissiveColor), sizeof(float), 4, pInFile);
+			nReads = (UINT)::fread(&(raw_mat->m_xmf4EmissiveColor), sizeof(float), 4, pInFile);
 		}
 		else if (!strcmp(token, "<SpecularColor>:"))
 		{
-			nReads = (UINT)::fread(&(pMaterialsInfo->m_pMaterials[nMaterial].m_xmf4SpecularColor), sizeof(float), 4, pInFile);
+			nReads = (UINT)::fread(&(raw_mat->m_xmf4SpecularColor), sizeof(float), 4, pInFile);
 		}
 		else if (!strcmp(token, "<Glossiness>:"))
 		{
-			nReads = (UINT)::fread(&(pMaterialsInfo->m_pMaterials[nMaterial].m_fGlossiness), sizeof(float), 1, pInFile);
+			nReads = (UINT)::fread(&(raw_mat->m_fGlossiness), sizeof(float), 1, pInFile);
 		}
 		else if (!strcmp(token, "<Smoothness>:"))
 		{
-			nReads = (UINT)::fread(&(pMaterialsInfo->m_pMaterials[nMaterial].m_fSmoothness), sizeof(float), 1, pInFile);
+			nReads = (UINT)::fread(&(raw_mat->m_fSmoothness), sizeof(float), 1, pInFile);
 		}
 		else if (!strcmp(token, "<Metallic>:"))
 		{
-			nReads = (UINT)::fread(&(pMaterialsInfo->m_pMaterials[nMaterial].m_fSpecularHighlight), sizeof(float), 1, pInFile);
+			nReads = (UINT)::fread(&(raw_mat->m_fSpecularHighlight), sizeof(float), 1, pInFile);
 		}
 		else if (!strcmp(token, "<SpecularHighlight>:"))
 		{
-			nReads = (UINT)::fread(&(pMaterialsInfo->m_pMaterials[nMaterial].m_fMetallic), sizeof(float), 1, pInFile);
+			nReads = (UINT)::fread(&(raw_mat->m_fMetallic), sizeof(float), 1, pInFile);
 		}
 		else if (!strcmp(token, "<GlossyReflection>:"))
 		{
-			nReads = (UINT)::fread(&(pMaterialsInfo->m_pMaterials[nMaterial].m_fGlossyReflection), sizeof(float), 1, pInFile);
+			nReads = (UINT)::fread(&(raw_mat->m_fGlossyReflection), sizeof(float), 1, pInFile);
 		}
 		else if (!strcmp(token, "</Materials>"))
 		{
 			break;
 		}
 	}
-	return(pMaterialsInfo);
+	return result;
 }
 
 Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
-	, ID3D12GraphicsCommandList* cmd_list
+	, ID3D12GraphicsCommandList* cmdlist
 	, Pipeline* pipeline
 	, FILE* pInFile)
 {
@@ -232,47 +232,61 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 		}
 		else if (!strcmp(token, "<Mesh>:"))
 		{
-			RawMesh* pMeshInfo = root->LoadRawMesh(pInFile);
-			if (pMeshInfo)
+			if (!root)
 			{
-				Mesh* pMesh = NULL;
-				if (pMeshInfo->m_nType & VERTEXT_NORMAL)
+				throw "게임 객체가 생성되지 않음!";
+			}
+
+			auto raw_mesh = root->LoadRawMesh(pInFile);
+			if (raw_mesh)
+			{
+				Mesh* mesh = nullptr;
+				if (raw_mesh->m_nType & VERTEXT_NORMAL)
 				{
-					pMesh = new CIlluminatedMesh(device, cmd_list, pMeshInfo);
+					mesh = new CIlluminatedMesh(device, cmdlist, raw_mesh);
 				}
-				if (pMesh) root->SetMesh(pMesh);
-				delete pMeshInfo;
+
+				if (mesh)
+				{
+					root->SetMesh(mesh);
+				}
+				delete raw_mesh;
 			}
 		}
 		else if (!strcmp(token, "<Materials>:"))
 		{
-			RawMaterialsBox* pMaterialsInfo = root->LoadRawMaterials(device, cmd_list, pInFile);
-			if (pMaterialsInfo && (pMaterialsInfo->m_nMaterials > 0))
+			auto raw_materials = root->LoadRawMaterials(device, cmdlist, pInFile);
+			const auto mat_count = raw_materials.size();
+
+			if (0 < mat_count)
 			{
 				if (!root)
 				{
 					throw "메쉬를 불러오는 중에 객체가 생성되지 않는 문제 발생!";
 				}
 
-				root->m_nMaterials = pMaterialsInfo->m_nMaterials;
-				root->m_ppMaterials = new CMaterial*[pMaterialsInfo->m_nMaterials];
+				auto& target = root->myMaterials;
+				target.reserve(mat_count);
+				
+				auto inserter = std::back_inserter(target);
+				std::transform(raw_materials.begin(), raw_materials.end()
+					, inserter
+					, [&](RawMaterial* raw) {
+					auto mat = new CMaterial;
 
-				for (int i = 0; i < pMaterialsInfo->m_nMaterials; i++)
-				{
-					root->m_ppMaterials[i] = NULL;
-
-					CMaterial* pMaterial = new CMaterial();
-
-					CMaterialColors* pMaterialColors = new CMaterialColors(&pMaterialsInfo->m_pMaterials[i]);
-					pMaterial->SetMaterialColors(pMaterialColors);
+					auto mat_color = new CMaterialColors(raw);
+					mat->SetMaterialColors(mat_color);
 
 					if (root->GetMeshType() & VERTEXT_NORMAL)
 					{
-						pMaterial->SetShader(pipeline);
+						mat->SetShader(pipeline);
 					}
 
-					root->SetMaterial(i, pMaterial);
-				}
+					return mat;
+				});
+
+				// 원본 재질 삭제
+				raw_materials.erase(raw_materials.begin(), raw_materials.end());
 			}
 		}
 		else if (!strcmp(token, "<Children>:"))
@@ -282,7 +296,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 			{
 				for (int i = 0; i < nChilds; i++)
 				{
-					auto pChild = Model::LoadFrameHierarchyFromFile(device, cmd_list, pipeline, pInFile);
+					auto pChild = Model::LoadFrameHierarchyFromFile(device, cmdlist, pipeline, pInFile);
 
 					if (pChild)
 					{

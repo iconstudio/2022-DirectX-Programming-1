@@ -143,15 +143,6 @@ void Framework::OnWindow(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	}
 }
 
-shared_ptr<Scene> Framework::RegisterScene(Scene&& stage)
-{
-	auto handle = make_shared<Scene>(std::forward<Scene>(stage));
-
-	myScenes.try_emplace(handle->GetName(), handle);
-
-	return handle;
-}
-
 void Framework::AddStage(const shared_ptr<Scene>& stage)
 {
 	myStages.push_back(stage);

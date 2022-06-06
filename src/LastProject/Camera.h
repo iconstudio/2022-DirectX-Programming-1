@@ -46,9 +46,9 @@ public:
 	GameCamera(GameCamera *pCamera);
 	virtual ~GameCamera();
 
-	virtual void InitializeUniforms(P3DDevice device, P3DGrpCommandList cmd_list);
+	virtual void InitializeUniforms(P3DDevice device, P3DGrpCommandList cmdlist);
 	virtual void ReleaseUniforms();
-	virtual void UpdateUniforms(P3DGrpCommandList cmd_list);
+	virtual void UpdateUniforms(P3DGrpCommandList cmdlist);
 
 	void GenerateViewMatrix();
 	void GenerateViewMatrix(XMFLOAT3 xmf3Position, XMFLOAT3 xmf3LookAt, XMFLOAT3 xmf3Up);
@@ -59,7 +59,7 @@ public:
 	void SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight, float fMinZ = 0.0f, float fMaxZ = 1.0f);
 	void SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom);
 
-	virtual void SetViewportsAndScissorRects(P3DGrpCommandList cmd_list);
+	virtual void SetViewportsAndScissorRects(P3DGrpCommandList cmdlist);
 
 	void SetPlayer(CPlayer *pPlayer) { myPlayer = pPlayer; }
 	CPlayer *GetPlayer() { return(myPlayer); }

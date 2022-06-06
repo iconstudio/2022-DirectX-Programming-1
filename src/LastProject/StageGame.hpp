@@ -6,7 +6,7 @@ class StageGame : public IlluminatedScene
 public:
 	StageGame(GameFramework& framework, HWND hwnd);
 
-	void Awake(P3DDevice device, P3DGrpCommandList cmd_list) override;
+	void Awake(P3DDevice device, P3DGrpCommandList cmdlist) override;
 	void Start() override;
 	void Reset() override;
 	void Update(float elapsed_time) override;

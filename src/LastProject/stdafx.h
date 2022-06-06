@@ -1,14 +1,29 @@
 #pragma once
+#include "targetver.h"
+
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
 
+#define WIN32_LEAN_AND_MEAN 거의 사용되지 않는 내용을 Windows 헤더에서 제외합니다.
 #define NOMINMAX
-#define WIN32_LEAN_AND_MEAN 거의 사용되지 않는 내용은 Windows 헤더에서 제외합니다.
+#define NOATOM
+#define NOGDI
+#define NOGDICAPMASKS
+#define NOMETAFILE
+#define NOOPENFILE
+#define NORASTEROPS
+#define NOSCROLL
+#define NOSOUND
+#define NOSYSMETRICS
+#define NOTEXTMETRIC
+#define NOWH
+#define NOCOMM
+#define NOKANJI
+#define NOCRYPT
+#define NOMCX
 #include <windows.h>
-#include <tchar.h>
-#include <math.h>
 
 #include <d3d12.h>
 #include <dxgi1_4.h>
@@ -22,25 +37,23 @@
 #include <DirectXCollision.h>
 using namespace DirectX;
 using namespace DirectX::PackedVector;
-using DESC_HANDLE = D3D12_CPU_DESCRIPTOR_HANDLE;
-using ShaderBlob = D3D12_SHADER_BYTECODE;
 using P3DDevice = ID3D12Device*;
 using P3DCommandList = ID3D12CommandList*;
 using P3DGrpCommandList = ID3D12GraphicsCommandList*;
 using P3DSignature = ID3D12RootSignature*;
-
-#include <wrl.h>
-#include <shellapi.h>
-#include <Mmsystem.h>
-using Microsoft::WRL::ComPtr;
+using D3DHandle = D3D12_CPU_DESCRIPTOR_HANDLE;
+using D3DByteCode = D3D12_SHADER_BYTECODE;
 
 #include <memory>
 #include <filesystem>
 #include <string>
+#include <initializer_list>
 #include <fstream>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <array>
+#include <numbers>
 #include <algorithm>
 using std::shared_ptr;
 using std::unique_ptr;
@@ -48,6 +61,8 @@ using std::weak_ptr;
 using std::make_shared;
 using std::make_unique;
 using std::make_pair;
+using Filepath = std::filesystem::path;
+constexpr auto PI = std::numbers::pi;
 
 class XYZWrapper
 {
@@ -96,36 +111,6 @@ public:
 	float& z;
 };
 
-constexpr UINT FRAME_BUFFER_WIDTH = 800;
-constexpr UINT FRAME_BUFFER_HEIGHT = 600;
-constexpr float ASPECT_RATIO = (float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT));
-
-#define DIR_FORWARD					0x01
-#define DIR_BACKWARD				0x02
-#define DIR_LEFT					0x04
-#define DIR_RIGHT					0x08
-#define DIR_UP						0x10
-#define DIR_DOWN					0x20
-
-#define MATERIAL_ALBEDO_MAP			0x01
-#define MATERIAL_SPECULAR_MAP		0x02
-#define MATERIAL_NORMAL_MAP			0x04
-#define MATERIAL_METALLIC_MAP		0x08
-#define MATERIAL_EMISSION_MAP		0x10
-#define MATERIAL_DETAIL_ALBEDO_MAP	0x20
-#define MATERIAL_DETAIL_NORMAL_MAP	0x40
-
-#define MAX_LIGHTS			16 
-#define POINT_LIGHT			1
-#define SPOT_LIGHT			2
-#define DIRECTIONAL_LIGHT	3
-
-#define VERTEXT_POSITION			0x01
-#define VERTEXT_COLOR				0x02
-#define VERTEXT_NORMAL				0x04
-
-#include "Arithmetics.hpp"
-
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
 //#define _WITH_CB_GAMEOBJECT_32BIT_CONSTANTS
 //#define _WITH_CB_GAMEOBJECT_ROOT_DESCRIPTOR
@@ -133,24 +118,24 @@ constexpr float ASPECT_RATIO = (float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_H
 #define _WITH_CB_WORLD_MATRIX_DESCRIPTOR_TABLE
 #define _WITH_DEBUG_FRAME_HIERARCHY
 
+extern ID3D12Resource* CreateBufferResource(P3DDevice device
+	, P3DGrpCommandList cmdlist
+	, const void* origin_data, UINT origin_size
+	, D3D12_HEAP_TYPE heap_type = D3D12_HEAP_TYPE_UPLOAD
+	, D3D12_RESOURCE_STATES state = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
+	, ID3D12Resource** upload_buffer = nullptr);
+
+//extern ID3D12Resource* CreateTextureResourceFromDDSFile(P3DDevice device, P3DGrpCommandList cmdlist, wchar_t* pszFileName, ID3D12Resource** ppd3dUploadBuffer, D3D12_RESOURCE_STATES d3dResourceStates = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
 extern UINT gnCbvSrvDescriptorIncrementSize;
 
 int ReadIntegerFromFile(FILE* file);
 float ReadFloatFromFile(FILE* file);
 BYTE ReadStringFromFile(FILE* file, char* token);
 
-extern ID3D12Resource* CreateBufferResource(P3DDevice device
-	, P3DGrpCommandList cmd_list
-	, void* origin_data, UINT origin_size
-	, D3D12_HEAP_TYPE heap_type = D3D12_HEAP_TYPE_UPLOAD
-	, D3D12_RESOURCE_STATES state = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
-	, ID3D12Resource** buffer = NULL);
-
-//extern ID3D12Resource* CreateTextureResourceFromDDSFile(P3DDevice device, P3DGrpCommandList cmd_list, wchar_t* pszFileName, ID3D12Resource** ppd3dUploadBuffer, D3D12_RESOURCE_STATES d3dResourceStates = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
-DESC_HANDLE operator+(const DESC_HANDLE& handle, const size_t increment);
-DESC_HANDLE operator+(DESC_HANDLE&& handle, const size_t increment);
-DESC_HANDLE& operator+=(DESC_HANDLE& handle, const size_t increment);
+D3DHandle operator+(const D3DHandle& handle, const size_t increment);
+D3DHandle operator+(D3DHandle&& handle, const size_t increment);
+D3DHandle& operator+=(D3DHandle& handle, const size_t increment);
 
 #define RANDOM_COLOR XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX))
 

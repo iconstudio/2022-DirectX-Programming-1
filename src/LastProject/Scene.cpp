@@ -19,10 +19,10 @@ Scene::~Scene()
 	ReleaseUniforms();
 }
 
-void Scene::Awake(P3DDevice device, P3DGrpCommandList cmd_list)
+void Scene::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
 	d3dDevice = device;
-	d3dTaskList = cmd_list;
+	d3dTaskList = cmdlist;
 
 	OnAwake();
 

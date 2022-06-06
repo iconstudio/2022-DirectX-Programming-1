@@ -21,25 +21,25 @@ Pipeline::~Pipeline()
 	}
 }
 
-ShaderBlob Pipeline::CreateVertexShader()
+D3DByteCode Pipeline::CreateVertexShader()
 {
-	ShaderBlob d3dShaderByteCode{};
+	D3DByteCode d3dShaderByteCode{};
 	d3dShaderByteCode.BytecodeLength = 0;
 	d3dShaderByteCode.pShaderBytecode = NULL;
 
 	return(d3dShaderByteCode);
 }
 
-ShaderBlob Pipeline::CreatePixelShader()
+D3DByteCode Pipeline::CreatePixelShader()
 {
-	ShaderBlob d3dShaderByteCode{};
+	D3DByteCode d3dShaderByteCode{};
 	d3dShaderByteCode.BytecodeLength = 0;
 	d3dShaderByteCode.pShaderBytecode = NULL;
 
 	return(d3dShaderByteCode);
 }
 
-ShaderBlob Pipeline::CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob)
+D3DByteCode Pipeline::CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob)
 {
 	UINT nCompileFlags = 0;
 #if defined(_DEBUG)
@@ -64,7 +64,7 @@ ShaderBlob Pipeline::CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszS
 		pErrorString = (char*)pd3dErrorBlob->GetBufferPointer();
 	}
 
-	ShaderBlob d3dShaderByteCode{};
+	D3DByteCode d3dShaderByteCode{};
 	d3dShaderByteCode.BytecodeLength = (*ppd3dShaderBlob)->GetBufferSize();
 	d3dShaderByteCode.pShaderBytecode = (*ppd3dShaderBlob)->GetBufferPointer();
 
@@ -81,7 +81,7 @@ ShaderBlob Pipeline::CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszS
 #include <sstream>
 #endif
 
-ShaderBlob Pipeline::ReadCompiledShaderFromFile(const WCHAR* pszFileName, ID3DBlob** ppd3dShaderBlob)
+D3DByteCode Pipeline::ReadCompiledShaderFromFile(const WCHAR* pszFileName, ID3DBlob** ppd3dShaderBlob)
 {
 	UINT nReadBytes = 0;
 #ifdef _WITH_WFOPEN
@@ -104,7 +104,7 @@ ShaderBlob Pipeline::ReadCompiledShaderFromFile(const WCHAR* pszFileName, ID3DBl
 	ifsFile.close();
 #endif
 
-	ShaderBlob d3dShaderByteCode;
+	D3DByteCode d3dShaderByteCode;
 	if (ppd3dShaderBlob)
 	{
 		*ppd3dShaderBlob = NULL;
@@ -193,7 +193,7 @@ D3D12_BLEND_DESC Pipeline::CreateBlendState()
 	return(d3dBlendDesc);
 }
 
-void Pipeline::CreateShader(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature)
+void Pipeline::CreateShader(P3DDevice device, P3DGrpCommandList cmdlist, P3DSignature signature)
 {
 	ZeroMemory(&pipeline_state_desc, sizeof(pipeline_state_desc));
 
@@ -222,36 +222,29 @@ void Pipeline::CreateShader(P3DDevice device, P3DGrpCommandList cmd_list, P3DSig
 	}
 }
 
-void Pipeline::InitializeUniforms(P3DDevice device, P3DGrpCommandList cmd_list)
+void Pipeline::InitializeUniforms(P3DDevice device, P3DGrpCommandList cmdlist)
 {}
 
-void Pipeline::UpdateUniforms(P3DGrpCommandList cmd_list)
+void Pipeline::UpdateUniforms(P3DGrpCommandList cmdlist)
 {}
 
-void Pipeline::UpdateUniforms(P3DGrpCommandList cmd_list, XMFLOAT4X4* pxmf4x4World)
+void Pipeline::UpdateUniforms(P3DGrpCommandList cmdlist, XMFLOAT4X4* pxmf4x4World)
 {}
 
-void Pipeline::UpdateUniforms(P3DGrpCommandList cmd_list, CMaterialColors* pMaterialColors)
+void Pipeline::UpdateUniforms(P3DGrpCommandList cmdlist, CMaterialColors* pMaterialColors)
 {}
 
 void Pipeline::ReleaseUniforms()
 {}
 
-void Pipeline::OnPrepareRender(P3DGrpCommandList cmd_list, int nPipelineState)
+void Pipeline::PrepareRendering(P3DGrpCommandList cmdlist, int index)
 {
 	if (m_ppd3dPipelineStates)
 	{
-		cmd_list->SetPipelineState(m_ppd3dPipelineStates[nPipelineState]);
+		cmdlist->SetPipelineState(m_ppd3dPipelineStates[index]);
 	}
 }
 
-void Pipeline::Render(P3DGrpCommandList cmd_list, GameCamera* pCamera, int nPipelineState)
-{
-	OnPrepareRender(cmd_list, nPipelineState);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
 CIlluminatedShader::CIlluminatedShader()
 {}
 
@@ -273,22 +266,22 @@ D3D12_INPUT_LAYOUT_DESC CIlluminatedShader::CreateInputLayout()
 	return(d3dInputLayoutDesc);
 }
 
-ShaderBlob CIlluminatedShader::CreateVertexShader()
+D3DByteCode CIlluminatedShader::CreateVertexShader()
 {
 	return(Pipeline::CompileShaderFromFile(L"VertexShader.hlsl", "main", "vs_5_1", &m_pd3dVertexShaderBlob));
 }
 
-ShaderBlob CIlluminatedShader::CreatePixelShader()
+D3DByteCode CIlluminatedShader::CreatePixelShader()
 {
 	return(Pipeline::CompileShaderFromFile(L"PixelShader.hlsl", "main", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
 
-void CIlluminatedShader::CreateShader(P3DDevice device, P3DGrpCommandList cmd_list, P3DSignature signature)
+void CIlluminatedShader::CreateShader(P3DDevice device, P3DGrpCommandList cmdlist, P3DSignature signature)
 {
 	m_nPipelineStates = 2;
 	m_ppd3dPipelineStates = new ID3D12PipelineState*[m_nPipelineStates];
 
-	Pipeline::CreateShader(device, cmd_list, signature);
+	Pipeline::CreateShader(device, cmdlist, signature);
 
 	pipeline_state_desc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
 
@@ -300,7 +293,7 @@ void CIlluminatedShader::CreateShader(P3DDevice device, P3DGrpCommandList cmd_li
 	if (pipeline_state_desc.InputLayout.pInputElementDescs) delete[] pipeline_state_desc.InputLayout.pInputElementDescs;
 }
 
-void CIlluminatedShader::Render(P3DGrpCommandList cmd_list, GameCamera* pCamera, int nPipelineState)
+void CIlluminatedShader::PrepareRendering(P3DGrpCommandList cmdlist, int index)
 {
-	OnPrepareRender(cmd_list, nPipelineState);
+	Pipeline::PrepareRendering(cmdlist, index);
 }

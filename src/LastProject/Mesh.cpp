@@ -125,19 +125,19 @@ void CIndexedMesh::ReleaseUploadBuffers()
 	}
 }
 
-void CIndexedMesh::Render(P3DGrpCommandList cmd_list, int nSubSet)
+void CIndexedMesh::Render(P3DGrpCommandList cmdlist, int nSubSet)
 {
-	cmd_list->IASetPrimitiveTopology(typePrimitive);
-	cmd_list->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
+	cmdlist->IASetPrimitiveTopology(typePrimitive);
+	cmdlist->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
 
 	if ((numberMyMesh > 0) && (nSubSet < numberMyMesh))
 	{
-		cmd_list->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));
-		cmd_list->DrawIndexedInstanced(m_pnSubSetIndices[nSubSet], 1, 0, 0, 0);
+		cmdlist->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));
+		cmdlist->DrawIndexedInstanced(m_pnSubSetIndices[nSubSet], 1, 0, 0, 0);
 	}
 	else
 	{
-		cmd_list->DrawInstanced(numberMyVertex, 1, m_nOffset, 0);
+		cmdlist->DrawInstanced(numberMyVertex, 1, m_nOffset, 0);
 	}
 }
 
@@ -175,20 +175,20 @@ void CIlluminatedMesh::ReleaseUploadBuffers()
 	m_pd3dNormalUploadBuffer = NULL;
 }
 
-void CIlluminatedMesh::Render(P3DGrpCommandList cmd_list, int nSubSet)
+void CIlluminatedMesh::Render(P3DGrpCommandList cmdlist, int nSubSet)
 {
-	cmd_list->IASetPrimitiveTopology(typePrimitive);
+	cmdlist->IASetPrimitiveTopology(typePrimitive);
 
 	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[2] = { m_d3dPositionBufferView, m_d3dNormalBufferView };
-	cmd_list->IASetVertexBuffers(m_nSlot, 2, pVertexBufferViews);
+	cmdlist->IASetVertexBuffers(m_nSlot, 2, pVertexBufferViews);
 
 	if ((numberMyMesh > 0) && (nSubSet < numberMyMesh))
 	{
-		cmd_list->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));
-		cmd_list->DrawIndexedInstanced(m_pnSubSetIndices[nSubSet], 1, 0, 0, 0);
+		cmdlist->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));
+		cmdlist->DrawIndexedInstanced(m_pnSubSetIndices[nSubSet], 1, 0, 0, 0);
 	}
 	else
 	{
-		cmd_list->DrawInstanced(numberMyVertex, 1, m_nOffset, 0);
+		cmdlist->DrawInstanced(numberMyVertex, 1, m_nOffset, 0);
 	}
 }

@@ -9,9 +9,9 @@ StageGameEnd::StageGameEnd(GameFramework& framework, HWND hwnd)
 	SetBackgroundColor(colors);
 }
 
-void StageGameEnd::Awake(P3DDevice device, P3DGrpCommandList cmd_list)
+void StageGameEnd::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
-	Scene::Awake(device, cmd_list);
+	Scene::Awake(device, cmdlist);
 }
 
 void StageGameEnd::Start()

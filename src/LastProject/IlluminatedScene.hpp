@@ -10,7 +10,7 @@ public:
 	IlluminatedScene(GameFramework& framework, HWND hwnd, const char* name);
 	virtual ~IlluminatedScene();
 
-	virtual void Awake(P3DDevice device, P3DGrpCommandList cmd_list) override;
+	virtual void Awake(P3DDevice device, P3DGrpCommandList cmdlist) override;
 	virtual void Start() override;
 	virtual void Reset() override;
 	virtual void Update(float elapsed_time) override;
