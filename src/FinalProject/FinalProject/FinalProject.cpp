@@ -95,7 +95,8 @@ void InitialzeGame(HWND hwnd)
 	camera->CreateOrthographicProjectionMatrix(1.0f, 1000.0f, float(FRAME_BUFFER_W), float(FRAME_BUFFER_H));
 	camera->GenerateViewMatrix();
 
-	auto testbed = gameFramework.RegisterScene(IlluminatedScene(gameFramework, "Test Scene", dxdevice, dxcmdlist));
+	auto testbed = gameFramework.RegisterScene(Scene(gameFramework, "Test Scene", dxdevice, dxcmdlist));
+	//auto testbed = gameFramework.RegisterScene(IlluminatedScene(gameFramework, "Test Scene", dxdevice, dxcmdlist));
 	gameFramework.AddStage(testbed);
 
 	camera->Init(dxdevice, dxcmdlist);

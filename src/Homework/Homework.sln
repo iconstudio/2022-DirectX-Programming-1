@@ -7,8 +7,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Original", "Homework\Homewo
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SoftwareRenderer", "SoftwareRenderer\SoftwareRenderer.vcxproj", "{4B086806-982C-423A-AF6C-1B0779308B66}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Midterm 2022-1", "Midterm 2022-1\Midterm 2022-1.vcxproj", "{2E4EF433-3C0D-4DD4-838D-1814E058AEBE}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -33,14 +31,6 @@ Global
 		{4B086806-982C-423A-AF6C-1B0779308B66}.Release|x64.Build.0 = Release|x64
 		{4B086806-982C-423A-AF6C-1B0779308B66}.Release|x86.ActiveCfg = Release|Win32
 		{4B086806-982C-423A-AF6C-1B0779308B66}.Release|x86.Build.0 = Release|Win32
-		{2E4EF433-3C0D-4DD4-838D-1814E058AEBE}.Debug|x64.ActiveCfg = Debug|x64
-		{2E4EF433-3C0D-4DD4-838D-1814E058AEBE}.Debug|x64.Build.0 = Debug|x64
-		{2E4EF433-3C0D-4DD4-838D-1814E058AEBE}.Debug|x86.ActiveCfg = Debug|Win32
-		{2E4EF433-3C0D-4DD4-838D-1814E058AEBE}.Debug|x86.Build.0 = Debug|Win32
-		{2E4EF433-3C0D-4DD4-838D-1814E058AEBE}.Release|x64.ActiveCfg = Release|x64
-		{2E4EF433-3C0D-4DD4-838D-1814E058AEBE}.Release|x64.Build.0 = Release|x64
-		{2E4EF433-3C0D-4DD4-838D-1814E058AEBE}.Release|x86.ActiveCfg = Release|Win32
-		{2E4EF433-3C0D-4DD4-838D-1814E058AEBE}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
