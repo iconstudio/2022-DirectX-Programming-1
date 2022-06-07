@@ -140,13 +140,13 @@ float ReadFloatFromFile(FILE* file);
 BYTE ReadStringFromFile(FILE* file, char* token);
 
 extern ID3D12Resource* CreateBufferResource(P3DDevice device
-	, P3DGrpCommandList cmd_list
+	, P3DGrpCommandList cmdlist
 	, void* origin_data, UINT origin_size
 	, D3D12_HEAP_TYPE heap_type = D3D12_HEAP_TYPE_UPLOAD
 	, D3D12_RESOURCE_STATES state = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
 	, ID3D12Resource** buffer = NULL);
 
-//extern ID3D12Resource* CreateTextureResourceFromDDSFile(P3DDevice device, P3DGrpCommandList cmd_list, wchar_t* pszFileName, ID3D12Resource** ppd3dUploadBuffer, D3D12_RESOURCE_STATES d3dResourceStates = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+//extern ID3D12Resource* CreateTextureResourceFromDDSFile(P3DDevice device, P3DGrpCommandList cmdlist, wchar_t* pszFileName, ID3D12Resource** ppd3dUploadBuffer, D3D12_RESOURCE_STATES d3dResourceStates = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 DESC_HANDLE operator+(const DESC_HANDLE& handle, const size_t increment);
 DESC_HANDLE operator+(DESC_HANDLE&& handle, const size_t increment);

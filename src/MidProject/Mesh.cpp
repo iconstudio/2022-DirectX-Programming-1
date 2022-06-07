@@ -15,13 +15,13 @@ RawMesh::~RawMesh()
 	if (m_ppnSubSetIndices) delete[] m_ppnSubSetIndices;
 }
 
-COriginalMesh::COriginalMesh(P3DDevice device, P3DGrpCommandList cmd_list, RawMesh* pMeshInfo)
+COriginalMesh::COriginalMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* pMeshInfo)
 {
 	m_nVertices = pMeshInfo->m_nVertices;
 	m_nType = pMeshInfo->m_nType;
 
 	// 서술자 & 서술자 힙이 필요없다.
-	m_pd3dPositionBuffer = ::CreateBufferResource(device, cmd_list, pMeshInfo->m_pxmf3Positions, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
+	m_pd3dPositionBuffer = ::CreateBufferResource(device, cmdlist, pMeshInfo->m_pxmf3Positions, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
 
 	m_d3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
 	m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
@@ -39,7 +39,7 @@ COriginalMesh::COriginalMesh(P3DDevice device, P3DGrpCommandList cmd_list, RawMe
 		for (int i = 0; i < m_nSubMeshes; i++)
 		{
 			m_pnSubSetIndices[i] = pMeshInfo->m_pnSubSetIndices[i];
-			m_ppd3dSubSetIndexBuffers[i] = ::CreateBufferResource(device, cmd_list, pMeshInfo->m_ppnSubSetIndices[i], sizeof(UINT) * m_pnSubSetIndices[i], D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_ppd3dSubSetIndexUploadBuffers[i]);
+			m_ppd3dSubSetIndexBuffers[i] = ::CreateBufferResource(device, cmdlist, pMeshInfo->m_ppnSubSetIndices[i], sizeof(UINT) * m_pnSubSetIndices[i], D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_ppd3dSubSetIndexUploadBuffers[i]);
 
 			m_pd3dSubSetIndexBufferViews[i].BufferLocation = m_ppd3dSubSetIndexBuffers[i]->GetGPUVirtualAddress();
 			m_pd3dSubSetIndexBufferViews[i].Format = DXGI_FORMAT_R32_UINT;
@@ -82,24 +82,25 @@ void COriginalMesh::ReleaseUploadBuffers()
 	}
 }
 
-void COriginalMesh::Render(P3DGrpCommandList cmd_list, int nSubSet)
+void COriginalMesh::Render(P3DGrpCommandList cmdlist, int nSubSet)
 {
-	cmd_list->IASetPrimitiveTopology(typePrimitive);
-	cmd_list->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
+	cmdlist->IASetPrimitiveTopology(typePrimitive);
+	cmdlist->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
 	if ((m_nSubMeshes > 0) && (nSubSet < m_nSubMeshes))
 	{
-		cmd_list->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));
-		cmd_list->DrawIndexedInstanced(m_pnSubSetIndices[nSubSet], 1, 0, 0, 0);
+		cmdlist->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));
+		cmdlist->DrawIndexedInstanced(m_pnSubSetIndices[nSubSet], 1, 0, 0, 0);
 	}
 	else
 	{
-		cmd_list->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
+		cmdlist->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
 	}
 }
 
-CLightenMesh::CLightenMesh(P3DDevice device, P3DGrpCommandList cmd_list, RawMesh* pMeshInfo) : COriginalMesh::COriginalMesh(device, cmd_list, pMeshInfo)
+CLightenMesh::CLightenMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* pMeshInfo)
+	: COriginalMesh::COriginalMesh(device, cmdlist, pMeshInfo)
 {
-	m_pd3dNormalBuffer = ::CreateBufferResource(device, cmd_list, pMeshInfo->m_pxmf3Normals, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dNormalUploadBuffer);
+	m_pd3dNormalBuffer = ::CreateBufferResource(device, cmdlist, pMeshInfo->m_pxmf3Normals, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dNormalUploadBuffer);
 
 	m_d3dNormalBufferView.BufferLocation = m_pd3dNormalBuffer->GetGPUVirtualAddress();
 	m_d3dNormalBufferView.StrideInBytes = sizeof(XMFLOAT3);
@@ -119,19 +120,19 @@ void CLightenMesh::ReleaseUploadBuffers()
 	m_pd3dNormalUploadBuffer = NULL;
 }
 
-void CLightenMesh::Render(P3DGrpCommandList cmd_list, int nSubSet)
+void CLightenMesh::Render(P3DGrpCommandList cmdlist, int nSubSet)
 {
-	cmd_list->IASetPrimitiveTopology(typePrimitive);
+	cmdlist->IASetPrimitiveTopology(typePrimitive);
 	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[2] = { m_d3dPositionBufferView, m_d3dNormalBufferView };
-	cmd_list->IASetVertexBuffers(m_nSlot, 2, pVertexBufferViews);
+	cmdlist->IASetVertexBuffers(m_nSlot, 2, pVertexBufferViews);
 
 	if ((m_nSubMeshes > 0) && (nSubSet < m_nSubMeshes))
 	{
-		cmd_list->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));
-		cmd_list->DrawIndexedInstanced(m_pnSubSetIndices[nSubSet], 1, 0, 0, 0);
+		cmdlist->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));
+		cmdlist->DrawIndexedInstanced(m_pnSubSetIndices[nSubSet], 1, 0, 0, 0);
 	}
 	else
 	{
-		cmd_list->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
+		cmdlist->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
 	}
 }

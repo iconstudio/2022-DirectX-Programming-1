@@ -2,16 +2,16 @@
 #include "StageGameEnd.hpp"
 #include "GameFramework.h"
 
-StageGameEnd::StageGameEnd(GameFramework& framework, HWND hwnd)
-	: Scene(framework, hwnd, "Complete")
+StageGameEnd::StageGameEnd(GameFramework& framework)
+	: Scene(framework, "Complete")
 {
 	constexpr float colors[] = { 0.0f, 0.5f, 0.5f, 1.0f };
 	SetBackgroundColor(colors);
 }
 
-void StageGameEnd::Awake(P3DDevice device, P3DGrpCommandList cmd_list)
+void StageGameEnd::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
-	Scene::Awake(device, cmd_list);
+	Scene::Awake(device, cmdlist);
 }
 
 void StageGameEnd::Start()
@@ -24,31 +24,24 @@ void StageGameEnd::Reset()
 	Scene::Reset();
 }
 
-void StageGameEnd::Update(float elapsed_time)
+void StageGameEnd::Update(float delta_time)
 {
-	Scene::Update(elapsed_time);
+	Scene::Update(delta_time);
 }
+
+void StageGameEnd::PrepareRendering()
+{}
 
 void StageGameEnd::Render()
-{
-	Scene::Render();
-}
-
-
-void StageGameEnd::OnAwake()
-{}
-
-void StageGameEnd::OnInialized()
-{}
-
-void StageGameEnd::OnUpdate()
-{}
-
-void StageGameEnd::OnRender()
 {}
 
 void StageGameEnd::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {}
+
+P3DSignature StageGameEnd::CreateGraphicsRootSignature()
+{
+	return nullptr;
+}
 
 void StageGameEnd::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 {

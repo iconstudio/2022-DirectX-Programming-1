@@ -1,8 +1,8 @@
 #include "pch.hpp"
 #include "IlluminatedScene.hpp"
 
-IlluminatedScene::IlluminatedScene(GameFramework& framework, HWND hwnd, const char* name)
-	: Scene(framework, hwnd, name)
+IlluminatedScene::IlluminatedScene(GameFramework& framework, const char* name)
+	: Scene(framework, name)
 	, m_xmf4GlobalAmbient(XMFLOAT4(1, 1, 1, 1))
 {}
 
@@ -12,16 +12,43 @@ IlluminatedScene::~IlluminatedScene()
 	{
 		delete[] myLights;
 	}
+
+	if (m_pd3dcbLights)
+	{
+		m_pd3dcbLights->Unmap(0, NULL);
+		m_pd3dcbLights->Release();
+	}
 }
 
-void IlluminatedScene::Awake(P3DDevice device, P3DGrpCommandList cmd_list)
+void IlluminatedScene::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
-	Scene::Awake(device, cmd_list);
+	Scene::Awake(device, cmdlist);
+
+	// 256의 배수
+	UINT ncbElementBytes = ((sizeof(StaticLights) + 255) & ~255);
+
+	// 상수 버퍼 형식의 자원 생성
+	m_pd3dcbLights = CreateBufferResource(device, cmdlist
+		, NULL, ncbElementBytes
+		, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, nullptr);
+
+	// GPU의 메모리와 CPU의 메모리 연결
+	auto place = reinterpret_cast<void**>(&myStaticLights);
+	auto valid = m_pd3dcbLights->Map(0, nullptr, place);
+	if (FAILED(valid))
+	{
+		throw "광원의 정보 얻기 실패!";
+	}
 }
 
 void IlluminatedScene::Start()
 {
 	Scene::Start();
+
+	if (myPlayer)
+	{
+		myPlayer->ReleaseUploadBuffers();
+	}
 }
 
 void IlluminatedScene::Reset()
@@ -29,14 +56,14 @@ void IlluminatedScene::Reset()
 	Scene::Reset();
 }
 
-void IlluminatedScene::Update(float elapsed_time)
+void IlluminatedScene::Update(float delta_time)
 {
-	Scene::Update(elapsed_time);
+	Scene::Update(delta_time);
 
 	if (myPlayer)
 	{
-		myPlayer->Animate(elapsed_time, nullptr);
-		myPlayer->Update(elapsed_time);
+		myPlayer->Animate(delta_time, nullptr);
+		myPlayer->Update(delta_time);
 
 		if (myLights)
 		{
@@ -46,7 +73,7 @@ void IlluminatedScene::Update(float elapsed_time)
 
 		for (auto& instance : myInstances)
 		{
-			instance->Animate(elapsed_time, nullptr);
+			instance->Animate(delta_time, nullptr);
 
 			if (myPlayer->CheckCollisionWith(instance.get()))
 			{
@@ -56,10 +83,22 @@ void IlluminatedScene::Update(float elapsed_time)
 	}
 }
 
+void IlluminatedScene::PrepareRendering()
+{
+	d3dTaskList->SetGraphicsRootSignature(mySignature);
+
+	myCamera->SetViewportsAndScissorRects(d3dTaskList);
+	myCamera->UpdateUniforms(d3dTaskList);
+
+	memcpy(myStaticLights->everyLights, myLights, sizeof(CLight) * numberLights);
+
+	memcpy(&myStaticLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
+
+	memcpy(&myStaticLights->m_nLights, &numberLights, sizeof(int));
+}
+
 void IlluminatedScene::Render()
 {
-	Scene::Render();
-
 	if (!myCamera)
 	{
 		throw "장면에 카메라가 없음!";
@@ -84,82 +123,6 @@ void IlluminatedScene::Render()
 	if (myPlayer)
 	{
 		myPlayer->Render(d3dTaskList, myCamera);
-	}
-}
-
-void IlluminatedScene::OnAwake()
-{
-}
-
-void IlluminatedScene::OnInialized()
-{
-	ReleaseUploadBuffers();
-}
-
-void IlluminatedScene::OnUpdate()
-{
-}
-
-void IlluminatedScene::OnRender()
-{
-	d3dTaskList->SetGraphicsRootSignature(mySignature);
-
-	myCamera->SetViewportsAndScissorRects(d3dTaskList);
-	myCamera->UpdateUniforms(d3dTaskList);
-
-	UpdateUniforms();
-}
-
-void IlluminatedScene::InitializeUniforms()
-{
-	Scene::InitializeUniforms();
-
-	// 256의 배수
-	UINT ncbElementBytes = ((sizeof(StaticLights) + 255) & ~255);
-
-	// 메모리 리소스 생성
-	m_pd3dcbLights = CreateBufferResource(d3dDevice, d3dTaskList
-		, NULL, ncbElementBytes
-		, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, nullptr);
-
-	// CPU에서 GPU로 복사
-	auto place = reinterpret_cast<void**>(&myStaticLights);
-	auto valid = m_pd3dcbLights->Map(0, nullptr, place);
-	if (FAILED(valid))
-	{
-		throw "광원의 정보 얻기 실패!";
-	}
-}
-
-void IlluminatedScene::UpdateUniforms()
-{
-	Scene::UpdateUniforms();
-
-	memcpy(myStaticLights->everyLights, myLights, sizeof(CLight) * numberLights);
-
-	memcpy(&myStaticLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
-
-	memcpy(&myStaticLights->m_nLights, &numberLights, sizeof(int));
-}
-
-void IlluminatedScene::ReleaseUniforms()
-{
-	Scene::ReleaseUniforms();
-
-	if (m_pd3dcbLights)
-	{
-		m_pd3dcbLights->Unmap(0, NULL);
-		m_pd3dcbLights->Release();
-	}
-}
-
-void IlluminatedScene::ReleaseUploadBuffers()
-{
-	Scene::ReleaseUploadBuffers();
-
-	if (myPlayer)
-	{
-		myPlayer->ReleaseUploadBuffers();
 	}
 }
 

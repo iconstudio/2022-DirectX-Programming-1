@@ -2,16 +2,16 @@
 #include "StageMain.hpp"
 #include "GameFramework.h"
 
-StageMain::StageMain(GameFramework& framework, HWND hwnd)
-	: Scene(framework, hwnd, "Main")
+StageMain::StageMain(GameFramework& framework)
+	: Scene(framework, "Main")
 {
 	constexpr float colors[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	SetBackgroundColor(colors);
 }
 
-void StageMain::Awake(P3DDevice device, P3DGrpCommandList cmd_list)
+void StageMain::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
-	Scene::Awake(device, cmd_list);
+	Scene::Awake(device, cmdlist);
 }
 
 void StageMain::Start()
@@ -24,30 +24,24 @@ void StageMain::Reset()
 	Scene::Reset();
 }
 
-void StageMain::Update(float elapsed_time)
+void StageMain::Update(float delta_time)
 {
-	Scene::Update(elapsed_time);
+	Scene::Update(delta_time);
 }
+
+void StageMain::PrepareRendering()
+{}
 
 void StageMain::Render()
-{
-	Scene::Render();
-}
-
-void StageMain::OnAwake()
-{}
-
-void StageMain::OnInialized()
-{}
-
-void StageMain::OnUpdate()
-{}
-
-void StageMain::OnRender()
 {}
 
 void StageMain::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {}
+
+P3DSignature StageMain::CreateGraphicsRootSignature()
+{
+	return nullptr;
+}
 
 void StageMain::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 {

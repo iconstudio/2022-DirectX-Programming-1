@@ -2,7 +2,7 @@
 #include "Model.hpp"
 
 Model* Model::Load(ID3D12Device* device
-	, ID3D12GraphicsCommandList* cmd_list
+	, ID3D12GraphicsCommandList* cmdlist
 	, Pipeline* pipeline
 	, const char* pstrFileName)
 {
@@ -24,7 +24,7 @@ Model* Model::Load(ID3D12Device* device
 
 		if (!strcmp(token, "<Hierarchy>:"))
 		{
-			root = Model::LoadFrameHierarchyFromFile(device, cmd_list, pipeline, pInFile);
+			root = Model::LoadFrameHierarchyFromFile(device, cmdlist, pipeline, pInFile);
 		}
 		else if (!strcmp(token, "</Hierarchy>"))
 		{
@@ -135,7 +135,7 @@ RawMesh* Model::LoadRawMesh(FILE* pInFile)
 	return(pMeshInfo);
 }
 
-RawMaterialsBox* Model::LoadRawMaterials(ID3D12Device* device, ID3D12GraphicsCommandList* cmd_list, FILE* pInFile)
+RawMaterialsBox* Model::LoadRawMaterials(ID3D12Device* device, ID3D12GraphicsCommandList* cmdlist, FILE* pInFile)
 {
 	char token[64] = { '\0' };
 	UINT nReads = 0;
@@ -196,7 +196,7 @@ RawMaterialsBox* Model::LoadRawMaterials(ID3D12Device* device, ID3D12GraphicsCom
 }
 
 Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
-	, ID3D12GraphicsCommandList* cmd_list
+	, ID3D12GraphicsCommandList* cmdlist
 	, Pipeline* pipeline
 	, FILE* pInFile)
 {
@@ -238,7 +238,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 				COriginalMesh* pMesh = NULL;
 				if (pMeshInfo->m_nType & VERTEXT_NORMAL)
 				{
-					pMesh = new CLightenMesh(device, cmd_list, pMeshInfo);
+					pMesh = new CLightenMesh(device, cmdlist, pMeshInfo);
 				}
 				if (pMesh) root->SetMesh(pMesh);
 				delete pMeshInfo;
@@ -246,7 +246,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 		}
 		else if (!strcmp(token, "<Materials>:"))
 		{
-			RawMaterialsBox* pMaterialsInfo = root->LoadRawMaterials(device, cmd_list, pInFile);
+			RawMaterialsBox* pMaterialsInfo = root->LoadRawMaterials(device, cmdlist, pInFile);
 			if (pMaterialsInfo && (pMaterialsInfo->m_nMaterials > 0))
 			{
 				if (!root)
@@ -282,7 +282,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 			{
 				for (int i = 0; i < nChilds; i++)
 				{
-					auto pChild = Model::LoadFrameHierarchyFromFile(device, cmd_list, pipeline, pInFile);
+					auto pChild = Model::LoadFrameHierarchyFromFile(device, cmdlist, pipeline, pInFile);
 
 					if (pChild)
 					{

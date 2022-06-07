@@ -12,15 +12,19 @@ float MakeRandom()
 }
 
 StageGame::StageGame(GameFramework& framework, HWND hwnd)
-	: IlluminatedScene(framework, hwnd, "Game")
+	: IlluminatedScene(framework, "Game")
 	, myGoal(), playerSpawnPoint()
 	, myWalls()
+	, handleWindow(hwnd)
 	, raceColors
 { { 0.2f, 0.2f, 0.2f, 1.0f }, { 0.4f, 0.6f, 0.6f, 1.0f }
 , { 0.3f, 0.8f, 0.6f, 1.0f }, {0.2f, 0.6f, 0.4f, 1.0f } }
 {
 	SetBackgroundColor(raceColors[0]);
 }
+
+StageGame::~StageGame()
+{}
 
 void StageGame::ProcessInput(UCHAR* pKeysBuffer)
 {
@@ -75,69 +79,9 @@ void StageGame::ProcessInput(UCHAR* pKeysBuffer)
 	}
 }
 
-void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmd_list)
+void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
-	IlluminatedScene::Awake(device, cmd_list);
-}
-
-void StageGame::Start()
-{
-	IlluminatedScene::Start();
-}
-
-void StageGame::Reset()
-{
-	IlluminatedScene::Reset();
-
-	myPlayer->SetPosition(playerSpawnPoint);
-	myPlayer->SetVelocity(XMFLOAT3());
-	raceTimer = 4.0f;
-}
-
-void StageGame::Update(float elapsed_time)
-{
-	IlluminatedScene::Update(elapsed_time);
-
-	raceTimer -= elapsed_time;
-
-	if (raceTimer <= 0)
-	{
-		BYTE keystate[256]{};
-		ZeroMemory(keystate, sizeof(keystate));
-
-		if (GetKeyboardState(keystate))
-		{
-			ProcessInput(keystate);
-		}
-
-		auto& player_collider = myPlayer->myCollider;
-		player_collider->Center = myPlayer->GetPosition();
-
-		if (player_collider->Intersects(myGoal))
-		{
-			myFramework.JumpToNextStage();
-		}
-
-		SetBackgroundColor(defaultColor);
-	}
-	else
-	{
-		const int raceApproxtime = int(raceTimer);
-		const int raceIndex = 3 - std::min(3, raceApproxtime);
-
-		SetBackgroundColor(raceColors[raceIndex]);
-	}
-}
-
-void StageGame::Render()
-{
-	IlluminatedScene::Render();
-}
-
-void StageGame::OnAwake()
-{
-	IlluminatedScene::OnAwake();
-
+	IlluminatedScene::Awake(device, cmdlist);
 	//
 	m_xmf4GlobalAmbient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -372,19 +316,63 @@ void StageGame::OnAwake()
 	myInstances.emplace_back(goaline);
 }
 
-void StageGame::OnInialized()
+void StageGame::Start()
 {
-	IlluminatedScene::OnInialized();
+	IlluminatedScene::Start();
 }
 
-void StageGame::OnUpdate()
+void StageGame::Reset()
 {
-	IlluminatedScene::OnUpdate();
+	IlluminatedScene::Reset();
+
+	myPlayer->SetPosition(playerSpawnPoint);
+	myPlayer->SetVelocity(XMFLOAT3());
+	raceTimer = 4.0f;
 }
 
-void StageGame::OnRender()
+void StageGame::Update(float delta_time)
 {
-	IlluminatedScene::OnRender();
+	IlluminatedScene::Update(delta_time);
+
+	raceTimer -= delta_time;
+
+	if (raceTimer <= 0)
+	{
+		BYTE keystate[256]{};
+		ZeroMemory(keystate, sizeof(keystate));
+
+		if (GetKeyboardState(keystate))
+		{
+			ProcessInput(keystate);
+		}
+
+		auto& player_collider = myPlayer->myCollider;
+		player_collider->Center = myPlayer->GetPosition();
+
+		if (player_collider->Intersects(myGoal))
+		{
+			myFramework.JumpToNextStage();
+		}
+
+		SetBackgroundColor(defaultColor);
+	}
+	else
+	{
+		const int raceApproxtime = int(raceTimer);
+		const int raceIndex = 3 - std::min(3, raceApproxtime);
+
+		SetBackgroundColor(raceColors[raceIndex]);
+	}
+}
+
+void StageGame::PrepareRendering()
+{
+	IlluminatedScene::PrepareRendering();
+}
+
+void StageGame::Render()
+{
+	IlluminatedScene::Render();
 }
 
 void StageGame::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)

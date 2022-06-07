@@ -100,14 +100,14 @@ public:
 class COriginalMesh
 {
 public:
-	COriginalMesh(P3DDevice device, P3DGrpCommandList cmd_list, RawMesh* pMeshInfo);
+	COriginalMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* pMeshInfo);
 	virtual ~COriginalMesh();
 
 	virtual void ReleaseUploadBuffers();
 
 	UINT GetType() { return (m_nType); }
-	virtual void Render(P3DGrpCommandList cmd_list) {}
-	virtual void Render(P3DGrpCommandList cmd_list, int nSubSet);
+	virtual void Render(P3DGrpCommandList cmdlist) {}
+	virtual void Render(P3DGrpCommandList cmdlist, int nSubSet);
 
 private:
 	int m_nReferences = 0;
@@ -140,7 +140,7 @@ protected:
 class CLightenMesh : public COriginalMesh
 {
 public:
-	CLightenMesh(P3DDevice device, P3DGrpCommandList cmd_list, RawMesh* pMeshInfo);
+	CLightenMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* pMeshInfo);
 	virtual ~CLightenMesh();
 
 	virtual void ReleaseUploadBuffers();
@@ -151,5 +151,5 @@ protected:
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dNormalBufferView;
 
 public:
-	virtual void Render(P3DGrpCommandList cmd_list, int nSubSet);
+	virtual void Render(P3DGrpCommandList cmdlist, int nSubSet);
 };

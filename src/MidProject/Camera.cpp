@@ -105,15 +105,15 @@ void GameCamera::RegenerateViewMatrix()
 	m_xmf4x4View._43 = -Vector3::DotProduct(m_xmf3Position, m_xmf3Look);
 }
 
-void GameCamera::InitializeUniforms(P3DDevice device, P3DGrpCommandList cmd_list)
+void GameCamera::InitializeUniforms(P3DDevice device, P3DGrpCommandList cmdlist)
 {
 	UINT ncbElementBytes = ((sizeof(VS_CB_CAMERA_INFO) + 255) & ~255);
-	m_pd3dcbCamera = ::CreateBufferResource(device, cmd_list, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcbCamera = ::CreateBufferResource(device, cmdlist, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dcbCamera->Map(0, NULL, (void**)&m_pcbMappedCamera);
 }
 
-void GameCamera::UpdateUniforms(P3DGrpCommandList cmd_list)
+void GameCamera::UpdateUniforms(P3DGrpCommandList cmdlist)
 {
 	XMFLOAT4X4 xmf4x4View;
 	XMStoreFloat4x4(&xmf4x4View, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4View)));
@@ -126,7 +126,7 @@ void GameCamera::UpdateUniforms(P3DGrpCommandList cmd_list)
 	::memcpy(&m_pcbMappedCamera->m_xmf3Position, &m_xmf3Position, sizeof(XMFLOAT3));
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
-	cmd_list->SetGraphicsRootConstantBufferView(0, d3dGpuVirtualAddress);
+	cmdlist->SetGraphicsRootConstantBufferView(0, d3dGpuVirtualAddress);
 }
 
 void GameCamera::ReleaseUniforms()
@@ -138,10 +138,10 @@ void GameCamera::ReleaseUniforms()
 	}
 }
 
-void GameCamera::SetViewportsAndScissorRects(P3DGrpCommandList cmd_list)
+void GameCamera::SetViewportsAndScissorRects(P3DGrpCommandList cmdlist)
 {
-	cmd_list->RSSetViewports(1, &m_d3dViewport);
-	cmd_list->RSSetScissorRects(1, &m_d3dScissorRect);
+	cmdlist->RSSetViewports(1, &m_d3dViewport);
+	cmdlist->RSSetScissorRects(1, &m_d3dScissorRect);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////

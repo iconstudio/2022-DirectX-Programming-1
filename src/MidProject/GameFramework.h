@@ -29,7 +29,7 @@ public:
 	void CleanupBuilds();
 
 	// °»½Å
-	void Update(float elapsed_time);
+	void Update(float delta_time);
 
 	// ·»´õ¸µ
 	void Render();

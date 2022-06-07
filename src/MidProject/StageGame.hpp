@@ -5,17 +5,14 @@ class StageGame : public IlluminatedScene
 {
 public:
 	StageGame(GameFramework& framework, HWND hwnd);
+	virtual ~StageGame();
 
-	void Awake(P3DDevice device, P3DGrpCommandList cmd_list) override;
+	void Awake(P3DDevice device, P3DGrpCommandList cmdlist) override;
 	void Start() override;
 	void Reset() override;
-	void Update(float elapsed_time) override;
+	void Update(float delta_time) override;
+	void PrepareRendering() override;
 	void Render() override;
-
-	void OnAwake() override;
-	void OnInialized() override;
-	void OnUpdate() override;
-	void OnRender() override;
 
 	void OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info) override;
 	void OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state) override;
@@ -36,4 +33,6 @@ public:
 
 	const float raceColors[4][4];
 	float raceTimer = 4.0f;
+
+	HWND handleWindow;
 };

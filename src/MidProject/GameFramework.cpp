@@ -555,14 +555,13 @@ void GameFramework::BuildAssets()
 
 void GameFramework::BuildStages()
 {
-	auto room_main = RegisterScene(StageMain(*this, myWindow));
+	auto room_main = RegisterScene(StageMain(*this));
 	auto room_game = RegisterScene(StageGame(*this, myWindow));
-	auto room_complete = RegisterScene(StageGameEnd(*this, myWindow));
+	auto room_complete = RegisterScene(StageGameEnd(*this));
 	
 	AddStage(room_main);
 	AddStage(room_game);
 	AddStage(room_complete);
-	JumpToStage(0);
 
 	for (auto& stage_pair : myScenes)
 	{
@@ -599,13 +598,10 @@ void GameFramework::BuildObjects()
 
 void GameFramework::CleanupBuilds()
 {
-	if (currentScene)
-	{
-		currentScene->OnInialized();
-	}
+	JumpToStage(0);
 }
 
-void GameFramework::Update(float elapsed_time)
+void GameFramework::Update(float delta_time)
 {
 	static UCHAR pKeysBuffer[256];
 	const auto input = GetKeyboardState(pKeysBuffer);
@@ -621,7 +617,7 @@ void GameFramework::Update(float elapsed_time)
 
 	if (currentScene)
 	{
-		currentScene->Update(elapsed_time);
+		currentScene->Update(delta_time);
 	}
 }
 
@@ -648,6 +644,7 @@ void GameFramework::Render()
 
 	if (currentScene)
 	{
+		currentScene->PrepareRendering();
 		currentScene->Render();
 	}
 
