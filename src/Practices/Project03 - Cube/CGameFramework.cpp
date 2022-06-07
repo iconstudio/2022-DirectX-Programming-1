@@ -14,7 +14,6 @@ CGameFramework::CGameFramework()
 	, m_pd3dDepthStencilBuffer(nullptr)
 	, controlCommands()
 	, m_pScene(nullptr)
-	, Timer()
 {
 	ZeroMemory(m_ppd3dRenderTargetBuffers, sizeof(m_ppd3dRenderTargetBuffers));
 	ZeroMemory(m_nFenceValues, sizeof(m_nFenceValues));
@@ -24,8 +23,6 @@ CGameFramework::CGameFramework()
 	dxgiRenderTargetParameters.RefreshRate.Denominator = 1;
 	dxgiRenderTargetParameters.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	dxgiRenderTargetParameters.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-
-	wcscpy_s(m_pszFrameRate, L"LapProject (");
 }
 
 CGameFramework::~CGameFramework()
@@ -43,7 +40,7 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	CreateSwapChain();
 
 	// 렌더링할 게임 객체를 생성한다.
-	BuildObjects();
+	Start();
 
 	return true;
 }
@@ -368,15 +365,48 @@ void CGameFramework::CreateDepthStencilView()
 	m_pd3dDevice->CreateDepthStencilView(m_pd3dDepthStencilBuffer, NULL, d3dDsvCPUDescriptorHandle);
 }
 
-void CGameFramework::BuildObjects()
+void CGameFramework::Start()
+{
+	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
+	
+	//카메라 객체를 생성하여 뷰포트, 씨저 사각형, 투영 변환 행렬, 카메라 변환 행렬을 생성하고 설정한다.
+	m_pCamera = new CCamera();
+	m_pCamera->SetViewport(0, 0, m_nWndClientWidth, m_nWndClientHeight, 0.0f, 1.0f);
+	m_pCamera->SetScissorRect(0, 0, m_nWndClientWidth, m_nWndClientHeight);
+	m_pCamera->GenerateProjectionMatrix(1.0f, 500.0f, float(m_nWndClientWidth) /
+		float(m_nWndClientHeight), 90.0f);
+	m_pCamera->GenerateViewMatrix(XMFLOAT3(0.0f, 0.0f, -2.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
+	
+	
+	//씬 객체를 생성하고 씬에 포함될 게임 객체들을 생성한다.
+	m_pScene = new CScene();
+	m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+	//씬 객체를 생성하기 위하여 필요한 그래픽 명령 리스트들을 명령 큐에 추가한다. 
+	
+	m_pd3dCommandList->Close();
+	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
+	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+	//그래픽 명령 리스트들이 모두 실행될 때까지 기다린다.
+
+	WaitForGpuComplete();
+	//그래픽 리소스들을 생성하는 과정에 생성된 업로드 버퍼들을 소멸시킨다.
+	
+	BuildCamera();
+	BuildScene();
+}
+
+void CGameFramework::BuildCamera()
+{}
+
+void CGameFramework::BuildScene()
 {
 	m_pScene = std::make_unique<CScene>();
+
 	if (m_pScene)
 	{
-		m_pScene->BuildObjects(m_pd3dDevice);
+		m_pScene->Start(m_pd3dDevice);
+		m_pScene->ReleaseUploadBuffers();
 	}
-
-	Timer.Reset();
 }
 
 void CGameFramework::ReleaseObjects()
@@ -453,11 +483,11 @@ void CGameFramework::OnResizeBackBuffers()
 void CGameFramework::ProcessInput()
 {}
 
-void CGameFramework::AnimateObjects()
+void CGameFramework::AnimateObjects(float delta_time)
 {
 	if (m_pScene)
 	{
-		m_pScene->AnimateObjects(Timer.GetTimeElapsed());
+		m_pScene->AnimateObjects(delta_time);
 	}
 }
 
@@ -488,12 +518,10 @@ void CGameFramework::WaitForGpuComplete()
 	}
 }
 
-void CGameFramework::FrameAdvance()
+void CGameFramework::FrameAdvance(float delta_time)
 {
-	Timer.Tick(0.0f);
-
 	ProcessInput();
-	AnimateObjects();
+	AnimateObjects(delta_time);
 
 	HRESULT result = controlCommands.TryResetAllocator();
 	if (FAILED(result))
@@ -596,10 +624,6 @@ void CGameFramework::FrameAdvance()
 	}
 
 	MoveToNextFrame();
-
-	Timer.GetFrameRate(m_pszFrameRate + 12, 37);
-
-	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
 
 void CGameFramework::MoveToNextFrame()
@@ -635,11 +659,14 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 		case WM_LBUTTONDOWN:
 		case WM_RBUTTONDOWN:
 		break;
+
 		case WM_LBUTTONUP:
 		case WM_RBUTTONUP:
 		break;
+
 		case WM_MOUSEMOVE:
 		break;
+
 		default:
 		break;
 	}
@@ -653,16 +680,15 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		switch (wParam)
 		{
 			case VK_ESCAPE:
-			::PostQuitMessage(0);
+			{
+				PostQuitMessage(0);
+			}
 			break;
 
 			case VK_RETURN:
+			{}
 			break;
 
-			case VK_F8:
-			break;
-
-			// “F9” 키가 눌려지면 윈도우 모드와 전체화면 모드의 전환을 처리한다.
 			case VK_F9:
 			{
 				BOOL bFullScreenState = FALSE;
@@ -686,19 +712,10 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 	}
 }
 
-LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	switch (nMessageID)
+	switch (msg)
 	{
-		case WM_ACTIVATE:
-		{
-			if (LOWORD(wParam) == WA_INACTIVE)
-				Timer.Stop();
-			else
-				Timer.Start();
-			break;
-		}
-
 		/*
 			WM_SIZE 메시지는 윈도우가 생성될 때 한번 호출되거나 윈도우의 크기가 변경될 때 호출된다.
 			주 윈도우의 크기 를 사용자가 변경할 수 없으므로 윈도우의 크기가 변경되는 경우는
@@ -706,8 +723,8 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 		*/
 		case WM_SIZE:
 		{
-			m_nWndClientWidth = LOWORD(lParam);
-			m_nWndClientHeight = HIWORD(lParam);
+			m_nWndClientWidth = LOWORD(lp);
+			m_nWndClientHeight = HIWORD(lp);
 
 			// 윈도우의 크기가 변경되면 후면버퍼의 크기를 변경한다.
 			OnResizeBackBuffers();
@@ -720,14 +737,14 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 		case WM_RBUTTONUP:
 		case WM_MOUSEMOVE:
 		{
-			OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+			OnProcessingMouseMessage(hwnd, msg, wp, lp);
 		}
 		break;
 
 		case WM_KEYDOWN:
 		case WM_KEYUP:
 		{
-			OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+			OnProcessingKeyboardMessage(hwnd, msg, wp, lp);
 		}
 		break;
 	}

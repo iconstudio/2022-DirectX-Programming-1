@@ -44,8 +44,8 @@ void InitialzeGame(HWND hwnd)
 
 	vs_shader.Complile("shaders/VertexShader.hlsl", "main");
 	ps_shader.Complile("shaders/PixelShader.hlsl", "main");
-	pl_vs_shader.Complile("PlainVertexShader.hlsl", "main");
-	pl_ps_shader.Complile("PlainPixelShader.hlsl", "main");
+	pl_vs_shader.Complile("DiffuseShaders.hlsl", "main");
+	pl_ps_shader.Complile("DiffuseShaders.hlsl", "main");
 
 	UINT nInputElementDescs = 2;
 	auto pl_attributes = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
@@ -68,6 +68,23 @@ void InitialzeGame(HWND hwnd)
 	pl_pipeline.Attach(ds_dest);
 	gameRenderer.RegisterPipeline(pl_pipeline);
 
+	// Camera
+	D3D12_ROOT_PARAMETER param0{};
+	param0.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	param0.Descriptor.ShaderRegister = 0;
+	param0.Descriptor.RegisterSpace = 0;
+	param0.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pl_pipeline.Attach(param0);
+
+	// GameObject
+	D3D12_ROOT_PARAMETER param1{};
+	param1.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	param1.Constants.Num32BitValues = 32;
+	param1.Constants.ShaderRegister = 1;
+	param1.Constants.RegisterSpace = 0;
+	param1.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pl_pipeline.Attach(param1);
+
 	auto attributes = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 	attributes[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT
 		, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
@@ -83,6 +100,32 @@ void InitialzeGame(HWND hwnd)
 	pipeline.Attach(rs_dest);
 	pipeline.Attach(blend_dest);
 	pipeline.Attach(ds_dest);
+
+	// Camera
+	D3D12_ROOT_PARAMETER param0{};
+	param0.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	param0.Descriptor.ShaderRegister = 0;
+	param0.Descriptor.RegisterSpace = 0;
+	param0.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pipeline.Attach(param0);
+
+	// GameObject
+	D3D12_ROOT_PARAMETER param1{};
+	param1.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	param1.Constants.Num32BitValues = 32;
+	param1.Constants.ShaderRegister = 1;
+	param1.Constants.RegisterSpace = 0;
+	param1.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pipeline.Attach(param1);
+
+	// Lights
+	D3D12_ROOT_PARAMETER param2{};
+	param2.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	param2.Descriptor.ShaderRegister = 2;
+	param2.Descriptor.RegisterSpace = 0;
+	param2.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pipeline.Attach(param2);
+
 	gameRenderer.RegisterPipeline(pipeline);
 
 	auto dxdevice = gameRenderer.GetDevice();

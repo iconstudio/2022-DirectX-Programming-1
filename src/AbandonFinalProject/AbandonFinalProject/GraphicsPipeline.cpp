@@ -31,30 +31,6 @@ void GraphicsPipeline::Awake()
 
 void GraphicsPipeline::CreateUniforms()
 {
-	// Camera
-	D3D12_ROOT_PARAMETER param0{};
-	param0.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	param0.Descriptor.ShaderRegister = 0;
-	param0.Descriptor.RegisterSpace = 0;
-	param0.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	Attach(param0);
-
-	// GameObject
-	D3D12_ROOT_PARAMETER param1{};
-	param1.ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	param1.Constants.Num32BitValues = 32;
-	param1.Constants.ShaderRegister = 1;
-	param1.Constants.RegisterSpace = 0;
-	param1.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	Attach(param1);
-
-	// Lights
-	D3D12_ROOT_PARAMETER param2{};
-	param2.ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	param2.Descriptor.ShaderRegister = 2;
-	param2.Descriptor.RegisterSpace = 0;
-	param2.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	Attach(param2);
 }
 
 void GraphicsPipeline::CreateRootSignature()

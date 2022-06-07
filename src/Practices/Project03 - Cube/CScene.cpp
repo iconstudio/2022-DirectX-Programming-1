@@ -9,7 +9,7 @@ CScene::CScene()
 CScene::~CScene()
 {}
 
-void CScene::BuildObjects(ID3D12Device* pd3dDevice)
+void CScene::Start(ID3D12Device* pd3dDevice)
 {
 	// 루트 시그너쳐를 생성한다.
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
@@ -102,6 +102,9 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice)
 	if (pd3dVertexShaderBlob) pd3dVertexShaderBlob->Release();
 	if (pd3dPixelShaderBlob) pd3dPixelShaderBlob->Release();
 }
+
+void CScene::ReleaseUploadBuffers()
+{}
 
 void CScene::ReleaseObjects()
 {

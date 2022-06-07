@@ -162,27 +162,37 @@
     <ResourceCompile Include="MyDirectX.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Arithmetics.cpp" />
+    <ClCompile Include="CCamera.cpp" />
     <ClCompile Include="CGameFramework.cpp" />
     <ClCompile Include="CGameTimer.cpp" />
     <ClCompile Include="CommandController.cpp" />
     <ClCompile Include="CRenderer.cpp" />
     <ClCompile Include="CScene.cpp" />
     <ClCompile Include="DirectObject.cpp" />
+    <ClCompile Include="GameEntity.cpp" />
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="MyDirectX.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="Transformer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Arithmetics.hpp" />
+    <ClInclude Include="CCamera.hpp" />
     <ClInclude Include="CGameFramework.hpp" />
     <ClInclude Include="CGameTimer.h" />
     <ClInclude Include="CommandController.hpp" />
     <ClInclude Include="CRenderer.hpp" />
     <ClInclude Include="CScene.hpp" />
     <ClInclude Include="DirectObject.hpp" />
-    <ClInclude Include="MyDirectX.h" />
+    <ClInclude Include="GameEntity.hpp" />
+    <ClInclude Include="GameObject.hpp" />
+    <ClInclude Include="MyDirectX.hpp" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.hpp" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Transformer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">

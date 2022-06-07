@@ -257,5 +257,8 @@
     <FxCompile Include="shaders\VertexShader.hlsl">
       <Filter>쉐이더 파일\Lighting</Filter>
     </FxCompile>
+    <FxCompile Include="DiffuseShaders.hlsl">
+      <Filter>쉐이더 파일</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

@@ -23,17 +23,18 @@ public:
 	void CreateRenderTargetViews();
 	void CreateDepthStencilView();
 
-	// 렌더링할 메쉬와 게임 객체를 생성하고 소멸하는 함수이다.
-	void BuildObjects();
+	void Start();
+	void BuildCamera();
+	void BuildScene();
 	void ReleaseObjects();
 
 	// 프레임워크의 핵심(사용자 입력, 애니메이션, 렌더링)을 구성하는 함수이다.
 	void ProcessInput();
-	void AnimateObjects();
+	void AnimateObjects(float delta_time);
 
 	// CPU와 GPU를 동기화하는 함수이다.
 	void WaitForGpuComplete();
-	void FrameAdvance();
+	void FrameAdvance(float delta_time);
 	void MoveToNextFrame();
 
 	// 윈도우의 메시지(키보드, 마우스 입력)를 처리하는 함수이다.
@@ -98,7 +99,6 @@ private:
 	// 다중 샘플링 레벨 수준
 	UINT m_nMsaa4xQualityLevels = 0;
 
-	std::unique_ptr<CScene> m_pScene;
-	CGameTimer Timer;
-	WCHAR m_pszFrameRate[50];
+	shared_ptr<CCamera> m_pCamera;
+	unique_ptr<CScene> m_pScene;
 };

@@ -6,7 +6,8 @@ public:
 	CScene();
 	~CScene();
 
-	void BuildObjects(ID3D12Device* pd3dDevice);
+	void Start(ID3D12Device* pd3dDevice);
+	virtual void ReleaseUploadBuffers();
 	void ReleaseObjects();
 
 	bool ProcessInput();

@@ -10,4 +10,17 @@
 // 여기에 미리 컴파일하려는 헤더 추가
 #include "stdafx.hpp"
 
+constexpr auto FRAME_BUFFER_WIDTH = 800;
+constexpr auto FRAME_BUFFER_HEIGHT = 600;
+constexpr auto ASPECT_RATIO = float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT);
+
+class CGameTimer;
+class CGameFramework;
+
+class DirectObject;
+class CommandController;
+
+class CCamera;
+struct VS_CB_CAMERA_INFO;
+
 #endif //PCH_H
