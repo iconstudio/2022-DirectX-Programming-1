@@ -155,6 +155,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Arithmetics.hpp" />
+    <ClInclude Include="BasicScene.hpp" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="IlluminatedScene.hpp" />
@@ -183,6 +184,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Arithmetics.cpp" />
+    <ClCompile Include="BasicScene.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="IlluminatedScene.cpp" />
     <ClCompile Include="Light.cpp" />

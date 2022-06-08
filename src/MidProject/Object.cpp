@@ -126,11 +126,11 @@ GameObject* GameObject::FindFrame(const char* name)
 	return nullptr;
 }
 
-void GameObject::Render(P3DGrpCommandList cmd_list, GameCamera* pCamera)
+void GameObject::Render(P3DGrpCommandList cmdlist, GameCamera* pCamera)
 {
 	OnPrepareRender();
 
-	UpdateUniforms(cmd_list, &worldTransform);
+	UpdateUniforms(cmdlist, &worldTransform);
 
 	if (0 < m_nMaterials)
 	{
@@ -141,43 +141,43 @@ void GameObject::Render(P3DGrpCommandList cmd_list, GameCamera* pCamera)
 				auto& pipeline = m_ppMaterials[i]->m_pShader;
 				if (pipeline)
 				{
-					pipeline->Render(cmd_list, pCamera);
+					pipeline->Render(cmdlist, pCamera);
 				}
 				else
 				{
 					throw "파이프라인과 쉐이더가 존재하지 않음!";
 				}
 
-				m_ppMaterials[i]->UpdateUniforms(cmd_list);
+				m_ppMaterials[i]->UpdateUniforms(cmdlist);
 			}
 
 			if (m_pMesh)
 			{
-				m_pMesh->Render(cmd_list, i);
+				m_pMesh->Render(cmdlist, i);
 			}
 		}
 	}
 
-	if (mySibling) mySibling->Render(cmd_list, pCamera);
-	if (myChild) myChild->Render(cmd_list, pCamera);
+	if (mySibling) mySibling->Render(cmdlist, pCamera);
+	if (myChild) myChild->Render(cmdlist, pCamera);
 }
 
-void GameObject::InitializeUniforms(P3DDevice device, P3DGrpCommandList cmd_list)
+void GameObject::InitializeUniforms(P3DDevice device, P3DGrpCommandList cmdlist)
 {}
 
-void GameObject::UpdateUniforms(P3DGrpCommandList cmd_list)
+void GameObject::UpdateUniforms(P3DGrpCommandList cmdlist)
 {}
 
-void GameObject::UpdateUniforms(P3DGrpCommandList cmd_list, XMFLOAT4X4* pxmf4x4World)
+void GameObject::UpdateUniforms(P3DGrpCommandList cmdlist, XMFLOAT4X4* pxmf4x4World)
 {
 	XMFLOAT4X4 xmf4x4World{};
 
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
 
-	cmd_list->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+	cmdlist->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 }
 
-void GameObject::UpdateUniforms(P3DGrpCommandList cmd_list, CMaterial* pMaterial)
+void GameObject::UpdateUniforms(P3DGrpCommandList cmdlist, CMaterial* pMaterial)
 {}
 
 void GameObject::ReleaseUniforms()
@@ -211,7 +211,7 @@ void GameObject::UpdateCollider(const XMFLOAT4X4* mat)
 	}
 }
 
-void GameObject::BuildMaterials(P3DDevice device, P3DGrpCommandList cmd_list)
+void GameObject::BuildMaterials(P3DDevice device, P3DGrpCommandList cmdlist)
 {}
 
 void GameObject::ReleaseUploadBuffers()
@@ -373,9 +373,9 @@ void CRotatingObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	GameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
-void CRotatingObject::Render(ID3D12GraphicsCommandList* cmd_list, GameCamera* pCamera)
+void CRotatingObject::Render(ID3D12GraphicsCommandList* cmdlist, GameCamera* pCamera)
 {
-	GameObject::Render(cmd_list, pCamera);
+	GameObject::Render(cmdlist, pCamera);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
