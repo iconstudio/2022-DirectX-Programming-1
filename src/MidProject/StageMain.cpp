@@ -38,11 +38,6 @@ void StageMain::Render()
 void StageMain::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {}
 
-P3DSignature StageMain::CreateGraphicsRootSignature()
-{
-	return nullptr;
-}
-
 void StageMain::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 {
 	switch (msg)

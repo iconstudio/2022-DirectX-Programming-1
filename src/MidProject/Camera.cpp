@@ -1,6 +1,7 @@
 #include "pch.hpp"
 #include "Player.h"
 #include "Camera.h"
+#include "Arithmetics.hpp"
 
 GameCamera::GameCamera()
 {

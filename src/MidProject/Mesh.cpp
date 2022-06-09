@@ -1,5 +1,7 @@
 #include "pch.hpp"
 #include "Mesh.h"
+#include "Material.hpp"
+#include "Pipeline.hpp"
 
 RawMesh::~RawMesh()
 {
@@ -9,87 +11,164 @@ RawMesh::~RawMesh()
 
 	if (m_pnIndices) delete[] m_pnIndices;
 
-	if (m_pnSubSetIndices) delete[] m_pnSubSetIndices;
+	if (countPolygonIndices) delete[] countPolygonIndices;
 
-	for (int i = 0; i < m_nSubMeshes; i++) if (m_ppnSubSetIndices[i]) delete[] m_ppnSubSetIndices[i];
+	for (int i = 0; i < countPolygons; i++) if (m_ppnSubSetIndices[i]) delete[] m_ppnSubSetIndices[i];
 	if (m_ppnSubSetIndices) delete[] m_ppnSubSetIndices;
 }
 
-COriginalMesh::COriginalMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* pMeshInfo)
+CMaterialMesh::CMaterialMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw)
 {
-	m_nVertices = pMeshInfo->m_nVertices;
-	m_nType = pMeshInfo->m_nType;
+	m_nVertices = raw->m_nVertices;
+	m_nType = raw->m_nType;
 
 	// 서술자 & 서술자 힙이 필요없다.
-	m_pd3dPositionBuffer = ::CreateBufferResource(device, cmdlist, pMeshInfo->m_pxmf3Positions, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
+	myPositionBuffer = ::CreateBufferResource(device, cmdlist, raw->m_pxmf3Positions, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &myUploadingPositonBuffer);
 
-	m_d3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
-	m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
-	m_d3dPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+	myPositionBufferView.BufferLocation = myPositionBuffer->GetGPUVirtualAddress();
+	myPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
+	myPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
 
-	m_nSubMeshes = pMeshInfo->m_nSubMeshes;
-	if (m_nSubMeshes > 0)
+	countPolygons = raw->countPolygons;
+	if (countPolygons > 0)
 	{
-		m_ppd3dSubSetIndexBuffers = new ID3D12Resource * [m_nSubMeshes];
-		m_ppd3dSubSetIndexUploadBuffers = new ID3D12Resource * [m_nSubMeshes];
-		m_pd3dSubSetIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[m_nSubMeshes];
+		myIndexBuffers = new ID3D12Resource * [countPolygons];
+		myUploadingIndexBuffer = new ID3D12Resource * [countPolygons];
+		myIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[countPolygons];
 
-		m_pnSubSetIndices = new int[m_nSubMeshes];
+		countPolygonIndices = new int[countPolygons];
 
-		for (int i = 0; i < m_nSubMeshes; i++)
+		for (int i = 0; i < countPolygons; i++)
 		{
-			m_pnSubSetIndices[i] = pMeshInfo->m_pnSubSetIndices[i];
-			m_ppd3dSubSetIndexBuffers[i] = ::CreateBufferResource(device, cmdlist, pMeshInfo->m_ppnSubSetIndices[i], sizeof(UINT) * m_pnSubSetIndices[i], D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_ppd3dSubSetIndexUploadBuffers[i]);
+			countPolygonIndices[i] = raw->countPolygonIndices[i];
+			myIndexBuffers[i] = ::CreateBufferResource(device, cmdlist, raw->m_ppnSubSetIndices[i], sizeof(UINT) * countPolygonIndices[i], D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &myUploadingIndexBuffer[i]);
 
-			m_pd3dSubSetIndexBufferViews[i].BufferLocation = m_ppd3dSubSetIndexBuffers[i]->GetGPUVirtualAddress();
-			m_pd3dSubSetIndexBufferViews[i].Format = DXGI_FORMAT_R32_UINT;
-			m_pd3dSubSetIndexBufferViews[i].SizeInBytes = sizeof(UINT) * pMeshInfo->m_pnSubSetIndices[i];
+			myIndexBufferViews[i].BufferLocation = myIndexBuffers[i]->GetGPUVirtualAddress();
+			myIndexBufferViews[i].Format = DXGI_FORMAT_R32_UINT;
+			myIndexBufferViews[i].SizeInBytes = sizeof(UINT) * raw->countPolygonIndices[i];
 		}
 	}
 }
 
-COriginalMesh::~COriginalMesh()
+CMaterialMesh::~CMaterialMesh()
 {
-	if (m_pd3dPositionBuffer) m_pd3dPositionBuffer->Release();
-
-	if (m_nSubMeshes > 0)
+	if (0 < m_nMaterials)
 	{
-		for (int i = 0; i < m_nSubMeshes; i++)
+		for (int i = 0; i < m_nMaterials; i++)
 		{
-			if (m_ppd3dSubSetIndexBuffers[i]) m_ppd3dSubSetIndexBuffers[i]->Release();
+			if (m_ppMaterials[i]) m_ppMaterials[i]->Release();
 		}
-		if (m_ppd3dSubSetIndexBuffers) delete[] m_ppd3dSubSetIndexBuffers;
-		if (m_pd3dSubSetIndexBufferViews) delete[] m_pd3dSubSetIndexBufferViews;
+	}
 
-		if (m_pnSubSetIndices) delete[] m_pnSubSetIndices;
+	if (m_ppMaterials)
+	{
+		delete[] m_ppMaterials;
+	}
+
+	if (myPositionBuffer) myPositionBuffer->Release();
+
+	if (countPolygons > 0)
+	{
+		for (int i = 0; i < countPolygons; i++)
+		{
+			if (myIndexBuffers[i]) myIndexBuffers[i]->Release();
+		}
+		if (myIndexBuffers) delete[] myIndexBuffers;
+		if (myIndexBufferViews) delete[] myIndexBufferViews;
+
+		if (countPolygonIndices) delete[] countPolygonIndices;
 	}
 }
 
-void COriginalMesh::ReleaseUploadBuffers()
+void CMaterialMesh::SetShader(Pipeline* pipeline)
 {
-	if (m_pd3dPositionUploadBuffer) m_pd3dPositionUploadBuffer->Release();
+	m_nMaterials = 1;
+	m_ppMaterials = new CMaterial * [m_nMaterials];
+	m_ppMaterials[0] = new CMaterial;
+	m_ppMaterials[0]->SetShader(pipeline);
+}
 
-	m_pd3dPositionUploadBuffer = NULL;
-
-	if ((m_nSubMeshes > 0) && m_ppd3dSubSetIndexUploadBuffers)
+void CMaterialMesh::SetShader(int index, Pipeline* pipeline)
+{
+	if (m_ppMaterials[index])
 	{
-		for (int i = 0; i < m_nSubMeshes; i++)
-		{
-			if (m_ppd3dSubSetIndexUploadBuffers[i]) m_ppd3dSubSetIndexUploadBuffers[i]->Release();
-		}
-		if (m_ppd3dSubSetIndexUploadBuffers) delete[] m_ppd3dSubSetIndexUploadBuffers;
-		m_ppd3dSubSetIndexUploadBuffers = NULL;
+		m_ppMaterials[index]->SetShader(pipeline);
 	}
 }
 
-void COriginalMesh::Render(P3DGrpCommandList cmdlist, int nSubSet)
+void CMaterialMesh::SetMaterial(int index, CMaterial* mat)
+{
+	if (m_ppMaterials[index])
+		m_ppMaterials[index]->Release();
+
+	m_ppMaterials[index] = mat;
+
+	if (m_ppMaterials[index])
+		m_ppMaterials[index]->AddRef();
+}
+
+void CMaterialMesh::ReleaseUploadBuffers()
+{
+	if (myUploadingPositonBuffer) myUploadingPositonBuffer->Release();
+
+	myUploadingPositonBuffer = NULL;
+
+	if (0 < countPolygons && myUploadingIndexBuffer)
+	{
+		for (int i = 0; i < countPolygons; i++)
+		{
+			if (myUploadingIndexBuffer[i])
+			{
+				myUploadingIndexBuffer[i]->Release();
+			}
+		}
+
+		if (myUploadingIndexBuffer)
+		{
+			delete[] myUploadingIndexBuffer;
+		}
+
+		myUploadingIndexBuffer = nullptr;
+	}
+}
+
+void CMaterialMesh::Render(P3DGrpCommandList cmdlist)
+{
+	if (0 < countPolygons)
+	{
+		for (int i = 0; i < countPolygons; i++)
+		{
+			auto& material = m_ppMaterials[i];
+			
+			if (material)
+			{
+				auto& pipeline = material->m_pShader;
+
+				if (pipeline)
+				{
+					pipeline->PrepareRendering(cmdlist);
+					material->PrepareRendering(cmdlist);
+
+					Render(cmdlist, i);
+				}
+				else
+				{
+					throw "파이프라인과 쉐이더가 존재하지 않음!";
+				}
+			}
+		}
+	}
+}
+
+void CMaterialMesh::Render(P3DGrpCommandList cmdlist, int polygon_index)
 {
 	cmdlist->IASetPrimitiveTopology(typePrimitive);
-	cmdlist->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
-	if ((m_nSubMeshes > 0) && (nSubSet < m_nSubMeshes))
+	cmdlist->IASetVertexBuffers(m_nSlot, 1, &myPositionBufferView);
+
+	if (0 < countPolygons && polygon_index < countPolygons)
 	{
-		cmdlist->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));
-		cmdlist->DrawIndexedInstanced(m_pnSubSetIndices[nSubSet], 1, 0, 0, 0);
+		cmdlist->IASetIndexBuffer(&(myIndexBufferViews[polygon_index]));
+		cmdlist->DrawIndexedInstanced(countPolygonIndices[polygon_index], 1, 0, 0, 0);
 	}
 	else
 	{
@@ -97,39 +176,51 @@ void COriginalMesh::Render(P3DGrpCommandList cmdlist, int nSubSet)
 	}
 }
 
-CLightenMesh::CLightenMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* pMeshInfo)
-	: COriginalMesh::COriginalMesh(device, cmdlist, pMeshInfo)
+UINT CMaterialMesh::GetType() const
 {
-	m_pd3dNormalBuffer = ::CreateBufferResource(device, cmdlist, pMeshInfo->m_pxmf3Normals, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dNormalUploadBuffer);
+	return m_nType;
+}
 
-	m_d3dNormalBufferView.BufferLocation = m_pd3dNormalBuffer->GetGPUVirtualAddress();
-	m_d3dNormalBufferView.StrideInBytes = sizeof(XMFLOAT3);
-	m_d3dNormalBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+CLightenMesh::CLightenMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* pMeshInfo)
+	: CMaterialMesh::CMaterialMesh(device, cmdlist, pMeshInfo)
+{
+	myNormalBuffer = ::CreateBufferResource(device, cmdlist, pMeshInfo->m_pxmf3Normals, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &myUploadingNormalBuffer);
+
+	myNormalBufferView.BufferLocation = myNormalBuffer->GetGPUVirtualAddress();
+	myNormalBufferView.StrideInBytes = sizeof(XMFLOAT3);
+	myNormalBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
 }
 
 CLightenMesh::~CLightenMesh()
 {
-	if (m_pd3dNormalBuffer) m_pd3dNormalBuffer->Release();
+	if (myNormalBuffer)
+	{
+		myNormalBuffer->Release();
+	}
 }
 
 void CLightenMesh::ReleaseUploadBuffers()
 {
-	COriginalMesh::ReleaseUploadBuffers();
+	CMaterialMesh::ReleaseUploadBuffers();
 
-	if (m_pd3dNormalUploadBuffer) m_pd3dNormalUploadBuffer->Release();
-	m_pd3dNormalUploadBuffer = NULL;
+	if (myUploadingNormalBuffer)
+	{
+		myUploadingNormalBuffer->Release();
+	}
+	myUploadingNormalBuffer = nullptr;
 }
 
-void CLightenMesh::Render(P3DGrpCommandList cmdlist, int nSubSet)
+void CLightenMesh::Render(P3DGrpCommandList cmdlist, int polygon_index)
 {
 	cmdlist->IASetPrimitiveTopology(typePrimitive);
-	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[2] = { m_d3dPositionBufferView, m_d3dNormalBufferView };
-	cmdlist->IASetVertexBuffers(m_nSlot, 2, pVertexBufferViews);
 
-	if ((m_nSubMeshes > 0) && (nSubSet < m_nSubMeshes))
+	D3D12_VERTEX_BUFFER_VIEW vertex_buffers[2] = { myPositionBufferView, myNormalBufferView };
+	cmdlist->IASetVertexBuffers(m_nSlot, 2, vertex_buffers);
+
+	if (0 < countPolygons && polygon_index < countPolygons)
 	{
-		cmdlist->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));
-		cmdlist->DrawIndexedInstanced(m_pnSubSetIndices[nSubSet], 1, 0, 0, 0);
+		cmdlist->IASetIndexBuffer(&(myIndexBufferViews[polygon_index]));
+		cmdlist->DrawIndexedInstanced(countPolygonIndices[polygon_index], 1, 0, 0, 0);
 	}
 	else
 	{

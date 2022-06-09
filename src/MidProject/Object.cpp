@@ -1,7 +1,8 @@
 #include "pch.hpp"
 #include "Object.h"
 #include "Material.hpp"
-#include "Shader.h"
+#include "Pipeline.hpp"
+#include "Arithmetics.hpp"
 
 GameObject::GameObject()
 	: m_pstrFrameName()
@@ -18,22 +19,9 @@ GameObject::~GameObject()
 	{
 		m_pMesh->Release();
 	}
-
-	if (m_nMaterials > 0)
-	{
-		for (int i = 0; i < m_nMaterials; i++)
-		{
-			if (m_ppMaterials[i]) m_ppMaterials[i]->Release();
-		}
-	}
-
-	if (m_ppMaterials)
-	{
-		delete[] m_ppMaterials;
-	}
 }
 
-void GameObject::Attach(GameObject* pChild, bool bReferenceUpdate)
+void GameObject::Attach(GameObject* pChild)
 {
 	if (pChild)
 	{
@@ -55,38 +43,11 @@ constexpr COLLISION_TAGS GameObject::GetTag() const noexcept
 	return COLLISION_TAGS::NONE;
 }
 
-void GameObject::SetMesh(COriginalMesh* pMesh)
+void GameObject::SetMesh(CMaterialMesh* pMesh)
 {
 	if (m_pMesh) m_pMesh->Release();
 	m_pMesh = pMesh;
 	if (m_pMesh) m_pMesh->AddRef();
-}
-
-void GameObject::SetShader(Pipeline* pipeline)
-{
-	m_nMaterials = 1;
-	m_ppMaterials = new CMaterial * [m_nMaterials];
-	m_ppMaterials[0] = new CMaterial();
-	m_ppMaterials[0]->SetShader(pipeline);
-}
-
-void GameObject::SetShader(int index, Pipeline* pipeline)
-{
-	if (m_ppMaterials[index])
-	{
-		m_ppMaterials[index]->SetShader(pipeline);
-	}
-}
-
-void GameObject::SetMaterial(int index, CMaterial* mat)
-{
-	if (m_ppMaterials[index])
-		m_ppMaterials[index]->Release();
-
-	m_ppMaterials[index] = mat;
-
-	if (m_ppMaterials[index])
-		m_ppMaterials[index]->AddRef();
 }
 
 void GameObject::Animate(float time_elapsed, XMFLOAT4X4* parent)
@@ -130,32 +91,11 @@ void GameObject::Render(P3DGrpCommandList cmdlist, GameCamera* pCamera)
 {
 	OnPrepareRender();
 
-	UpdateUniforms(cmdlist, &worldTransform);
+	UpdateUniforms(cmdlist, &worldTransform); 
 
-	if (0 < m_nMaterials)
+	if (m_pMesh)
 	{
-		for (int i = 0; i < m_nMaterials; i++)
-		{
-			if (m_ppMaterials[i])
-			{
-				auto& pipeline = m_ppMaterials[i]->m_pShader;
-				if (pipeline)
-				{
-					pipeline->Render(cmdlist, pCamera);
-				}
-				else
-				{
-					throw "파이프라인과 쉐이더가 존재하지 않음!";
-				}
-
-				m_ppMaterials[i]->UpdateUniforms(cmdlist);
-			}
-
-			if (m_pMesh)
-			{
-				m_pMesh->Render(cmdlist, i);
-			}
-		}
+		m_pMesh->Render(cmdlist);
 	}
 
 	if (mySibling) mySibling->Render(cmdlist, pCamera);

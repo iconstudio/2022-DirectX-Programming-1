@@ -38,11 +38,6 @@ void StageGameEnd::Render()
 void StageGameEnd::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {}
 
-P3DSignature StageGameEnd::CreateGraphicsRootSignature()
-{
-	return nullptr;
-}
-
 void StageGameEnd::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 {
 	switch (msg)

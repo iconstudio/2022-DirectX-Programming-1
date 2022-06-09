@@ -1,6 +1,6 @@
 #include "pch.hpp"
 #include "Scene.h"
-#include "Shader.h"
+#include "Pipeline.hpp"
 #include "Player.h"
 #include "Light.hpp"
 

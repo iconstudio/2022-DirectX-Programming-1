@@ -5,6 +5,7 @@
 #include "Vehicles.hpp"
 #include "Terrains.hpp"
 #include "Obstacles.hpp"
+#include "Arithmetics.hpp"
 
 float MakeRandom()
 {
@@ -188,7 +189,7 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 		for (int j = 0; j < 100; ++j)
 		{
 			stone = new Rock();
-			stone->Attach(model_rock1.get(), true);
+			stone->Attach(model_rock1.get());
 			stone->SetOriginalCollider(collider_rock);
 			stone->BuildCollider();
 			stone->SetPosition(stone_place);
@@ -198,7 +199,7 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 			stone_place.z += place_gap;
 
 			stone = new Rock();
-			stone->Attach(model_rock2.get(), true);
+			stone->Attach(model_rock2.get());
 			stone->SetOriginalCollider(collider_rock);
 			stone->BuildCollider();
 			stone->SetPosition(stone_place);
@@ -217,7 +218,7 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	model_policecar->SetScale(8.5f, 8.5f, 8.5f);
 
 	auto policecar = new Vehicles();
-	policecar->Attach(model_policecar.get(), true);
+	policecar->Attach(model_policecar.get());
 	policecar->SetOriginalCollider(collider_car);
 	policecar->BuildCollider();
 	policecar->SetPosition(135.0f, 0.0f, 620.0f);
@@ -225,7 +226,7 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	myInstances.emplace_back(policecar);
 
 	policecar = new Vehicles();
-	policecar->Attach(model_policecar.get(), true);
+	policecar->Attach(model_policecar.get());
 	policecar->SetOriginalCollider(collider_car);
 	policecar->BuildCollider();
 	policecar->SetPosition(-15.0f, 0.0f, 130.0f);
@@ -233,7 +234,7 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	myInstances.emplace_back(policecar);
 
 	policecar = new Vehicles();
-	policecar->Attach(model_policecar.get(), true);
+	policecar->Attach(model_policecar.get());
 	policecar->SetOriginalCollider(collider_car);
 	policecar->BuildCollider();
 	policecar->SetPosition(140.0f, 0.0f, 1750.0f);
@@ -253,7 +254,7 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	for (int i = 0; i < 10; ++i)
 	{
 		tree = new Tree();
-		tree->Attach(model_tree.get(), true);
+		tree->Attach(model_tree.get());
 		tree->SetOriginalCollider(collider_tree);
 		tree->BuildCollider();
 		tree->SetPosition(150.0f + cx, 0.0f, 50.0f + cz);
@@ -267,7 +268,7 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	for (int i = 0; i < 10; ++i)
 	{
 		tree = new Tree();
-		tree->Attach(model_tree.get(), true);
+		tree->Attach(model_tree.get());
 		tree->SetOriginalCollider(collider_tree);
 		tree->BuildCollider();
 		tree->SetPosition(-110.0f + cx, 0.0f, 2490.0f + cz);
@@ -284,8 +285,11 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 
 	playerSpawnPoint = XMFLOAT3(width * 0.5f, 0.0f, -3.0f);
 
-	auto player = new CAirplanePlayer(d3dDevice, d3dTaskList, GetRootSignature());
-	player->Attach(model_rallycar.get(), true);
+	auto& illuminated_pipeline = Pipeline::illuminatedShader;
+	auto signature = illuminated_pipeline->GetRootSignature();
+
+	auto player = new CAirplanePlayer(d3dDevice, d3dTaskList, signature);
+	player->Attach(model_rallycar.get());
 	player->SetOriginalCollider(collider_car);
 	player->BuildCollider();
 	player->SetPosition(playerSpawnPoint);
@@ -301,17 +305,17 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	model_cactus->SetScale(30.0f, 30.0f, 30.0f);
 
 	auto goaline = new GameObject();
-	goaline->Attach(model_cactus.get(), true);
+	goaline->Attach(model_cactus.get());
 	goaline->SetPosition(goal);
 	myInstances.emplace_back(goaline);
 
 	goaline = new GameObject();
-	goaline->Attach(model_cactus.get(), true);
+	goaline->Attach(model_cactus.get());
 	goaline->SetPosition(Vector3::Add(goal, XMFLOAT3(-20.0f, 0.0f, 0.0f)));
 	myInstances.emplace_back(goaline);
 
 	goaline = new GameObject();
-	goaline->Attach(model_cactus.get(), true);
+	goaline->Attach(model_cactus.get());
 	goaline->SetPosition(Vector3::Add(goal, XMFLOAT3(+20.0f, 0.0f, 0.0f)));
 	myInstances.emplace_back(goaline);
 }

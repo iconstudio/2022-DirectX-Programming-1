@@ -3,8 +3,8 @@
 #include "StageMain.hpp"
 #include "StageGame.hpp"
 #include "StageGameEnd.hpp"
-#include "Shader.h"
 #include "Model.hpp"
+#include "GraphicsPipeline.hpp"
 
 GameFramework::GameFramework(unsigned int width, unsigned int height)
 	: frameWidth(width), frameHeight(height)
@@ -14,7 +14,6 @@ GameFramework::GameFramework(unsigned int width, unsigned int height)
 	, myFactory(nullptr), myDevice(nullptr)
 	, myRenderFence(nullptr), myFences(), eventFence(NULL)
 	, myCommandList(nullptr), myCommandQueue(nullptr), myCommandAlloc(nullptr)
-	, myRootSignature(nullptr)
 	, mySwapChain(nullptr), resSwapChainBackBuffers(), myBarriers()
 	, heapRtvDesc(nullptr), szRtvDescIncrements(0)
 	, myDepthStencilBuffer(nullptr)
@@ -71,11 +70,6 @@ GameFramework::~GameFramework()
 	{
 		mySwapChain->SetFullscreenState(FALSE, NULL);
 		mySwapChain->Release();
-	}
-
-	if (myRootSignature)
-	{
-		myRootSignature->Release();
 	}
 
 	if (myCommandAlloc) myCommandAlloc->Release();
@@ -142,10 +136,11 @@ void GameFramework::CreateDirect3DDevice()
 	}
 
 	IDXGIAdapter1* adapter = nullptr;
-	DXGI_ADAPTER_DESC1 adapter_desc;
+	DXGI_ADAPTER_DESC1 adapter_desc{};
 	D3D_FEATURE_LEVEL d3d_level = D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_12_0;
 
-	for (UINT i = 0; DXGI_ERROR_NOT_FOUND != myFactory->EnumAdapters1(i, &adapter); i++)
+	UINT adapter_peek = 0;
+	while (DXGI_ERROR_NOT_FOUND != myFactory->EnumAdapters1(adapter_peek, &adapter))
 	{
 		valid = adapter->GetDesc1(&adapter_desc);
 		if (FAILED(valid))
@@ -165,6 +160,8 @@ void GameFramework::CreateDirect3DDevice()
 		{
 			break;
 		}
+
+		adapter_peek++;
 	}
 
 	if (!adapter)
@@ -187,12 +184,11 @@ void GameFramework::CreateDirect3DDevice()
 	}
 
 	D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS aa_desc{};
-	ZeroMemory(&aa_desc, sizeof(aa_desc));
-
 	aa_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	aa_desc.SampleCount = 4;
 	aa_desc.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
 	aa_desc.NumQualityLevels = 0;
+
 	const auto aa_feature = D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS;
 	const auto aa_sz = sizeof(aa_desc);
 
@@ -222,6 +218,43 @@ void GameFramework::CreateDirect3DDevice()
 
 	if (adapter)
 	{
+		DXGI_ADAPTER_DESC1 graphicscard_desc{};
+
+		valid = adapter->GetDesc1(&graphicscard_desc);
+		if (FAILED(valid))
+		{
+			OutputDebugString(L"그래픽 카드의 정보 얻기 실패!");
+		}
+		else
+		{
+			const auto& gc_desc = graphicscard_desc.Description;
+			const auto& gc_venderid = graphicscard_desc.VendorId;
+			const auto& gc_mem_cpu = graphicscard_desc.DedicatedSystemMemory;
+			const auto& gc_mem_gpu = graphicscard_desc.DedicatedVideoMemory;
+			const auto& gc_mem_shared = graphicscard_desc.SharedSystemMemory;
+
+			WCHAR out_desc[256]{};
+			wsprintf(out_desc, L"그래픽 카드 설명: %s", gc_desc);
+
+			WCHAR out_vendor[128]{};
+			wsprintf(out_vendor, L"그래픽 카드 제조사 ID: %u", gc_venderid);
+
+			WCHAR out_mem_cpu[128]{};
+			wsprintf(out_mem_cpu, L"시스템 메모리: %d", gc_mem_cpu);
+
+			WCHAR out_mem_gpu[128]{};
+			wsprintf(out_mem_gpu, L"그래픽 카드 메모리: %d", gc_mem_gpu);
+
+			WCHAR out_mem_shared[128]{};
+			wsprintf(out_mem_shared, L"통합 메모리: %d", gc_mem_shared);
+
+			OutputDebugString(out_desc);
+			OutputDebugString(out_vendor);
+			OutputDebugString(out_mem_cpu);
+			OutputDebugString(out_mem_gpu);
+			OutputDebugString(out_mem_shared);
+		}
+
 		adapter->Release();
 	}
 }
@@ -234,8 +267,6 @@ void GameFramework::CreateCommanders()
 	ZeroMemory(&uiid, sizeof(uiid));
 
 	D3D12_COMMAND_QUEUE_DESC queue_desc{};
-	ZeroMemory(&queue_desc, sizeof(queue_desc));
-
 	queue_desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	queue_desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 
@@ -274,8 +305,6 @@ void GameFramework::CreateCommanders()
 void GameFramework::CreateSwapChain()
 {
 	DXGI_SWAP_CHAIN_DESC sw_desc{};
-	ZeroMemory(&sw_desc, sizeof(sw_desc));
-
 	sw_desc.BufferCount = numberFrameBuffers;
 	sw_desc.BufferDesc.Width = frameWidth;
 	sw_desc.BufferDesc.Height = frameHeight;
@@ -299,7 +328,7 @@ void GameFramework::CreateSwapChain()
 	sw_desc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
 	auto place = reinterpret_cast<IDXGISwapChain**>(&mySwapChain);
-	HRESULT valid = myFactory->CreateSwapChain(myCommandQueue, &sw_desc, place);
+	auto valid = myFactory->CreateSwapChain(myCommandQueue, &sw_desc, place);
 	if (FAILED(valid))
 	{
 		throw "스왑 체인 생성 실패!";
@@ -320,11 +349,10 @@ void GameFramework::CreateRenderTargetViews()
 	IID uiid{};
 	void** place = nullptr;
 	ZeroMemory(&uiid, sizeof(uiid));
+	
+	const auto buffer_type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 
 	D3D12_DESCRIPTOR_HEAP_DESC rtv_heap_desc{};
-	ZeroMemory(&rtv_heap_desc, sizeof(rtv_heap_desc));
-
-	const auto buffer_type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	rtv_heap_desc.NumDescriptors = numberFrameBuffers;
 	rtv_heap_desc.Type = buffer_type;
 	rtv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
@@ -364,10 +392,9 @@ void GameFramework::CreateDepthStencilView()
 	void** place = nullptr;
 	ZeroMemory(&uiid, sizeof(uiid));
 
-	D3D12_DESCRIPTOR_HEAP_DESC dsv_heap_desc{};
-	ZeroMemory(&dsv_heap_desc, sizeof(dsv_heap_desc));
-
 	const auto buffer_type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+	
+	D3D12_DESCRIPTOR_HEAP_DESC dsv_heap_desc{};
 	dsv_heap_desc.NumDescriptors = 1;
 	dsv_heap_desc.Type = buffer_type;
 	dsv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
@@ -385,8 +412,6 @@ void GameFramework::CreateDepthStencilView()
 
 
 	D3D12_RESOURCE_DESC stencil_desc{};
-	ZeroMemory(&stencil_desc, sizeof(stencil_desc));
-
 	stencil_desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	stencil_desc.Alignment = 0;
 	stencil_desc.Width = UINT64(frameWidth);
@@ -409,8 +434,6 @@ void GameFramework::CreateDepthStencilView()
 
 	// 메모리 할당 방법 정의
 	D3D12_HEAP_PROPERTIES heap_properties{};
-	ZeroMemory(&heap_properties, sizeof(heap_properties));
-
 	heap_properties.Type = D3D12_HEAP_TYPE_DEFAULT;
 	heap_properties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
 	heap_properties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
@@ -418,8 +441,6 @@ void GameFramework::CreateDepthStencilView()
 	heap_properties.VisibleNodeMask = 1;
 
 	D3D12_CLEAR_VALUE d3dClearValue{};
-	ZeroMemory(&d3dClearValue, sizeof(d3dClearValue));
-
 	d3dClearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	d3dClearValue.DepthStencil.Depth = 1.0f;
 	d3dClearValue.DepthStencil.Stencil = 0;
@@ -435,8 +456,6 @@ void GameFramework::CreateDepthStencilView()
 	}
 
 	D3D12_DEPTH_STENCIL_VIEW_DESC dsv_desc{};
-	ZeroMemory(&dsv_desc, sizeof(dsv_desc));
-
 	dsv_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	dsv_desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	dsv_desc.Flags = D3D12_DSV_FLAG_NONE;
@@ -470,77 +489,13 @@ void GameFramework::Start()
 
 void GameFramework::BuildPipeline()
 {
-	P3DSignature signature = nullptr;
+	// 루트 서명을 먼저 만들기
 
-	D3D12_ROOT_PARAMETER shader_params[3]{};
-	ZeroMemory(&shader_params, sizeof(shader_params));
+	// 파이프라인 구축
 
-	shader_params[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	shader_params[0].Descriptor.ShaderRegister = 1; // Camera
-	shader_params[0].Descriptor.RegisterSpace = 0;
-	shader_params[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
-	shader_params[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	shader_params[1].Constants.Num32BitValues = 32;
-	shader_params[1].Constants.ShaderRegister = 2; // GameObject
-
-	shader_params[1].Constants.RegisterSpace = 0;
-	shader_params[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
-	shader_params[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	shader_params[2].Descriptor.ShaderRegister = 4; // Lights
-	shader_params[2].Descriptor.RegisterSpace = 0;
-	shader_params[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
-	// 정점 쉐이더, 픽셀 쉐이더, 입력 조립기, 출력 병합기 
-	auto flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
-
-	D3D12_ROOT_SIGNATURE_DESC signature_desc;
-	ZeroMemory(&signature_desc, sizeof(signature_desc));
-
-	signature_desc.NumParameters = _countof(shader_params);
-	signature_desc.pParameters = shader_params;
-	signature_desc.NumStaticSamplers = 0; // 텍스처
-	signature_desc.pStaticSamplers = NULL;
-	signature_desc.Flags = flags;
-
-	ID3DBlob* signature_blob = nullptr;
-	ID3DBlob* error_blob = nullptr;
-
-	auto valid = D3D12SerializeRootSignature(&signature_desc
-		, D3D_ROOT_SIGNATURE_VERSION_1, &signature_blob
-		, &error_blob);
-	if (FAILED(valid))
-	{
-		throw "루트 서명의 메모리를 할당하지 못함!";
-	}
-
-	UINT gpu_mask = 0;
-	auto uuid = __uuidof(ID3D12RootSignature);
-	auto place = reinterpret_cast<void**>(&signature);
-	valid = myDevice->CreateRootSignature(gpu_mask
-		, signature_blob->GetBufferPointer(), signature_blob->GetBufferSize()
-		, uuid, place);
-	if (FAILED(valid))
-	{
-		throw "루트 서명을 생성하지 못함!";
-	}
-
-	if (signature_blob)
-	{
-		signature_blob->Release();
-	}
-
-	if (error_blob)
-	{
-		error_blob->Release();
-	}
-
-	myRootSignature = signature;
-
-	myDefaultShader = new CIlluminatedShader();
-	myDefaultShader->CreateShader(myDevice, myCommandList, myRootSignature);
-	myDefaultShader->InitializeUniforms(myDevice, myCommandList);
+	// 쉐이더 생성
+	Pipeline::illuminatedShader = new IlluminatedGraphicsPipeline();
+	Pipeline::illuminatedShader->CreateShader(myDevice, myCommandList);
 }
 
 void GameFramework::BuildAssets()
@@ -558,7 +513,7 @@ void GameFramework::BuildStages()
 	auto room_main = RegisterScene(StageMain(*this));
 	auto room_game = RegisterScene(StageGame(*this, myWindow));
 	auto room_complete = RegisterScene(StageGameEnd(*this));
-	
+
 	AddStage(room_main);
 	AddStage(room_game);
 	AddStage(room_complete);
@@ -570,7 +525,6 @@ void GameFramework::BuildStages()
 		if (scene)
 		{
 			scene->Awake(myDevice, myCommandList);
-			scene->SetRootSignature(myRootSignature);
 		}
 		else
 		{
@@ -580,15 +534,13 @@ void GameFramework::BuildStages()
 }
 
 void GameFramework::BuildWorld()
-{
-}
+{}
 
 void GameFramework::BuildParticles()
 {}
 
 void GameFramework::BuildPlayer()
-{
-}
+{}
 
 void GameFramework::BuildTerrains()
 {}
@@ -682,6 +634,11 @@ void GameFramework::WaitForGpuComplete()
 	}
 }
 
+void GameFramework::AddPipeline(GraphicsPipeline* pipeline)
+{
+	myPipelines.emplace_back(pipeline);
+}
+
 template<typename SceneType>
 	requires(std::is_base_of_v<Scene, SceneType>)
 constexpr shared_ptr<Scene> GameFramework::RegisterScene(SceneType&& stage)
@@ -746,7 +703,9 @@ bool GameFramework::JumpToNextStage()
 
 shared_ptr<Model> GameFramework::RegisterModel(const char* path, const char* name)
 {
-	auto handle = Model::Load(myDevice, myCommandList, myDefaultShader, path);
+	auto& my_lighten_shader = Pipeline::illuminatedShader;
+	//auto& my_lighten_pipeline = myPipelines.at(0);
+	auto handle = Model::Load(myDevice, myCommandList, my_lighten_shader, path);
 	auto ptr = shared_ptr<Model>(handle);
 
 	myModels.insert({ name, ptr });

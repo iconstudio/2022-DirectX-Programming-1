@@ -105,22 +105,22 @@ RawMesh* Model::LoadRawMesh(FILE* pInFile)
 		}
 		else if (!strcmp(token, "<SubMeshes>:"))
 		{
-			pMeshInfo->m_nSubMeshes = ::ReadIntegerFromFile(pInFile);
-			if (pMeshInfo->m_nSubMeshes > 0)
+			pMeshInfo->countPolygons = ::ReadIntegerFromFile(pInFile);
+			if (pMeshInfo->countPolygons > 0)
 			{
-				pMeshInfo->m_pnSubSetIndices = new int[pMeshInfo->m_nSubMeshes];
-				pMeshInfo->m_ppnSubSetIndices = new UINT * [pMeshInfo->m_nSubMeshes];
-				for (int i = 0; i < pMeshInfo->m_nSubMeshes; i++)
+				pMeshInfo->countPolygonIndices = new int[pMeshInfo->countPolygons];
+				pMeshInfo->m_ppnSubSetIndices = new UINT * [pMeshInfo->countPolygons];
+				for (int i = 0; i < pMeshInfo->countPolygons; i++)
 				{
 					::ReadStringFromFile(pInFile, token);
 					if (!strcmp(token, "<SubMesh>:"))
 					{
 						int nIndex = ::ReadIntegerFromFile(pInFile);
-						pMeshInfo->m_pnSubSetIndices[i] = ::ReadIntegerFromFile(pInFile);
-						if (pMeshInfo->m_pnSubSetIndices[i] > 0)
+						pMeshInfo->countPolygonIndices[i] = ::ReadIntegerFromFile(pInFile);
+						if (pMeshInfo->countPolygonIndices[i] > 0)
 						{
-							pMeshInfo->m_ppnSubSetIndices[i] = new UINT[pMeshInfo->m_pnSubSetIndices[i]];
-							nReads = (UINT)::fread(pMeshInfo->m_ppnSubSetIndices[i], sizeof(int), pMeshInfo->m_pnSubSetIndices[i], pInFile);
+							pMeshInfo->m_ppnSubSetIndices[i] = new UINT[pMeshInfo->countPolygonIndices[i]];
+							nReads = (UINT)::fread(pMeshInfo->m_ppnSubSetIndices[i], sizeof(int), pMeshInfo->countPolygonIndices[i], pInFile);
 						}
 
 					}
@@ -206,6 +206,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 	int nFrame = 0;
 
 	Model* root = nullptr;
+	CMaterialMesh* mesh = nullptr;
 
 	for (; ; )
 	{
@@ -219,6 +220,11 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 		}
 		else if (!strcmp(token, "<Transform>:"))
 		{
+			if (!root)
+			{
+				throw "모델을 불러오는 중에 모델 객체가 생성되지 않음!";
+			}
+
 			XMFLOAT3 xmf3Position, xmf3Rotation, xmf3Scale;
 			XMFLOAT4 xmf4Rotation;
 			nReads = (UINT)::fread(&xmf3Position, sizeof(float), 3, pInFile);
@@ -228,42 +234,62 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 		}
 		else if (!strcmp(token, "<TransformMatrix>:"))
 		{
+			if (!root)
+			{
+				throw "모델을 불러오는 중에 모델 객체가 생성되지 않음!";
+			}
+
 			nReads = (UINT)::fread(&root->localTransform, sizeof(float), 16, pInFile);
 		}
 		else if (!strcmp(token, "<Mesh>:"))
 		{
-			RawMesh* pMeshInfo = root->LoadRawMesh(pInFile);
-			if (pMeshInfo)
+			if (!root)
 			{
-				COriginalMesh* pMesh = NULL;
-				if (pMeshInfo->m_nType & VERTEXT_NORMAL)
+				throw "모델을 불러오는 중에 모델 객체가 생성되지 않음!";
+			}
+
+			auto raw_mesh = root->LoadRawMesh(pInFile);
+
+			if (raw_mesh)
+			{
+				if (raw_mesh->m_nType & VERTEXT_NORMAL)
 				{
-					pMesh = new CLightenMesh(device, cmdlist, pMeshInfo);
+					mesh = new CLightenMesh(device, cmdlist, raw_mesh);
 				}
-				if (pMesh) root->SetMesh(pMesh);
-				delete pMeshInfo;
+
+				if (mesh)
+				{
+					root->SetMesh(mesh);
+				}
+
+				delete raw_mesh;
 			}
 		}
 		else if (!strcmp(token, "<Materials>:"))
 		{
-			RawMaterialsBox* pMaterialsInfo = root->LoadRawMaterials(device, cmdlist, pInFile);
-			if (pMaterialsInfo && (pMaterialsInfo->m_nMaterials > 0))
+			auto raw_materials = root->LoadRawMaterials(device, cmdlist, pInFile);
+			if (raw_materials && (raw_materials->m_nMaterials > 0))
 			{
 				if (!root)
 				{
 					throw "메쉬를 불러오는 중에 객체가 생성되지 않는 문제 발생!";
 				}
 
-				root->m_nMaterials = pMaterialsInfo->m_nMaterials;
-				root->m_ppMaterials = new CMaterial*[pMaterialsInfo->m_nMaterials];
-
-				for (int i = 0; i < pMaterialsInfo->m_nMaterials; i++)
+				if (!mesh)
 				{
-					root->m_ppMaterials[i] = NULL;
+					throw "재질을 저장할 메쉬가 생성되지 않음!";
+				}
+
+				mesh->m_nMaterials = raw_materials->m_nMaterials;
+				mesh->m_ppMaterials = new CMaterial * [raw_materials->m_nMaterials];
+
+				for (int i = 0; i < raw_materials->m_nMaterials; i++)
+				{
+					mesh->m_ppMaterials[i] = NULL;
 
 					CMaterial* pMaterial = new CMaterial();
 
-					CMaterialColors* pMaterialColors = new CMaterialColors(&pMaterialsInfo->m_pMaterials[i]);
+					CMaterialColors* pMaterialColors = new CMaterialColors(&raw_materials->m_pMaterials[i]);
 					pMaterial->SetMaterialColors(pMaterialColors);
 
 					if (root->GetMeshType() & VERTEXT_NORMAL)
@@ -271,7 +297,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 						pMaterial->SetShader(pipeline);
 					}
 
-					root->SetMaterial(i, pMaterial);
+					mesh->SetMaterial(i, pMaterial);
 				}
 			}
 		}

@@ -1,5 +1,6 @@
 #include "pch.hpp"
 #include "Transformer.hpp"
+#include "Arithmetics.hpp"
 
 Transformer::Transformer()
 	: World(Matrix4x4::Identity())

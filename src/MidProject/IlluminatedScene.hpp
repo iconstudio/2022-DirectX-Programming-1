@@ -1,6 +1,6 @@
 #pragma once
 #include "Scene.h"
-#include "Shader.h"
+#include "Pipeline.hpp"
 #include "Player.h"
 #include "Light.hpp"
 
@@ -24,8 +24,6 @@ public:
 	CAirplanePlayer* myPlayer = nullptr;
 
 protected:
-	virtual P3DSignature CreateGraphicsRootSignature() override;
-
 	CLight* myLights = NULL;
 	int numberLights = 0;
 

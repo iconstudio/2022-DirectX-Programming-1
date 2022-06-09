@@ -39,6 +39,9 @@ public:
 	// 동기화
 	void WaitForGpuComplete();
 
+	// 파이프라인 등록
+	void AddPipeline(GraphicsPipeline* pipeline);
+
 	// 장면 등록
 	template<typename SceneType> requires(std::is_base_of_v<Scene, SceneType>)
 	constexpr shared_ptr<Scene> RegisterScene(SceneType&& stage);
@@ -49,6 +52,7 @@ public:
 	bool JumpToStage(const std::vector<shared_ptr<Scene>>::iterator it);
 	bool JumpToNextStage();
 
+	// 모델 등록
 	shared_ptr<Model> RegisterModel(const char* path, const char* name);
 
 	weak_ptr<Scene> GetScene(const char* name) const;
@@ -108,7 +112,6 @@ private:
 	P3DGrpCommandList myCommandList;
 	ID3D12CommandQueue* myCommandQueue;
 	ID3D12CommandAllocator* myCommandAlloc;
-	P3DSignature myRootSignature;
 
 	ID3D12Resource* resSwapChainBackBuffers[numberFrameBuffers];
 	D3D12_RESOURCE_BARRIER myBarriers[numberFrameBuffers];
@@ -126,6 +129,8 @@ private:
 #if defined(_DEBUG)
 	ID3D12Debug* myDebugController;
 #endif
+	std::vector<shared_ptr<GraphicsPipeline>> myPipelines;
+	shared_ptr<GraphicsPipeline> currentPipeline;
 
 	std::unordered_map<std::string, shared_ptr<Model>> myModels;
 
@@ -133,6 +138,4 @@ private:
 	std::vector<shared_ptr<Scene>> myStages;
 	std::vector<shared_ptr<Scene>>::iterator myStageIterator;
 	shared_ptr<Scene> currentScene;
-	
-	Pipeline* myDefaultShader;
 };

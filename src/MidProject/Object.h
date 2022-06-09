@@ -18,11 +18,8 @@ public:
 	GameObject();
 	virtual ~GameObject();
 
-	void SetMesh(COriginalMesh* pMesh);
-	void SetShader(Pipeline* pShader);
-	void SetShader(int nMaterial, Pipeline* pShader);
-	void SetMaterial(int nMaterial, CMaterial* pMaterial);
-	void Attach(GameObject* pChild, bool bReferenceUpdate = false);
+	void SetMesh(CMaterialMesh* pMesh);
+	void Attach(GameObject* pChild);
 
 	virtual constexpr COLLISION_TAGS GetTag() const noexcept;
 
@@ -73,11 +70,7 @@ public:
 
 	char m_pstrFrameName[256];
 
-	//shared_ptr<COriginalMesh> m_pMesh;
-	COriginalMesh* m_pMesh = nullptr;
-
-	int m_nMaterials = 0;
-	CMaterial** m_ppMaterials = NULL;
+	CMaterialMesh* m_pMesh = nullptr;
 
 	XMFLOAT4X4 localTransform;
 	XMFLOAT4X4 worldTransform;
@@ -181,4 +174,9 @@ public:
 
 public:
 	virtual void Awake();
+};
+
+class GameMaterialObject : public GameObject
+{
+
 };

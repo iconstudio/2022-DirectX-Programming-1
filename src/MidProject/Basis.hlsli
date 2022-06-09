@@ -53,15 +53,22 @@ struct VS_LIGHTING_OUTPUT
 #endif
 };
 
-cbuffer cbCameraInfo : register(b1)
+cbuffer cbCameraInfo : register(b0, space0)
 {
     matrix gmtxView : packoffset(c0);
     matrix gmtxProjection : packoffset(c4);
     float3 gvCameraPosition : packoffset(c8);
 };
 
-cbuffer cbGameObjectInfo : register(b2)
+cbuffer cbGameObjectInfo : register(b1, space0)
 {
     matrix gmtxGameObject : packoffset(c0);
     MATERIAL gMaterial : packoffset(c4);
+};
+
+cbuffer cbLights : register(b0, space1)
+{
+    LIGHT gLights[MAX_LIGHTS];
+    float4 gcGlobalAmbientLight;
+    int gnLights;
 };

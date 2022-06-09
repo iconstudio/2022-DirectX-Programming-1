@@ -5,7 +5,6 @@ BasicScene::BasicScene(GameFramework& framework, const char* name)
 	: myName(name)
 	, myFramework(framework)
 	, d3dDevice(nullptr), d3dTaskList(nullptr)
-	, mySignature(nullptr)
 	, myBackgroundColor()
 	, posCursor{ 0, 0 }
 	, lastDeltaTime(0.0f)
@@ -38,27 +37,7 @@ void BasicScene::SetBackgroundColor(XMFLOAT4&& color)
 	myBackgroundColor[3] = std::forward<float>(color.w);
 }
 
-void BasicScene::SetRootSignature(P3DSignature signature)
-{
-	if (mySignature)
-	{
-		mySignature->Release();
-	}
-
-	mySignature = signature;
-}
-
 const std::string& BasicScene::GetName() const noexcept
 {
 	return myName;
-}
-
-P3DSignature BasicScene::GetRootSignature()
-{
-	return mySignature;
-}
-
-P3DSignature const BasicScene::GetRootSignature() const
-{
-	return mySignature;
 }

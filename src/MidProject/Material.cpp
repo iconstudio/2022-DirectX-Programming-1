@@ -1,6 +1,6 @@
 #include "pch.hpp"
 #include "Material.hpp"
-#include "Shader.h"
+#include "Pipeline.hpp"
 
 RawMaterial::RawMaterial(const UINT type)
 	: myType(type)
@@ -56,7 +56,7 @@ void CMaterial::SetMaterialColors(CMaterialColors* pMaterialColors)
 	}
 }
 
-void CMaterial::UpdateUniforms(P3DGrpCommandList cmdlist)
+void CMaterial::PrepareRendering(P3DGrpCommandList cmdlist)
 {
 	cmdlist->SetGraphicsRoot32BitConstants(1, 4, &(m_pMaterialColors->m_xmf4Ambient), 16);
 	cmdlist->SetGraphicsRoot32BitConstants(1, 4, &(m_pMaterialColors->m_xmf4Diffuse), 20);

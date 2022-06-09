@@ -1,22 +1,5 @@
 #pragma once
-
-class CVertex
-{
-public:
-	XMFLOAT3 myPosition;
-};
-
-class CDiffusedVertex : public CVertex
-{
-public:
-	XMFLOAT4 myColour;
-};
-
-class CLightenVertex : public CVertex
-{
-public:
-	XMFLOAT3 myNormal;
-};
+#include "Vertex.hpp"
 
 class CPolygon
 {
@@ -24,7 +7,7 @@ public:
 	virtual void PrepareRender(P3DGrpCommandList cmdlist);
 	virtual void Render(P3DGrpCommandList cmdlist);
 
-	std::vector<UINT> myIndices;
+	std::vector<UINT> myPolygonIndices;
 
 	ID3D12Resource* m_ppd3dSubSetIndexBuffer;
 	D3D12_INDEX_BUFFER_VIEW m_pd3dSubSetIndexBufferView;
@@ -59,9 +42,9 @@ protected:
 	std::vector<CVertex*> myVertices;
 	std::vector<CPolygon*> mySubMeshes;
 
-	ID3D12Resource* m_pd3dPositionBuffer;
-	D3D12_VERTEX_BUFFER_VIEW m_d3dPositionBufferView;
-	ID3D12Resource* m_pd3dPositionUploadBuffer;
+	ID3D12Resource* myPositionBuffer;
+	D3D12_VERTEX_BUFFER_VIEW myPositionBufferView;
+	ID3D12Resource* myUploadingPositonBuffer;
 };
 
 class CDiffusedMesh : public CMesh
@@ -92,22 +75,30 @@ public:
 	int m_nIndices = 0;
 	UINT* m_pnIndices = NULL;
 
-	int m_nSubMeshes = 0;
-	int* m_pnSubSetIndices = NULL;
+	int countPolygons = 0;
+	int* countPolygonIndices = NULL;
 	UINT** m_ppnSubSetIndices = NULL;
 };
 
-class COriginalMesh
+class CMaterialMesh
 {
 public:
-	COriginalMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* pMeshInfo);
-	virtual ~COriginalMesh();
+	CMaterialMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw);
+	virtual ~CMaterialMesh();
+
+	void SetShader(Pipeline* pShader);
+	void SetShader(int nMaterial, Pipeline* pShader);
+	void SetMaterial(int nMaterial, CMaterial* pMaterial);
 
 	virtual void ReleaseUploadBuffers();
 
-	UINT GetType() { return (m_nType); }
-	virtual void Render(P3DGrpCommandList cmdlist) {}
-	virtual void Render(P3DGrpCommandList cmdlist, int nSubSet);
+	virtual void Render(P3DGrpCommandList cmdlist);
+	virtual void Render(P3DGrpCommandList cmdlist, int polygon_index);
+
+	UINT GetType() const;
+
+	int m_nMaterials = 0;
+	CMaterial** m_ppMaterials = NULL;
 
 private:
 	int m_nReferences = 0;
@@ -118,26 +109,24 @@ public:
 
 protected:
 	D3D12_PRIMITIVE_TOPOLOGY typePrimitive = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	UINT							m_nSlot = 0;
-	UINT							m_nVertices = 0;
-	UINT							m_nOffset = 0;
+	UINT m_nSlot = 0;
+	UINT m_nOffset = 0;
+	UINT m_nType = 0;
 
-	UINT							m_nType = 0;
+	UINT m_nVertices = 0;
+	ID3D12Resource* myPositionBuffer = NULL;
+	D3D12_VERTEX_BUFFER_VIEW myPositionBufferView;
+	ID3D12Resource* myUploadingPositonBuffer = NULL;
 
-	ID3D12Resource* m_pd3dPositionBuffer = NULL;
-	ID3D12Resource* m_pd3dPositionUploadBuffer = NULL;
-	D3D12_VERTEX_BUFFER_VIEW		m_d3dPositionBufferView;
+	int countPolygons = 0;
+	int* countPolygonIndices = NULL;
 
-	int								m_nSubMeshes = 0;
-	int* m_pnSubSetIndices = NULL;
-
-	ID3D12Resource** m_ppd3dSubSetIndexBuffers = NULL;
-	ID3D12Resource** m_ppd3dSubSetIndexUploadBuffers = NULL;
-	D3D12_INDEX_BUFFER_VIEW* m_pd3dSubSetIndexBufferViews = NULL;
-
+	ID3D12Resource** myIndexBuffers = NULL;
+	D3D12_INDEX_BUFFER_VIEW* myIndexBufferViews = NULL;
+	ID3D12Resource** myUploadingIndexBuffer = NULL;
 };
 
-class CLightenMesh : public COriginalMesh
+class CLightenMesh : public CMaterialMesh
 {
 public:
 	CLightenMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* pMeshInfo);
@@ -146,10 +135,10 @@ public:
 	virtual void ReleaseUploadBuffers();
 
 protected:
-	ID3D12Resource* m_pd3dNormalBuffer = NULL;
-	ID3D12Resource* m_pd3dNormalUploadBuffer = NULL;
-	D3D12_VERTEX_BUFFER_VIEW		m_d3dNormalBufferView;
+	ID3D12Resource* myNormalBuffer = NULL;
+	D3D12_VERTEX_BUFFER_VIEW myNormalBufferView;
+	ID3D12Resource* myUploadingNormalBuffer = NULL;
 
 public:
-	virtual void Render(P3DGrpCommandList cmdlist, int nSubSet);
+	virtual void Render(P3DGrpCommandList cmdlist, int polygon_index);
 };

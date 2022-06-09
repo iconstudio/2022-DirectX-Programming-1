@@ -16,7 +16,4 @@ public:
 	void OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info) override;
 	void OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state) override;
 	void OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) override;
-
-protected:
-	virtual P3DSignature CreateGraphicsRootSignature() override;
 };
