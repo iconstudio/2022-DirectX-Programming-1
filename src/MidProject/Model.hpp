@@ -15,6 +15,6 @@ public:
 		, FILE* pInFile);
 
 	static RawMesh* LoadRawMesh(FILE* pInFile);
-	static RawMaterialsBox* LoadRawMaterials(P3DDevice device, P3DGrpCommandList cmdlist, FILE* pInFile);
+	static std::vector<RawMaterial*> LoadRawMaterials(P3DDevice device, P3DGrpCommandList cmdlist, FILE* pInFile);
 
 };
