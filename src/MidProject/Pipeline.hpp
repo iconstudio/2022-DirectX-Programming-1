@@ -8,12 +8,26 @@ public:
 	Pipeline();
 	virtual ~Pipeline();
 
-private:
-	int m_nReferences = 0;
+	virtual void Awake(P3DDevice device, P3DGrpCommandList cmdlist);
+	virtual void BuildState(int index);
+	virtual void PrepareRendering(P3DGrpCommandList cmdlist, int index = 0);
 
-public:
-	void AddRef() { m_nReferences++; }
-	void Release() { if (--m_nReferences <= 0) delete this; }
+	ShaderBlob CompileShaderFromFile(const  WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob);
+	ShaderBlob ReadCompiledShaderFromFile(const WCHAR* pszFileName, ID3DBlob** ppd3dShaderBlob = NULL);
+
+	P3DSignature GetRootSignature();
+	const P3DSignature GetRootSignature() const;
+
+	static Pipeline* diffusedShader;
+	static Pipeline* illuminatedShader;
+
+protected:
+	virtual void BuildShaders();
+	virtual void BuildRootSignature();
+	virtual void BuildInputLayout();
+	virtual void BuildRasterizerState();
+	virtual void BuildBlendState();
+	virtual void BuildDepthStencilState();
 
 	virtual ShaderBlob CreateVertexShader() = 0;
 	virtual ShaderBlob CreatePixelShader() = 0;
@@ -23,45 +37,20 @@ public:
 	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();
 	virtual P3DSignature CreateGraphicsRootSignature() = 0;
 
-	ShaderBlob CompileShaderFromFile(const  WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob);
-	ShaderBlob ReadCompiledShaderFromFile(const WCHAR* pszFileName, ID3DBlob** ppd3dShaderBlob = NULL);
-
-	virtual void CreateShader(P3DDevice device, P3DGrpCommandList cmdlist);
-
-	virtual void PrepareRendering(P3DGrpCommandList cmdlist, int index = 0);
-
-	P3DSignature GetRootSignature();
-	const P3DSignature GetRootSignature() const;
-
-	static Pipeline* diffusedShader;
-	static Pipeline* illuminatedShader;
-
-protected:
 	P3DDevice dxDevice;
 	P3DGrpCommandList dxCommandList;
 
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC myStateDescription;
 	P3DSignature mySignature;
+	ID3DBlob* myVertexShaderBlob;
+	ID3DBlob* myPixelShaderBlob;
 
-	ID3DBlob* m_pd3dVertexShaderBlob = NULL;
-	ID3DBlob* m_pd3dPixelShaderBlob = NULL;
+	std::vector<ID3D12PipelineState*> myDerivedStates;
 
-	int m_nPipelineStates = 0;
-	ID3D12PipelineState** m_ppd3dPipelineStates = NULL;
+private:
+	int m_nReferences = 0;
 
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC myState;
-};
-
-class IlluminatedGraphicsPipeline : public Pipeline
-{
 public:
-	IlluminatedGraphicsPipeline();
-	virtual ~IlluminatedGraphicsPipeline();
-	
-	ShaderBlob CreateVertexShader() override;
-	ShaderBlob CreatePixelShader() override;
-	D3D12_INPUT_LAYOUT_DESC CreateInputLayout() override;
-	virtual P3DSignature CreateGraphicsRootSignature() override;
-	
-	void CreateShader(P3DDevice device, P3DGrpCommandList cmdlist) override;
+	void AddRef() { m_nReferences++; }
+	void Release() { if (--m_nReferences <= 0) delete this; }
 };
-

@@ -120,9 +120,6 @@
     <ClInclude Include="Vertex.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsPipeline.hpp">
-      <Filter>헤더 파일\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Timer.h">
       <Filter>헤더 파일\System</Filter>
     </ClInclude>
@@ -213,9 +210,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Shader.cpp">
-      <Filter>소스 파일\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicsPipeline.cpp">
       <Filter>소스 파일\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="IlluminatedGraphicsPipeline.cpp">

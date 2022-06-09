@@ -6,22 +6,27 @@ Pipeline* Pipeline::illuminatedShader = nullptr;
 
 Pipeline::Pipeline()
 	: dxDevice(nullptr), dxCommandList(nullptr)
-	, mySignature(nullptr)
-	, myState()
+	, myStateDescription()
+	, mySignature(nullptr), myVertexShaderBlob(nullptr), myPixelShaderBlob(nullptr)
+	, myDerivedStates()
 {}
 
 Pipeline::~Pipeline()
 {
-	if (m_ppd3dPipelineStates)
+	if (0 < myDerivedStates.size())
 	{
-		for (int i = 0; i < m_nPipelineStates; i++)
-		{
-			if (m_ppd3dPipelineStates[i])
-			{
-				m_ppd3dPipelineStates[i]->Release();
-			}
-		}
-		delete[] m_ppd3dPipelineStates;
+		std::for_each(myDerivedStates.begin(), myDerivedStates.end()
+			, [](ID3D12PipelineState* state) {
+				state->Release();
+			});
+	}
+
+	if (myVertexShaderBlob) myVertexShaderBlob->Release();
+	if (myPixelShaderBlob) myPixelShaderBlob->Release();
+
+	if (myStateDescription.InputLayout.pInputElementDescs)
+	{
+		delete[] myStateDescription.InputLayout.pInputElementDescs;
 	}
 
 	if (mySignature)
@@ -29,24 +34,6 @@ Pipeline::~Pipeline()
 		mySignature->Release();
 		mySignature = nullptr;
 	}
-}
-
-ShaderBlob Pipeline::CreateVertexShader()
-{
-	ShaderBlob d3dShaderByteCode{};
-	d3dShaderByteCode.BytecodeLength = 0;
-	d3dShaderByteCode.pShaderBytecode = NULL;
-
-	return(d3dShaderByteCode);
-}
-
-ShaderBlob Pipeline::CreatePixelShader()
-{
-	ShaderBlob d3dShaderByteCode{};
-	d3dShaderByteCode.BytecodeLength = 0;
-	d3dShaderByteCode.pShaderBytecode = NULL;
-
-	return(d3dShaderByteCode);
 }
 
 ShaderBlob Pipeline::CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob)
@@ -190,11 +177,6 @@ D3D12_DEPTH_STENCIL_DESC Pipeline::CreateDepthStencilState()
 	return(d3dDepthStencilDesc);
 }
 
-P3DSignature Pipeline::CreateGraphicsRootSignature()
-{
-	return nullptr;
-}
-
 D3D12_BLEND_DESC Pipeline::CreateBlendState()
 {
 	D3D12_BLEND_DESC d3dBlendDesc;
@@ -215,44 +197,99 @@ D3D12_BLEND_DESC Pipeline::CreateBlendState()
 	return(d3dBlendDesc);
 }
 
-void Pipeline::CreateShader(P3DDevice device, P3DGrpCommandList cmdlist)
+void Pipeline::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
 	dxDevice = device;
 	dxCommandList = cmdlist;
 
-	ZeroMemory(&myState, sizeof(myState));
+	BuildShaders();
+	BuildRootSignature();
+	BuildInputLayout();
+	BuildRasterizerState();
+	BuildBlendState();
+	BuildDepthStencilState();
+
+	BuildState(0);
+}
+
+void Pipeline::BuildShaders()
+{
+	myStateDescription.VS = CreateVertexShader();
+	myStateDescription.PS = CreatePixelShader();
+}
+
+void Pipeline::BuildRootSignature()
+{
+	if (mySignature)
+	{
+		mySignature->Release();
+	}
 
 	mySignature = CreateGraphicsRootSignature();
-	myState.pRootSignature = mySignature;
-	myState.VS = CreateVertexShader();
-	myState.PS = CreatePixelShader();
-	myState.RasterizerState = CreateRasterizerState();
-	myState.BlendState = CreateBlendState();
-	myState.DepthStencilState = CreateDepthStencilState();
-	myState.InputLayout = CreateInputLayout();
+	myStateDescription.pRootSignature = mySignature;
+}
 
-	myState.SampleMask = UINT_MAX;
-	myState.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	myState.NumRenderTargets = 1;
-	myState.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-	myState.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	myState.SampleDesc.Count = 1;
-	myState.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+void Pipeline::BuildInputLayout()
+{
+	myStateDescription.InputLayout = CreateInputLayout();
+}
+
+void Pipeline::BuildRasterizerState()
+{
+	myStateDescription.RasterizerState = CreateRasterizerState();
+}
+
+void Pipeline::BuildBlendState()
+{
+	myStateDescription.BlendState = CreateBlendState();
+}
+
+void Pipeline::BuildDepthStencilState()
+{
+	myStateDescription.DepthStencilState = CreateDepthStencilState();
+}
+
+void Pipeline::BuildState(int index)
+{
+	myStateDescription.SampleMask = UINT_MAX;
+	myStateDescription.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	myStateDescription.NumRenderTargets = 1;
+	myStateDescription.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+	myStateDescription.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	myStateDescription.SampleDesc.Count = 1;
+	myStateDescription.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+
+	ID3D12PipelineState* handle = nullptr;
 
 	auto uuid = __uuidof(ID3D12PipelineState);
-	auto place = reinterpret_cast<void**>(&m_ppd3dPipelineStates[0]);
-	auto valid = device->CreateGraphicsPipelineState(&myState, uuid, place);
+	auto place = reinterpret_cast<void**>(&handle);
+	auto valid = dxDevice->CreateGraphicsPipelineState(&myStateDescription, uuid, place);
 	if (FAILED(valid))
 	{
 		throw "파이프라인 상태의 설정 실패!";
 	}
+
+	if (myDerivedStates.size() <= index)
+	{
+		myDerivedStates.push_back(handle);
+	}
+	else
+	{
+		auto& it = myDerivedStates.at(index);
+		if (it)
+		{
+			it->Release();
+		}
+
+		it = handle;
+	}
 }
 
-void Pipeline::PrepareRendering(P3DGrpCommandList cmdlist, int nPipelineState)
+void Pipeline::PrepareRendering(P3DGrpCommandList cmdlist, int index)
 {
-	if (m_ppd3dPipelineStates)
+	if (index <= myDerivedStates.size())
 	{
-		cmdlist->SetPipelineState(m_ppd3dPipelineStates[nPipelineState]);
+		cmdlist->SetPipelineState(myDerivedStates.at(index));
 	}
 }
 
@@ -264,128 +301,4 @@ P3DSignature Pipeline::GetRootSignature()
 const P3DSignature Pipeline::GetRootSignature() const
 {
 	return mySignature;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-IlluminatedGraphicsPipeline::IlluminatedGraphicsPipeline()
-	: Pipeline()
-{}
-
-IlluminatedGraphicsPipeline::~IlluminatedGraphicsPipeline()
-{}
-
-D3D12_INPUT_LAYOUT_DESC IlluminatedGraphicsPipeline::CreateInputLayout()
-{
-	UINT nInputElementDescs = 2;
-	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
-
-	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[1] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-
-	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
-	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
-	d3dInputLayoutDesc.NumElements = nInputElementDescs;
-
-	return(d3dInputLayoutDesc);
-}
-
-ShaderBlob IlluminatedGraphicsPipeline::CreateVertexShader()
-{
-	return(Pipeline::CompileShaderFromFile(L"VertexShader.hlsl", "main", "vs_5_1", &m_pd3dVertexShaderBlob));
-}
-
-ShaderBlob IlluminatedGraphicsPipeline::CreatePixelShader()
-{
-	return(Pipeline::CompileShaderFromFile(L"PixelShader.hlsl", "main", "ps_5_1", &m_pd3dPixelShaderBlob));
-}
-
-P3DSignature IlluminatedGraphicsPipeline::CreateGraphicsRootSignature()
-{
-	P3DSignature signature = nullptr;
-
-	D3D12_ROOT_PARAMETER shader_params[3]{};
-	ZeroMemory(&shader_params, sizeof(shader_params));
-
-	shader_params[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	shader_params[0].Descriptor.ShaderRegister = 0; // Camera
-	shader_params[0].Descriptor.RegisterSpace = 0;
-	shader_params[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
-	shader_params[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	shader_params[1].Constants.Num32BitValues = 32;
-	shader_params[1].Constants.ShaderRegister = 1; // GameObject
-	shader_params[1].Constants.RegisterSpace = 0;
-	shader_params[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
-	shader_params[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	shader_params[2].Descriptor.ShaderRegister = 0; // Lights
-	shader_params[2].Descriptor.RegisterSpace = 1;
-	shader_params[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
-	// 정점 쉐이더, 픽셀 쉐이더, 입력 조립기, 출력 병합기 
-	auto flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
-
-	D3D12_ROOT_SIGNATURE_DESC signature_desc{};
-
-	signature_desc.NumParameters = std::size(shader_params);
-	signature_desc.pParameters = shader_params;
-	signature_desc.NumStaticSamplers = 0; // 텍스처
-	signature_desc.pStaticSamplers = NULL;
-	signature_desc.Flags = flags;
-
-	ID3DBlob* signature_blob = nullptr;
-	ID3DBlob* error_blob = nullptr;
-
-	auto valid = D3D12SerializeRootSignature(&signature_desc
-		, D3D_ROOT_SIGNATURE_VERSION_1, &signature_blob
-		, &error_blob);
-	if (FAILED(valid))
-	{
-		throw "루트 서명의 메모리를 할당하지 못함!";
-	}
-
-	UINT gpu_mask = 0;
-	auto uuid = __uuidof(ID3D12RootSignature);
-	auto place = reinterpret_cast<void**>(&signature);
-	valid = dxDevice->CreateRootSignature(gpu_mask
-		, signature_blob->GetBufferPointer(), signature_blob->GetBufferSize()
-		, uuid, place);
-	if (FAILED(valid))
-	{
-		throw "루트 서명을 셍성하지 못함!";
-	}
-
-	if (signature_blob)
-	{
-		signature_blob->Release();
-	}
-
-	if (error_blob)
-	{
-		error_blob->Release();
-	}
-
-	return signature;
-}
-
-void IlluminatedGraphicsPipeline::CreateShader(P3DDevice device, P3DGrpCommandList cmdlist)
-{
-	m_nPipelineStates = 2;
-	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
-
-	Pipeline::CreateShader(device, cmdlist);
-
-	myState.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
-	HRESULT hResult = device->CreateGraphicsPipelineState(&myState
-		, __uuidof(ID3D12PipelineState)
-		, (void**)&m_ppd3dPipelineStates[1]);
-
-	if (m_pd3dVertexShaderBlob) m_pd3dVertexShaderBlob->Release();
-	if (m_pd3dPixelShaderBlob) m_pd3dPixelShaderBlob->Release();
-
-	if (myState.InputLayout.pInputElementDescs)
-	{
-		delete[] myState.InputLayout.pInputElementDescs;
-	}
 }

@@ -158,7 +158,6 @@
     <ClInclude Include="BasicScene.hpp" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="GameObject.hpp" />
-    <ClInclude Include="GraphicsPipeline.hpp" />
     <ClInclude Include="IlluminatedGraphicsPipeline.hpp" />
     <ClInclude Include="IlluminatedScene.hpp" />
     <ClInclude Include="Light.hpp" />
@@ -190,7 +189,6 @@
     <ClCompile Include="Arithmetics.cpp" />
     <ClCompile Include="BasicScene.cpp" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="GraphicsPipeline.cpp" />
     <ClCompile Include="IlluminatedGraphicsPipeline.cpp" />
     <ClCompile Include="IlluminatedScene.cpp" />
     <ClCompile Include="Light.cpp" />

@@ -1,10 +1,10 @@
 #include "pch.hpp"
 #include "GameFramework.h"
+#include "Model.hpp"
+#include "IlluminatedGraphicsPipeline.hpp"
 #include "StageMain.hpp"
 #include "StageGame.hpp"
 #include "StageGameEnd.hpp"
-#include "Model.hpp"
-#include "GraphicsPipeline.hpp"
 
 GameFramework::GameFramework(unsigned int width, unsigned int height)
 	: frameWidth(width), frameHeight(height)
@@ -495,7 +495,7 @@ void GameFramework::BuildPipeline()
 
 	// ½¦ÀÌ´õ »ý¼º
 	Pipeline::illuminatedShader = new IlluminatedGraphicsPipeline();
-	Pipeline::illuminatedShader->CreateShader(myDevice, myCommandList);
+	Pipeline::illuminatedShader->Awake(myDevice, myCommandList);
 }
 
 void GameFramework::BuildAssets()
