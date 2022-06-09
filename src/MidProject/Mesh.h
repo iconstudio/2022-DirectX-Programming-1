@@ -1,4 +1,5 @@
 #pragma once
+#include "Material.hpp"
 #include "Vertex.hpp"
 
 class CPolygon
@@ -86,9 +87,11 @@ public:
 	CMaterialMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw);
 	virtual ~CMaterialMesh();
 
-	void SetShader(Pipeline* pShader);
-	void SetShader(int nMaterial, Pipeline* pShader);
-	void SetMaterial(int nMaterial, CMaterial* pMaterial);
+	void AssignShader(int mat_index, Pipeline* pipeline);
+	void AssignMaterial(const std::vector<CMaterial*>& list);
+	void AssignMaterial(std::vector<CMaterial*>&& list);
+	void AssignMaterial(std::vector<RawMaterial*> list, Pipeline* pipeline);
+	void SetMaterial(int mat_index, CMaterial* material);
 
 	virtual void ReleaseUploadBuffers();
 
@@ -97,8 +100,8 @@ public:
 
 	UINT GetType() const;
 
-	int m_nMaterials = 0;
-	CMaterial** m_ppMaterials = NULL;
+	CMaterial* myDefaultMaterial;
+	std::vector<CMaterial*> myMaterials;
 
 private:
 	int m_nReferences = 0;

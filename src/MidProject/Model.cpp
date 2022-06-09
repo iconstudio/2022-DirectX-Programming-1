@@ -291,9 +291,8 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 					throw "재질을 저장할 메쉬가 생성되지 않음!";
 				}
 
-				mesh->m_nMaterials = raw_count;
-				mesh->m_ppMaterials = new CMaterial * [raw_count];
-
+				mesh->AssignMaterial(raw_materials, pipeline);
+				/*
 				for (int i = 0; i < raw_count; i++)
 				{
 					mesh->m_ppMaterials[i] = NULL;
@@ -310,6 +309,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 
 					mesh->SetMaterial(i, pMaterial);
 				}
+				*/
 			}
 		}
 		else if (!strcmp(token, "<Children>:"))

@@ -129,8 +129,8 @@ private:
 #if defined(_DEBUG)
 	ID3D12Debug* myDebugController;
 #endif
-	std::vector<shared_ptr<GraphicsPipeline>> myPipelines;
-	shared_ptr<GraphicsPipeline> currentPipeline;
+	//std::vector<shared_ptr<GraphicsPipeline>> myPipelines;
+	//shared_ptr<GraphicsPipeline> currentPipeline;
 
 	std::unordered_map<std::string, shared_ptr<Model>> myModels;
 

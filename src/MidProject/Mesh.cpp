@@ -18,6 +18,7 @@ RawMesh::~RawMesh()
 }
 
 CMaterialMesh::CMaterialMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw)
+	: myDefaultMaterial(nullptr), myMaterials()
 {
 	m_nVertices = raw->m_nVertices;
 	m_nType = raw->m_nType;
@@ -52,17 +53,17 @@ CMaterialMesh::CMaterialMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMes
 
 CMaterialMesh::~CMaterialMesh()
 {
-	if (0 < m_nMaterials)
+	if (0 < myMaterials.size())
 	{
-		for (int i = 0; i < m_nMaterials; i++)
-		{
-			if (m_ppMaterials[i]) m_ppMaterials[i]->Release();
-		}
+		std::for_each(myMaterials.begin(), myMaterials.end()
+			, [](CMaterial* mat) {
+				mat->Release();
+			});
 	}
 
-	if (m_ppMaterials)
+	if (myDefaultMaterial)
 	{
-		delete[] m_ppMaterials;
+		myDefaultMaterial->Release();
 	}
 
 	if (myPositionBuffer) myPositionBuffer->Release();
@@ -80,31 +81,69 @@ CMaterialMesh::~CMaterialMesh()
 	}
 }
 
-void CMaterialMesh::SetShader(Pipeline* pipeline)
+void CMaterialMesh::AssignShader(int mat_index, Pipeline* pipeline)
 {
-	m_nMaterials = 1;
-	m_ppMaterials = new CMaterial * [m_nMaterials];
-	m_ppMaterials[0] = new CMaterial;
-	m_ppMaterials[0]->SetShader(pipeline);
-}
-
-void CMaterialMesh::SetShader(int index, Pipeline* pipeline)
-{
-	if (m_ppMaterials[index])
+	if (mat_index < myMaterials.size())
 	{
-		m_ppMaterials[index]->SetShader(pipeline);
+		auto& mat = myMaterials.at(mat_index);
+		if (mat)
+		{
+			mat->SetShader(pipeline);
+		}
+		else
+		{
+			throw "잘못된 재질이 들어있음!";
+		}
+	}
+	else
+	{
+		throw "잘못된 재질의 번호를 참조하는 중!";
 	}
 }
 
-void CMaterialMesh::SetMaterial(int index, CMaterial* mat)
+void CMaterialMesh::AssignMaterial(const std::vector<CMaterial*>& list)
 {
-	if (m_ppMaterials[index])
-		m_ppMaterials[index]->Release();
+	myMaterials = list;
+}
 
-	m_ppMaterials[index] = mat;
+void CMaterialMesh::AssignMaterial(std::vector<CMaterial*>&& list)
+{
+	myMaterials = std::forward<std::vector<CMaterial*>>(list);
+}
 
-	if (m_ppMaterials[index])
-		m_ppMaterials[index]->AddRef();
+void CMaterialMesh::AssignMaterial(std::vector<RawMaterial*> list, Pipeline* pipeline)
+{
+	auto inserter = std::back_inserter(myMaterials);
+
+	std::transform(list.begin(), list.end(), inserter
+		, [&](RawMaterial* raw_mat) -> CMaterial* {
+			auto result = new CMaterial(raw_mat);
+			result->SetShader(pipeline);
+			return result;
+		});
+}
+
+void CMaterialMesh::SetMaterial(int mat_index, CMaterial* material)
+{
+	if (mat_index < myMaterials.size())
+	{
+		auto& mat = myMaterials.at(mat_index);
+		if (mat)
+		{
+			mat->Release();
+		}
+
+		mat = material;
+
+		if (mat)
+		{
+			mat->AddRef();
+		}
+	}
+	else
+	{
+		throw "잘못된 재질의 번호를 참조하는 중!";
+	}
 }
 
 void CMaterialMesh::ReleaseUploadBuffers()
@@ -138,16 +177,22 @@ void CMaterialMesh::Render(P3DGrpCommandList cmdlist)
 	{
 		for (int i = 0; i < countPolygons; i++)
 		{
-			auto& material = m_ppMaterials[i];
-			
-			if (material)
+			auto& material = myMaterials.at(i);
+
+			auto proceed_mat = material;
+			if (!material)
 			{
-				auto& pipeline = material->m_pShader;
+				proceed_mat = myDefaultMaterial;
+			}
+
+			if (proceed_mat)
+			{
+				auto& pipeline = proceed_mat->m_pShader;
 
 				if (pipeline)
 				{
 					pipeline->PrepareRendering(cmdlist);
-					material->PrepareRendering(cmdlist);
+					proceed_mat->PrepareRendering(cmdlist);
 
 					Render(cmdlist, i);
 				}

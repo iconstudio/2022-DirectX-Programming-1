@@ -20,17 +20,17 @@ ShaderBlob IlluminatedGraphicsPipeline::CreatePixelShader()
 
 D3D12_INPUT_LAYOUT_DESC IlluminatedGraphicsPipeline::CreateInputLayout()
 {
-	UINT nInputElementDescs = 2;
-	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+	const UINT params_count = 2;
+	auto vs_params = new D3D12_INPUT_ELEMENT_DESC[params_count]{};
 
-	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[1] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	vs_params[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	vs_params[1] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
-	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
-	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
-	d3dInputLayoutDesc.NumElements = nInputElementDescs;
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc{};
+	d3dInputLayoutDesc.pInputElementDescs = vs_params;
+	d3dInputLayoutDesc.NumElements = params_count;
 
-	return(d3dInputLayoutDesc);
+	return d3dInputLayoutDesc;
 }
 
 P3DSignature IlluminatedGraphicsPipeline::CreateGraphicsRootSignature()
@@ -38,7 +38,6 @@ P3DSignature IlluminatedGraphicsPipeline::CreateGraphicsRootSignature()
 	P3DSignature signature = nullptr;
 
 	D3D12_ROOT_PARAMETER shader_params[3]{};
-	ZeroMemory(&shader_params, sizeof(shader_params));
 
 	shader_params[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	shader_params[0].Descriptor.ShaderRegister = 0; // Camera
@@ -60,7 +59,6 @@ P3DSignature IlluminatedGraphicsPipeline::CreateGraphicsRootSignature()
 	auto flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 
 	D3D12_ROOT_SIGNATURE_DESC signature_desc{};
-
 	signature_desc.NumParameters = std::size(shader_params);
 	signature_desc.pParameters = shader_params;
 	signature_desc.NumStaticSamplers = 0; // ≈ÿΩ∫√≥

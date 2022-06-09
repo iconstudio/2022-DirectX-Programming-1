@@ -636,7 +636,7 @@ void GameFramework::WaitForGpuComplete()
 
 void GameFramework::AddPipeline(GraphicsPipeline* pipeline)
 {
-	myPipelines.emplace_back(pipeline);
+	//myPipelines.emplace_back(pipeline);
 }
 
 template<typename SceneType>
