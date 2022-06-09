@@ -77,6 +77,8 @@ public:
 	CDiffusedMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw);
 	virtual ~CDiffusedMesh();
 
+	virtual void ReleaseUploadBuffers();
+
 	virtual void PrepareRender(P3DGrpCommandList cmdlist);
 
 protected:

@@ -29,7 +29,40 @@ CMesh::CMesh()
 {}
 
 CMesh::~CMesh()
-{}
+{
+	if (myPositionBuffer)
+	{
+		myPositionBuffer->Release();
+		myPositionBuffer = nullptr;
+	}
+
+	if (myIndexBuffers)
+	{
+		if (0 < countPolygons)
+		{
+			for (int i = 0; i < countPolygons; i++)
+			{
+				if (myIndexBuffers[i])
+				{
+					myIndexBuffers[i]->Release();
+				}
+			}
+		}
+
+		delete[] myIndexBuffers;
+		myIndexBuffers = nullptr;
+	}
+
+	if (myIndexBufferViews)
+	{
+		delete[] myIndexBufferViews;
+	}
+
+	if (countPolygonIndices)
+	{
+		delete[] countPolygonIndices;
+	}
+}
 
 void CMesh::PrepareRender(P3DGrpCommandList cmdlist)
 {
@@ -65,25 +98,26 @@ void CMesh::Render(P3DGrpCommandList cmdlist, int polygon_index)
 
 void CMesh::ReleaseUploadBuffers()
 {
-	if (myUploadingPositonBuffer) myUploadingPositonBuffer->Release();
-
-	myUploadingPositonBuffer = NULL;
-
-	if (0 < countPolygons && myUploadingIndexBuffer)
+	if (myUploadingPositonBuffer)
 	{
-		for (int i = 0; i < countPolygons; i++)
+		myUploadingPositonBuffer->Release();
+	}
+	myUploadingPositonBuffer = nullptr;
+
+	if (myUploadingIndexBuffer)
+	{
+		if (0 < countPolygons)
 		{
-			if (myUploadingIndexBuffer[i])
+			for (int i = 0; i < countPolygons; i++)
 			{
-				myUploadingIndexBuffer[i]->Release();
+				if (myUploadingIndexBuffer[i])
+				{
+					myUploadingIndexBuffer[i]->Release();
+				}
 			}
 		}
 
-		if (myUploadingIndexBuffer)
-		{
-			delete[] myUploadingIndexBuffer;
-		}
-
+		delete[] myUploadingIndexBuffer;
 		myUploadingIndexBuffer = nullptr;
 	}
 }
@@ -148,6 +182,17 @@ CDiffusedMesh::CDiffusedMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMes
 CDiffusedMesh::~CDiffusedMesh()
 {}
 
+void CDiffusedMesh::ReleaseUploadBuffers()
+{
+	CMesh::ReleaseUploadBuffers();
+
+	if (myUploadingColourBuffer)
+	{
+		myUploadingColourBuffer->Release();
+	}
+	myUploadingColourBuffer = nullptr;
+}
+
 void CDiffusedMesh::PrepareRender(P3DGrpCommandList cmdlist)
 {
 	cmdlist->IASetPrimitiveTopology(typePrimitive);
@@ -202,20 +247,6 @@ CMaterialMesh::~CMaterialMesh()
 	if (myDefaultMaterial)
 	{
 		myDefaultMaterial->Release();
-	}
-
-	if (myPositionBuffer) myPositionBuffer->Release();
-
-	if (countPolygons > 0)
-	{
-		for (int i = 0; i < countPolygons; i++)
-		{
-			if (myIndexBuffers[i]) myIndexBuffers[i]->Release();
-		}
-		if (myIndexBuffers) delete[] myIndexBuffers;
-		if (myIndexBufferViews) delete[] myIndexBufferViews;
-
-		if (countPolygonIndices) delete[] countPolygonIndices;
 	}
 }
 
