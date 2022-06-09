@@ -215,7 +215,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 	int nFrame = 0;
 
 	Model* root = nullptr;
-	CMaterialMesh* mesh = nullptr;
+	CLightenMesh* mesh = nullptr;
 
 	for (; ; )
 	{
@@ -310,6 +310,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 					mesh->SetMaterial(i, pMaterial);
 				}
 				*/
+				raw_materials.erase(raw_materials.begin(), raw_materials.end());
 			}
 		}
 		else if (!strcmp(token, "<Children>:"))

@@ -634,10 +634,10 @@ void GameFramework::WaitForGpuComplete()
 	}
 }
 
-void GameFramework::AddPipeline(GraphicsPipeline* pipeline)
-{
+//void GameFramework::AddPipeline(GraphicsPipeline* pipeline)
+//{
 	//myPipelines.emplace_back(pipeline);
-}
+//}
 
 template<typename SceneType>
 	requires(std::is_base_of_v<Scene, SceneType>)

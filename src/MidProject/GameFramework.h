@@ -40,7 +40,7 @@ public:
 	void WaitForGpuComplete();
 
 	// 파이프라인 등록
-	void AddPipeline(GraphicsPipeline* pipeline);
+	//void AddPipeline(GraphicsPipeline* pipeline);
 
 	// 장면 등록
 	template<typename SceneType> requires(std::is_base_of_v<Scene, SceneType>)

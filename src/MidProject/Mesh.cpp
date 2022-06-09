@@ -13,8 +13,84 @@ RawMesh::~RawMesh()
 
 	if (countPolygonIndices) delete[] countPolygonIndices;
 
-	for (int i = 0; i < countPolygons; i++) if (m_ppnSubSetIndices[i]) delete[] m_ppnSubSetIndices[i];
+	for (int i = 0; i < countPolygons; i++)
+	{
+		if (m_ppnSubSetIndices[i])
+		{
+			delete[] m_ppnSubSetIndices[i];
+		}
+	}
+
 	if (m_ppnSubSetIndices) delete[] m_ppnSubSetIndices;
+}
+
+CMesh::CMesh()
+	: myPositionBuffer(nullptr), myPositionBufferView(), myUploadingPositonBuffer(nullptr)
+{}
+
+CMesh::~CMesh()
+{}
+
+void CMesh::PrepareRender(P3DGrpCommandList cmdlist)
+{
+	cmdlist->IASetPrimitiveTopology(typePrimitive);
+	cmdlist->IASetVertexBuffers(m_nSlot, 1, &myPositionBufferView);
+}
+
+void CMesh::Render(P3DGrpCommandList cmdlist)
+{
+	PrepareRender(cmdlist);
+
+	if (0 < countPolygons)
+	{
+		for (int i = 0; i < countPolygons; i++)
+		{
+			Render(cmdlist, i);
+		}
+	}
+}
+
+void CMesh::Render(P3DGrpCommandList cmdlist, int polygon_index)
+{
+	if (0 < countPolygons && polygon_index < countPolygons)
+	{
+		cmdlist->IASetIndexBuffer(&(myIndexBufferViews[polygon_index]));
+		cmdlist->DrawIndexedInstanced(countPolygonIndices[polygon_index], 1, 0, 0, 0);
+	}
+	else
+	{
+		cmdlist->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
+	}
+}
+
+void CMesh::ReleaseUploadBuffers()
+{
+	if (myUploadingPositonBuffer) myUploadingPositonBuffer->Release();
+
+	myUploadingPositonBuffer = NULL;
+
+	if (0 < countPolygons && myUploadingIndexBuffer)
+	{
+		for (int i = 0; i < countPolygons; i++)
+		{
+			if (myUploadingIndexBuffer[i])
+			{
+				myUploadingIndexBuffer[i]->Release();
+			}
+		}
+
+		if (myUploadingIndexBuffer)
+		{
+			delete[] myUploadingIndexBuffer;
+		}
+
+		myUploadingIndexBuffer = nullptr;
+	}
+}
+
+UINT CMesh::GetType() const
+{
+	return m_nType;
 }
 
 CMaterialMesh::CMaterialMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw)
@@ -148,31 +224,13 @@ void CMaterialMesh::SetMaterial(int mat_index, CMaterial* material)
 
 void CMaterialMesh::ReleaseUploadBuffers()
 {
-	if (myUploadingPositonBuffer) myUploadingPositonBuffer->Release();
-
-	myUploadingPositonBuffer = NULL;
-
-	if (0 < countPolygons && myUploadingIndexBuffer)
-	{
-		for (int i = 0; i < countPolygons; i++)
-		{
-			if (myUploadingIndexBuffer[i])
-			{
-				myUploadingIndexBuffer[i]->Release();
-			}
-		}
-
-		if (myUploadingIndexBuffer)
-		{
-			delete[] myUploadingIndexBuffer;
-		}
-
-		myUploadingIndexBuffer = nullptr;
-	}
+	CMesh::ReleaseUploadBuffers();
 }
 
 void CMaterialMesh::Render(P3DGrpCommandList cmdlist)
 {
+	PrepareRender(cmdlist);
+
 	if (0 < countPolygons)
 	{
 		for (int i = 0; i < countPolygons; i++)
@@ -194,7 +252,7 @@ void CMaterialMesh::Render(P3DGrpCommandList cmdlist)
 					pipeline->PrepareRendering(cmdlist);
 					proceed_mat->PrepareRendering(cmdlist);
 
-					Render(cmdlist, i);
+					CMesh::Render(cmdlist, i);
 				}
 				else
 				{
@@ -205,29 +263,8 @@ void CMaterialMesh::Render(P3DGrpCommandList cmdlist)
 	}
 }
 
-void CMaterialMesh::Render(P3DGrpCommandList cmdlist, int polygon_index)
-{
-	cmdlist->IASetPrimitiveTopology(typePrimitive);
-	cmdlist->IASetVertexBuffers(m_nSlot, 1, &myPositionBufferView);
-
-	if (0 < countPolygons && polygon_index < countPolygons)
-	{
-		cmdlist->IASetIndexBuffer(&(myIndexBufferViews[polygon_index]));
-		cmdlist->DrawIndexedInstanced(countPolygonIndices[polygon_index], 1, 0, 0, 0);
-	}
-	else
-	{
-		cmdlist->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
-	}
-}
-
-UINT CMaterialMesh::GetType() const
-{
-	return m_nType;
-}
-
 CLightenMesh::CLightenMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* pMeshInfo)
-	: CMaterialMesh::CMaterialMesh(device, cmdlist, pMeshInfo)
+	: CMaterialMesh(device, cmdlist, pMeshInfo)
 {
 	myNormalBuffer = ::CreateBufferResource(device, cmdlist, pMeshInfo->m_pxmf3Normals, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &myUploadingNormalBuffer);
 
@@ -255,12 +292,17 @@ void CLightenMesh::ReleaseUploadBuffers()
 	myUploadingNormalBuffer = nullptr;
 }
 
-void CLightenMesh::Render(P3DGrpCommandList cmdlist, int polygon_index)
+void CLightenMesh::PrepareRender(P3DGrpCommandList cmdlist)
 {
 	cmdlist->IASetPrimitiveTopology(typePrimitive);
 
 	D3D12_VERTEX_BUFFER_VIEW vertex_buffers[2] = { myPositionBufferView, myNormalBufferView };
 	cmdlist->IASetVertexBuffers(m_nSlot, 2, vertex_buffers);
+}
+
+void CLightenMesh::Render(P3DGrpCommandList cmdlist, int polygon_index)
+{
+	PrepareRender(cmdlist);
 
 	if (0 < countPolygons && polygon_index < countPolygons)
 	{

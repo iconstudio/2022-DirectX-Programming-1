@@ -3,23 +3,27 @@
 #define __PCH__
 #include "stdafx.h"
 
+class Timer;
 class GameFramework;
-class GraphicsPipeline;
-
+class Pipeline;
 class Scene;
+
+class DiffusedGraphicsPipeline;
+class IlluminatedGraphicsPipeline;
 class IlluminatedScene;
 
 class CMesh;
+class CDiffusedMesh;
 class CMaterialMesh;
 class CLightenMesh;
 class CMaterial;
-class Pipeline;
 class CLight;
 
 class Transformer;
 class GameCamera;
 class GameObject;
 class GameKinematicObject; // 정적임
+class Model;
 class GameEntity; // 동적임
 enum class COLLISION_TAGS;
 
