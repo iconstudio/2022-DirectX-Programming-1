@@ -74,7 +74,15 @@ public:
 class CDiffusedMesh : public CMesh
 {
 public:
-	virtual ~CDiffusedMesh() {}
+	CDiffusedMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw);
+	virtual ~CDiffusedMesh();
+
+	virtual void PrepareRender(P3DGrpCommandList cmdlist);
+
+protected:
+	ID3D12Resource* myColourBuffer;
+	D3D12_VERTEX_BUFFER_VIEW myColourBufferView;
+	ID3D12Resource* myUploadingColourBuffer;
 };
 
 class CMaterialMesh : public CMesh
