@@ -13,6 +13,10 @@ class DiffusedGraphicsPipeline;
 class IlluminatedGraphicsPipeline;
 class IlluminatedScene;
 
+class CVertex;
+class CDiffusedVertex;
+class CLightenVertex;
+class CComplexVertex;
 class CMesh;
 class CDiffusedMesh;
 class CMaterialMesh;

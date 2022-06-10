@@ -1,4 +1,6 @@
 #pragma once
+#include "Vertex.hpp"
+#include "Polygon.hpp"
 
 class RawMesh
 {
@@ -6,7 +8,6 @@ public:
 	RawMesh();
 	~RawMesh();
 
-public:
 	char m_pstrMeshName[256] = { 0 };
 
 	UINT m_nType = 0x00;
@@ -25,4 +26,19 @@ public:
 	int countPolygons = 0;
 	int* countPolygonIndices = NULL;
 	UINT** m_ppnSubSetIndices = NULL;
+
+	std::vector<CVertex> myVertices;
+	std::vector<shared_ptr<CPolygon>> myPolygons;
+};
+
+class RawDiffusedMesh : public RawMesh
+{
+public:
+
+};
+
+class RawLightenMesh : public RawMesh
+{
+public:
+
 };

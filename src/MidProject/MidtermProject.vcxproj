@@ -171,6 +171,7 @@
     <ClInclude Include="Obstacles.hpp" />
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Polygon.hpp" />
     <ClInclude Include="RawMesh.hpp" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Scene.h" />
@@ -191,6 +192,7 @@
     <ClCompile Include="Arithmetics.cpp" />
     <ClCompile Include="BasicScene.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CPolygon.cpp" />
     <ClCompile Include="DiffusedGraphicsPipeline.cpp" />
     <ClCompile Include="IlluminatedGraphicsPipeline.cpp" />
     <ClCompile Include="IlluminatedScene.cpp" />

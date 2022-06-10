@@ -117,17 +117,11 @@
     <ClInclude Include="BasicScene.hpp">
       <Filter>헤더 파일\System</Filter>
     </ClInclude>
-    <ClInclude Include="Vertex.hpp">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Timer.h">
       <Filter>헤더 파일\System</Filter>
     </ClInclude>
     <ClInclude Include="Shader.hpp">
       <Filter>헤더 파일\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="IlluminatedGraphicsPipeline.hpp">
-      <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Pipeline.hpp">
       <Filter>헤더 파일\Graphics</Filter>
@@ -135,8 +129,17 @@
     <ClInclude Include="RawMesh.hpp">
       <Filter>헤더 파일\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Vertex.hpp">
+      <Filter>헤더 파일\Graphics</Filter>
+    </ClInclude>
     <ClInclude Include="DiffusedGraphicsPipeline.hpp">
-      <Filter>헤더 파일</Filter>
+      <Filter>헤더 파일\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="IlluminatedGraphicsPipeline.hpp">
+      <Filter>헤더 파일\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Polygon.hpp">
+      <Filter>헤더 파일\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -226,6 +229,9 @@
     </ClCompile>
     <ClCompile Include="DiffusedGraphicsPipeline.cpp">
       <Filter>소스 파일\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="CPolygon.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
