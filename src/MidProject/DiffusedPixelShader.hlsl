@@ -1,6 +1,4 @@
-#include "Basis.hlsli"
-
-float4 main(VS_DIFFUSED_OUTPUT vsout) : SV_TARGET
+float4 main() : SV_TARGET
 {
-    return vsout.colour;
+	return float4(1.0f, 1.0f, 1.0f, 1.0f);
 }

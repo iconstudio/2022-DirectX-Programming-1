@@ -1,12 +1,4 @@
-#include "Basis.hlsli"
-
-VS_DIFFUSED_OUTPUT main(VS_DIFFUSED_INPUT input)
+float4 main( float4 pos : POSITION ) : SV_POSITION
 {
-    VS_DIFFUSED_OUTPUT result;
-    result.position = float4(input.position, 1.0f);
-    result.colour = input.colour;
-    result.position_world.x = input.position.x * screen_w;
-    result.position_world.y = input.position.y * screen_h;
-    
-	return result;
+	return pos;
 }

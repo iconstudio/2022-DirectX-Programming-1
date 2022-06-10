@@ -144,6 +144,9 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	myLights[4].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	myLights[4].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
 
+	// 도로 생성
+	XMFLOAT3 my_start;
+
 	// 결승선
 	XMFLOAT3 goal = XMFLOAT3(roadWidth * 0.5f, 0.0f, roadHeight);
 
@@ -318,9 +321,6 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	goaline->Attach(model_cactus.get());
 	goaline->SetPosition(Vector3::Add(goal, XMFLOAT3(+20.0f, 0.0f, 0.0f)));
 	myInstances.emplace_back(goaline);
-
-	// 도로 생성
-	XMFLOAT3 my_start;
 }
 
 void StageGame::Start()

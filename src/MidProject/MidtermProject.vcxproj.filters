@@ -230,7 +230,7 @@
     <ClCompile Include="DiffusedGraphicsPipeline.cpp">
       <Filter>소스 파일\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="CPolygon.cpp">
+    <ClCompile Include="Polygon.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -258,6 +258,12 @@
       <Filter>쉐이더 파일</Filter>
     </FxCompile>
     <FxCompile Include="Basis.hlsli">
+      <Filter>쉐이더 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="PlainVertexShader.hlsl">
+      <Filter>쉐이더 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="PlainPixelShader.hlsl">
       <Filter>쉐이더 파일</Filter>
     </FxCompile>
     <FxCompile Include="DiffusedVertexShader.hlsl">
