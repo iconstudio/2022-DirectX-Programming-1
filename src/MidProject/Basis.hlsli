@@ -53,6 +53,22 @@ struct VS_LIGHTING_OUTPUT
 #endif
 };
 
+struct VS_DIFFUSED_INPUT
+{
+    float3 position : POSITION;
+    float4 colour : COLOR;
+};
+
+struct VS_DIFFUSED_OUTPUT
+{
+    // 0~1 사이의 좌표
+    float4 position : SV_POSITION;
+    // 화면의 절대 좌표 
+    float3 position_world : POSITION;
+    // 색상
+    float4 colour : COLOR;
+};
+
 cbuffer cbCameraInfo : register(b0, space0)
 {
     matrix gmtxView : packoffset(c0);
@@ -60,6 +76,7 @@ cbuffer cbCameraInfo : register(b0, space0)
     float3 gvCameraPosition : packoffset(c8);
 };
 
+// GPU 인스턴스
 cbuffer cbGameObjectInfo : register(b1, space0)
 {
     matrix gmtxGameObject : packoffset(c0);
@@ -71,4 +88,11 @@ cbuffer cbLights : register(b0, space1)
     LIGHT gLights[MAX_LIGHTS];
     float4 gcGlobalAmbientLight;
     int gnLights;
+};
+
+// 화면 해상도
+cbuffer cbResolutions : register(b0, space2)
+{
+    float screen_w;
+    float screen_h;
 };

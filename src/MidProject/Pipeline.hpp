@@ -1,6 +1,5 @@
 #pragma once
-#include "Object.h"
-#include "Camera.h"
+#include "Shader.hpp"
 
 class Pipeline
 {
@@ -12,7 +11,12 @@ public:
 	virtual void BuildState(int index);
 	virtual void PrepareRendering(P3DGrpCommandList cmdlist, int index = 0);
 
-	ShaderBlob CompileShaderFromFile(const  WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob);
+	void AssignVertexShader(const Shader& vs);
+	void AssignVertexShader(Shader&& vs);
+	void AssignPixelShader(const Shader& ps);
+	void AssignPixelShader(Shader&& ps);
+
+	ShaderBlob CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob);
 	ShaderBlob ReadCompiledShaderFromFile(const WCHAR* pszFileName, ID3DBlob** ppd3dShaderBlob = NULL);
 
 	P3DSignature GetRootSignature();
@@ -40,10 +44,10 @@ protected:
 	P3DDevice dxDevice;
 	P3DGrpCommandList dxCommandList;
 
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC myStateDescription;
+	Shader myVertexShader;
+	Shader myPixelShader;
 	P3DSignature mySignature;
-	ID3DBlob* myVertexShaderBlob;
-	ID3DBlob* myPixelShaderBlob;
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC myStateDescription;
 
 	std::vector<ID3D12PipelineState*> myDerivedStates;
 

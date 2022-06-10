@@ -20,6 +20,7 @@ Shader::~Shader()
 	if (myBlob)
 	{
 		//myBlob->Release();
+		//myBlob = nullptr;
 	}
 }
 

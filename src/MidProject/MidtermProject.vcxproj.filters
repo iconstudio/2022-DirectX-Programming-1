@@ -132,6 +132,12 @@
     <ClInclude Include="Pipeline.hpp">
       <Filter>헤더 파일\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="RawMesh.hpp">
+      <Filter>헤더 파일\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="DiffusedGraphicsPipeline.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -212,8 +218,14 @@
     <ClCompile Include="Shader.cpp">
       <Filter>소스 파일\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="RawMesh.cpp">
+      <Filter>소스 파일\Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="IlluminatedGraphicsPipeline.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="DiffusedGraphicsPipeline.cpp">
+      <Filter>소스 파일\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -240,6 +252,12 @@
       <Filter>쉐이더 파일</Filter>
     </FxCompile>
     <FxCompile Include="Basis.hlsli">
+      <Filter>쉐이더 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="DiffusedVertexShader.hlsl">
+      <Filter>쉐이더 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="DiffusedPixelShader.hlsl">
       <Filter>쉐이더 파일</Filter>
     </FxCompile>
   </ItemGroup>

@@ -6,6 +6,7 @@
 class Timer;
 class GameFramework;
 class Pipeline;
+class Shader;
 class Scene;
 
 class DiffusedGraphicsPipeline;

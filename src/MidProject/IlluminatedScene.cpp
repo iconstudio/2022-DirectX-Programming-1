@@ -86,6 +86,11 @@ void IlluminatedScene::Update(float delta_time)
 void IlluminatedScene::PrepareRendering()
 {
 	auto& pipeline = Pipeline::illuminatedShader;
+	if (!pipeline)
+	{
+		throw "조명 쉐이더가 존재하지 않음!";
+	}
+
 	d3dTaskList->SetGraphicsRootSignature(pipeline->GetRootSignature());
 
 	myCamera->SetViewportsAndScissorRects(d3dTaskList);

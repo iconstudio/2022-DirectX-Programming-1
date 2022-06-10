@@ -1,5 +1,7 @@
 #include "pch.hpp"
+#include "RawMesh.hpp"
 #include "Model.hpp"
+#include "Pipeline.hpp"
 
 Model* Model::Load(ID3D12Device* device
 	, ID3D12GraphicsCommandList* cmdlist

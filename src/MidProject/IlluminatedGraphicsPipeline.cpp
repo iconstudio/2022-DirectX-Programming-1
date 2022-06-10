@@ -10,12 +10,14 @@ IlluminatedGraphicsPipeline::~IlluminatedGraphicsPipeline()
 
 ShaderBlob IlluminatedGraphicsPipeline::CreateVertexShader()
 {
-	return(Pipeline::CompileShaderFromFile(L"VertexShader.hlsl", "main", "vs_5_1", &myVertexShaderBlob));
+	return myVertexShader.myCode;
+	//return CompileShaderFromFile(L"VertexShader.hlsl", "main", "vs_5_1", &myVertexShaderBlob);
 }
 
 ShaderBlob IlluminatedGraphicsPipeline::CreatePixelShader()
 {
-	return(Pipeline::CompileShaderFromFile(L"PixelShader.hlsl", "main", "ps_5_1", &myPixelShaderBlob));
+	return myPixelShader.myCode;
+	//return CompileShaderFromFile(L"PixelShader.hlsl", "main", "ps_5_1", &myPixelShaderBlob);
 }
 
 D3D12_INPUT_LAYOUT_DESC IlluminatedGraphicsPipeline::CreateInputLayout()
@@ -59,7 +61,7 @@ P3DSignature IlluminatedGraphicsPipeline::CreateGraphicsRootSignature()
 	auto flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 
 	D3D12_ROOT_SIGNATURE_DESC signature_desc{};
-	signature_desc.NumParameters = std::size(shader_params);
+	signature_desc.NumParameters = static_cast<UINT>(std::size(shader_params));
 	signature_desc.pParameters = shader_params;
 	signature_desc.NumStaticSamplers = 0; // ≈ÿΩ∫√≥
 	signature_desc.pStaticSamplers = NULL;
@@ -102,6 +104,9 @@ P3DSignature IlluminatedGraphicsPipeline::CreateGraphicsRootSignature()
 
 void IlluminatedGraphicsPipeline::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
+	AssignVertexShader(Shader("VertexShader.hlsl.", "main", "vs_5_1"));
+	AssignPixelShader(Shader("PixelShader.hlsl.", "main", "ps_5_1"));
+
 	myDerivedStates.clear();
 	myDerivedStates.reserve(2);
 

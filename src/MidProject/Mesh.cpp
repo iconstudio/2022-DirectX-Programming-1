@@ -1,28 +1,8 @@
 #include "pch.hpp"
 #include "Mesh.h"
+#include "RawMesh.hpp"
 #include "Material.hpp"
 #include "Pipeline.hpp"
-
-RawMesh::~RawMesh()
-{
-	if (m_pxmf3Positions) delete[] m_pxmf3Positions;
-	if (m_pxmf4Colors) delete[] m_pxmf4Colors;
-	if (m_pxmf3Normals) delete[] m_pxmf3Normals;
-
-	if (m_pnIndices) delete[] m_pnIndices;
-
-	if (countPolygonIndices) delete[] countPolygonIndices;
-
-	for (int i = 0; i < countPolygons; i++)
-	{
-		if (m_ppnSubSetIndices[i])
-		{
-			delete[] m_ppnSubSetIndices[i];
-		}
-	}
-
-	if (m_ppnSubSetIndices) delete[] m_ppnSubSetIndices;
-}
 
 CMesh::CMesh()
 	: myPositionBuffer(nullptr), myPositionBufferView(), myUploadingPositonBuffer(nullptr)
@@ -64,13 +44,13 @@ CMesh::~CMesh()
 	}
 }
 
-void CMesh::PrepareRender(P3DGrpCommandList cmdlist)
+void CMesh::PrepareRender(P3DGrpCommandList cmdlist) const
 {
 	cmdlist->IASetPrimitiveTopology(typePrimitive);
 	cmdlist->IASetVertexBuffers(m_nSlot, 1, &myPositionBufferView);
 }
 
-void CMesh::Render(P3DGrpCommandList cmdlist)
+void CMesh::Render(P3DGrpCommandList cmdlist) const
 {
 	PrepareRender(cmdlist);
 
@@ -83,7 +63,7 @@ void CMesh::Render(P3DGrpCommandList cmdlist)
 	}
 }
 
-void CMesh::Render(P3DGrpCommandList cmdlist, int polygon_index)
+void CMesh::Render(P3DGrpCommandList cmdlist, int polygon_index) const
 {
 	if (0 < countPolygons && polygon_index < countPolygons)
 	{
@@ -193,7 +173,7 @@ void CDiffusedMesh::ReleaseUploadBuffers()
 	myUploadingColourBuffer = nullptr;
 }
 
-void CDiffusedMesh::PrepareRender(P3DGrpCommandList cmdlist)
+void CDiffusedMesh::PrepareRender(P3DGrpCommandList cmdlist) const
 {
 	cmdlist->IASetPrimitiveTopology(typePrimitive);
 
@@ -320,7 +300,7 @@ void CMaterialMesh::ReleaseUploadBuffers()
 	CMesh::ReleaseUploadBuffers();
 }
 
-void CMaterialMesh::Render(P3DGrpCommandList cmdlist)
+void CMaterialMesh::Render(P3DGrpCommandList cmdlist) const
 {
 	PrepareRender(cmdlist);
 
@@ -385,7 +365,7 @@ void CLightenMesh::ReleaseUploadBuffers()
 	myUploadingNormalBuffer = nullptr;
 }
 
-void CLightenMesh::PrepareRender(P3DGrpCommandList cmdlist)
+void CLightenMesh::PrepareRender(P3DGrpCommandList cmdlist) const
 {
 	cmdlist->IASetPrimitiveTopology(typePrimitive);
 
@@ -393,7 +373,7 @@ void CLightenMesh::PrepareRender(P3DGrpCommandList cmdlist)
 	cmdlist->IASetVertexBuffers(m_nSlot, 2, vertex_buffers);
 }
 
-void CLightenMesh::Render(P3DGrpCommandList cmdlist, int polygon_index)
+void CLightenMesh::Render(P3DGrpCommandList cmdlist, int polygon_index) const
 {
 	PrepareRender(cmdlist);
 
