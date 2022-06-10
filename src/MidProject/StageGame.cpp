@@ -14,8 +14,8 @@ float MakeRandom()
 
 StageGame::StageGame(GameFramework& framework, HWND hwnd)
 	: IlluminatedScene(framework, "Game")
-	, myGoal(), playerSpawnPoint()
-	, myWalls()
+	, myGoalie(), playerSpawnPoint()
+	, myRoadData(), myRoadMesh(nullptr)
 	, handleWindow(hwnd)
 	, raceColors
 { { 0.2f, 0.2f, 0.2f, 1.0f }, { 0.4f, 0.6f, 0.6f, 1.0f }
@@ -297,8 +297,8 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	SetCamera(player->GetCamera());
 	myPlayer = player;
 
-	myGoal.Center = goal;
-	myGoal.Radius = 5.0f;
+	myGoalie.Center = goal;
+	myGoalie.Radius = 5.0f;
 
 	auto model_cactus = myFramework.GetModel("Cactus").lock();
 	model_cactus->SetPosition(0.0f, 0.0f, 0.0f);
@@ -318,6 +318,9 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	goaline->Attach(model_cactus.get());
 	goaline->SetPosition(Vector3::Add(goal, XMFLOAT3(+20.0f, 0.0f, 0.0f)));
 	myInstances.emplace_back(goaline);
+
+	// 도로 생성
+	XMFLOAT3 my_start;
 }
 
 void StageGame::Start()
@@ -353,7 +356,7 @@ void StageGame::Update(float delta_time)
 		auto& player_collider = myPlayer->myCollider;
 		player_collider->Center = myPlayer->GetPosition();
 
-		if (player_collider->Intersects(myGoal))
+		if (player_collider->Intersects(myGoalie))
 		{
 			myFramework.JumpToNextStage();
 		}

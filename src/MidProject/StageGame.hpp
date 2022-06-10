@@ -23,14 +23,13 @@ public:
 	const float roadWidth = 100.0f;
 	const float roadHeight = 3000.0f;
 
-	BoundingSphere myGoal;
-
-	XMFLOAT3 playerSpawnPoint;
-
-	std::vector<GameObject*> myWalls;
-
 	RawMesh myRoadData;
-	CDiffusedMesh myRoadMesh;
+	CDiffusedMesh* myRoadMesh;
+
+	XMFLOAT3 roadStartPoint;
+	XMFLOAT3 roadDestPoint;
+	XMFLOAT3 playerSpawnPoint;
+	BoundingSphere myGoalie;
 
 	const float defaultColor[4] = { 0.2f, 0.6f, 0.4f, 1.0f };
 
