@@ -175,6 +175,12 @@ void CDiffusedMesh::ReleaseUploadBuffers()
 
 void CDiffusedMesh::PrepareRender(P3DGrpCommandList cmdlist) const
 {
+	auto& pipeline = Pipeline::diffusedShader;
+	if (!pipeline)
+	{
+		throw "색상 쉐이더가 존재하지 않음!";
+	}
+
 	cmdlist->IASetPrimitiveTopology(typePrimitive);
 
 	D3D12_VERTEX_BUFFER_VIEW vertex_buffers[2] = { myPositionBufferView, myColourBufferView };
