@@ -23,9 +23,12 @@ public:
 	int m_nIndices = 0;
 	UINT* m_pnIndices = NULL;
 
+	// 인덱스 객체의 수
 	int countPolygons = 0;
+	// 각각 인덱스 객체가 가진 정점의 수
 	int* countPolygonIndices = NULL;
-	UINT** m_ppnSubSetIndices = NULL;
+	// 각각 인덱스 객체가 가진 정점의 배열
+	UINT** indexByPolygons = NULL;
 
 	std::vector<CVertex> myVertices;
 	std::vector<shared_ptr<CPolygon>> myPolygons;

@@ -16,11 +16,11 @@ RawMesh::~RawMesh()
 
 	for (int i = 0; i < countPolygons; i++)
 	{
-		if (m_ppnSubSetIndices[i])
+		if (indexByPolygons[i])
 		{
-			delete[] m_ppnSubSetIndices[i];
+			delete[] indexByPolygons[i];
 		}
 	}
 
-	if (m_ppnSubSetIndices) delete[] m_ppnSubSetIndices;
+	if (indexByPolygons) delete[] indexByPolygons;
 }

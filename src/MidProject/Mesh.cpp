@@ -150,7 +150,7 @@ CDiffusedMesh::CDiffusedMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMes
 		for (int i = 0; i < countPolygons; i++)
 		{
 			countPolygonIndices[i] = raw->countPolygonIndices[i];
-			myIndexBuffers[i] = ::CreateBufferResource(device, cmdlist, raw->m_ppnSubSetIndices[i], sizeof(UINT) * countPolygonIndices[i], D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &myUploadingIndexBuffer[i]);
+			myIndexBuffers[i] = ::CreateBufferResource(device, cmdlist, raw->indexByPolygons[i], sizeof(UINT) * countPolygonIndices[i], D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &myUploadingIndexBuffer[i]);
 
 			myIndexBufferViews[i].BufferLocation = myIndexBuffers[i]->GetGPUVirtualAddress();
 			myIndexBufferViews[i].Format = DXGI_FORMAT_R32_UINT;
@@ -211,7 +211,7 @@ CMaterialMesh::CMaterialMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMes
 		for (int i = 0; i < countPolygons; i++)
 		{
 			countPolygonIndices[i] = raw->countPolygonIndices[i];
-			myIndexBuffers[i] = ::CreateBufferResource(device, cmdlist, raw->m_ppnSubSetIndices[i], sizeof(UINT) * countPolygonIndices[i], D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &myUploadingIndexBuffer[i]);
+			myIndexBuffers[i] = ::CreateBufferResource(device, cmdlist, raw->indexByPolygons[i], sizeof(UINT) * countPolygonIndices[i], D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &myUploadingIndexBuffer[i]);
 
 			myIndexBufferViews[i].BufferLocation = myIndexBuffers[i]->GetGPUVirtualAddress();
 			myIndexBufferViews[i].Format = DXGI_FORMAT_R32_UINT;

@@ -52,10 +52,10 @@ RawMesh* Model::LoadRawMesh(FILE* pInFile)
 
 	int nPositions = 0, nColors = 0, nNormals = 0, nIndices = 0, nSubMeshes = 0, nSubIndices = 0;
 
-	RawMesh* pMeshInfo = new RawMesh;
+	RawMesh* raw_mesh = new RawMesh;
 
-	pMeshInfo->m_nVertices = ::ReadIntegerFromFile(pInFile);
-	::ReadStringFromFile(pInFile, pMeshInfo->m_pstrMeshName);
+	raw_mesh->m_nVertices = ::ReadIntegerFromFile(pInFile);
+	::ReadStringFromFile(pInFile, raw_mesh->m_pstrMeshName);
 
 	for (; ; )
 	{
@@ -63,17 +63,17 @@ RawMesh* Model::LoadRawMesh(FILE* pInFile)
 
 		if (!strcmp(token, "<Bounds>:"))
 		{
-			nReads = (UINT)::fread(&(pMeshInfo->m_xmf3AABBCenter), sizeof(XMFLOAT3), 1, pInFile);
-			nReads = (UINT)::fread(&(pMeshInfo->m_xmf3AABBExtents), sizeof(XMFLOAT3), 1, pInFile);
+			nReads = (UINT)::fread(&(raw_mesh->m_xmf3AABBCenter), sizeof(XMFLOAT3), 1, pInFile);
+			nReads = (UINT)::fread(&(raw_mesh->m_xmf3AABBExtents), sizeof(XMFLOAT3), 1, pInFile);
 		}
 		else if (!strcmp(token, "<Positions>:"))
 		{
 			nPositions = ::ReadIntegerFromFile(pInFile);
 			if (nPositions > 0)
 			{
-				pMeshInfo->m_nType |= VERTEXT_POSITION;
-				pMeshInfo->m_pxmf3Positions = new XMFLOAT3[nPositions];
-				nReads = (UINT)::fread(pMeshInfo->m_pxmf3Positions, sizeof(XMFLOAT3), nPositions, pInFile);
+				raw_mesh->m_nType |= VERTEXT_POSITION;
+				raw_mesh->m_pxmf3Positions = new XMFLOAT3[nPositions];
+				nReads = (UINT)::fread(raw_mesh->m_pxmf3Positions, sizeof(XMFLOAT3), nPositions, pInFile);
 			}
 		}
 		else if (!strcmp(token, "<Colors>:"))
@@ -81,9 +81,9 @@ RawMesh* Model::LoadRawMesh(FILE* pInFile)
 			nColors = ::ReadIntegerFromFile(pInFile);
 			if (nColors > 0)
 			{
-				pMeshInfo->m_nType |= VERTEXT_COLOR;
-				pMeshInfo->m_pxmf4Colors = new XMFLOAT4[nColors];
-				nReads = (UINT)::fread(pMeshInfo->m_pxmf4Colors, sizeof(XMFLOAT4), nColors, pInFile);
+				raw_mesh->m_nType |= VERTEXT_COLOR;
+				raw_mesh->m_pxmf4Colors = new XMFLOAT4[nColors];
+				nReads = (UINT)::fread(raw_mesh->m_pxmf4Colors, sizeof(XMFLOAT4), nColors, pInFile);
 			}
 		}
 		else if (!strcmp(token, "<Normals>:"))
@@ -91,9 +91,9 @@ RawMesh* Model::LoadRawMesh(FILE* pInFile)
 			nNormals = ::ReadIntegerFromFile(pInFile);
 			if (nNormals > 0)
 			{
-				pMeshInfo->m_nType |= VERTEXT_NORMAL;
-				pMeshInfo->m_pxmf3Normals = new XMFLOAT3[nNormals];
-				nReads = (UINT)::fread(pMeshInfo->m_pxmf3Normals, sizeof(XMFLOAT3), nNormals, pInFile);
+				raw_mesh->m_nType |= VERTEXT_NORMAL;
+				raw_mesh->m_pxmf3Normals = new XMFLOAT3[nNormals];
+				nReads = (UINT)::fread(raw_mesh->m_pxmf3Normals, sizeof(XMFLOAT3), nNormals, pInFile);
 			}
 		}
 		else if (!strcmp(token, "<Indices>:"))
@@ -101,28 +101,28 @@ RawMesh* Model::LoadRawMesh(FILE* pInFile)
 			nIndices = ::ReadIntegerFromFile(pInFile);
 			if (nIndices > 0)
 			{
-				pMeshInfo->m_pnIndices = new UINT[nIndices];
-				nReads = (UINT)::fread(pMeshInfo->m_pnIndices, sizeof(int), nIndices, pInFile);
+				raw_mesh->m_pnIndices = new UINT[nIndices];
+				nReads = (UINT)::fread(raw_mesh->m_pnIndices, sizeof(int), nIndices, pInFile);
 			}
 		}
 		else if (!strcmp(token, "<SubMeshes>:"))
 		{
-			pMeshInfo->countPolygons = ::ReadIntegerFromFile(pInFile);
-			if (pMeshInfo->countPolygons > 0)
+			raw_mesh->countPolygons = ReadIntegerFromFile(pInFile);
+			if (raw_mesh->countPolygons > 0)
 			{
-				pMeshInfo->countPolygonIndices = new int[pMeshInfo->countPolygons];
-				pMeshInfo->m_ppnSubSetIndices = new UINT * [pMeshInfo->countPolygons];
-				for (int i = 0; i < pMeshInfo->countPolygons; i++)
+				raw_mesh->countPolygonIndices = new int[raw_mesh->countPolygons];
+				raw_mesh->indexByPolygons = new UINT * [raw_mesh->countPolygons];
+				for (int i = 0; i < raw_mesh->countPolygons; i++)
 				{
-					::ReadStringFromFile(pInFile, token);
+					ReadStringFromFile(pInFile, token);
 					if (!strcmp(token, "<SubMesh>:"))
 					{
 						int nIndex = ::ReadIntegerFromFile(pInFile);
-						pMeshInfo->countPolygonIndices[i] = ::ReadIntegerFromFile(pInFile);
-						if (pMeshInfo->countPolygonIndices[i] > 0)
+						raw_mesh->countPolygonIndices[i] = ReadIntegerFromFile(pInFile);
+						if (raw_mesh->countPolygonIndices[i] > 0)
 						{
-							pMeshInfo->m_ppnSubSetIndices[i] = new UINT[pMeshInfo->countPolygonIndices[i]];
-							nReads = (UINT)::fread(pMeshInfo->m_ppnSubSetIndices[i], sizeof(int), pMeshInfo->countPolygonIndices[i], pInFile);
+							raw_mesh->indexByPolygons[i] = new UINT[raw_mesh->countPolygonIndices[i]];
+							nReads = (UINT)::fread(raw_mesh->indexByPolygons[i], sizeof(int), raw_mesh->countPolygonIndices[i], pInFile);
 						}
 
 					}
@@ -134,7 +134,7 @@ RawMesh* Model::LoadRawMesh(FILE* pInFile)
 			break;
 		}
 	}
-	return(pMeshInfo);
+	return(raw_mesh);
 }
 
 std::vector<RawMaterial*> Model::LoadRawMaterials(ID3D12Device* device, ID3D12GraphicsCommandList* cmdlist, FILE* pInFile)
