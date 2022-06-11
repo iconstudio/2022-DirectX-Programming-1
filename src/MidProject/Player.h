@@ -42,7 +42,6 @@ public:
 
 	virtual void Awake(P3DDevice device, P3DGrpCommandList cmdlist) override;
 	virtual void Update(float fTimeElapsed) override;
-	virtual void UpdateTransform(const XMFLOAT4X4* parent) override;
 	virtual void PrepareRendering(P3DGrpCommandList cmdlist) const override;
 	virtual void Render(P3DGrpCommandList cmdlist, GameCamera* camera = NULL) const override;
 	virtual void ReleaseUniforms() override;
@@ -94,19 +93,17 @@ public:
 class CAirplanePlayer : public CPlayer
 {
 public:
-	CAirplanePlayer(P3DDevice device, P3DGrpCommandList cmdlist, P3DSignature signature);
+	CAirplanePlayer();
 	virtual ~CAirplanePlayer();
 
 	void Awake(P3DDevice device, P3DGrpCommandList cmdlist) override;
 	void Update(float delta_time) override;
-	void PrepareRendering(P3DGrpCommandList cmdlist) const override;
 
 	virtual GameCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 
 private:
 	GameObject* m_pMainRotorFrame = NULL;
 	GameObject* m_pTailRotorFrame = NULL;
-
 };
 
 

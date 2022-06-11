@@ -166,6 +166,22 @@ void CPlayer::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 
 void CPlayer::Update(float fTimeElapsed)
 {
+	localTransform._11 = m_xmf3Right.x;
+	localTransform._12 = m_xmf3Right.y;
+	localTransform._13 = m_xmf3Right.z;
+
+	localTransform._21 = m_xmf3Up.x;
+	localTransform._22 = m_xmf3Up.y;
+	localTransform._23 = m_xmf3Up.z;
+
+	localTransform._31 = m_xmf3Look.x;
+	localTransform._32 = m_xmf3Look.y;
+	localTransform._33 = m_xmf3Look.z;
+
+	localTransform._41 = m_xmf3Position.x;
+	localTransform._42 = m_xmf3Position.y;
+	localTransform._43 = m_xmf3Position.z;
+
 	GameObject::Update(fTimeElapsed);
 
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
@@ -217,27 +233,6 @@ void CPlayer::Update(float fTimeElapsed)
 	float fDeceleration = (m_fFriction * fTimeElapsed);
 	if (fDeceleration > fLength) fDeceleration = fLength;
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
-}
-
-void CPlayer::UpdateTransform(const XMFLOAT4X4* parent)
-{
-	localTransform._11 = m_xmf3Right.x;
-	localTransform._12 = m_xmf3Right.y;
-	localTransform._13 = m_xmf3Right.z;
-
-	localTransform._21 = m_xmf3Up.x;
-	localTransform._22 = m_xmf3Up.y;
-	localTransform._23 = m_xmf3Up.z;
-
-	localTransform._31 = m_xmf3Look.x;
-	localTransform._32 = m_xmf3Look.y;
-	localTransform._33 = m_xmf3Look.z;
-
-	localTransform._41 = m_xmf3Position.x;
-	localTransform._42 = m_xmf3Position.y;
-	localTransform._43 = m_xmf3Position.z;
-
-	GameObject::UpdateTransform(parent);
 }
 
 void CPlayer::PrepareRendering(P3DGrpCommandList cmdlist) const
@@ -401,7 +396,7 @@ void CAirplanePlayer::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	CPlayer::Awake(device, cmdlist);
 }
 
-CAirplanePlayer::CAirplanePlayer(P3DDevice device, P3DGrpCommandList cmdlist, P3DSignature signature)
+CAirplanePlayer::CAirplanePlayer()
 	: CPlayer()
 {
 	myCamera = ChangeCamera(THIRD_PERSON_CAMERA, 10.0f);
@@ -428,11 +423,6 @@ void CAirplanePlayer::Update(float delta_time)
 	}
 
 	CPlayer::Update(delta_time);
-}
-
-void CAirplanePlayer::PrepareRendering(P3DGrpCommandList cmdlist) const
-{
-	CPlayer::PrepareRendering(cmdlist);
 }
 
 GameCamera* CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)

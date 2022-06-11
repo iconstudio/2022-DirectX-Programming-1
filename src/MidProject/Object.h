@@ -16,11 +16,15 @@ public:
 	void BuildCollider();
 
 	virtual void Awake(P3DDevice device, P3DGrpCommandList cmdlist);
-	void Animate(float time_elapsed, XMFLOAT4X4* parent = nullptr);
-	void Animate(float time_elapsed, XMFLOAT4X4* parent = nullptr);
-	virtual void Update(float time_elapsed);
-	virtual void UpdateTransform(const XMFLOAT4X4* parent);
-	void EnumerateTransforms(const XMFLOAT4X4* parent);
+	void Animate(float delta_time);
+	void Animate(float delta_time, const XMFLOAT4X4& parent);
+	virtual void Update(float delta_time);
+	void UpdateTransform();
+	void UpdateTransform(const XMFLOAT4X4& parent);
+	void UpdateTransform(XMFLOAT4X4&& parent);
+	void EnumerateTransforms();
+	void EnumerateTransforms(const XMFLOAT4X4& parent);
+	void EnumerateTransforms(XMFLOAT4X4&& parent);
 	void UpdateCollider();
 	virtual void PrepareRendering(P3DGrpCommandList cmdlist) const;
 	virtual void Render(P3DGrpCommandList cmdlist, GameCamera* camera = NULL) const;

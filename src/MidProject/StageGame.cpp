@@ -292,7 +292,8 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	auto& illuminated_pipeline = Pipeline::illuminatedShader;
 	auto signature = illuminated_pipeline->GetRootSignature();
 
-	auto player = new CAirplanePlayer(d3dDevice, d3dTaskList, signature);
+	auto player = new CAirplanePlayer();
+	player->Awake(d3dDevice, d3dTaskList);
 	player->Attach(model_rallycar.get());
 	player->SetOriginalCollider(collider_car);
 	player->BuildCollider();

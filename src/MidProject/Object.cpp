@@ -78,7 +78,28 @@ void GameObject::BuildCollider()
 void GameObject::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {}
 
-void GameObject::Animate(float delta_time, XMFLOAT4X4* parent)
+void GameObject::Animate(float delta_time)
+{
+	Update(delta_time);
+
+	if (isTransformModified)
+	{
+		EnumerateTransforms();
+		isTransformModified = false;
+	}
+
+	if (mySibling)
+	{
+		mySibling->Animate(delta_time);
+	}
+
+	if (myChild)
+	{
+		myChild->Animate(delta_time, worldTransform);
+	}
+}
+
+void GameObject::Animate(float delta_time, const XMFLOAT4X4& parent)
 {
 	Update(delta_time);
 
@@ -95,31 +116,72 @@ void GameObject::Animate(float delta_time, XMFLOAT4X4* parent)
 
 	if (myChild)
 	{
-		myChild->Animate(delta_time, &worldTransform);
+		myChild->Animate(delta_time, worldTransform);
 	}
 }
 
 void GameObject::Update(float delta_time)
-{}
+{
+	// 
+}
 
-void GameObject::EnumerateTransforms(const XMFLOAT4X4* parent)
+void GameObject::UpdateTransform()
+{
+	worldTransform = localTransform;
+}
+
+void GameObject::UpdateTransform(const XMFLOAT4X4& parent)
+{
+	worldTransform = Matrix4x4::Multiply(localTransform, parent);
+}
+
+void GameObject::UpdateTransform(XMFLOAT4X4&& parent)
+{
+	worldTransform = Matrix4x4::Multiply(localTransform, std::forward<XMFLOAT4X4>(parent));
+}
+
+void GameObject::EnumerateTransforms()
+{
+	UpdateTransform();
+	UpdateCollider();
+
+	if (mySibling)
+	{
+		mySibling->EnumerateTransforms();
+	}
+	if (myChild)
+	{
+		myChild->EnumerateTransforms(worldTransform);
+	}
+}
+
+void GameObject::EnumerateTransforms(const XMFLOAT4X4& parent)
 {
 	UpdateTransform(parent);
 	UpdateCollider();
 
-	if (mySibling) mySibling->EnumerateTransforms(parent);
-	if (myChild) myChild->EnumerateTransforms(&worldTransform);
+	if (mySibling)
+	{
+		mySibling->EnumerateTransforms(parent);
+	}
+	if (myChild)
+	{
+		myChild->EnumerateTransforms(worldTransform);
+	}
 }
 
-void GameObject::UpdateTransform(const XMFLOAT4X4* parent)
+void GameObject::EnumerateTransforms(XMFLOAT4X4&& parent)
 {
-	if (parent)
+	UpdateTransform(std::forward<XMFLOAT4X4>(parent));
+	UpdateCollider();
+
+	if (mySibling)
 	{
-		worldTransform = Matrix4x4::Multiply(localTransform, *parent);
+		mySibling->EnumerateTransforms(std::forward<XMFLOAT4X4>(parent));
 	}
-	else
+	if (myChild)
 	{
-		worldTransform = localTransform;
+		myChild->EnumerateTransforms(worldTransform);
 	}
 }
 

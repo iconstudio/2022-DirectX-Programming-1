@@ -62,7 +62,7 @@ void IlluminatedScene::Update(float delta_time)
 
 	if (myPlayer)
 	{
-		myPlayer->Animate(delta_time, nullptr);
+		myPlayer->Animate(delta_time);
 
 		if (myLights)
 		{
@@ -72,8 +72,6 @@ void IlluminatedScene::Update(float delta_time)
 
 		for (auto& instance : myInstances)
 		{
-			instance->Animate(delta_time, nullptr);
-
 			if (myPlayer->CheckCollisionWith(instance.get()))
 			{
 				myPlayer->CollideWith(instance.get());
@@ -114,7 +112,7 @@ void IlluminatedScene::Render()
 
 	for (auto& instance : myInstances)
 	{
-		instance->EnumerateTransforms(nullptr);
+		instance->EnumerateTransforms();
 		instance->Render(d3dTaskList, myCamera);
 	}
 

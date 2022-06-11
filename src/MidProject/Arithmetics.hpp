@@ -287,6 +287,7 @@ namespace Matrix4x4
 
 		return result;
 	}
+
 	inline XMFLOAT4X4 Multiply(const XMFLOAT4X4& lhs, const XMMATRIX& rhs)
 	{
 		XMFLOAT4X4 result{};
