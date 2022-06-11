@@ -1,38 +1,46 @@
-// stdafx.cpp : 표준 포함 파일만 들어 있는 소스 파일입니다.
-// LabProject03-1.pch는 미리 컴파일된 헤더가 됩니다.
-// stdafx.obj에는 미리 컴파일된 형식 정보가 포함됩니다.
-
 #include "pch.hpp"
+#include "stdafx.h"
 
 UINT gnCbvSrvDescriptorIncrementSize = 32;
 
 int ReadIntegerFromFile(FILE* file)
 {
-	int nValue = 0;
-	UINT nReads = (UINT)::fread(&nValue, sizeof(int), 1, file);
-	return(nValue);
+	int result{};
+	if (file)
+	{
+		fread(&result, sizeof(int), 1, file);
+	}
+	return result;
 }
 
 float ReadFloatFromFile(FILE* file)
 {
-	float fValue = 0;
-	UINT nReads = (UINT)::fread(&fValue, sizeof(float), 1, file);
-	return(fValue);
+	float result{};
+	if (file)
+	{
+		fread(&result, sizeof(float), 1, file);
+	}
+	return result;
 }
 
 BYTE ReadStringFromFile(FILE* file, char* token)
 {
-	BYTE nStrLength = 0;
-	UINT nReads = 0;
-	nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, file);
-	nReads = (UINT)::fread(token, sizeof(char), nStrLength, file);
-	token[nStrLength] = '\0';
+	BYTE chr_count = 0;
+	if (file)
+	{
+		fread(&chr_count, sizeof(BYTE), 1, file);
+		if (token && 0 < chr_count)
+		{
+			fread(token, sizeof(char), chr_count, file);
+			token[chr_count] = '\0';
+		}
+	}
 
-	return(nStrLength);
+	return chr_count;
 }
 
 ID3D12Resource* CreateBufferResource(P3DDevice device, P3DGrpCommandList cmdlist
-	, void* data, UINT data_sz
+	, const void* data, UINT data_sz
 	, D3D12_HEAP_TYPE type
 	, D3D12_RESOURCE_STATES states
 	, ID3D12Resource** upload_buffer)
@@ -41,8 +49,6 @@ ID3D12Resource* CreateBufferResource(P3DDevice device, P3DGrpCommandList cmdlist
 
 	// 모든 것을 다렉에서 알아서 해주는 힙
 	D3D12_HEAP_PROPERTIES heap_property{};
-	ZeroMemory(&heap_property, sizeof(heap_property));
-
 	heap_property.Type = type;
 	heap_property.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
 	heap_property.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
@@ -50,8 +56,6 @@ ID3D12Resource* CreateBufferResource(P3DDevice device, P3DGrpCommandList cmdlist
 	heap_property.VisibleNodeMask = 1;
 
 	D3D12_RESOURCE_DESC res_desc{};
-	ZeroMemory(&res_desc, sizeof(res_desc));
-
 	res_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
 	res_desc.Alignment = 0;
 	res_desc.Width = data_sz;
@@ -95,8 +99,6 @@ ID3D12Resource* CreateBufferResource(P3DDevice device, P3DGrpCommandList cmdlist
 					heap_property.Type = D3D12_HEAP_TYPE_UPLOAD;
 
 					D3D12_CLEAR_VALUE clear_value{};
-					ZeroMemory(&clear_value, sizeof(clear_value));
-
 					clear_value.Format = DXGI_FORMAT_UNKNOWN;
 
 					uuid = __uuidof(ID3D12Resource);
@@ -137,9 +139,7 @@ ID3D12Resource* CreateBufferResource(P3DDevice device, P3DGrpCommandList cmdlist
 					cmdlist->CopyResource(result, *upload_buffer);
 
 					// 복사가 끝날 때 까지 접근 금지
-					D3D12_RESOURCE_BARRIER barrier;
-					ZeroMemory(&barrier, sizeof(barrier));
-
+					D3D12_RESOURCE_BARRIER barrier{};
 					barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 					barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 					barrier.Transition.pResource = result;

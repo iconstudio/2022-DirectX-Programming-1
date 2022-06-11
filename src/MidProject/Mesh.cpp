@@ -38,9 +38,9 @@ CMesh::~CMesh()
 		delete[] myIndexBufferViews;
 	}
 
-	if (countPolygonIndices)
+	//if (countPolygonIndices)
 	{
-		delete[] countPolygonIndices;
+	//	delete[] countPolygonIndices;
 	}
 }
 
@@ -68,7 +68,8 @@ void CMesh::Render(P3DGrpCommandList cmdlist, int polygon_index) const
 	if (0 < countPolygons && polygon_index < countPolygons)
 	{
 		cmdlist->IASetIndexBuffer(&(myIndexBufferViews[polygon_index]));
-		cmdlist->DrawIndexedInstanced(countPolygonIndices[polygon_index], 1, 0, 0, 0);
+		PolygonAt(polygon_index).Render(cmdlist);
+		//cmdlist->DrawIndexedInstanced(countPolygonIndices[polygon_index], 1, 0, 0, 0);
 	}
 	else
 	{
@@ -100,6 +101,16 @@ void CMesh::ReleaseUploadBuffers()
 		delete[] myUploadingIndexBuffer;
 		myUploadingIndexBuffer = nullptr;
 	}
+}
+
+const CPolygon& CMesh::PolygonAt(const size_t index) const
+{
+	return myPolygons.at(index);
+}
+
+CPolygon& CMesh::PolygonAt(const size_t index)
+{
+	return myPolygons.at(index);
 }
 
 UINT CMesh::GetType() const
@@ -141,20 +152,33 @@ CDiffusedMesh::CDiffusedMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMes
 	countPolygons = raw->countPolygons;
 	if (countPolygons > 0)
 	{
+		// 통째로 복사
+		myPolygons = raw->myPolygons;
+
 		myIndexBuffers = new ID3D12Resource * [countPolygons];
 		myUploadingIndexBuffer = new ID3D12Resource * [countPolygons];
 		myIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[countPolygons];
 
-		countPolygonIndices = new int[countPolygons];
+		//countPolygonIndices = new int[countPolygons];
 
 		for (int i = 0; i < countPolygons; i++)
 		{
-			countPolygonIndices[i] = raw->countPolygonIndices[i];
-			myIndexBuffers[i] = ::CreateBufferResource(device, cmdlist, raw->indexByPolygons[i], sizeof(UINT) * countPolygonIndices[i], D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &myUploadingIndexBuffer[i]);
+			const auto& polygon = myPolygons.at(i);
+			const auto index_count = polygon.GetSize();
+			const auto indice_size = sizeof(UINT) * index_count;
+			const auto indice_blob = reinterpret_cast<const void*>(polygon.GetData());
+
+			// countPolygonIndices[i] = raw->countPolygonIndices[i];
+			// raw->indexByPolygons[i]
+			myIndexBuffers[i] = CreateBufferResource(device, cmdlist
+				, indice_blob, indice_size
+				, D3D12_HEAP_TYPE_DEFAULT
+				, D3D12_RESOURCE_STATE_INDEX_BUFFER
+				, &myUploadingIndexBuffer[i]);
 
 			myIndexBufferViews[i].BufferLocation = myIndexBuffers[i]->GetGPUVirtualAddress();
 			myIndexBufferViews[i].Format = DXGI_FORMAT_R32_UINT;
-			myIndexBufferViews[i].SizeInBytes = sizeof(UINT) * raw->countPolygonIndices[i];
+			myIndexBufferViews[i].SizeInBytes = indice_size;
 		}
 	}
 }
@@ -188,7 +212,8 @@ void CDiffusedMesh::PrepareRender(P3DGrpCommandList cmdlist) const
 }
 
 CMaterialMesh::CMaterialMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw)
-	: myDefaultMaterial(nullptr), myMaterials()
+	: CMesh()
+	, myDefaultMaterial(nullptr), myMaterials()
 {
 	m_nVertices = raw->m_nVertices;
 	m_nType = raw->m_nType;
@@ -200,22 +225,35 @@ CMaterialMesh::CMaterialMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMes
 	myPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
 
 	countPolygons = raw->countPolygons;
-	if (countPolygons > 0)
+	if (0 < countPolygons)
 	{
-		myIndexBuffers = new ID3D12Resource * [countPolygons];
-		myUploadingIndexBuffer = new ID3D12Resource * [countPolygons];
+		// 통째로 복사
+		myPolygons = raw->myPolygons;
+
+		myIndexBuffers = new ID3D12Resource*[countPolygons];
+		myUploadingIndexBuffer = new ID3D12Resource*[countPolygons];
 		myIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[countPolygons];
 
-		countPolygonIndices = new int[countPolygons];
+		//countPolygonIndices = new int[countPolygons];
 
 		for (int i = 0; i < countPolygons; i++)
 		{
-			countPolygonIndices[i] = raw->countPolygonIndices[i];
-			myIndexBuffers[i] = ::CreateBufferResource(device, cmdlist, raw->indexByPolygons[i], sizeof(UINT) * countPolygonIndices[i], D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &myUploadingIndexBuffer[i]);
+			const auto& polygon = myPolygons.at(i);
+			const auto index_count = polygon.GetSize();
+			const auto indice_size = sizeof(UINT) * index_count;
+			const auto indice_blob = reinterpret_cast<const void*>(polygon.GetData());
+
+			// countPolygonIndices[i] = raw->countPolygonIndices[i];
+			// raw->indexByPolygons[i]
+			myIndexBuffers[i] = CreateBufferResource(device, cmdlist
+				, indice_blob, indice_size
+				, D3D12_HEAP_TYPE_DEFAULT
+				, D3D12_RESOURCE_STATE_INDEX_BUFFER
+				, &myUploadingIndexBuffer[i]);
 
 			myIndexBufferViews[i].BufferLocation = myIndexBuffers[i]->GetGPUVirtualAddress();
 			myIndexBufferViews[i].Format = DXGI_FORMAT_R32_UINT;
-			myIndexBufferViews[i].SizeInBytes = sizeof(UINT) * raw->countPolygonIndices[i];
+			myIndexBufferViews[i].SizeInBytes = indice_size;
 		}
 	}
 }
@@ -386,7 +424,8 @@ void CLightenMesh::Render(P3DGrpCommandList cmdlist, int polygon_index) const
 	if (0 < countPolygons && polygon_index < countPolygons)
 	{
 		cmdlist->IASetIndexBuffer(&(myIndexBufferViews[polygon_index]));
-		cmdlist->DrawIndexedInstanced(countPolygonIndices[polygon_index], 1, 0, 0, 0);
+		PolygonAt(polygon_index).Render(cmdlist);
+		//cmdlist->DrawIndexedInstanced(countPolygonIndices[polygon_index],1, 0, 0, 0);
 	}
 	else
 	{

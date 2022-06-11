@@ -12,15 +12,30 @@ RawMesh::~RawMesh()
 
 	if (m_pnIndices) delete[] m_pnIndices;
 
-	if (countPolygonIndices) delete[] countPolygonIndices;
+	//if (countPolygonIndices) delete[] countPolygonIndices;
 
 	for (int i = 0; i < countPolygons; i++)
 	{
-		if (indexByPolygons[i])
+		//if (indexByPolygons[i])
 		{
-			delete[] indexByPolygons[i];
+		//	delete[] indexByPolygons[i];
 		}
 	}
 
-	if (indexByPolygons) delete[] indexByPolygons;
+	//if (indexByPolygons) delete[] indexByPolygons;
+}
+
+void RawMesh::ReservePolygons(const size_t count)
+{
+	myPolygons.resize(count);
+}
+
+const CPolygon& RawMesh::PolygonAt(const size_t index) const
+{
+	return myPolygons.at(index);
+}
+
+CPolygon& RawMesh::PolygonAt(const size_t index)
+{
+	return myPolygons.at(index);
 }

@@ -9,11 +9,14 @@ public:
 	CMesh();
 	virtual ~CMesh();
 
+	virtual void ReleaseUploadBuffers();
+
+	const CPolygon& PolygonAt(const size_t index) const;
+	CPolygon& PolygonAt(const size_t index);
+
 	virtual void PrepareRender(P3DGrpCommandList cmdlist) const;
 	virtual void Render(P3DGrpCommandList cmdlist) const;
 	virtual void Render(P3DGrpCommandList cmdlist, int polygon_index) const;
-
-	virtual void ReleaseUploadBuffers();
 
 	UINT GetType() const;
 
@@ -31,7 +34,8 @@ protected:
 	ID3D12Resource* myUploadingPositonBuffer;
 
 	int countPolygons = 0;
-	int* countPolygonIndices = NULL;
+	//int* countPolygonIndices = NULL;
+	std::vector<CPolygon> myPolygons;
 
 	ID3D12Resource** myIndexBuffers = NULL;
 	D3D12_INDEX_BUFFER_VIEW* myIndexBufferViews = NULL;

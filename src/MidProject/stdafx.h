@@ -107,7 +107,7 @@ BYTE ReadStringFromFile(FILE* file, char* token);
 
 extern ID3D12Resource* CreateBufferResource(P3DDevice device
 	, P3DGrpCommandList cmdlist
-	, void* origin_data, UINT origin_size
+	, const void* origin_data, UINT origin_size
 	, D3D12_HEAP_TYPE heap_type = D3D12_HEAP_TYPE_UPLOAD
 	, D3D12_RESOURCE_STATES state = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
 	, ID3D12Resource** buffer = NULL);
