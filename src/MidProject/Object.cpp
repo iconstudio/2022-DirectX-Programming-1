@@ -78,28 +78,28 @@ void GameObject::BuildCollider()
 void GameObject::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {}
 
-void GameObject::Animate(float time_elapsed, XMFLOAT4X4* parent)
+void GameObject::Animate(float delta_time, XMFLOAT4X4* parent)
 {
+	Update(delta_time);
+
 	if (isTransformModified)
 	{
 		EnumerateTransforms(parent);
 		isTransformModified = false;
 	}
 
-	Update(time_elapsed);
-
 	if (mySibling)
 	{
-		mySibling->Animate(time_elapsed, parent);
+		mySibling->Animate(delta_time, parent);
 	}
 
 	if (myChild)
 	{
-		myChild->Animate(time_elapsed, &worldTransform);
+		myChild->Animate(delta_time, &worldTransform);
 	}
 }
 
-void GameObject::Update(float time_elapsed)
+void GameObject::Update(float delta_time)
 {}
 
 void GameObject::EnumerateTransforms(const XMFLOAT4X4* parent)
@@ -403,11 +403,11 @@ CRotatingObject::CRotatingObject()
 CRotatingObject::~CRotatingObject()
 {}
 
-void CRotatingObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+void CRotatingObject::Update(float delta_time)
 {
-	GameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
+	GameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * delta_time);
 
-	GameObject::Animate(fTimeElapsed, pxmf4x4Parent);
+	GameObject::Update(delta_time);
 }
 
 CRevolvingObject::CRevolvingObject()
@@ -419,12 +419,12 @@ CRevolvingObject::CRevolvingObject()
 CRevolvingObject::~CRevolvingObject()
 {}
 
-void CRevolvingObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+void CRevolvingObject::Update(float delta_time)
 {
-	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3RevolutionAxis), XMConvertToRadians(m_fRevolutionSpeed * fTimeElapsed));
+	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3RevolutionAxis), XMConvertToRadians(m_fRevolutionSpeed * delta_time));
 	localTransform = Matrix4x4::Multiply(localTransform, mtxRotate);
 
-	GameObject::Animate(fTimeElapsed, pxmf4x4Parent);
+	GameObject::Update(delta_time);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -435,23 +435,24 @@ CHellicopterObject::CHellicopterObject()
 CHellicopterObject::~CHellicopterObject()
 {}
 
-void CHellicopterObject::Awake()
+void CHellicopterObject::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {}
 
-void CHellicopterObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+void CHellicopterObject::Update(float delta_time)
 {
 	if (m_pMainRotorFrame)
 	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
+		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * delta_time);
 		m_pMainRotorFrame->localTransform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->localTransform);
 	}
+
 	if (m_pTailRotorFrame)
 	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
+		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * delta_time);
 		m_pTailRotorFrame->localTransform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->localTransform);
 	}
 
-	GameObject::Animate(fTimeElapsed, pxmf4x4Parent);
+	GameObject::Update(delta_time);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -462,26 +463,26 @@ CApacheObject::CApacheObject()
 CApacheObject::~CApacheObject()
 {}
 
-void CApacheObject::Awake()
+void CApacheObject::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
 	m_pMainRotorFrame = FindFrame("rotor");
 	m_pTailRotorFrame = FindFrame("black_m_7");
 }
 
-void CApacheObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+void CApacheObject::Update(float delta_time)
 {
 	if (m_pMainRotorFrame)
 	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
+		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * delta_time);
 		m_pMainRotorFrame->localTransform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->localTransform);
 	}
 	if (m_pTailRotorFrame)
 	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
+		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 4.0f) * delta_time);
 		m_pTailRotorFrame->localTransform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->localTransform);
 	}
 
-	GameObject::Animate(fTimeElapsed, pxmf4x4Parent);
+	GameObject::Update(delta_time);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -492,7 +493,7 @@ CSuperCobraObject::CSuperCobraObject()
 CSuperCobraObject::~CSuperCobraObject()
 {}
 
-void CSuperCobraObject::Awake()
+void CSuperCobraObject::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
 	m_pMainRotorFrame = FindFrame("MainRotor_LOD0");
 	m_pTailRotorFrame = FindFrame("TailRotor_LOD0");
@@ -506,7 +507,7 @@ CGunshipObject::CGunshipObject()
 CGunshipObject::~CGunshipObject()
 {}
 
-void CGunshipObject::Awake()
+void CGunshipObject::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
 	m_pMainRotorFrame = FindFrame("Rotor");
 	m_pTailRotorFrame = FindFrame("Back_Rotor");
@@ -520,7 +521,7 @@ CMi24Object::CMi24Object()
 CMi24Object::~CMi24Object()
 {}
 
-void CMi24Object::Awake()
+void CMi24Object::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
 	m_pMainRotorFrame = FindFrame("Top_Rotor");
 	m_pTailRotorFrame = FindFrame("Tail_Rotor");

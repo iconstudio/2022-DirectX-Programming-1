@@ -1,15 +1,6 @@
 #pragma once
 #include "Transformer.hpp"
 
-enum class COLLISION_TAGS
-{
-	NONE = 0,
-	ROCK,
-	TREE,
-	CAR,
-	PLAYER
-};
-
 class GameObject
 {
 public:
@@ -25,7 +16,8 @@ public:
 	void BuildCollider();
 
 	virtual void Awake(P3DDevice device, P3DGrpCommandList cmdlist);
-	virtual void Animate(float time_elapsed, XMFLOAT4X4* parent = nullptr);
+	void Animate(float time_elapsed, XMFLOAT4X4* parent = nullptr);
+	void Animate(float time_elapsed, XMFLOAT4X4* parent = nullptr);
 	virtual void Update(float time_elapsed);
 	virtual void UpdateTransform(const XMFLOAT4X4* parent);
 	void EnumerateTransforms(const XMFLOAT4X4* parent);
@@ -80,6 +72,15 @@ public:
 	unique_ptr<BoundingOrientedBox> myCollider;
 };
 
+enum class COLLISION_TAGS
+{
+	NONE = 0,
+	ROCK,
+	TREE,
+	CAR,
+	PLAYER
+};
+
 class CRotatingObject : public GameObject
 {
 public:
@@ -94,7 +95,7 @@ public:
 	void SetRotationSpeed(float fRotationSpeed) { m_fRotationSpeed = fRotationSpeed; }
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
 
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void Update(float delta_time) override;
 };
 
 class CRevolvingObject : public GameObject
@@ -104,14 +105,14 @@ public:
 	virtual ~CRevolvingObject();
 
 private:
-	XMFLOAT3					m_xmf3RevolutionAxis;
-	float						m_fRevolutionSpeed;
+	XMFLOAT3 m_xmf3RevolutionAxis;
+	float m_fRevolutionSpeed;
 
 public:
 	void SetRevolutionSpeed(float fRevolutionSpeed) { m_fRevolutionSpeed = fRevolutionSpeed; }
 	void SetRevolutionAxis(XMFLOAT3 xmf3RevolutionAxis) { m_xmf3RevolutionAxis = xmf3RevolutionAxis; }
 
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void Update(float delta_time) override;
 };
 
 class CHellicopterObject : public GameObject
@@ -120,13 +121,12 @@ public:
 	CHellicopterObject();
 	virtual ~CHellicopterObject();
 
+	virtual void Awake(P3DDevice device, P3DGrpCommandList cmdlist) override;
+	virtual void Update(float delta_time) override;
+
 protected:
 	GameObject* m_pMainRotorFrame = NULL;
 	GameObject* m_pTailRotorFrame = NULL;
-
-public:
-	virtual void Awake();
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 };
 
 class CApacheObject : public CHellicopterObject
@@ -136,8 +136,8 @@ public:
 	virtual ~CApacheObject();
 
 public:
-	virtual void Awake();
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void Awake(P3DDevice device, P3DGrpCommandList cmdlist) override;
+	virtual void Update(float delta_time) override;
 };
 
 class CGunshipObject : public CHellicopterObject
@@ -147,7 +147,7 @@ public:
 	virtual ~CGunshipObject();
 
 public:
-	virtual void Awake();
+	virtual void Awake(P3DDevice device, P3DGrpCommandList cmdlist) override;
 };
 
 class CSuperCobraObject : public CHellicopterObject
@@ -157,7 +157,7 @@ public:
 	virtual ~CSuperCobraObject();
 
 public:
-	virtual void Awake();
+	virtual void Awake(P3DDevice device, P3DGrpCommandList cmdlist) override;
 };
 
 class CMi24Object : public CHellicopterObject
@@ -167,10 +167,5 @@ public:
 	virtual ~CMi24Object();
 
 public:
-	virtual void Awake();
-};
-
-class GameMaterialObject : public GameObject
-{
-
+	virtual void Awake(P3DDevice device, P3DGrpCommandList cmdlist) override;
 };

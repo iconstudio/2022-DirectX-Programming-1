@@ -396,6 +396,11 @@ GameCamera* CPlayer::GetCamera()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CAirplanePlayer
 
+void CAirplanePlayer::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
+{
+	CPlayer::Awake(device, cmdlist);
+}
+
 CAirplanePlayer::CAirplanePlayer(P3DDevice device, P3DGrpCommandList cmdlist, P3DSignature signature)
 	: CPlayer()
 {
@@ -408,21 +413,21 @@ CAirplanePlayer::CAirplanePlayer(P3DDevice device, P3DGrpCommandList cmdlist, P3
 CAirplanePlayer::~CAirplanePlayer()
 {}
 
-void CAirplanePlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+void CAirplanePlayer::Update(float delta_time)
 {
 	if (m_pMainRotorFrame)
 	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
+		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * delta_time);
 		m_pMainRotorFrame->localTransform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->localTransform);
 	}
 
 	if (m_pTailRotorFrame)
 	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
+		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * delta_time);
 		m_pTailRotorFrame->localTransform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->localTransform);
 	}
 
-	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
+	CPlayer::Update(delta_time);
 }
 
 void CAirplanePlayer::PrepareRendering(P3DGrpCommandList cmdlist) const
