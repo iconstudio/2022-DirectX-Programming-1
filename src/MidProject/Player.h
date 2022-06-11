@@ -42,8 +42,9 @@ public:
 
 	virtual void Awake(P3DDevice device, P3DGrpCommandList cmdlist) override;
 	virtual void Update(float fTimeElapsed) override;
+	virtual void UpdateTransform(const XMFLOAT4X4* parent) override;
 	virtual void PrepareRendering(P3DGrpCommandList cmdlist) const override;
-	virtual void Render(P3DGrpCommandList cmdlist, GameCamera* pCamera = NULL) const override;
+	virtual void Render(P3DGrpCommandList cmdlist, GameCamera* camera = NULL) const override;
 	virtual void ReleaseUniforms() override;
 
 	virtual void CollideWith(GameObject* other) override;

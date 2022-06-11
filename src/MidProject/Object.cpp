@@ -87,8 +87,6 @@ void GameObject::Animate(float time_elapsed, XMFLOAT4X4* parent)
 		isTransformModified = false;
 	}
 
-	UpdateCollider(&worldTransform);
-
 	if (mySibling)
 	{
 		mySibling->Animate(time_elapsed, parent);
@@ -105,6 +103,15 @@ void GameObject::Update(float time_elapsed)
 
 void GameObject::EnumerateTransforms(const XMFLOAT4X4* parent)
 {
+	UpdateTransform(parent);
+	UpdateCollider();
+
+	if (mySibling) mySibling->EnumerateTransforms(parent);
+	if (myChild) myChild->EnumerateTransforms(&worldTransform);
+}
+
+void GameObject::UpdateTransform(const XMFLOAT4X4* parent)
+{
 	if (parent)
 	{
 		worldTransform = Matrix4x4::Multiply(localTransform, *parent);
@@ -113,18 +120,13 @@ void GameObject::EnumerateTransforms(const XMFLOAT4X4* parent)
 	{
 		worldTransform = localTransform;
 	}
-
-	UpdateCollider(&worldTransform);
-
-	if (mySibling) mySibling->EnumerateTransforms(parent);
-	if (myChild) myChild->EnumerateTransforms(&worldTransform);
 }
 
-void GameObject::UpdateCollider(const XMFLOAT4X4* mat)
+void GameObject::UpdateCollider()
 {
 	if (myCollider)
 	{
-		const auto float4x4 = DirectX::XMLoadFloat4x4(mat);
+		const auto float4x4 = DirectX::XMLoadFloat4x4(&worldTransform);
 
 		const auto& original_collider = staticCollider;
 		original_collider->Transform(*myCollider, float4x4);
@@ -170,6 +172,38 @@ void GameObject::Render(P3DGrpCommandList cmdlist, GameCamera* camera) const
 
 void GameObject::ReleaseUniforms()
 {}
+
+bool GameObject::CheckCollisionWith(GameObject* other) const
+{
+	const auto& other_collision = other->myCollider;
+	if (myCollider && other_collision)
+	{
+		return other_collision->Intersects(*myCollider);
+	}
+
+	return false;
+}
+
+void GameObject::CollideWith(GameObject* other)
+{
+	const auto& tag = other->GetTag();
+	switch (tag)
+	{
+		case COLLISION_TAGS::NONE:
+		{}
+		break;
+	}
+}
+
+void GameObject::OnTransformUpdate()
+{
+	isTransformModified = true;
+}
+
+constexpr COLLISION_TAGS GameObject::GetTag() const noexcept
+{
+	return COLLISION_TAGS::NONE;
+}
 
 void GameObject::SetPosition(float x, float y, float z)
 {
@@ -242,38 +276,6 @@ void GameObject::Rotate(XMFLOAT4* pxmf4Quaternion)
 	localTransform = Matrix4x4::Multiply(mtxRotate, localTransform);
 
 	OnTransformUpdate();
-}
-
-bool GameObject::CheckCollisionWith(GameObject* other) const
-{
-	const auto& other_collision = other->myCollider;
-	if (myCollider && other_collision)
-	{
-		return other_collision->Intersects(*myCollider);
-	}
-
-	return false;
-}
-
-void GameObject::CollideWith(GameObject* other)
-{
-	const auto& tag = other->GetTag();
-	switch (tag)
-	{
-		case COLLISION_TAGS::NONE:
-		{}
-		break;
-	}
-}
-
-void GameObject::OnTransformUpdate()
-{
-	isTransformModified = true;
-}
-
-constexpr COLLISION_TAGS GameObject::GetTag() const noexcept
-{
-	return COLLISION_TAGS::NONE;
 }
 
 XMFLOAT3 GameObject::GetPosition()

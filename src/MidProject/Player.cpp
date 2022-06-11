@@ -162,22 +162,6 @@ void CPlayer::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	{
 		myCamera->InitializeUniforms(device, cmdlist);
 	}
-
-	localTransform._11 = m_xmf3Right.x;
-	localTransform._12 = m_xmf3Right.y;
-	localTransform._13 = m_xmf3Right.z;
-
-	localTransform._21 = m_xmf3Up.x;
-	localTransform._22 = m_xmf3Up.y;
-	localTransform._23 = m_xmf3Up.z;
-
-	localTransform._31 = m_xmf3Look.x;
-	localTransform._32 = m_xmf3Look.y;
-	localTransform._33 = m_xmf3Look.z;
-
-	localTransform._41 = m_xmf3Position.x;
-	localTransform._42 = m_xmf3Position.y;
-	localTransform._43 = m_xmf3Position.z;
 }
 
 void CPlayer::Update(float fTimeElapsed)
@@ -233,6 +217,47 @@ void CPlayer::Update(float fTimeElapsed)
 	float fDeceleration = (m_fFriction * fTimeElapsed);
 	if (fDeceleration > fLength) fDeceleration = fLength;
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+}
+
+void CPlayer::UpdateTransform(const XMFLOAT4X4* parent)
+{
+	localTransform._11 = m_xmf3Right.x;
+	localTransform._12 = m_xmf3Right.y;
+	localTransform._13 = m_xmf3Right.z;
+
+	localTransform._21 = m_xmf3Up.x;
+	localTransform._22 = m_xmf3Up.y;
+	localTransform._23 = m_xmf3Up.z;
+
+	localTransform._31 = m_xmf3Look.x;
+	localTransform._32 = m_xmf3Look.y;
+	localTransform._33 = m_xmf3Look.z;
+
+	localTransform._41 = m_xmf3Position.x;
+	localTransform._42 = m_xmf3Position.y;
+	localTransform._43 = m_xmf3Position.z;
+
+	GameObject::UpdateTransform(parent);
+}
+
+void CPlayer::PrepareRendering(P3DGrpCommandList cmdlist) const
+{
+	GameObject::PrepareRendering(cmdlist);
+}
+
+void CPlayer::Render(P3DGrpCommandList cmdlist, GameCamera* pCamera) const
+{
+	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
+
+	if (nCameraMode == THIRD_PERSON_CAMERA)
+	{
+		GameObject::Render(cmdlist, pCamera);
+	}
+}
+
+void CPlayer::ReleaseUniforms()
+{
+	if (myCamera) myCamera->ReleaseUniforms();
 }
 
 void CPlayer::CollideWith(GameObject* other)
@@ -351,26 +376,6 @@ GameCamera* CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMo
 	if (myCamera) delete myCamera;
 
 	return(pNewCamera);
-}
-
-void CPlayer::PrepareRendering(P3DGrpCommandList cmdlist) const
-{
-	GameObject::PrepareRendering(cmdlist);
-}
-
-void CPlayer::Render(P3DGrpCommandList cmdlist, GameCamera* pCamera) const
-{
-	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
-
-	if (nCameraMode == THIRD_PERSON_CAMERA)
-	{
-		GameObject::Render(cmdlist, pCamera);
-	}
-}
-
-void CPlayer::ReleaseUniforms()
-{
-	if (myCamera) myCamera->ReleaseUniforms();
 }
 
 constexpr COLLISION_TAGS CPlayer::GetTag() const noexcept

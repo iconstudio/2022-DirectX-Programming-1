@@ -29,11 +29,19 @@ public:
 	virtual void Awake(P3DDevice device, P3DGrpCommandList cmdlist);
 	virtual void Animate(float time_elapsed, XMFLOAT4X4* parent = nullptr);
 	virtual void Update(float time_elapsed);
+	virtual void UpdateTransform(const XMFLOAT4X4* parent);
 	void EnumerateTransforms(const XMFLOAT4X4* parent);
-	void UpdateCollider(const XMFLOAT4X4* mat);
+	void UpdateCollider();
 	virtual void PrepareRendering(P3DGrpCommandList cmdlist) const;
 	virtual void Render(P3DGrpCommandList cmdlist, GameCamera* camera = NULL) const;
 	virtual void ReleaseUniforms();
+
+	bool CheckCollisionWith(GameObject* other) const;
+	virtual void CollideWith(GameObject* other);
+
+	void OnTransformUpdate();
+
+	virtual constexpr COLLISION_TAGS GetTag() const noexcept;
 
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3 position);
@@ -44,13 +52,6 @@ public:
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 	void Rotate(XMFLOAT4* pxmf4Quaternion);
-
-	virtual bool CheckCollisionWith(GameObject* other) const;
-	virtual void CollideWith(GameObject* other);
-
-	virtual void OnTransformUpdate();
-
-	virtual constexpr COLLISION_TAGS GetTag() const noexcept;
 
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();
