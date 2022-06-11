@@ -7,14 +7,14 @@ public:
 	static Model* Load(P3DDevice device
 		, P3DGrpCommandList cmdlist
 		, Pipeline* pipeline
-		, const char* pstrFileName);
+		, const char* filepath);
 
 	static Model* LoadFrameHierarchyFromFile(P3DDevice device
 		, P3DGrpCommandList cmdlist
 		, Pipeline* pipeline
-		, FILE* pInFile);
+		, FILE* pfile);
 
-	static RawMesh* LoadRawMesh(FILE* pInFile);
-	static std::vector<RawMaterial*> LoadRawMaterials(P3DDevice device, P3DGrpCommandList cmdlist, FILE* pInFile);
+	static RawMesh* LoadRawMesh(FILE* pfile);
+	static std::vector<RawMaterial*> LoadRawMaterials(P3DDevice device, P3DGrpCommandList cmdlist, FILE* pfile);
 
 };

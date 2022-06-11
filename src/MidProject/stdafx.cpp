@@ -3,6 +3,42 @@
 
 UINT gnCbvSrvDescriptorIncrementSize = 32;
 
+int ReadIntegerFromFile(std::ifstream& fs)
+{
+	int result{};
+	if (fs)
+	{
+		fs >> result;
+	}
+	return result;
+}
+
+float ReadFloatFromFile(std::ifstream& fs)
+{
+	float result{};
+	if (fs)
+	{
+		fs >> result;
+	}
+	return result;
+}
+
+BYTE ReadStringFromFile(std::ifstream& fs, char* token)
+{
+	BYTE chr_count = 0;
+	if (fs)
+	{
+		fs >> chr_count;
+
+		if (token && 0 < chr_count)
+		{
+			fs.readsome(token, chr_count);
+		}
+	}
+
+	return chr_count;
+}
+
 int ReadIntegerFromFile(FILE* file)
 {
 	int result{};

@@ -27,7 +27,7 @@ Shader::~Shader()
 void Shader::Load(const Filepath& filepath)
 {
 	std::ifstream shader_file{};
-	shader_file.open(filepath, std::ios::in | std::ios::ate | std::ios::binary);
+	shader_file.open(filepath, std::ios::in | std::ios::binary | std::ios::ate);
 
 	auto code_size = shader_file.tellg();
 	BYTE* bytecode = new BYTE[code_size];

@@ -6,27 +6,31 @@
 Model* Model::Load(ID3D12Device* device
 	, ID3D12GraphicsCommandList* cmdlist
 	, Pipeline* pipeline
-	, const char* pstrFileName)
+	, const char* filepath)
 {
-	FILE* pInFile = NULL;
-	fopen_s(&pInFile, pstrFileName, "rb");
-	if (!pInFile)
+	if (!std::filesystem::exists(filepath))
+	{
+		throw "모델 파일을 찾을 수 없음!";
+	}
+
+	FILE* pfile = nullptr;
+	fopen_s(&pfile, filepath, "rb");
+	if (!pfile)
 	{
 		throw "모델 파일을 불러올 수 없습니다!";
 	}
+	rewind(pfile);
 
-	rewind(pInFile);
-
-	Model* root = NULL;
 	char token[64] = { '\0' };
 
+	Model* root = nullptr;
 	while (true)
 	{
-		::ReadStringFromFile(pInFile, token);
+		ReadStringFromFile(pfile, token);
 
 		if (!strcmp(token, "<Hierarchy>:"))
 		{
-			root = Model::LoadFrameHierarchyFromFile(device, cmdlist, pipeline, pInFile);
+			root = Model::LoadFrameHierarchyFromFile(device, cmdlist, pipeline, pfile);
 		}
 		else if (!strcmp(token, "</Hierarchy>"))
 		{
@@ -34,12 +38,13 @@ Model* Model::Load(ID3D12Device* device
 		}
 	}
 
-#ifdef _WITH_DEBUG_FRAME_HIERARCHY
-	TCHAR pstrDebug[256] = { 0 };
-	_stprintf_s(pstrDebug, 256, _T("Frame Hierarchy\n"));
-	OutputDebugString(pstrDebug);
+	if (!root)
+	{
+		throw "모델 객체가 생성되지 않음!";
+	}
 
-	GameObject::PrintFrameInfo(root, NULL);
+#ifdef _WITH_DEBUG_FRAME_HIERARCHY
+	root->PrintFrameInfo();
 #endif
 
 	return root;
@@ -111,9 +116,6 @@ RawMesh* Model::LoadRawMesh(FILE* mfile)
 			if (0 < polygons_count)
 			{
 				raw_mesh->ReservePolygons(polygons_count);
-
-				//raw_mesh->countPolygonIndices = new int[raw_mesh->countPolygons];
-				//raw_mesh->indexByPolygons = new UINT * [raw_mesh->countPolygons];
 				for (size_t i = 0; i < polygons_count; i++)
 				{
 					ReadStringFromFile(mfile, token);
@@ -124,12 +126,9 @@ RawMesh* Model::LoadRawMesh(FILE* mfile)
 
 						const size_t index_count = ReadIntegerFromFile(mfile);
 						
-						//raw_mesh->countPolygonIndices[i] = index_count;
 						if (0 < index_count)
 						{
 							polygon.Reserve(index_count);
-
-							//raw_mesh->indexByPolygons[i] = new UINT[raw_mesh->countPolygonIndices[i]];
 
 							UINT read_index{};
 							for (size_t k = 0; k < index_count; ++k)
@@ -343,9 +342,9 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 					}
 
 #ifdef _WITH_DEBUG_RUNTIME_FRAME_HIERARCHY
-					TCHAR pstrDebug[256] = { 0 };
-					_stprintf_s(pstrDebug, 256, _T("(Child Frame: %p) (Parent Frame: %p)\n"), pChild, root);
-					OutputDebugString(pstrDebug);
+					TCHAR debug_frame_info[256] = { 0 };
+					_stprintf_s(debug_frame_info, 256, _T("(Child Frame: %p) (Parent Frame: %p)\n"), pChild, root);
+					OutputDebugString(debug_frame_info);
 #endif
 				}
 			}

@@ -27,25 +27,19 @@ public:
 	virtual void BuildCollider();
 	void UpdateCollider(const XMFLOAT4X4* mat);
 
-	virtual void BuildMaterials(P3DDevice device, P3DGrpCommandList cmdlist);
 	virtual void ReleaseUploadBuffers();
 
 	// °»½Å
 	virtual void Animate(float time_elapsed, XMFLOAT4X4* parent = nullptr);
+	void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	virtual void OnPrepareRender() {}
 	virtual void Render(P3DGrpCommandList cmdlist, GameCamera* pCamera = NULL);
 
 	virtual void InitializeUniforms(P3DDevice device, P3DGrpCommandList cmdlist);
 	virtual void UpdateUniforms(P3DGrpCommandList cmdlist);
-	virtual void UpdateUniforms(P3DGrpCommandList cmdlist, XMFLOAT4X4* pxmf4x4World);
 	virtual void UpdateUniforms(P3DGrpCommandList cmdlist, CMaterial* pMaterial);
 	virtual void ReleaseUniforms();
-
-	XMFLOAT3 GetPosition();
-	XMFLOAT3 GetLook();
-	XMFLOAT3 GetUp();
-	XMFLOAT3 GetRight();
 
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3 xmf3Position);
@@ -62,27 +56,32 @@ public:
 	virtual bool CheckCollisionWith(GameObject* other) const;
 	virtual void CollideWith(GameObject* other);
 
-	GameObject* GetParent() { return(m_pParent); }
-	void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
-	GameObject* FindFrame(const char* pstrFrameName);
+	XMFLOAT3 GetPosition();
+	XMFLOAT3 GetLook();
+	XMFLOAT3 GetUp();
+	XMFLOAT3 GetRight();
+	const GameObject* FindFrame(const char* name) const;
+	GameObject* FindFrame(const char* name);
 
+	const GameObject* GetParent() const;
+	GameObject* GetParent();
 	UINT GetMeshType() { return((m_pMesh) ? m_pMesh->GetType() : 0); }
 
-	char m_pstrFrameName[256];
+	void PrintFrameInfo() const;
+	void PrintFrameInfo(const GameObject* parent) const;
 
-	CMaterialMesh* m_pMesh = nullptr;
+	char m_pstrFrameName[256];
 
 	XMFLOAT4X4 localTransform;
 	XMFLOAT4X4 worldTransform;
 
+	CMaterialMesh* m_pMesh = nullptr;
 	GameObject* m_pParent = NULL;
 	GameObject* myChild = NULL;
 	GameObject* mySibling = NULL;
 
 	shared_ptr<BoundingOrientedBox> staticCollider;
 	unique_ptr<BoundingOrientedBox> myCollider;
-
-	static void PrintFrameInfo(GameObject* pGameObject, GameObject* pParent);
 };
 
 class CRotatingObject : public GameObject

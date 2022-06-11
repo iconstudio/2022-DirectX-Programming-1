@@ -4,6 +4,8 @@
 #include "Pipeline.hpp"
 #include "Arithmetics.hpp"
 
+WCHAR debug_frame_info[256]{};
+
 GameObject::GameObject()
 	: m_pstrFrameName()
 {
@@ -65,33 +67,11 @@ void GameObject::Animate(float time_elapsed, XMFLOAT4X4* parent)
 	}
 }
 
-GameObject* GameObject::FindFrame(const char* name)
-{
-	if (0 == strcmp(m_pstrFrameName, name))
-	{
-		return this;
-	}
-
-	if (mySibling)
-	{
-		if (auto root = mySibling->FindFrame(name); root)
-			return root;
-	}
-
-	if (myChild)
-	{
-		if (auto root = myChild->FindFrame(name); root)
-			return root;
-	}
-
-	return nullptr;
-}
-
 void GameObject::Render(P3DGrpCommandList cmdlist, GameCamera* pCamera)
 {
 	OnPrepareRender();
 
-	UpdateUniforms(cmdlist, &worldTransform); 
+	UpdateUniforms(cmdlist); 
 
 	if (m_pMesh)
 	{
@@ -106,14 +86,13 @@ void GameObject::InitializeUniforms(P3DDevice device, P3DGrpCommandList cmdlist)
 {}
 
 void GameObject::UpdateUniforms(P3DGrpCommandList cmdlist)
-{}
-
-void GameObject::UpdateUniforms(P3DGrpCommandList cmdlist, XMFLOAT4X4* pxmf4x4World)
 {
 	XMFLOAT4X4 xmf4x4World{};
 
-	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
+	const auto my_mat = XMLoadFloat4x4(&worldTransform);
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(my_mat));
 
+	// 두번째 루트 매개인자에서 0번째 메모리에 float 16개 전달
 	cmdlist->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 }
 
@@ -150,9 +129,6 @@ void GameObject::UpdateCollider(const XMFLOAT4X4* mat)
 		DirectX::XMStoreFloat4(&angle, quaternion);
 	}
 }
-
-void GameObject::BuildMaterials(P3DDevice device, P3DGrpCommandList cmdlist)
-{}
 
 void GameObject::ReleaseUploadBuffers()
 {
@@ -192,26 +168,6 @@ void GameObject::SetScale(float x, float y, float z)
 	localTransform = Matrix4x4::Multiply(mtxScale, localTransform);
 
 	UpdateTransform(NULL);
-}
-
-XMFLOAT3 GameObject::GetPosition()
-{
-	return(XMFLOAT3(worldTransform._41, worldTransform._42, worldTransform._43));
-}
-
-XMFLOAT3 GameObject::GetLook()
-{
-	return(Vector3::Normalize(XMFLOAT3(worldTransform._31, worldTransform._32, worldTransform._33)));
-}
-
-XMFLOAT3 GameObject::GetUp()
-{
-	return(Vector3::Normalize(XMFLOAT3(worldTransform._21, worldTransform._22, worldTransform._23)));
-}
-
-XMFLOAT3 GameObject::GetRight()
-{
-	return(Vector3::Normalize(XMFLOAT3(worldTransform._11, worldTransform._12, worldTransform._13)));
 }
 
 void GameObject::MoveStrafe(float fDistance)
@@ -284,15 +240,112 @@ void GameObject::CollideWith(GameObject* other)
 	}
 }
 
-void GameObject::PrintFrameInfo(GameObject* root, GameObject* pParent)
+XMFLOAT3 GameObject::GetPosition()
 {
-	TCHAR pstrDebug[256] = { 0 };
+	return(XMFLOAT3(worldTransform._41, worldTransform._42, worldTransform._43));
+}
 
-	_stprintf_s(pstrDebug, 256, _T("(Frame: %p) (Parent: %p)\n"), root, pParent);
-	OutputDebugString(pstrDebug);
+XMFLOAT3 GameObject::GetLook()
+{
+	return(Vector3::Normalize(XMFLOAT3(worldTransform._31, worldTransform._32, worldTransform._33)));
+}
 
-	if (root->mySibling) GameObject::PrintFrameInfo(root->mySibling, pParent);
-	if (root->myChild) GameObject::PrintFrameInfo(root->myChild, root);
+XMFLOAT3 GameObject::GetUp()
+{
+	return(Vector3::Normalize(XMFLOAT3(worldTransform._21, worldTransform._22, worldTransform._23)));
+}
+
+XMFLOAT3 GameObject::GetRight()
+{
+	return(Vector3::Normalize(XMFLOAT3(worldTransform._11, worldTransform._12, worldTransform._13)));
+}
+
+const GameObject* GameObject::FindFrame(const char* name) const
+{
+	if (0 == strcmp(m_pstrFrameName, name))
+	{
+		return this;
+	}
+
+	if (mySibling)
+	{
+		if (auto root = mySibling->FindFrame(name); root)
+			return root;
+	}
+
+	if (myChild)
+	{
+		if (auto root = myChild->FindFrame(name); root)
+			return root;
+	}
+
+	return nullptr;
+}
+
+GameObject* GameObject::FindFrame(const char* name)
+{
+	if (0 == strcmp(m_pstrFrameName, name))
+	{
+		return this;
+	}
+
+	if (mySibling)
+	{
+		if (auto root = mySibling->FindFrame(name); root)
+			return root;
+	}
+
+	if (myChild)
+	{
+		if (auto root = myChild->FindFrame(name); root)
+			return root;
+	}
+
+	return nullptr;
+}
+
+const GameObject* GameObject::GetParent() const
+{
+	return m_pParent;
+}
+
+GameObject* GameObject::GetParent()
+{
+	return m_pParent;
+}
+
+void GameObject::PrintFrameInfo() const
+{
+	swprintf_s(debug_frame_info, 256, L"프레임 계층 열거: (Frame: %p)\n", this);
+	OutputDebugString(debug_frame_info);
+	ZeroMemory(debug_frame_info, sizeof(debug_frame_info));
+
+	if (mySibling)
+	{
+		mySibling->PrintFrameInfo();
+	}
+
+	if (myChild)
+	{
+		myChild->PrintFrameInfo(this);
+	}
+}
+
+void GameObject::PrintFrameInfo(const GameObject* parent) const
+{
+	swprintf_s(debug_frame_info, 256, L"(Frame: %p) (Parent: %p)\n", this, parent);
+	OutputDebugString(debug_frame_info);
+	ZeroMemory(debug_frame_info, sizeof(debug_frame_info));
+
+	if (mySibling)
+	{
+		mySibling->PrintFrameInfo(parent);
+	}
+
+	if (myChild)
+	{
+		myChild->PrintFrameInfo(this);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
