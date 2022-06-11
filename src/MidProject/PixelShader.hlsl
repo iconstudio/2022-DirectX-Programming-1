@@ -11,3 +11,4 @@ float4 main(VS_LIGHTING_OUTPUT input) : SV_TARGET
     return (color);
 #endif
 }
+

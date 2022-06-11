@@ -221,7 +221,7 @@ std::vector<RawMaterial*> Model::LoadRawMaterials(ID3D12Device* device, ID3D12Gr
 Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 	, ID3D12GraphicsCommandList* cmdlist
 	, Pipeline* pipeline
-	, FILE* pfile)
+	, FILE* pInFile)
 {
 	char token[64] = { '\0' };
 	UINT nReads = 0;
@@ -233,13 +233,13 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 
 	for (; ; )
 	{
-		::ReadStringFromFile(pfile, token);
+		::ReadStringFromFile(pInFile, token);
 		if (!strcmp(token, "<Frame>:"))
 		{
 			root = new Model();
 
-			nFrame = ::ReadIntegerFromFile(pfile);
-			::ReadStringFromFile(pfile, root->m_pstrFrameName);
+			nFrame = ::ReadIntegerFromFile(pInFile);
+			::ReadStringFromFile(pInFile, root->m_pstrFrameName);
 		}
 		else if (!strcmp(token, "<Transform>:"))
 		{
@@ -250,10 +250,10 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 
 			XMFLOAT3 xmf3Position, xmf3Rotation, xmf3Scale;
 			XMFLOAT4 xmf4Rotation;
-			nReads = (UINT)::fread(&xmf3Position, sizeof(float), 3, pfile);
-			nReads = (UINT)::fread(&xmf3Rotation, sizeof(float), 3, pfile); //Euler Angle
-			nReads = (UINT)::fread(&xmf3Scale, sizeof(float), 3, pfile);
-			nReads = (UINT)::fread(&xmf4Rotation, sizeof(float), 4, pfile); //Quaternion
+			nReads = (UINT)::fread(&xmf3Position, sizeof(float), 3, pInFile);
+			nReads = (UINT)::fread(&xmf3Rotation, sizeof(float), 3, pInFile); //Euler Angle
+			nReads = (UINT)::fread(&xmf3Scale, sizeof(float), 3, pInFile);
+			nReads = (UINT)::fread(&xmf4Rotation, sizeof(float), 4, pInFile); //Quaternion
 		}
 		else if (!strcmp(token, "<TransformMatrix>:"))
 		{
@@ -262,7 +262,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 				throw "모델을 불러오는 중에 모델 객체가 생성되지 않음!";
 			}
 
-			nReads = (UINT)::fread(&root->localTransform, sizeof(float), 16, pfile);
+			nReads = (UINT)::fread(&root->localTransform, sizeof(float), 16, pInFile);
 		}
 		else if (!strcmp(token, "<Mesh>:"))
 		{
@@ -271,7 +271,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 				throw "모델을 불러오는 중에 모델 객체가 생성되지 않음!";
 			}
 
-			auto raw_mesh = root->LoadRawMesh(pfile);
+			auto raw_mesh = root->LoadRawMesh(pInFile);
 
 			if (raw_mesh)
 			{
@@ -290,7 +290,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 		}
 		else if (!strcmp(token, "<Materials>:"))
 		{
-			auto raw_materials = root->LoadRawMaterials(device, cmdlist, pfile);
+			auto raw_materials = root->LoadRawMaterials(device, cmdlist, pInFile);
 			const auto raw_count = raw_materials.size();
 
 			if (0 < raw_count)
@@ -306,25 +306,44 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 				}
 
 				mesh->AssignMaterial(raw_materials, pipeline);
+				/*
+				for (int i = 0; i < raw_count; i++)
+				{
+					mesh->m_ppMaterials[i] = NULL;
 
+					auto pMaterial = new CMaterial;
+
+					auto matcol = new CMaterialColors(raw_materials.at(i));
+					pMaterial->SetMaterialColors(matcol);
+
+					if (root->GetMeshType() & VERTEXT_NORMAL)
+					{
+						pMaterial->SetShader(pipeline);
+					}
+
+					mesh->SetMaterial(i, pMaterial);
+				}
+				*/
 				raw_materials.erase(raw_materials.begin(), raw_materials.end());
 			}
 		}
 		else if (!strcmp(token, "<Children>:"))
 		{
-			int children_count = ReadIntegerFromFile(pfile);
-			if (0 < children_count)
+			int nChilds = ::ReadIntegerFromFile(pInFile);
+			if (0 < nChilds)
 			{
-				for (int i = 0; i < children_count; i++)
+				for (int i = 0; i < nChilds; i++)
 				{
-					if (auto child = Model::LoadFrameHierarchyFromFile(device, cmdlist, pipeline, pfile); child)
+					auto pChild = Model::LoadFrameHierarchyFromFile(device, cmdlist, pipeline, pInFile);
+
+					if (pChild)
 					{
-						root->Attach(child);
+						root->Attach(pChild);
 					}
 
 #ifdef _WITH_DEBUG_RUNTIME_FRAME_HIERARCHY
 					TCHAR debug_frame_info[256] = { 0 };
-					_stprintf_s(debug_frame_info, 256, _T("(Child Frame: %p) (Parent Frame: %p)\n"), child, root);
+					_stprintf_s(debug_frame_info, 256, _T("(Child Frame: %p) (Parent Frame: %p)\n"), pChild, root);
 					OutputDebugString(debug_frame_info);
 #endif
 				}

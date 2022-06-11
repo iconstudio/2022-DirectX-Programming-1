@@ -4,10 +4,16 @@
 #include "Model.hpp"
 #include "Arithmetics.hpp"
 
+constexpr COLLISION_TAGS CPlayer::GetTag() const noexcept
+{
+	return COLLISION_TAGS::PLAYER;
+}
+
 CPlayer::CPlayer()
 	: GameObject()
-	, myCamera(nullptr)
 {
+	myCamera = NULL;
+
 	m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
@@ -30,7 +36,6 @@ CPlayer::CPlayer()
 CPlayer::~CPlayer()
 {
 	ReleaseUniforms();
-	ReleaseUploadBuffers();
 
 	if (myCamera)
 	{
@@ -38,9 +43,20 @@ CPlayer::~CPlayer()
 	}
 }
 
-void CPlayer::SetCamera(GameCamera* camera)
+void CPlayer::InitializeUniforms(P3DDevice device, P3DGrpCommandList cmdlist)
 {
-	myCamera = camera;
+	if (myCamera)
+	{
+		myCamera->InitializeUniforms(device, cmdlist);
+	}
+}
+
+void CPlayer::UpdateUniforms(P3DGrpCommandList cmdlist)
+{}
+
+void CPlayer::ReleaseUniforms()
+{
+	if (myCamera) myCamera->ReleaseUniforms();
 }
 
 void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
@@ -69,8 +85,6 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 	{
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
 		myCamera->Move(xmf3Shift);
-
-		OnTransformUpdate();
 	}
 }
 
@@ -79,8 +93,6 @@ void CPlayer::Move(float fxOffset, float fyOffset, float fzOffset)
 	m_xmf3Position.x += fxOffset;
 	m_xmf3Position.y += fyOffset;
 	m_xmf3Position.z += fzOffset;
-
-	OnTransformUpdate();
 }
 
 void CPlayer::MoveForward(float fDistance)
@@ -89,8 +101,6 @@ void CPlayer::MoveForward(float fDistance)
 	const auto velocity = Vector3::ScalarProduct(look, fDistance);
 
 	m_xmf3Position = Vector3::Add(m_xmf3Position, velocity);
-
-	OnTransformUpdate();
 }
 
 void CPlayer::Rotate(float x, float y, float z)
@@ -150,40 +160,10 @@ void CPlayer::Rotate(float x, float y, float z)
 	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
 	m_xmf3Right = Vector3::CrossProduct(m_xmf3Up, m_xmf3Look, true);
 	m_xmf3Up = Vector3::CrossProduct(m_xmf3Look, m_xmf3Right, true);
-
-	OnTransformUpdate();
-}
-
-void CPlayer::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
-{
-	GameObject::Awake(device, cmdlist);
-
-	if (myCamera)
-	{
-		myCamera->InitializeUniforms(device, cmdlist);
-	}
-
-	localTransform._11 = m_xmf3Right.x;
-	localTransform._12 = m_xmf3Right.y;
-	localTransform._13 = m_xmf3Right.z;
-
-	localTransform._21 = m_xmf3Up.x;
-	localTransform._22 = m_xmf3Up.y;
-	localTransform._23 = m_xmf3Up.z;
-
-	localTransform._31 = m_xmf3Look.x;
-	localTransform._32 = m_xmf3Look.y;
-	localTransform._33 = m_xmf3Look.z;
-
-	localTransform._41 = m_xmf3Position.x;
-	localTransform._42 = m_xmf3Position.y;
-	localTransform._43 = m_xmf3Position.z;
 }
 
 void CPlayer::Update(float fTimeElapsed)
 {
-	GameObject::Update(fTimeElapsed);
-
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
 
 	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
@@ -353,12 +333,17 @@ GameCamera* CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMo
 	return(pNewCamera);
 }
 
-void CPlayer::PrepareRendering(P3DGrpCommandList cmdlist) const
+void CPlayer::OnPrepareRender()
 {
-	GameObject::PrepareRendering(cmdlist);
+	localTransform._11 = m_xmf3Right.x; localTransform._12 = m_xmf3Right.y; localTransform._13 = m_xmf3Right.z;
+	localTransform._21 = m_xmf3Up.x; localTransform._22 = m_xmf3Up.y; localTransform._23 = m_xmf3Up.z;
+	localTransform._31 = m_xmf3Look.x; localTransform._32 = m_xmf3Look.y; localTransform._33 = m_xmf3Look.z;
+	localTransform._41 = m_xmf3Position.x; localTransform._42 = m_xmf3Position.y; localTransform._43 = m_xmf3Position.z;
+
+	UpdateTransform(NULL);
 }
 
-void CPlayer::Render(P3DGrpCommandList cmdlist, GameCamera* pCamera) const
+void CPlayer::Render(P3DGrpCommandList cmdlist, GameCamera* pCamera)
 {
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
 
@@ -368,43 +353,33 @@ void CPlayer::Render(P3DGrpCommandList cmdlist, GameCamera* pCamera) const
 	}
 }
 
-void CPlayer::ReleaseUniforms()
-{
-	if (myCamera) myCamera->ReleaseUniforms();
-}
-
-constexpr COLLISION_TAGS CPlayer::GetTag() const noexcept
-{
-	return COLLISION_TAGS::PLAYER;
-}
-
-const GameCamera* CPlayer::GetCamera() const
-{
-	return myCamera;
-}
-
-GameCamera* CPlayer::GetCamera()
-{
-	return myCamera;
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CAirplanePlayer
 
 CAirplanePlayer::CAirplanePlayer(P3DDevice device, P3DGrpCommandList cmdlist, P3DSignature signature)
-	: CPlayer()
 {
 	myCamera = ChangeCamera(THIRD_PERSON_CAMERA, 10.0f);
 
-	m_pMainRotorFrame = FindFrame("Rotor");
-	m_pTailRotorFrame = FindFrame("Back_Rotor");
+	Awake();
+
+	InitializeUniforms(device, cmdlist);
 }
 
 CAirplanePlayer::~CAirplanePlayer()
 {}
 
+void CAirplanePlayer::Awake()
+{
+//	m_pMainRotorFrame = FindFrame("rotor");
+//	m_pTailRotorFrame = FindFrame("black_m_7");
+
+	m_pMainRotorFrame = FindFrame("Rotor");
+	m_pTailRotorFrame = FindFrame("Back_Rotor");
+}
+
 void CAirplanePlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
+
 	if (m_pMainRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
@@ -418,12 +393,12 @@ void CAirplanePlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	}
 
 	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
-	EnumerateTransforms(pxmf4x4Parent);
+	UpdateTransform(pxmf4x4Parent);
 }
 
-void CAirplanePlayer::PrepareRendering(P3DGrpCommandList cmdlist) const
+void CAirplanePlayer::OnPrepareRender()
 {
-	CPlayer::PrepareRendering(cmdlist);
+	CPlayer::OnPrepareRender();
 }
 
 GameCamera* CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)

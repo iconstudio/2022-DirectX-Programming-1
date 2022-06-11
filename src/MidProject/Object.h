@@ -18,29 +18,37 @@ public:
 	GameObject();
 	virtual ~GameObject();
 
+	void SetMesh(CMaterialMesh* pMesh);
+	void Attach(GameObject* pChild);
+
+	virtual constexpr COLLISION_TAGS GetTag() const noexcept;
+
+	void SetOriginalCollider(const shared_ptr<BoundingOrientedBox>& box);
+	virtual void BuildCollider();
+	void UpdateCollider(const XMFLOAT4X4* mat);
+
 	virtual void ReleaseUploadBuffers();
 
-	void SetMesh(CMaterialMesh* pMesh);
-	void SetOriginalCollider(const shared_ptr<BoundingOrientedBox>& box);
-	void SetOriginalCollider(shared_ptr<BoundingOrientedBox>&& box);
-	void Attach(GameObject* pChild);
-	void BuildCollider();
-
-	virtual void Awake(P3DDevice device, P3DGrpCommandList cmdlist);
+	// °»½Å
 	virtual void Animate(float time_elapsed, XMFLOAT4X4* parent = nullptr);
-	virtual void Update(float time_elapsed);
-	void EnumerateTransforms(const XMFLOAT4X4* parent);
-	void UpdateCollider(const XMFLOAT4X4* mat);
-	virtual void PrepareRendering(P3DGrpCommandList cmdlist) const;
-	virtual void Render(P3DGrpCommandList cmdlist, GameCamera* camera = NULL) const;
+	void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
+
+	virtual void OnPrepareRender() {}
+	virtual void Render(P3DGrpCommandList cmdlist, GameCamera* pCamera = NULL);
+
+	virtual void InitializeUniforms(P3DDevice device, P3DGrpCommandList cmdlist);
+	virtual void UpdateUniforms(P3DGrpCommandList cmdlist);
+	virtual void UpdateUniforms(P3DGrpCommandList cmdlist, CMaterial* pMaterial);
 	virtual void ReleaseUniforms();
 
 	void SetPosition(float x, float y, float z);
-	void SetPosition(XMFLOAT3 position);
+	void SetPosition(XMFLOAT3 xmf3Position);
 	void SetScale(float x, float y, float z);
-	void MoveStrafe(float dist = 1.0f);
-	void MoveUp(float dist = 1.0f);
-	void MoveForward(float dist = 1.0f);
+
+	void MoveStrafe(float fDistance = 1.0f);
+	void MoveUp(float fDistance = 1.0f);
+	void MoveForward(float fDistance = 1.0f);
+
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 	void Rotate(XMFLOAT4* pxmf4Quaternion);
@@ -48,16 +56,13 @@ public:
 	virtual bool CheckCollisionWith(GameObject* other) const;
 	virtual void CollideWith(GameObject* other);
 
-	virtual void OnTransformUpdate();
-
-	virtual constexpr COLLISION_TAGS GetTag() const noexcept;
-
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();
 	XMFLOAT3 GetUp();
 	XMFLOAT3 GetRight();
 	const GameObject* FindFrame(const char* name) const;
 	GameObject* FindFrame(const char* name);
+
 	const GameObject* GetParent() const;
 	GameObject* GetParent();
 	UINT GetMeshType() { return((m_pMesh) ? m_pMesh->GetType() : 0); }
@@ -69,7 +74,6 @@ public:
 
 	XMFLOAT4X4 localTransform;
 	XMFLOAT4X4 worldTransform;
-	bool isTransformModified;
 
 	CMaterialMesh* m_pMesh = nullptr;
 	GameObject* m_pParent = NULL;
@@ -95,6 +99,7 @@ public:
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
 
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void Render(P3DGrpCommandList cmdlist, GameCamera* pCamera = NULL);
 };
 
 class CRevolvingObject : public GameObject
