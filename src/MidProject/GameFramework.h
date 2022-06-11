@@ -21,7 +21,6 @@ public:
 	void BuildPipeline();
 	void BuildAssets();
 	void BuildStages();
-	void BuildWorld();
 	void BuildParticles();
 	void BuildPlayer();
 	void BuildTerrains();

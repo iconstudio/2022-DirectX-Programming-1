@@ -2,6 +2,7 @@
 #include "GameFramework.h"
 #include "Model.hpp"
 #include "IlluminatedGraphicsPipeline.hpp"
+#include "DiffusedGraphicsPipeline.hpp"
 #include "StageMain.hpp"
 #include "StageGame.hpp"
 #include "StageGameEnd.hpp"
@@ -471,7 +472,6 @@ void GameFramework::Start()
 	BuildPipeline();
 	BuildAssets();
 	BuildStages();
-	BuildWorld();
 	BuildParticles();
 	BuildPlayer();
 	BuildTerrains();
@@ -489,10 +489,12 @@ void GameFramework::Start()
 
 void GameFramework::BuildPipeline()
 {
-	Pipeline::diffusedShader = new IlluminatedGraphicsPipeline();
+	Pipeline::diffusedShader = new DiffusedGraphicsPipeline();
 	Pipeline::diffusedShader->Awake(myDevice, myCommandList);
 	Pipeline::illuminatedShader = new IlluminatedGraphicsPipeline();
 	Pipeline::illuminatedShader->Awake(myDevice, myCommandList);
+	Pipeline::diffusedShader = new IlluminatedGraphicsPipeline();
+	Pipeline::diffusedShader->Awake(myDevice, myCommandList);
 }
 
 void GameFramework::BuildAssets()
@@ -530,9 +532,6 @@ void GameFramework::BuildStages()
 	}
 }
 
-void GameFramework::BuildWorld()
-{}
-
 void GameFramework::BuildParticles()
 {}
 
@@ -547,6 +546,11 @@ void GameFramework::BuildObjects()
 
 void GameFramework::CleanupBuilds()
 {
+	for (auto& model : myModels)
+	{
+		model.second->ReleaseUploadBuffers();
+	}
+
 	JumpToStage(0);
 }
 
@@ -689,7 +693,7 @@ bool GameFramework::JumpToNextStage()
 shared_ptr<Model> GameFramework::RegisterModel(const char* path, const char* name)
 {
 	auto& my_lighten_shader = Pipeline::illuminatedShader;
-	//auto& my_lighten_pipeline = myPipelines.at(0);
+	//auto& my_lighten_shader = myPipelines.at(0);
 	auto handle = Model::Load(myDevice, myCommandList, my_lighten_shader, path);
 	auto ptr = shared_ptr<Model>(handle);
 
