@@ -54,8 +54,6 @@ RawMesh* Model::LoadRawMesh(FILE* mfile)
 {
 	char token[64] = { '\0' };
 
-	int nPositions = 0, nColors = 0, nNormals = 0, nIndices = 0, nSubMeshes = 0, nSubIndices = 0;
-
 	auto raw_mesh = new RawMesh;
 	raw_mesh->countVertices = ReadIntegerFromFile(mfile);
 	ReadStringFromFile(mfile, raw_mesh->m_pstrMeshName);
@@ -71,41 +69,68 @@ RawMesh* Model::LoadRawMesh(FILE* mfile)
 		}
 		else if (!strcmp(token, "<Positions>:"))
 		{
-			nPositions = ::ReadIntegerFromFile(mfile);
-			if (nPositions > 0)
+			auto count = ReadIntegerFromFile(mfile);
+			if (0 < count)
 			{
 				raw_mesh->myVertexType |= VERTEXT_POSITION;
-				raw_mesh->m_pxmf3Positions = new XMFLOAT3[nPositions];
-				fread(raw_mesh->m_pxmf3Positions, sizeof(XMFLOAT3), nPositions, mfile);
+
+				auto& containter = raw_mesh->myPositions;
+				containter.reserve(count);
+
+				XMFLOAT3 result{};
+				for (int k = 0; k < count; ++k)
+				{
+					fread(&result, sizeof(XMFLOAT3), 1, mfile);
+
+					containter.push_back(result);
+				}
 			}
 		}
 		else if (!strcmp(token, "<Colors>:"))
 		{
-			nColors = ::ReadIntegerFromFile(mfile);
-			if (nColors > 0)
+			auto count = ReadIntegerFromFile(mfile);
+			if (0 < count)
 			{
 				raw_mesh->myVertexType |= VERTEXT_COLOR;
-				raw_mesh->m_pxmf4Colors = new XMFLOAT4[nColors];
-				fread(raw_mesh->m_pxmf4Colors, sizeof(XMFLOAT4), nColors, mfile);
+
+				auto& containter = raw_mesh->myColours;
+				containter.reserve(count);
+
+				XMFLOAT4 result{};
+				for (int k = 0; k < count; ++k)
+				{
+					fread(&result, sizeof(XMFLOAT4), 1, mfile);
+
+					containter.push_back(result);
+				}
 			}
 		}
 		else if (!strcmp(token, "<Normals>:"))
 		{
-			nNormals = ::ReadIntegerFromFile(mfile);
-			if (nNormals > 0)
+			auto count = ReadIntegerFromFile(mfile);
+			if (0 < count)
 			{
 				raw_mesh->myVertexType |= VERTEXT_NORMAL;
-				raw_mesh->m_pxmf3Normals = new XMFLOAT3[nNormals];
-				fread(raw_mesh->m_pxmf3Normals, sizeof(XMFLOAT3), nNormals, mfile);
+
+				auto& containter = raw_mesh->myNormals;
+				containter.reserve(count);
+
+				XMFLOAT3 result{};
+				for (int k = 0; k < count; ++k)
+				{
+					fread(&result, sizeof(XMFLOAT3), 1, mfile);
+
+					containter.push_back(result);
+				}
 			}
 		}
 		else if (!strcmp(token, "<Indices>:"))
 		{
-			nIndices = ::ReadIntegerFromFile(mfile);
-			if (nIndices > 0)
+			auto count = ReadIntegerFromFile(mfile);
+			if (0 < count)
 			{
-				raw_mesh->m_pnIndices = new UINT[nIndices];
-				fread(raw_mesh->m_pnIndices, sizeof(int), nIndices, mfile);
+				raw_mesh->m_pnIndices = new UINT[count];
+				fread(raw_mesh->m_pnIndices, sizeof(int), count, mfile);
 			}
 		}
 		else if (!strcmp(token, "<SubMeshes>:"))
@@ -223,7 +248,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 	, Pipeline* pipeline
 	, FILE* pfile)
 {
-	char token[64] = { '\0' };
+	char token[64]{};
 	UINT nReads = 0;
 
 	int nFrame = 0;
@@ -266,7 +291,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 				throw "모델을 불러오는 중에 모델 객체가 생성되지 않음!";
 			}
 
-			nReads = (UINT)::fread(&root->localTransform, sizeof(float), 16, pfile);
+			nReads = (UINT)::fread(&root->localMatrix, sizeof(float), 16, pfile);
 		}
 		else if (!strcmp(token, "<Mesh>:"))
 		{

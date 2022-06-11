@@ -63,8 +63,8 @@ public:
 	std::string myName;
 
 	Transformer myTransform;
-	XMFLOAT4X4 localTransform;
-	XMFLOAT4X4 worldTransform;
+	XMFLOAT4X4 localMatrix;
+	XMFLOAT4X4 worldMatrix;
 	bool isTransformModified;
 
 	CMaterialMesh* m_pMesh = nullptr;

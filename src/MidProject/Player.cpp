@@ -166,21 +166,21 @@ void CPlayer::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 
 void CPlayer::Update(float fTimeElapsed)
 {
-	localTransform._11 = m_xmf3Right.x;
-	localTransform._12 = m_xmf3Right.y;
-	localTransform._13 = m_xmf3Right.z;
+	localMatrix._11 = m_xmf3Right.x;
+	localMatrix._12 = m_xmf3Right.y;
+	localMatrix._13 = m_xmf3Right.z;
 
-	localTransform._21 = m_xmf3Up.x;
-	localTransform._22 = m_xmf3Up.y;
-	localTransform._23 = m_xmf3Up.z;
+	localMatrix._21 = m_xmf3Up.x;
+	localMatrix._22 = m_xmf3Up.y;
+	localMatrix._23 = m_xmf3Up.z;
 
-	localTransform._31 = m_xmf3Look.x;
-	localTransform._32 = m_xmf3Look.y;
-	localTransform._33 = m_xmf3Look.z;
+	localMatrix._31 = m_xmf3Look.x;
+	localMatrix._32 = m_xmf3Look.y;
+	localMatrix._33 = m_xmf3Look.z;
 
-	localTransform._41 = m_xmf3Position.x;
-	localTransform._42 = m_xmf3Position.y;
-	localTransform._43 = m_xmf3Position.z;
+	localMatrix._41 = m_xmf3Position.x;
+	localMatrix._42 = m_xmf3Position.y;
+	localMatrix._43 = m_xmf3Position.z;
 
 	GameObject::Update(fTimeElapsed);
 
@@ -413,13 +413,13 @@ void CAirplanePlayer::Update(float delta_time)
 	if (m_pMainRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * delta_time);
-		m_pMainRotorFrame->localTransform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->localTransform);
+		m_pMainRotorFrame->localMatrix = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->localMatrix);
 	}
 
 	if (m_pTailRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * delta_time);
-		m_pTailRotorFrame->localTransform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->localTransform);
+		m_pTailRotorFrame->localMatrix = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->localMatrix);
 	}
 
 	CPlayer::Update(delta_time);

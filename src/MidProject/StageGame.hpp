@@ -24,9 +24,8 @@ public:
 	const float roadWidth = 100.0f;
 	const float roadHeight = 3000.0f;
 
-	RawMesh myRoadData;
-	CDiffusedMesh* myRoadMesh;
-
+	RawMesh roadData;
+	CDiffusedMesh* roadMesh;
 	XMFLOAT3 roadStartPoint;
 	XMFLOAT3 roadDestPoint;
 	XMFLOAT3 playerSpawnPoint;

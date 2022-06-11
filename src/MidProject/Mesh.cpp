@@ -20,8 +20,12 @@ CMesh::CMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh * raw)
 
 	constexpr auto pos_obj_sz = sizeof(XMFLOAT3);
 	const auto pos_sz = pos_obj_sz * countVertices;
+	
+	const auto& container = raw->myPositions;
+	const auto& blob = container.data();
+
 	myPositionBuffer = CreateBufferResource(device, cmdlist
-		, raw->m_pxmf3Positions, pos_sz
+		, blob, pos_sz
 		, D3D12_HEAP_TYPE_DEFAULT
 		, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
 		, &myUploadingPositonBuffer);
@@ -174,8 +178,12 @@ CDiffusedMesh::CDiffusedMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMes
 {
 	constexpr auto col_obj_sz = sizeof(XMFLOAT4);
 	const auto col_sz = col_obj_sz * countVertices;
+
+	const auto& container = raw->myColours;
+	const auto& blob = container.data();
+
 	myColourBuffer = CreateBufferResource(device, cmdlist
-		, raw->m_pxmf4Colors, col_sz
+		, blob, col_sz
 		, D3D12_HEAP_TYPE_DEFAULT
 		, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
 		, &myUploadingColourBuffer);
@@ -339,15 +347,21 @@ void CMaterialMesh::Render(P3DGrpCommandList cmdlist) const
 CLightenMesh::CLightenMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw_mesh)
 	: CMaterialMesh(device, cmdlist, raw_mesh)
 {
-	myNormalBuffer = ::CreateBufferResource(device, cmdlist
-		, raw_mesh->m_pxmf3Normals, sizeof(XMFLOAT3) * countVertices
+	constexpr auto nrm_obj_sz = sizeof(XMFLOAT3);
+	const auto nrm_sz = nrm_obj_sz * countVertices;
+
+	const auto& container = raw_mesh->myNormals;
+	const auto& blob = container.data();
+
+	myNormalBuffer = CreateBufferResource(device, cmdlist
+		, blob, nrm_sz
 		, D3D12_HEAP_TYPE_DEFAULT
 		, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
 		, &myUploadingNormalBuffer);
 
 	myNormalBufferView.BufferLocation = myNormalBuffer->GetGPUVirtualAddress();
-	myNormalBufferView.StrideInBytes = sizeof(XMFLOAT3);
-	myNormalBufferView.SizeInBytes = sizeof(XMFLOAT3) * countVertices;
+	myNormalBufferView.StrideInBytes = nrm_obj_sz;
+	myNormalBufferView.SizeInBytes = nrm_sz;
 }
 
 CLightenMesh::~CLightenMesh()

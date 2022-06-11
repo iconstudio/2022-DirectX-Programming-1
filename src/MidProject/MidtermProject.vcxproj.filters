@@ -243,7 +243,7 @@
       <Filter>소스 파일\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="PlainGraphicsPipeline.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

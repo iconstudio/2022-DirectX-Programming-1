@@ -9,7 +9,7 @@ WCHAR debug_frame_info[256]{};
 GameObject::GameObject()
 	: myName()
 	, myTransform()
-	, localTransform(Matrix4x4::Identity()), worldTransform(Matrix4x4::Identity())
+	, localMatrix(Matrix4x4::Identity()), worldMatrix(Matrix4x4::Identity())
 	, isTransformModified(true)
 	, staticCollider(nullptr), myCollider(nullptr)
 {}
@@ -95,7 +95,7 @@ void GameObject::Animate(float delta_time)
 
 	if (myChild)
 	{
-		myChild->Animate(delta_time, worldTransform);
+		myChild->Animate(delta_time, worldMatrix);
 	}
 }
 
@@ -116,7 +116,7 @@ void GameObject::Animate(float delta_time, const XMFLOAT4X4& parent)
 
 	if (myChild)
 	{
-		myChild->Animate(delta_time, worldTransform);
+		myChild->Animate(delta_time, worldMatrix);
 	}
 }
 
@@ -127,17 +127,17 @@ void GameObject::Update(float delta_time)
 
 void GameObject::UpdateTransform()
 {
-	worldTransform = localTransform;
+	worldMatrix = localMatrix;
 }
 
 void GameObject::UpdateTransform(const XMFLOAT4X4& parent)
 {
-	worldTransform = Matrix4x4::Multiply(localTransform, parent);
+	worldMatrix = Matrix4x4::Multiply(localMatrix, parent);
 }
 
 void GameObject::UpdateTransform(XMFLOAT4X4&& parent)
 {
-	worldTransform = Matrix4x4::Multiply(localTransform, std::forward<XMFLOAT4X4>(parent));
+	worldMatrix = Matrix4x4::Multiply(localMatrix, std::forward<XMFLOAT4X4>(parent));
 }
 
 void GameObject::EnumerateTransforms()
@@ -151,7 +151,7 @@ void GameObject::EnumerateTransforms()
 	}
 	if (myChild)
 	{
-		myChild->EnumerateTransforms(worldTransform);
+		myChild->EnumerateTransforms(worldMatrix);
 	}
 }
 
@@ -166,22 +166,24 @@ void GameObject::EnumerateTransforms(const XMFLOAT4X4& parent)
 	}
 	if (myChild)
 	{
-		myChild->EnumerateTransforms(worldTransform);
+		myChild->EnumerateTransforms(worldMatrix);
 	}
 }
 
 void GameObject::EnumerateTransforms(XMFLOAT4X4&& parent)
 {
-	UpdateTransform(std::forward<XMFLOAT4X4>(parent));
+	const auto& mat = std::forward<XMFLOAT4X4>(parent);
+
+	UpdateTransform(mat);
 	UpdateCollider();
 
 	if (mySibling)
 	{
-		mySibling->EnumerateTransforms(std::forward<XMFLOAT4X4>(parent));
+		mySibling->EnumerateTransforms(mat);
 	}
 	if (myChild)
 	{
-		myChild->EnumerateTransforms(worldTransform);
+		myChild->EnumerateTransforms(worldMatrix);
 	}
 }
 
@@ -189,7 +191,7 @@ void GameObject::UpdateCollider()
 {
 	if (myCollider)
 	{
-		const auto float4x4 = DirectX::XMLoadFloat4x4(&worldTransform);
+		const auto float4x4 = DirectX::XMLoadFloat4x4(&worldMatrix);
 
 		const auto& original_collider = staticCollider;
 		original_collider->Transform(*myCollider, float4x4);
@@ -206,7 +208,7 @@ void GameObject::PrepareRendering(P3DGrpCommandList cmdlist) const
 {
 	XMFLOAT4X4 xmf4x4World{};
 
-	const auto my_mat = XMLoadFloat4x4(&worldTransform);
+	const auto my_mat = XMLoadFloat4x4(&worldMatrix);
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(my_mat));
 
 	// 두번째 루트 매개인자에서 0번째 메모리에 float 16개 전달
@@ -263,16 +265,11 @@ void GameObject::OnTransformUpdate()
 	isTransformModified = true;
 }
 
-constexpr COLLISION_TAGS GameObject::GetTag() const noexcept
-{
-	return COLLISION_TAGS::NONE;
-}
-
 void GameObject::SetPosition(float x, float y, float z)
 {
-	localTransform._41 = x;
-	localTransform._42 = y;
-	localTransform._43 = z;
+	localMatrix._41 = x;
+	localMatrix._42 = y;
+	localMatrix._43 = z;
 
 	OnTransformUpdate();
 }
@@ -285,7 +282,7 @@ void GameObject::SetPosition(XMFLOAT3 position)
 void GameObject::SetScale(float x, float y, float z)
 {
 	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
-	localTransform = Matrix4x4::Multiply(mtxScale, localTransform);
+	localMatrix = Matrix4x4::Multiply(mtxScale, localMatrix);
 
 	OnTransformUpdate();
 }
@@ -320,7 +317,7 @@ void GameObject::MoveForward(float fDistance)
 void GameObject::Rotate(float fPitch, float fYaw, float fRoll)
 {
 	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(fPitch), XMConvertToRadians(fYaw), XMConvertToRadians(fRoll));
-	localTransform = Matrix4x4::Multiply(mtxRotate, localTransform);
+	localMatrix = Matrix4x4::Multiply(mtxRotate, localMatrix);
 
 	OnTransformUpdate();
 }
@@ -328,7 +325,7 @@ void GameObject::Rotate(float fPitch, float fYaw, float fRoll)
 void GameObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
 {
 	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(pxmf3Axis), XMConvertToRadians(fAngle));
-	localTransform = Matrix4x4::Multiply(mtxRotate, localTransform);
+	localMatrix = Matrix4x4::Multiply(mtxRotate, localMatrix);
 
 	OnTransformUpdate();
 }
@@ -336,29 +333,34 @@ void GameObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
 void GameObject::Rotate(XMFLOAT4* pxmf4Quaternion)
 {
 	XMMATRIX mtxRotate = XMMatrixRotationQuaternion(XMLoadFloat4(pxmf4Quaternion));
-	localTransform = Matrix4x4::Multiply(mtxRotate, localTransform);
+	localMatrix = Matrix4x4::Multiply(mtxRotate, localMatrix);
 
 	OnTransformUpdate();
 }
 
+constexpr COLLISION_TAGS GameObject::GetTag() const noexcept
+{
+	return COLLISION_TAGS::NONE;
+}
+
 XMFLOAT3 GameObject::GetPosition()
 {
-	return(XMFLOAT3(worldTransform._41, worldTransform._42, worldTransform._43));
+	return(XMFLOAT3(worldMatrix._41, worldMatrix._42, worldMatrix._43));
 }
 
 XMFLOAT3 GameObject::GetLook()
 {
-	return(Vector3::Normalize(XMFLOAT3(worldTransform._31, worldTransform._32, worldTransform._33)));
+	return(Vector3::Normalize(XMFLOAT3(worldMatrix._31, worldMatrix._32, worldMatrix._33)));
 }
 
 XMFLOAT3 GameObject::GetUp()
 {
-	return(Vector3::Normalize(XMFLOAT3(worldTransform._21, worldTransform._22, worldTransform._23)));
+	return(Vector3::Normalize(XMFLOAT3(worldMatrix._21, worldMatrix._22, worldMatrix._23)));
 }
 
 XMFLOAT3 GameObject::GetRight()
 {
-	return(Vector3::Normalize(XMFLOAT3(worldTransform._11, worldTransform._12, worldTransform._13)));
+	return(Vector3::Normalize(XMFLOAT3(worldMatrix._11, worldMatrix._12, worldMatrix._13)));
 }
 
 const GameObject* GameObject::FindFrame(const char* name) const
@@ -484,7 +486,7 @@ CRevolvingObject::~CRevolvingObject()
 void CRevolvingObject::Update(float delta_time)
 {
 	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3RevolutionAxis), XMConvertToRadians(m_fRevolutionSpeed * delta_time));
-	localTransform = Matrix4x4::Multiply(localTransform, mtxRotate);
+	localMatrix = Matrix4x4::Multiply(localMatrix, mtxRotate);
 
 	GameObject::Update(delta_time);
 }
@@ -505,13 +507,13 @@ void CHellicopterObject::Update(float delta_time)
 	if (m_pMainRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * delta_time);
-		m_pMainRotorFrame->localTransform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->localTransform);
+		m_pMainRotorFrame->localMatrix = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->localMatrix);
 	}
 
 	if (m_pTailRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * delta_time);
-		m_pTailRotorFrame->localTransform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->localTransform);
+		m_pTailRotorFrame->localMatrix = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->localMatrix);
 	}
 
 	GameObject::Update(delta_time);
@@ -536,12 +538,12 @@ void CApacheObject::Update(float delta_time)
 	if (m_pMainRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * delta_time);
-		m_pMainRotorFrame->localTransform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->localTransform);
+		m_pMainRotorFrame->localMatrix = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->localMatrix);
 	}
 	if (m_pTailRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 4.0f) * delta_time);
-		m_pTailRotorFrame->localTransform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->localTransform);
+		m_pTailRotorFrame->localMatrix = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->localMatrix);
 	}
 
 	GameObject::Update(delta_time);
