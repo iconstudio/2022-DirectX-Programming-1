@@ -32,7 +32,7 @@ void StageMain::Update(float delta_time)
 void StageMain::PrepareRendering()
 {}
 
-void StageMain::Render()
+void StageMain::Render() const
 {}
 
 void StageMain::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)

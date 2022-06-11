@@ -265,75 +265,170 @@ void GameObject::OnTransformUpdate()
 	isTransformModified = true;
 }
 
-void GameObject::SetPosition(float x, float y, float z)
+void GameObject::SetMatrix(const XMFLOAT4X4& mat)
 {
-	localMatrix._41 = x;
-	localMatrix._42 = y;
-	localMatrix._43 = z;
+	localTransform.SetMatrix(mat);
 
 	OnTransformUpdate();
 }
 
-void GameObject::SetPosition(XMFLOAT3 position)
+void GameObject::SetMatrix(XMFLOAT4X4&& mat)
 {
-	SetPosition(position.x, position.y, position.z);
+	localTransform.SetMatrix(std::forward<XMFLOAT4X4>(mat));
+
+	OnTransformUpdate();
 }
 
 void GameObject::SetScale(float x, float y, float z)
 {
-	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
-	localMatrix = Matrix4x4::Multiply(mtxScale, localMatrix);
+	localTransform.SetScale(x, y, z);
 
 	OnTransformUpdate();
 }
 
-void GameObject::MoveStrafe(float fDistance)
+void GameObject::SetPosition(float x, float y, float z)
 {
-	XMFLOAT3 xmf3Position = GetPosition();
-	XMFLOAT3 xmf3Right = GetRight();
-	xmf3Position = Vector3::Add(xmf3Position, xmf3Right, fDistance);
-
-	GameObject::SetPosition(xmf3Position);
-}
-
-void GameObject::MoveUp(float fDistance)
-{
-	XMFLOAT3 xmf3Position = GetPosition();
-	XMFLOAT3 xmf3Up = GetUp();
-	xmf3Position = Vector3::Add(xmf3Position, xmf3Up, fDistance);
-
-	GameObject::SetPosition(xmf3Position);
-}
-
-void GameObject::MoveForward(float fDistance)
-{
-	XMFLOAT3 xmf3Position = GetPosition();
-	XMFLOAT3 xmf3Look = GetLook();
-	xmf3Position = Vector3::Add(xmf3Position, xmf3Look, fDistance);
-
-	GameObject::SetPosition(xmf3Position);
-}
-
-void GameObject::Rotate(float fPitch, float fYaw, float fRoll)
-{
-	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(fPitch), XMConvertToRadians(fYaw), XMConvertToRadians(fRoll));
-	localMatrix = Matrix4x4::Multiply(mtxRotate, localMatrix);
+	localTransform.SetPosition(x, y, z);
 
 	OnTransformUpdate();
 }
 
-void GameObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
+void GameObject::SetPosition(const XMFLOAT3& pos)
 {
-	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(pxmf3Axis), XMConvertToRadians(fAngle));
-	localMatrix = Matrix4x4::Multiply(mtxRotate, localMatrix);
+	localTransform.SetPosition(pos);
 
 	OnTransformUpdate();
 }
 
-void GameObject::Rotate(XMFLOAT4* pxmf4Quaternion)
+void GameObject::SetPosition(XMFLOAT3&& pos)
 {
-	XMMATRIX mtxRotate = XMMatrixRotationQuaternion(XMLoadFloat4(pxmf4Quaternion));
-	localMatrix = Matrix4x4::Multiply(mtxRotate, localMatrix);
+	localTransform.SetPosition(std::forward<XMFLOAT3>(pos));
+
+	OnTransformUpdate();
+}
+
+void GameObject::SetRotation(const XMFLOAT4X4& tfrm)
+{
+	localTransform.SetRotation(tfrm);
+
+	OnTransformUpdate();
+}
+
+void GameObject::SetRotation(XMFLOAT4X4&& tfrm)
+{
+	localTransform.SetRotation(std::forward<XMFLOAT4X4>(tfrm));
+
+	OnTransformUpdate();
+}
+
+void GameObject::Translate(float x, float y, float z)
+{
+	localTransform.Translate(x, y, z);
+
+	OnTransformUpdate();
+}
+
+void GameObject::Translate(const XMFLOAT3& shift)
+{
+	localTransform.Translate(shift);
+
+	OnTransformUpdate();
+}
+
+void GameObject::Translate(XMFLOAT3&& shift)
+{
+	localTransform.Translate(std::forward<XMFLOAT3>(shift));
+
+	OnTransformUpdate();
+}
+
+void GameObject::Move(const XMFLOAT3& dir, float distance)
+{
+	localTransform.Move(dir, distance);
+
+	OnTransformUpdate();
+}
+
+void GameObject::Move(XMFLOAT3&& dir, float distance)
+{
+	localTransform.Move(std::forward<XMFLOAT3>(dir), distance);
+
+	OnTransformUpdate();
+}
+
+void GameObject::MoveStrafe(float distance)
+{
+	localTransform.MoveStrafe(distance);
+
+	OnTransformUpdate();
+}
+
+void GameObject::MoveForward(float distance)
+{
+	localTransform.MoveForward(distance);
+
+	OnTransformUpdate();
+}
+
+void GameObject::MoveUp(float distance)
+{
+	localTransform.MoveUp(distance);
+
+	OnTransformUpdate();
+}
+
+void GameObject::Rotate(const XMFLOAT4X4& tfrm)
+{
+	localTransform.Rotate(tfrm);
+
+	OnTransformUpdate();
+}
+
+void GameObject::Rotate(XMFLOAT4X4 && tfrm)
+{
+	localTransform.Rotate(std::forward<XMFLOAT4X4>(tfrm));
+
+	OnTransformUpdate();
+}
+
+void GameObject::Rotate(float pitch, float yaw, float roll)
+{
+	localTransform.Rotate(pitch, yaw, roll);
+
+	OnTransformUpdate();
+}
+
+void GameObject::Rotate(const XMFLOAT3& axis, float angle)
+{
+	localTransform.Rotate(axis, angle);
+
+	OnTransformUpdate();
+}
+
+void GameObject::Rotate(const XMFLOAT4& quaternion)
+{
+	localTransform.Rotate(quaternion);
+
+	OnTransformUpdate();
+}
+
+void GameObject::Rotate(XMFLOAT4&& quaternion)
+{
+	localTransform.Rotate(std::forward<XMFLOAT4>(quaternion));
+
+	OnTransformUpdate();
+}
+
+void GameObject::LookTo(const XMFLOAT3& look, const XMFLOAT3& up)
+{
+	localTransform.LookTo(look, up);
+
+	OnTransformUpdate();
+}
+
+void GameObject::LookAt(const XMFLOAT3 & look, const XMFLOAT3 & up)
+{
+	localTransform.LookAt(look, up);
 
 	OnTransformUpdate();
 }
@@ -345,22 +440,22 @@ constexpr COLLISION_TAGS GameObject::GetTag() const noexcept
 
 XMFLOAT3 GameObject::GetPosition()
 {
-	return(XMFLOAT3(worldMatrix._41, worldMatrix._42, worldMatrix._43));
+	return XMFLOAT3(worldTransform.GetPosition());
 }
 
 XMFLOAT3 GameObject::GetLook()
 {
-	return(Vector3::Normalize(XMFLOAT3(worldMatrix._31, worldMatrix._32, worldMatrix._33)));
+	return XMFLOAT3(worldTransform.GetLook());
 }
 
 XMFLOAT3 GameObject::GetUp()
 {
-	return(Vector3::Normalize(XMFLOAT3(worldMatrix._21, worldMatrix._22, worldMatrix._23)));
+	return XMFLOAT3(worldTransform.GetUp());
 }
 
 XMFLOAT3 GameObject::GetRight()
 {
-	return(Vector3::Normalize(XMFLOAT3(worldMatrix._11, worldMatrix._12, worldMatrix._13)));
+	return XMFLOAT3(worldTransform.GetRight());
 }
 
 const GameObject* GameObject::FindFrame(const char* name) const
@@ -469,7 +564,7 @@ CRotatingObject::~CRotatingObject()
 
 void CRotatingObject::Update(float delta_time)
 {
-	GameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * delta_time);
+	GameObject::Rotate(m_xmf3RotationAxis, m_fRotationSpeed * delta_time);
 
 	GameObject::Update(delta_time);
 }

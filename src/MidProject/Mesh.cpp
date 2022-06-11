@@ -99,7 +99,7 @@ CMesh::~CMesh()
 	}
 }
 
-void CMesh::PrepareRender(P3DGrpCommandList cmdlist) const
+void CMesh::PrepareRendering(P3DGrpCommandList cmdlist) const
 {
 	cmdlist->IASetPrimitiveTopology(typePrimitive);
 	cmdlist->IASetVertexBuffers(m_nSlot, 1, &myPositionBufferView);
@@ -107,7 +107,7 @@ void CMesh::PrepareRender(P3DGrpCommandList cmdlist) const
 
 void CMesh::Render(P3DGrpCommandList cmdlist) const
 {
-	PrepareRender(cmdlist);
+	PrepareRendering(cmdlist);
 
 	if (0 < countPolygons)
 	{
@@ -213,7 +213,7 @@ void CDiffusedMesh::ReleaseUploadBuffers()
 	myUploadingColourBuffer = nullptr;
 }
 
-void CDiffusedMesh::PrepareRender(P3DGrpCommandList cmdlist) const
+void CDiffusedMesh::PrepareRendering(P3DGrpCommandList cmdlist) const
 {
 	auto& pipeline = Pipeline::diffusedShader;
 	if (!pipeline)
@@ -310,7 +310,7 @@ void CMaterialMesh::SetMaterial(int mat_index, CMaterial* material)
 
 void CMaterialMesh::Render(P3DGrpCommandList cmdlist) const
 {
-	PrepareRender(cmdlist);
+	PrepareRendering(cmdlist);
 
 	if (0 < countPolygons)
 	{
@@ -383,7 +383,7 @@ void CLightenMesh::ReleaseUploadBuffers()
 	myUploadingNormalBuffer = nullptr;
 }
 
-void CLightenMesh::PrepareRender(P3DGrpCommandList cmdlist) const
+void CLightenMesh::PrepareRendering(P3DGrpCommandList cmdlist) const
 {
 	cmdlist->IASetPrimitiveTopology(typePrimitive);
 
@@ -393,7 +393,7 @@ void CLightenMesh::PrepareRender(P3DGrpCommandList cmdlist) const
 
 void CLightenMesh::Render(P3DGrpCommandList cmdlist, int polygon_index) const
 {
-	PrepareRender(cmdlist);
+	PrepareRendering(cmdlist);
 
 	CMesh::Render(cmdlist, polygon_index);
 }

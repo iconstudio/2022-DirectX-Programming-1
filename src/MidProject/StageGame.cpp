@@ -153,10 +153,16 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	roadStartPoint = XMFLOAT3(roadWidth * 0.5f, 0.0f, -10.0f);
 	roadDestPoint = goal;
 
+	roadMesh = new CDiffusedMesh(device, cmdlist, &roadData);
+	if (!roadMesh)
+	{
+		throw "도로 생성 실패!";
+	}
+
 	myLights[5].m_bEnable = true;
 	myLights[5].m_nType = POINT_LIGHT;
 	myLights[5].m_fRange = 100.0f;
-	myLights[5].m_xmf4Ambient = XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f);
+	myLights[5].m_xmf4Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	myLights[5].m_xmf4Diffuse = XMFLOAT4(0.1f, 1.0f, 0.5f, 1.0f);
 	myLights[5].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
 	myLights[5].m_xmf3Position = XMFLOAT3(goal);
@@ -291,9 +297,6 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 
 	playerSpawnPoint = XMFLOAT3(width * 0.5f, 0.0f, -3.0f);
 
-	auto& illuminated_pipeline = Pipeline::illuminatedShader;
-	auto signature = illuminated_pipeline->GetRootSignature();
-
 	auto player = new CAirplanePlayer();
 	player->Awake(d3dDevice, d3dTaskList);
 	player->Attach(model_rallycar.get());
@@ -381,9 +384,11 @@ void StageGame::PrepareRendering()
 	IlluminatedScene::PrepareRendering();
 }
 
-void StageGame::Render()
+void StageGame::Render() const
 {
 	IlluminatedScene::Render();
+
+	roadMesh->Render(d3dTaskList);
 }
 
 void StageGame::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)

@@ -32,7 +32,7 @@ void StageGameEnd::Update(float delta_time)
 void StageGameEnd::PrepareRendering()
 {}
 
-void StageGameEnd::Render()
+void StageGameEnd::Render() const
 {}
 
 void StageGameEnd::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)

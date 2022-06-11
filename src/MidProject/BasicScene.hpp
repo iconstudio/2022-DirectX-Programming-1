@@ -17,7 +17,7 @@ public:
 	virtual void Reset() = 0;
 	virtual void Update(float delta_time) = 0;
 	virtual void PrepareRendering() = 0;
-	virtual void Render() = 0;
+	virtual void Render() const = 0;
 
 	virtual void OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info) = 0;
 	virtual void OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state) = 0;

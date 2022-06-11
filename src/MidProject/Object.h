@@ -27,7 +27,7 @@ public:
 	void EnumerateTransforms(XMFLOAT4X4&& parent);
 	void UpdateCollider();
 	virtual void PrepareRendering(P3DGrpCommandList cmdlist) const;
-	virtual void Render(P3DGrpCommandList cmdlist, GameCamera* camera = NULL) const;
+	virtual void Render(P3DGrpCommandList cmdlist, GameCamera* camera) const;
 	virtual void ReleaseUniforms();
 
 	bool CheckCollisionWith(GameObject* other) const;
@@ -39,6 +39,7 @@ public:
 
 	void SetMatrix(const XMFLOAT4X4& mat);
 	void SetMatrix(XMFLOAT4X4&& mat);
+	void SetScale(float x, float y, float z);
 	void SetPosition(float x, float y, float z);
 	void SetPosition(const XMFLOAT3& pos);
 	void SetPosition(XMFLOAT3&& pos);
@@ -58,12 +59,11 @@ public:
 	void Rotate(XMFLOAT4X4&& tfrm);
 	void Rotate(float pitch, float yaw, float roll);
 	void Rotate(const XMFLOAT3& axis, float angle);
+	void Rotate(const XMFLOAT4& quaternion);
+	void Rotate(XMFLOAT4&& quaternion);
 
 	void LookTo(const XMFLOAT3& look, const XMFLOAT3& up);
 	void LookAt(const XMFLOAT3& look, const XMFLOAT3& up);
-
-	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
-	void Rotate(XMFLOAT4* pxmf4Quaternion);
 
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();
@@ -82,8 +82,8 @@ public:
 
 	Transformer localTransform;
 	Transformer worldTransform;
-	XMFLOAT4X4& const localMatrix;
-	XMFLOAT4X4& const worldMatrix;
+	XMFLOAT4X4& localMatrix;
+	XMFLOAT4X4& worldMatrix;
 	bool isTransformModified;
 
 	CMaterialMesh* m_pMesh = nullptr;

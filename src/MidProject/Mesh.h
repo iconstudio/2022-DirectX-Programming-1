@@ -15,7 +15,7 @@ public:
 	const CPolygon& PolygonAt(const size_t index) const;
 	CPolygon& PolygonAt(const size_t index);
 
-	virtual void PrepareRender(P3DGrpCommandList cmdlist) const;
+	virtual void PrepareRendering(P3DGrpCommandList cmdlist) const;
 	virtual void Render(P3DGrpCommandList cmdlist) const;
 	virtual void Render(P3DGrpCommandList cmdlist, int polygon_index) const;
 
@@ -57,7 +57,7 @@ public:
 
 	void ReleaseUploadBuffers() override;
 
-	void PrepareRender(P3DGrpCommandList cmdlist) const override;
+	void PrepareRendering(P3DGrpCommandList cmdlist) const override;
 
 protected:
 	ID3D12Resource* myColourBuffer;
@@ -91,7 +91,7 @@ public:
 
 	void ReleaseUploadBuffers() override;
 
-	void PrepareRender(P3DGrpCommandList cmdlist) const override;
+	void PrepareRendering(P3DGrpCommandList cmdlist) const override;
 	void Render(P3DGrpCommandList cmdlist, int polygon_index) const override;
 
 protected:

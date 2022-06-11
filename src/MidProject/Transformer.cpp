@@ -3,11 +3,11 @@
 #include "Arithmetics.hpp"
 
 Transformer::Transformer()
-	: World(Matrix4x4::Identity())
-	, myRight(World._11, World._12, World._13)
-	, myUp(World._21, World._22, World._23)
-	, myLook(World._31, World._32, World._33)
-	, myPosition(World._41, World._42, World._43)
+	: myMatrix(Matrix4x4::Identity())
+	, myRight(myMatrix._11, myMatrix._12, myMatrix._13)
+	, myUp(myMatrix._21, myMatrix._22, myMatrix._23)
+	, myLook(myMatrix._31, myMatrix._32, myMatrix._33)
+	, myPosition(myMatrix._41, myMatrix._42, myMatrix._43)
 	, Updated(false)
 {
 	myRight = Transformer::Right;
@@ -18,14 +18,20 @@ Transformer::Transformer()
 Transformer::~Transformer()
 {}
 
-void Transformer::SetWorldMatrix(const XMFLOAT4X4& mat)
+void Transformer::SetMatrix(const XMFLOAT4X4& mat)
 {
-	World = mat;
+	myMatrix = mat;
 }
 
-void Transformer::SetWorldMatrix(XMFLOAT4X4&& mat)
+void Transformer::SetMatrix(XMFLOAT4X4&& mat)
 {
-	World = std::forward<XMFLOAT4X4>(mat);
+	myMatrix = std::forward<XMFLOAT4X4>(mat);
+}
+
+void Transformer::SetScale(float x, float y, float z)
+{
+	auto mtxScale = XMMatrixScaling(x, y, z);
+	myMatrix = Matrix4x4::Multiply(mtxScale, myMatrix);
 }
 
 void Transformer::SetPosition(float x, float y, float z)
@@ -93,9 +99,9 @@ void Transformer::Translate(const XMFLOAT3& shift)
 
 void Transformer::Translate(XMFLOAT3&& shift)
 {
-	myPosition.x += shift.x;
-	myPosition.y += shift.y;
-	myPosition.z += shift.z;
+	myPosition.x += std::forward<float>(shift.x);
+	myPosition.y += std::forward<float>(shift.y);
+	myPosition.z += std::forward<float>(shift.z);
 }
 
 void Transformer::Move(const XMFLOAT3& dir, float distance)
@@ -139,13 +145,25 @@ void Transformer::Rotate(const XMFLOAT4X4& tfrm)
 }
 
 void Transformer::Rotate(XMFLOAT4X4&& tfrm)
-{}
+{
+	myRight.x += std::forward<float>(tfrm._11);
+	myRight.y += std::forward<float>(tfrm._12);
+	myRight.z += std::forward<float>(tfrm._13);
+
+	myUp.x += std::forward<float>(tfrm._21);
+	myUp.y += std::forward<float>(tfrm._22);
+	myUp.z += std::forward<float>(tfrm._23);
+
+	myLook.x += std::forward<float>(tfrm._31);
+	myLook.y += std::forward<float>(tfrm._32);
+	myLook.z += std::forward<float>(tfrm._33);
+}
 
 void Transformer::Rotate(float pitch, float yaw, float roll)
 {
 	XMFLOAT4X4 mtxRotate = Matrix4x4::RotationYawPitchRoll(pitch, yaw, roll);
 
-	World = Matrix4x4::Multiply(mtxRotate, World);
+	myMatrix = Matrix4x4::Multiply(mtxRotate, myMatrix);
 
 	myRight = Vector3::Normalize(XMFLOAT3(myRight));
 	myUp = Vector3::Normalize(XMFLOAT3(myUp));
@@ -157,20 +175,34 @@ void Transformer::Rotate(const XMFLOAT3& axis, float angle)
 {
 	XMFLOAT4X4 mtxRotate = Matrix4x4::RotationAxis(axis, angle);
 
-	World = Matrix4x4::Multiply(mtxRotate, World);
+	myMatrix = Matrix4x4::Multiply(mtxRotate, myMatrix);
 
 	myRight = Vector3::Normalize(XMFLOAT3(myRight));
 	myUp = Vector3::Normalize(XMFLOAT3(myUp));
 	myLook = Vector3::Normalize(XMFLOAT3(myLook));
 }
 
+void Transformer::Rotate(const XMFLOAT4& quaternion)
+{
+	auto mid = XMLoadFloat4(&quaternion);
+	auto mtxRotate = XMMatrixRotationQuaternion(mid);
+	myMatrix = Matrix4x4::Multiply(mtxRotate, myMatrix);
+}
+
+void Transformer::Rotate(XMFLOAT4&& quaternion)
+{
+	auto mid = XMLoadFloat4(std::forward<XMFLOAT4*>(&quaternion));
+	auto mtxRotate = XMMatrixRotationQuaternion(mid);
+	myMatrix = Matrix4x4::Multiply(mtxRotate, myMatrix);
+}
+
 void Transformer::LookTo(const XMFLOAT3& look, const XMFLOAT3& up)
 {
 	const auto&& view = Matrix4x4::LookToLH(XMFLOAT3(GetPosition()), look, up);
 
-	World._11 = view._11; World._12 = view._21; World._13 = view._31;
-	World._21 = view._12; World._22 = view._22; World._23 = view._32;
-	World._31 = view._13; World._32 = view._23; World._33 = view._33;
+	myMatrix._11 = view._11; myMatrix._12 = view._21; myMatrix._13 = view._31;
+	myMatrix._21 = view._12; myMatrix._22 = view._22; myMatrix._23 = view._32;
+	myMatrix._31 = view._13; myMatrix._32 = view._23; myMatrix._33 = view._33;
 
 	myRight = Vector3::Normalize(XMFLOAT3(myRight));
 	myUp = Vector3::Normalize(XMFLOAT3(myUp));
@@ -181,9 +213,9 @@ void Transformer::LookAt(const XMFLOAT3& look, const XMFLOAT3& up)
 {
 	const auto&& view = Matrix4x4::LookAtLH(XMFLOAT3(GetPosition()), look, up);
 
-	World._11 = view._11; World._12 = view._21; World._13 = view._31;
-	World._21 = view._12; World._22 = view._22; World._23 = view._32;
-	World._31 = view._13; World._32 = view._23; World._33 = view._33;
+	myMatrix._11 = view._11; myMatrix._12 = view._21; myMatrix._13 = view._31;
+	myMatrix._21 = view._12; myMatrix._22 = view._22; myMatrix._23 = view._32;
+	myMatrix._31 = view._13; myMatrix._32 = view._23; myMatrix._33 = view._33;
 
 	myRight = Vector3::Normalize(XMFLOAT3(myRight));
 	myUp = Vector3::Normalize(XMFLOAT3(myUp));
@@ -192,12 +224,12 @@ void Transformer::LookAt(const XMFLOAT3& look, const XMFLOAT3& up)
 
 XMFLOAT4X4& Transformer::GetMatrix()
 {
-	return World;
+	return myMatrix;
 }
 
 const XMFLOAT4X4& Transformer::GetMatrix() const
 {
-	return World;
+	return myMatrix;
 }
 
 XYZWrapper& Transformer::GetRight()

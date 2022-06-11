@@ -100,7 +100,7 @@ void IlluminatedScene::PrepareRendering()
 	memcpy(&myStaticLights->m_nLights, &numberLights, sizeof(int));
 }
 
-void IlluminatedScene::Render()
+void IlluminatedScene::Render() const
 {
 	if (!myCamera)
 	{

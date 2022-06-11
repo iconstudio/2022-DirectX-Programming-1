@@ -56,6 +56,11 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance);
 
 		Move(xmf3Shift, bUpdateVelocity);
+		if (!bUpdateVelocity)
+		{
+			myCamera->Move(xmf3Shift);
+			OnTransformUpdate();
+		}
 	}
 }
 
