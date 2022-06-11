@@ -10,6 +10,15 @@ public:
 
 	void ReservePolygons(const size_t count);
 
+	template<typename VertexType>
+		requires(std::is_base_of_v<CVertex, VertexType>)
+	constexpr void AddVertex(const VertexType& vbo);
+	template<typename VertexType>
+		requires(std::is_base_of_v<CVertex, VertexType>)
+	constexpr void AddVertex(VertexType&& vbo);
+	void AddPolygon(const CPolygon& polygon);
+	void AddPolygon(CPolygon&& polygon);
+
 	const CPolygon& PolygonAt(const size_t index) const;
 	CPolygon& PolygonAt(const size_t index);
 
@@ -32,14 +41,70 @@ public:
 	std::vector<CPolygon> myPolygons;
 };
 
-class RawDiffusedMesh : public RawMesh
+template<typename VertexType>
+	requires(std::is_base_of_v<CVertex, VertexType>)
+constexpr void RawMesh::AddVertex(const VertexType& vbo)
 {
-public:
+	if constexpr (std::is_same_v<VertexType, CVertex>)
+	{
+		countVertices++;
 
-};
+		myPositions.push_back(vbo.myPosition);
+	}
+	else if constexpr (std::is_same_v<VertexType, CDiffusedVertex>)
+	{
+		countVertices++;
 
-class RawLightenMesh : public RawMesh
+		myPositions.push_back(vbo.myPosition);
+		myPositions.push_back(vbo.myColour);
+	}
+	else if constexpr (std::is_same_v<VertexType, CLightenVertex>)
+	{
+		countVertices++;
+
+		myPositions.push_back(vbo.myPosition);
+		myPositions.push_back(vbo.myNormal);
+	}
+	else
+	{
+		countVertices++;
+
+		myPositions.push_back(vbo.myPosition);
+		myPositions.push_back(vbo.myNormal);
+		myPositions.push_back(vbo.myColour);
+	}
+}
+
+template<typename VertexType>
+	requires(std::is_base_of_v<CVertex, VertexType>)
+constexpr void RawMesh::AddVertex(VertexType&& vbo)
 {
-public:
+	if constexpr (std::is_same_v<VertexType, CVertex>)
+	{
+		countVertices++;
 
-};
+		myPositions.push_back(std::forward<XMFLOAT3>(vbo.myPosition));
+	}
+	else if constexpr (std::is_same_v<VertexType, CDiffusedVertex>)
+	{
+		countVertices++;
+
+		myPositions.push_back(std::forward<XMFLOAT3>(vbo.myPosition));
+		myPositions.push_back(std::forward<XMFLOAT4>(vbo.myColour));
+	}
+	else if constexpr (std::is_same_v<VertexType, CLightenVertex>)
+	{
+		countVertices++;
+
+		myPositions.push_back(std::forward<XMFLOAT3>(vbo.myPosition));
+		myPositions.push_back(std::forward<XMFLOAT3>(vbo.myNormal));
+	}
+	else
+	{
+		countVertices++;
+
+		myPositions.push_back(std::forward<XMFLOAT3>(vbo.myPosition));
+		myPositions.push_back(std::forward<XMFLOAT4>(vbo.myColour));
+		myPositions.push_back(std::forward<XMFLOAT3>(vbo.myNormal));
+	}
+}

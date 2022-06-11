@@ -7,6 +7,7 @@
 #include "Obstacles.hpp"
 #include "Arithmetics.hpp"
 #include "Mesh.h"
+#include "Vertex.hpp"
 
 float MakeRandom()
 {
@@ -152,6 +153,10 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	// 도로 생성
 	roadStartPoint = XMFLOAT3(roadWidth * 0.5f, 0.0f, -10.0f);
 	roadDestPoint = goal;
+
+	constexpr auto black = XMFLOAT4{ 0.0f, 0.0f, 0.0f, 1.0f };
+	const auto b = black.x;
+	roadData.AddVertex(CDiffusedVertex({ 0.0f, 0.0f, 0.0f }, black));
 
 	roadMesh = new CDiffusedMesh(device, cmdlist, &roadData);
 	if (!roadMesh)
