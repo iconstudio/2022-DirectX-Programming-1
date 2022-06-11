@@ -63,7 +63,6 @@ void IlluminatedScene::Update(float delta_time)
 	if (myPlayer)
 	{
 		myPlayer->Animate(delta_time, nullptr);
-		myPlayer->Update(delta_time);
 
 		if (myLights)
 		{

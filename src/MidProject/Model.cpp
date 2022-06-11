@@ -1,7 +1,7 @@
 #include "pch.hpp"
 #include "RawMesh.hpp"
 #include "Model.hpp"
-#include "Pipeline.hpp"
+#include "Mesh.h"
 
 Model* Model::Load(ID3D12Device* device
 	, ID3D12GraphicsCommandList* cmdlist
@@ -231,15 +231,19 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 	Model* root = nullptr;
 	CLightenMesh* mesh = nullptr;
 
-	for (; ; )
+	while (true)
 	{
-		::ReadStringFromFile(pfile, token);
+		ReadStringFromFile(pfile, token);
 		if (!strcmp(token, "<Frame>:"))
 		{
 			root = new Model();
 
-			nFrame = ::ReadIntegerFromFile(pfile);
-			::ReadStringFromFile(pfile, root->m_pstrFrameName);
+			nFrame = ReadIntegerFromFile(pfile);
+
+			char name[64]{};
+			ReadStringFromFile(pfile, name);
+
+			root->myName = name;
 		}
 		else if (!strcmp(token, "<Transform>:"))
 		{

@@ -1,5 +1,8 @@
 #pragma once
 #include "Object.h"
+#include "RawMesh.hpp"
+#include "Material.hpp"
+#include "Pipeline.hpp"
 
 class Model : public GameObject
 {

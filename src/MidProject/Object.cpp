@@ -1,19 +1,18 @@
 #include "pch.hpp"
 #include "Object.h"
-#include "Material.hpp"
 #include "Pipeline.hpp"
 #include "Arithmetics.hpp"
+#include "Mesh.h"
 
 WCHAR debug_frame_info[256]{};
 
 GameObject::GameObject()
-	: m_pstrFrameName()
+	: myName()
+	, myTransform()
 	, localTransform(Matrix4x4::Identity()), worldTransform(Matrix4x4::Identity())
 	, isTransformModified(true)
 	, staticCollider(nullptr), myCollider(nullptr)
-{
-	ZeroMemory(m_pstrFrameName, sizeof(m_pstrFrameName));
-}
+{}
 
 GameObject::~GameObject()
 {
@@ -86,6 +85,8 @@ void GameObject::Animate(float time_elapsed, XMFLOAT4X4* parent)
 		EnumerateTransforms(parent);
 		isTransformModified = false;
 	}
+
+	Update(time_elapsed);
 
 	if (mySibling)
 	{
@@ -300,7 +301,7 @@ XMFLOAT3 GameObject::GetRight()
 
 const GameObject* GameObject::FindFrame(const char* name) const
 {
-	if (0 == strcmp(m_pstrFrameName, name))
+	if (name == myName)
 	{
 		return this;
 	}
@@ -322,7 +323,7 @@ const GameObject* GameObject::FindFrame(const char* name) const
 
 GameObject* GameObject::FindFrame(const char* name)
 {
-	if (0 == strcmp(m_pstrFrameName, name))
+	if (name == myName)
 	{
 		return this;
 	}
@@ -350,6 +351,11 @@ const GameObject* GameObject::GetParent() const
 GameObject* GameObject::GetParent()
 {
 	return m_pParent;
+}
+
+UINT GameObject::GetMeshType() const
+{
+	return (m_pMesh) ? m_pMesh->GetType() : 0;
 }
 
 void GameObject::PrintFrameInfo() const

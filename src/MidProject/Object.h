@@ -1,7 +1,5 @@
 #pragma once
-#include "Mesh.h"
-#include "Material.hpp"
-#include "Camera.h"
+#include "Transformer.hpp"
 
 enum class COLLISION_TAGS
 {
@@ -61,13 +59,14 @@ public:
 	GameObject* FindFrame(const char* name);
 	const GameObject* GetParent() const;
 	GameObject* GetParent();
-	UINT GetMeshType() { return((m_pMesh) ? m_pMesh->GetType() : 0); }
+	UINT GetMeshType() const;
 
 	void PrintFrameInfo() const;
 	void PrintFrameInfo(const GameObject* parent) const;
 
-	char m_pstrFrameName[256];
+	std::string myName;
 
+	Transformer myTransform;
 	XMFLOAT4X4 localTransform;
 	XMFLOAT4X4 worldTransform;
 	bool isTransformModified;

@@ -423,7 +423,6 @@ void CAirplanePlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	}
 
 	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
-	EnumerateTransforms(pxmf4x4Parent);
 }
 
 void CAirplanePlayer::PrepareRendering(P3DGrpCommandList cmdlist) const

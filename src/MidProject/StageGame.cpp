@@ -6,6 +6,7 @@
 #include "Terrains.hpp"
 #include "Obstacles.hpp"
 #include "Arithmetics.hpp"
+#include "Mesh.h"
 
 float MakeRandom()
 {

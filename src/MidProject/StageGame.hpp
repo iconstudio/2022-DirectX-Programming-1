@@ -1,5 +1,6 @@
 #pragma once
 #include "IlluminatedScene.hpp"
+#include "RawMesh.hpp"
 
 class StageGame : public IlluminatedScene
 {
