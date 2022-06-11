@@ -52,7 +52,7 @@ RawMesh* Model::LoadRawMesh(FILE* mfile)
 	int nPositions = 0, nColors = 0, nNormals = 0, nIndices = 0, nSubMeshes = 0, nSubIndices = 0;
 
 	auto raw_mesh = new RawMesh;
-	raw_mesh->m_nVertices = ReadIntegerFromFile(mfile);
+	raw_mesh->countVertices = ReadIntegerFromFile(mfile);
 	ReadStringFromFile(mfile, raw_mesh->m_pstrMeshName);
 
 	while (true)
@@ -69,7 +69,7 @@ RawMesh* Model::LoadRawMesh(FILE* mfile)
 			nPositions = ::ReadIntegerFromFile(mfile);
 			if (nPositions > 0)
 			{
-				raw_mesh->m_nType |= VERTEXT_POSITION;
+				raw_mesh->myVertexType |= VERTEXT_POSITION;
 				raw_mesh->m_pxmf3Positions = new XMFLOAT3[nPositions];
 				fread(raw_mesh->m_pxmf3Positions, sizeof(XMFLOAT3), nPositions, mfile);
 			}
@@ -79,7 +79,7 @@ RawMesh* Model::LoadRawMesh(FILE* mfile)
 			nColors = ::ReadIntegerFromFile(mfile);
 			if (nColors > 0)
 			{
-				raw_mesh->m_nType |= VERTEXT_COLOR;
+				raw_mesh->myVertexType |= VERTEXT_COLOR;
 				raw_mesh->m_pxmf4Colors = new XMFLOAT4[nColors];
 				fread(raw_mesh->m_pxmf4Colors, sizeof(XMFLOAT4), nColors, mfile);
 			}
@@ -89,7 +89,7 @@ RawMesh* Model::LoadRawMesh(FILE* mfile)
 			nNormals = ::ReadIntegerFromFile(mfile);
 			if (nNormals > 0)
 			{
-				raw_mesh->m_nType |= VERTEXT_NORMAL;
+				raw_mesh->myVertexType |= VERTEXT_NORMAL;
 				raw_mesh->m_pxmf3Normals = new XMFLOAT3[nNormals];
 				fread(raw_mesh->m_pxmf3Normals, sizeof(XMFLOAT3), nNormals, mfile);
 			}
@@ -276,7 +276,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 
 			if (raw_mesh)
 			{
-				if (raw_mesh->m_nType & VERTEXT_NORMAL)
+				if (raw_mesh->myVertexType & VERTEXT_NORMAL)
 				{
 					mesh = new CLightenMesh(device, cmdlist, raw_mesh);
 				}

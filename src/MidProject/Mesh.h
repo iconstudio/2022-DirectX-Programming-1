@@ -7,6 +7,7 @@ class CMesh
 {
 public:
 	CMesh();
+	CMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw);
 	virtual ~CMesh();
 
 	virtual void ReleaseUploadBuffers();
@@ -21,21 +22,20 @@ public:
 	UINT GetType() const;
 
 protected:
-	D3D12_PRIMITIVE_TOPOLOGY typePrimitive = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	UINT m_nSlot = 0;
-	UINT m_nOffset = 0;
-	UINT m_nType = 0;
+	UINT myVertexType;
+	D3D12_PRIMITIVE_TOPOLOGY typePrimitive;
+	UINT m_nSlot;
+	UINT m_nOffset;
 
+	UINT countVertices;
 	std::vector<CVertex*> myVertices;
 
-	UINT m_nVertices = 0;
+	size_t countPolygons;
+	std::vector<CPolygon> myPolygons;
+
 	ID3D12Resource* myPositionBuffer;
 	D3D12_VERTEX_BUFFER_VIEW myPositionBufferView;
 	ID3D12Resource* myUploadingPositonBuffer;
-
-	int countPolygons = 0;
-	//int* countPolygonIndices = NULL;
-	std::vector<CPolygon> myPolygons;
 
 	ID3D12Resource** myIndexBuffers = NULL;
 	D3D12_INDEX_BUFFER_VIEW* myIndexBufferViews = NULL;
@@ -53,11 +53,11 @@ class CDiffusedMesh : public CMesh
 {
 public:
 	CDiffusedMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw);
-	virtual ~CDiffusedMesh();
+	~CDiffusedMesh();
 
-	virtual void ReleaseUploadBuffers();
+	void ReleaseUploadBuffers() override;
 
-	virtual void PrepareRender(P3DGrpCommandList cmdlist) const;
+	void PrepareRender(P3DGrpCommandList cmdlist) const override;
 
 protected:
 	ID3D12Resource* myColourBuffer;
@@ -77,11 +77,9 @@ public:
 	void AssignMaterial(std::vector<RawMaterial*> list, Pipeline* pipeline);
 	void SetMaterial(int mat_index, CMaterial* material);
 
-	virtual void ReleaseUploadBuffers();
+	virtual void Render(P3DGrpCommandList cmdlist) const override;
 
-	virtual void Render(P3DGrpCommandList cmdlist) const;
-
-	CMaterial* myDefaultMaterial;
+	shared_ptr<CMaterial> myDefaultMaterial;
 	std::vector<CMaterial*> myMaterials;
 };
 
@@ -89,12 +87,12 @@ class CLightenMesh : public CMaterialMesh
 {
 public:
 	CLightenMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* pMeshInfo);
-	virtual ~CLightenMesh();
+	~CLightenMesh();
 
-	virtual void ReleaseUploadBuffers();
+	void ReleaseUploadBuffers() override;
 
-	virtual void PrepareRender(P3DGrpCommandList cmdlist) const;
-	virtual void Render(P3DGrpCommandList cmdlist, int polygon_index) const;
+	void PrepareRender(P3DGrpCommandList cmdlist) const override;
+	void Render(P3DGrpCommandList cmdlist, int polygon_index) const override;
 
 protected:
 	ID3D12Resource* myNormalBuffer = NULL;

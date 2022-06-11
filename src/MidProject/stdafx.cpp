@@ -40,7 +40,7 @@ BYTE ReadStringFromFile(FILE* file, char* token)
 }
 
 ID3D12Resource* CreateBufferResource(P3DDevice device, P3DGrpCommandList cmdlist
-	, const void* data, UINT data_sz
+	, const void* data, const size_t data_sz
 	, D3D12_HEAP_TYPE type
 	, D3D12_RESOURCE_STATES states
 	, ID3D12Resource** upload_buffer)

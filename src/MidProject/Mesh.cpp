@@ -5,8 +5,64 @@
 #include "Pipeline.hpp"
 
 CMesh::CMesh()
-	: myPositionBuffer(nullptr), myPositionBufferView(), myUploadingPositonBuffer(nullptr)
+	: myVertexType(0), typePrimitive(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST)
+	, m_nSlot(0), m_nOffset()
+	, countVertices(0), myVertices()
+	, countPolygons(0), myPolygons()
+	, myPositionBuffer(nullptr), myPositionBufferView(), myUploadingPositonBuffer(nullptr)
 {}
+
+CMesh::CMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh * raw)
+	: CMesh()
+{
+	countVertices = raw->countVertices;
+	myVertexType = raw->myVertexType;
+
+	constexpr auto pos_obj_sz = sizeof(XMFLOAT3);
+	const auto pos_sz = pos_obj_sz * countVertices;
+	myPositionBuffer = CreateBufferResource(device, cmdlist
+		, raw->m_pxmf3Positions, pos_sz
+		, D3D12_HEAP_TYPE_DEFAULT
+		, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
+		, &myUploadingPositonBuffer);
+
+	myPositionBufferView.BufferLocation = myPositionBuffer->GetGPUVirtualAddress();
+	myPositionBufferView.StrideInBytes = pos_obj_sz;
+	myPositionBufferView.SizeInBytes = static_cast<UINT>(pos_sz);
+
+	countPolygons = raw->countPolygons;
+	if (0 < countPolygons)
+	{
+		// 통째로 복사
+		myPolygons = raw->myPolygons;
+
+		myIndexBuffers = new ID3D12Resource * [countPolygons];
+		myUploadingIndexBuffer = new ID3D12Resource * [countPolygons];
+		myIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[countPolygons];
+
+		//countPolygonIndices = new int[countPolygons];
+
+		for (int i = 0; i < countPolygons; i++)
+		{
+			const auto& polygon = myPolygons.at(i);
+			const auto index_count = polygon.GetSize();
+			const auto indice_size = sizeof(UINT) * index_count;
+			const auto indice_blob = reinterpret_cast<const void*>(polygon.GetData());
+
+			// countPolygonIndices[i] = raw->countPolygonIndices[i];
+			// raw->indexByPolygons[i]
+			myIndexBuffers[i] = CreateBufferResource(device, cmdlist
+				, indice_blob, indice_size
+				, D3D12_HEAP_TYPE_DEFAULT
+				, D3D12_RESOURCE_STATE_INDEX_BUFFER
+				, &myUploadingIndexBuffer[i]);
+
+			myIndexBufferViews[i].BufferLocation = myIndexBuffers[i]->GetGPUVirtualAddress();
+			myIndexBufferViews[i].Format = DXGI_FORMAT_R32_UINT;
+			myIndexBufferViews[i].SizeInBytes = static_cast<UINT>(indice_size);
+		}
+	}
+}
 
 CMesh::~CMesh()
 {
@@ -37,11 +93,6 @@ CMesh::~CMesh()
 	{
 		delete[] myIndexBufferViews;
 	}
-
-	//if (countPolygonIndices)
-	{
-	//	delete[] countPolygonIndices;
-	}
 }
 
 void CMesh::PrepareRender(P3DGrpCommandList cmdlist) const
@@ -69,11 +120,10 @@ void CMesh::Render(P3DGrpCommandList cmdlist, int polygon_index) const
 	{
 		cmdlist->IASetIndexBuffer(&(myIndexBufferViews[polygon_index]));
 		PolygonAt(polygon_index).Render(cmdlist);
-		//cmdlist->DrawIndexedInstanced(countPolygonIndices[polygon_index], 1, 0, 0, 0);
 	}
 	else
 	{
-		cmdlist->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
+		cmdlist->DrawInstanced(countVertices, 1, m_nOffset, 0);
 	}
 }
 
@@ -115,30 +165,15 @@ CPolygon& CMesh::PolygonAt(const size_t index)
 
 UINT CMesh::GetType() const
 {
-	return m_nType;
+	return myVertexType;
 }
 
 CDiffusedMesh::CDiffusedMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw)
-	: CMesh()
+	: CMesh(device, cmdlist, raw)
 	, myColourBuffer(nullptr), myColourBufferView(), myUploadingColourBuffer()
 {
-	m_nVertices = raw->m_nVertices;
-	m_nType = raw->m_nType;
-
-	constexpr auto pos_obj_sz = sizeof(XMFLOAT3);
-	const auto pos_sz = pos_obj_sz * m_nVertices;
-	myPositionBuffer = CreateBufferResource(device, cmdlist
-		, raw->m_pxmf3Positions, pos_sz
-		, D3D12_HEAP_TYPE_DEFAULT
-		, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
-		, &myUploadingPositonBuffer);
-
-	myPositionBufferView.BufferLocation = myPositionBuffer->GetGPUVirtualAddress();
-	myPositionBufferView.StrideInBytes = pos_obj_sz;
-	myPositionBufferView.SizeInBytes = pos_sz;
-
 	constexpr auto col_obj_sz = sizeof(XMFLOAT4);
-	const auto col_sz = col_obj_sz * m_nVertices;
+	const auto col_sz = col_obj_sz * countVertices;
 	myColourBuffer = CreateBufferResource(device, cmdlist
 		, raw->m_pxmf4Colors, col_sz
 		, D3D12_HEAP_TYPE_DEFAULT
@@ -147,44 +182,17 @@ CDiffusedMesh::CDiffusedMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMes
 
 	myColourBufferView.BufferLocation = myColourBuffer->GetGPUVirtualAddress();
 	myColourBufferView.StrideInBytes = col_obj_sz;
-	myColourBufferView.SizeInBytes = col_sz;
-
-	countPolygons = raw->countPolygons;
-	if (countPolygons > 0)
-	{
-		// 통째로 복사
-		myPolygons = raw->myPolygons;
-
-		myIndexBuffers = new ID3D12Resource * [countPolygons];
-		myUploadingIndexBuffer = new ID3D12Resource * [countPolygons];
-		myIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[countPolygons];
-
-		//countPolygonIndices = new int[countPolygons];
-
-		for (int i = 0; i < countPolygons; i++)
-		{
-			const auto& polygon = myPolygons.at(i);
-			const auto index_count = polygon.GetSize();
-			const auto indice_size = sizeof(UINT) * index_count;
-			const auto indice_blob = reinterpret_cast<const void*>(polygon.GetData());
-
-			// countPolygonIndices[i] = raw->countPolygonIndices[i];
-			// raw->indexByPolygons[i]
-			myIndexBuffers[i] = CreateBufferResource(device, cmdlist
-				, indice_blob, indice_size
-				, D3D12_HEAP_TYPE_DEFAULT
-				, D3D12_RESOURCE_STATE_INDEX_BUFFER
-				, &myUploadingIndexBuffer[i]);
-
-			myIndexBufferViews[i].BufferLocation = myIndexBuffers[i]->GetGPUVirtualAddress();
-			myIndexBufferViews[i].Format = DXGI_FORMAT_R32_UINT;
-			myIndexBufferViews[i].SizeInBytes = indice_size;
-		}
-	}
+	myColourBufferView.SizeInBytes = static_cast<UINT>(col_sz);
 }
 
 CDiffusedMesh::~CDiffusedMesh()
-{}
+{
+	if (myColourBuffer)
+	{
+		myColourBuffer->Release();
+		myColourBuffer = nullptr;
+	}
+}
 
 void CDiffusedMesh::ReleaseUploadBuffers()
 {
@@ -212,51 +220,9 @@ void CDiffusedMesh::PrepareRender(P3DGrpCommandList cmdlist) const
 }
 
 CMaterialMesh::CMaterialMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw)
-	: CMesh()
+	: CMesh(device, cmdlist, raw)
 	, myDefaultMaterial(nullptr), myMaterials()
-{
-	m_nVertices = raw->m_nVertices;
-	m_nType = raw->m_nType;
-
-	myPositionBuffer = CreateBufferResource(device, cmdlist, raw->m_pxmf3Positions, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &myUploadingPositonBuffer);
-
-	myPositionBufferView.BufferLocation = myPositionBuffer->GetGPUVirtualAddress();
-	myPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
-	myPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
-
-	countPolygons = raw->countPolygons;
-	if (0 < countPolygons)
-	{
-		// 통째로 복사
-		myPolygons = raw->myPolygons;
-
-		myIndexBuffers = new ID3D12Resource*[countPolygons];
-		myUploadingIndexBuffer = new ID3D12Resource*[countPolygons];
-		myIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[countPolygons];
-
-		//countPolygonIndices = new int[countPolygons];
-
-		for (int i = 0; i < countPolygons; i++)
-		{
-			const auto& polygon = myPolygons.at(i);
-			const auto index_count = polygon.GetSize();
-			const auto indice_size = sizeof(UINT) * index_count;
-			const auto indice_blob = reinterpret_cast<const void*>(polygon.GetData());
-
-			// countPolygonIndices[i] = raw->countPolygonIndices[i];
-			// raw->indexByPolygons[i]
-			myIndexBuffers[i] = CreateBufferResource(device, cmdlist
-				, indice_blob, indice_size
-				, D3D12_HEAP_TYPE_DEFAULT
-				, D3D12_RESOURCE_STATE_INDEX_BUFFER
-				, &myUploadingIndexBuffer[i]);
-
-			myIndexBufferViews[i].BufferLocation = myIndexBuffers[i]->GetGPUVirtualAddress();
-			myIndexBufferViews[i].Format = DXGI_FORMAT_R32_UINT;
-			myIndexBufferViews[i].SizeInBytes = indice_size;
-		}
-	}
-}
+{}
 
 CMaterialMesh::~CMaterialMesh()
 {
@@ -266,11 +232,6 @@ CMaterialMesh::~CMaterialMesh()
 			, [](CMaterial* mat) {
 				mat->Release();
 			});
-	}
-
-	if (myDefaultMaterial)
-	{
-		myDefaultMaterial->Release();
 	}
 }
 
@@ -339,11 +300,6 @@ void CMaterialMesh::SetMaterial(int mat_index, CMaterial* material)
 	}
 }
 
-void CMaterialMesh::ReleaseUploadBuffers()
-{
-	CMesh::ReleaseUploadBuffers();
-}
-
 void CMaterialMesh::Render(P3DGrpCommandList cmdlist) const
 {
 	PrepareRender(cmdlist);
@@ -357,7 +313,7 @@ void CMaterialMesh::Render(P3DGrpCommandList cmdlist) const
 			auto proceed_mat = material;
 			if (!material)
 			{
-				proceed_mat = myDefaultMaterial;
+				proceed_mat = myDefaultMaterial.get();
 			}
 
 			if (proceed_mat)
@@ -380,14 +336,18 @@ void CMaterialMesh::Render(P3DGrpCommandList cmdlist) const
 	}
 }
 
-CLightenMesh::CLightenMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* pMeshInfo)
-	: CMaterialMesh(device, cmdlist, pMeshInfo)
+CLightenMesh::CLightenMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw_mesh)
+	: CMaterialMesh(device, cmdlist, raw_mesh)
 {
-	myNormalBuffer = ::CreateBufferResource(device, cmdlist, pMeshInfo->m_pxmf3Normals, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &myUploadingNormalBuffer);
+	myNormalBuffer = ::CreateBufferResource(device, cmdlist
+		, raw_mesh->m_pxmf3Normals, sizeof(XMFLOAT3) * countVertices
+		, D3D12_HEAP_TYPE_DEFAULT
+		, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
+		, &myUploadingNormalBuffer);
 
 	myNormalBufferView.BufferLocation = myNormalBuffer->GetGPUVirtualAddress();
 	myNormalBufferView.StrideInBytes = sizeof(XMFLOAT3);
-	myNormalBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+	myNormalBufferView.SizeInBytes = sizeof(XMFLOAT3) * countVertices;
 }
 
 CLightenMesh::~CLightenMesh()
@@ -421,14 +381,5 @@ void CLightenMesh::Render(P3DGrpCommandList cmdlist, int polygon_index) const
 {
 	PrepareRender(cmdlist);
 
-	if (0 < countPolygons && polygon_index < countPolygons)
-	{
-		cmdlist->IASetIndexBuffer(&(myIndexBufferViews[polygon_index]));
-		PolygonAt(polygon_index).Render(cmdlist);
-		//cmdlist->DrawIndexedInstanced(countPolygonIndices[polygon_index],1, 0, 0, 0);
-	}
-	else
-	{
-		cmdlist->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
-	}
+	CMesh::Render(cmdlist, polygon_index);
 }

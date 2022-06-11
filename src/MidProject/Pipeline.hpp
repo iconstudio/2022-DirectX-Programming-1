@@ -16,14 +16,12 @@ public:
 	void AssignPixelShader(const Shader& ps);
 	void AssignPixelShader(Shader&& ps);
 
-	ShaderBlob CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob);
-	ShaderBlob ReadCompiledShaderFromFile(const WCHAR* pszFileName, ID3DBlob** ppd3dShaderBlob = NULL);
-
 	P3DSignature GetRootSignature();
 	const P3DSignature GetRootSignature() const;
 
 	static Pipeline* diffusedShader;
 	static Pipeline* illuminatedShader;
+	static Pipeline* plainShader;
 
 protected:
 	virtual void BuildShaders();
@@ -35,7 +33,7 @@ protected:
 
 	virtual ShaderBlob CreateVertexShader() = 0;
 	virtual ShaderBlob CreatePixelShader() = 0;
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout() = 0;
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
 	virtual D3D12_BLEND_DESC CreateBlendState();
 	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();

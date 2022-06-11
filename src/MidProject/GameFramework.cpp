@@ -237,10 +237,10 @@ void GameFramework::CreateDirect3DDevice()
 			wsprintf(out_desc, L"그래픽 카드 설명: %s\n", gc_desc);
 
 			WCHAR out_vendor[128]{};
-			wsprintf(out_vendor, L"그래픽 카드 제조사 ID: %I64u\n", gc_venderid);
+			wsprintf(out_vendor, L"그래픽 카드 제조사 ID: %u\n", gc_venderid);
 
 			WCHAR out_mem_cpu[128]{};
-			wsprintf(out_mem_cpu, L"시스템 메모리: I64u\n", gc_mem_cpu);
+			wsprintf(out_mem_cpu, L"시스템 메모리: %I64u\n", gc_mem_cpu);
 
 			WCHAR out_mem_gpu[128]{};
 			wsprintf(out_mem_gpu, L"그래픽 카드 메모리: %I64u\n", gc_mem_gpu);
