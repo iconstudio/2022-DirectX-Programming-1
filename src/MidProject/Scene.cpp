@@ -21,7 +21,7 @@ void Scene::Start()
 {
 	for (auto& instance : myInstances)
 	{
-		instance->ReleaseUploadBuffers();
+		instance->Awake(d3dDevice, d3dTaskList);
 	}
 }
 

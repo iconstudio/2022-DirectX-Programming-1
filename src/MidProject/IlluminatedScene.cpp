@@ -44,11 +44,6 @@ void IlluminatedScene::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 void IlluminatedScene::Start()
 {
 	Scene::Start();
-
-	if (myPlayer)
-	{
-		myPlayer->ReleaseUploadBuffers();
-	}
 }
 
 void IlluminatedScene::Reset()
@@ -115,7 +110,7 @@ void IlluminatedScene::Render()
 
 	for (auto& instance : myInstances)
 	{
-		instance->UpdateTransform(nullptr);
+		instance->EnumerateTransforms(nullptr);
 		instance->Render(d3dTaskList, myCamera);
 	}
 

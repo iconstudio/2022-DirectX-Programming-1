@@ -8,11 +8,11 @@ WCHAR debug_frame_info[256]{};
 
 GameObject::GameObject()
 	: m_pstrFrameName()
+	, localTransform(Matrix4x4::Identity()), worldTransform(Matrix4x4::Identity())
+	, isTransformModified(true)
+	, staticCollider(nullptr), myCollider(nullptr)
 {
 	ZeroMemory(m_pstrFrameName, sizeof(m_pstrFrameName));
-
-	localTransform = Matrix4x4::Identity();
-	worldTransform = Matrix4x4::Identity();
 }
 
 GameObject::~GameObject()
@@ -23,26 +23,12 @@ GameObject::~GameObject()
 	}
 }
 
-void GameObject::Attach(GameObject* pChild)
+void GameObject::ReleaseUploadBuffers()
 {
-	if (pChild)
-	{
-		pChild->m_pParent = this;
-	}
-	if (myChild)
-	{
-		if (pChild) pChild->mySibling = myChild->mySibling;
-		myChild->mySibling = pChild;
-	}
-	else
-	{
-		myChild = pChild;
-	}
-}
+	if (m_pMesh) m_pMesh->ReleaseUploadBuffers();
 
-constexpr COLLISION_TAGS GameObject::GetTag() const noexcept
-{
-	return COLLISION_TAGS::NONE;
+	if (mySibling) mySibling->ReleaseUploadBuffers();
+	if (myChild) myChild->ReleaseUploadBuffers();
 }
 
 void GameObject::SetMesh(CMaterialMesh* pMesh)
@@ -52,8 +38,55 @@ void GameObject::SetMesh(CMaterialMesh* pMesh)
 	if (m_pMesh) m_pMesh->AddRef();
 }
 
+void GameObject::SetOriginalCollider(const shared_ptr<BoundingOrientedBox>& box)
+{
+	staticCollider = box;
+}
+
+void GameObject::SetOriginalCollider(shared_ptr<BoundingOrientedBox>&& box)
+{
+	staticCollider = std::forward<shared_ptr<BoundingOrientedBox>>(box);
+}
+
+void GameObject::Attach(GameObject* pChild)
+{
+	if (pChild)
+	{
+		pChild->m_pParent = this;
+	}
+
+	if (myChild)
+	{
+		if (pChild)
+		{
+			pChild->mySibling = myChild->mySibling;
+		}
+
+		myChild->mySibling = pChild;
+	}
+	else
+	{
+		myChild = pChild;
+	}
+}
+
+void GameObject::BuildCollider()
+{
+	auto handle = new BoundingOrientedBox(*staticCollider);
+	myCollider = unique_ptr<BoundingOrientedBox>(handle);
+}
+
+void GameObject::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
+{}
+
 void GameObject::Animate(float time_elapsed, XMFLOAT4X4* parent)
 {
+	if (isTransformModified)
+	{
+		EnumerateTransforms(parent);
+		isTransformModified = false;
+	}
+
 	UpdateCollider(&worldTransform);
 
 	if (mySibling)
@@ -67,50 +100,24 @@ void GameObject::Animate(float time_elapsed, XMFLOAT4X4* parent)
 	}
 }
 
-void GameObject::Render(P3DGrpCommandList cmdlist, GameCamera* pCamera)
+void GameObject::Update(float time_elapsed)
+{}
+
+void GameObject::EnumerateTransforms(const XMFLOAT4X4* parent)
 {
-	OnPrepareRender();
-
-	UpdateUniforms(cmdlist); 
-
-	if (m_pMesh)
+	if (parent)
 	{
-		m_pMesh->Render(cmdlist);
+		worldTransform = Matrix4x4::Multiply(localTransform, *parent);
+	}
+	else
+	{
+		worldTransform = localTransform;
 	}
 
-	if (mySibling) mySibling->Render(cmdlist, pCamera);
-	if (myChild) myChild->Render(cmdlist, pCamera);
-}
+	UpdateCollider(&worldTransform);
 
-void GameObject::InitializeUniforms(P3DDevice device, P3DGrpCommandList cmdlist)
-{}
-
-void GameObject::UpdateUniforms(P3DGrpCommandList cmdlist)
-{
-	XMFLOAT4X4 xmf4x4World{};
-
-	const auto my_mat = XMLoadFloat4x4(&worldTransform);
-	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(my_mat));
-
-	// 두번째 루트 매개인자에서 0번째 메모리에 float 16개 전달
-	cmdlist->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
-}
-
-void GameObject::UpdateUniforms(P3DGrpCommandList cmdlist, CMaterial* pMaterial)
-{}
-
-void GameObject::ReleaseUniforms()
-{}
-
-void GameObject::SetOriginalCollider(const shared_ptr<BoundingOrientedBox>& box)
-{
-	staticCollider = box;
-}
-
-void GameObject::BuildCollider()
-{
-	auto handle = new BoundingOrientedBox(*staticCollider);
-	myCollider = unique_ptr<BoundingOrientedBox>(handle);
+	if (mySibling) mySibling->EnumerateTransforms(parent);
+	if (myChild) myChild->EnumerateTransforms(&worldTransform);
 }
 
 void GameObject::UpdateCollider(const XMFLOAT4X4* mat)
@@ -130,23 +137,39 @@ void GameObject::UpdateCollider(const XMFLOAT4X4* mat)
 	}
 }
 
-void GameObject::ReleaseUploadBuffers()
+void GameObject::PrepareRendering(P3DGrpCommandList cmdlist) const
 {
-	if (m_pMesh) m_pMesh->ReleaseUploadBuffers();
+	XMFLOAT4X4 xmf4x4World{};
 
-	if (mySibling) mySibling->ReleaseUploadBuffers();
-	if (myChild) myChild->ReleaseUploadBuffers();
+	const auto my_mat = XMLoadFloat4x4(&worldTransform);
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(my_mat));
+
+	// 두번째 루트 매개인자에서 0번째 메모리에 float 16개 전달
+	cmdlist->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 }
 
-void GameObject::UpdateTransform(XMFLOAT4X4* pxmf4x4Parent)
+void GameObject::Render(P3DGrpCommandList cmdlist, GameCamera* camera) const
 {
-	worldTransform = (pxmf4x4Parent) ? Matrix4x4::Multiply(localTransform, *pxmf4x4Parent) : localTransform;
+	PrepareRendering(cmdlist);
 
-	UpdateCollider(&worldTransform);
+	if (m_pMesh)
+	{
+		m_pMesh->Render(cmdlist);
+	}
 
-	if (mySibling) mySibling->UpdateTransform(pxmf4x4Parent);
-	if (myChild) myChild->UpdateTransform(&worldTransform);
+	if (mySibling)
+	{
+		mySibling->Render(cmdlist, camera);
+	}
+
+	if (myChild)
+	{
+		myChild->Render(cmdlist, camera);
+	}
 }
+
+void GameObject::ReleaseUniforms()
+{}
 
 void GameObject::SetPosition(float x, float y, float z)
 {
@@ -154,12 +177,12 @@ void GameObject::SetPosition(float x, float y, float z)
 	localTransform._42 = y;
 	localTransform._43 = z;
 
-	UpdateTransform(NULL);
+	OnTransformUpdate();
 }
 
-void GameObject::SetPosition(XMFLOAT3 xmf3Position)
+void GameObject::SetPosition(XMFLOAT3 position)
 {
-	SetPosition(xmf3Position.x, xmf3Position.y, xmf3Position.z);
+	SetPosition(position.x, position.y, position.z);
 }
 
 void GameObject::SetScale(float x, float y, float z)
@@ -167,7 +190,7 @@ void GameObject::SetScale(float x, float y, float z)
 	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
 	localTransform = Matrix4x4::Multiply(mtxScale, localTransform);
 
-	UpdateTransform(NULL);
+	OnTransformUpdate();
 }
 
 void GameObject::MoveStrafe(float fDistance)
@@ -175,6 +198,7 @@ void GameObject::MoveStrafe(float fDistance)
 	XMFLOAT3 xmf3Position = GetPosition();
 	XMFLOAT3 xmf3Right = GetRight();
 	xmf3Position = Vector3::Add(xmf3Position, xmf3Right, fDistance);
+
 	GameObject::SetPosition(xmf3Position);
 }
 
@@ -183,6 +207,7 @@ void GameObject::MoveUp(float fDistance)
 	XMFLOAT3 xmf3Position = GetPosition();
 	XMFLOAT3 xmf3Up = GetUp();
 	xmf3Position = Vector3::Add(xmf3Position, xmf3Up, fDistance);
+
 	GameObject::SetPosition(xmf3Position);
 }
 
@@ -191,6 +216,7 @@ void GameObject::MoveForward(float fDistance)
 	XMFLOAT3 xmf3Position = GetPosition();
 	XMFLOAT3 xmf3Look = GetLook();
 	xmf3Position = Vector3::Add(xmf3Position, xmf3Look, fDistance);
+
 	GameObject::SetPosition(xmf3Position);
 }
 
@@ -199,7 +225,7 @@ void GameObject::Rotate(float fPitch, float fYaw, float fRoll)
 	XMMATRIX mtxRotate = XMMatrixRotationRollPitchYaw(XMConvertToRadians(fPitch), XMConvertToRadians(fYaw), XMConvertToRadians(fRoll));
 	localTransform = Matrix4x4::Multiply(mtxRotate, localTransform);
 
-	UpdateTransform(NULL);
+	OnTransformUpdate();
 }
 
 void GameObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
@@ -207,7 +233,7 @@ void GameObject::Rotate(XMFLOAT3* pxmf3Axis, float fAngle)
 	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(pxmf3Axis), XMConvertToRadians(fAngle));
 	localTransform = Matrix4x4::Multiply(mtxRotate, localTransform);
 
-	UpdateTransform(NULL);
+	OnTransformUpdate();
 }
 
 void GameObject::Rotate(XMFLOAT4* pxmf4Quaternion)
@@ -215,7 +241,7 @@ void GameObject::Rotate(XMFLOAT4* pxmf4Quaternion)
 	XMMATRIX mtxRotate = XMMatrixRotationQuaternion(XMLoadFloat4(pxmf4Quaternion));
 	localTransform = Matrix4x4::Multiply(mtxRotate, localTransform);
 
-	UpdateTransform(NULL);
+	OnTransformUpdate();
 }
 
 bool GameObject::CheckCollisionWith(GameObject* other) const
@@ -238,6 +264,16 @@ void GameObject::CollideWith(GameObject* other)
 		{}
 		break;
 	}
+}
+
+void GameObject::OnTransformUpdate()
+{
+	isTransformModified = true;
+}
+
+constexpr COLLISION_TAGS GameObject::GetTag() const noexcept
+{
+	return COLLISION_TAGS::NONE;
 }
 
 XMFLOAT3 GameObject::GetPosition()
@@ -366,13 +402,6 @@ void CRotatingObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	GameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
-void CRotatingObject::Render(ID3D12GraphicsCommandList* cmdlist, GameCamera* pCamera)
-{
-	GameObject::Render(cmdlist, pCamera);
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//
 CRevolvingObject::CRevolvingObject()
 {
 	m_xmf3RevolutionAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
