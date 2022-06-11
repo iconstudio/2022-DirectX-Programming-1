@@ -8,8 +8,8 @@ WCHAR debug_frame_info[256]{};
 
 GameObject::GameObject()
 	: myName()
-	, myTransform()
-	, localMatrix(Matrix4x4::Identity()), worldMatrix(Matrix4x4::Identity())
+	, localTransform(), localMatrix(localTransform.GetMatrix())
+	, worldTransform(), worldMatrix(worldTransform.GetMatrix())
 	, isTransformModified(true)
 	, staticCollider(nullptr), myCollider(nullptr)
 {}

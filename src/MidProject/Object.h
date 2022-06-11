@@ -37,13 +37,31 @@ public:
 
 	virtual constexpr COLLISION_TAGS GetTag() const noexcept;
 
+	void SetMatrix(const XMFLOAT4X4& mat);
+	void SetMatrix(XMFLOAT4X4&& mat);
 	void SetPosition(float x, float y, float z);
-	void SetPosition(XMFLOAT3 position);
-	void SetScale(float x, float y, float z);
-	void MoveStrafe(float dist = 1.0f);
-	void MoveUp(float dist = 1.0f);
-	void MoveForward(float dist = 1.0f);
-	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
+	void SetPosition(const XMFLOAT3& pos);
+	void SetPosition(XMFLOAT3&& pos);
+	void SetRotation(const XMFLOAT4X4& tfrm);
+	void SetRotation(XMFLOAT4X4&& tfrm);
+
+	void Translate(float x, float y, float z);
+	void Translate(const XMFLOAT3& shift);
+	void Translate(XMFLOAT3&& shift);
+	void Move(const XMFLOAT3& dir, float distance);
+	void Move(XMFLOAT3&& dir, float distance);
+	void MoveStrafe(float distance);
+	void MoveForward(float distance);
+	void MoveUp(float distance);
+
+	void Rotate(const XMFLOAT4X4& tfrm);
+	void Rotate(XMFLOAT4X4&& tfrm);
+	void Rotate(float pitch, float yaw, float roll);
+	void Rotate(const XMFLOAT3& axis, float angle);
+
+	void LookTo(const XMFLOAT3& look, const XMFLOAT3& up);
+	void LookAt(const XMFLOAT3& look, const XMFLOAT3& up);
+
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
 	void Rotate(XMFLOAT4* pxmf4Quaternion);
 
@@ -62,9 +80,10 @@ public:
 
 	std::string myName;
 
-	Transformer myTransform;
-	XMFLOAT4X4 localMatrix;
-	XMFLOAT4X4 worldMatrix;
+	Transformer localTransform;
+	Transformer worldTransform;
+	XMFLOAT4X4& const localMatrix;
+	XMFLOAT4X4& const worldMatrix;
 	bool isTransformModified;
 
 	CMaterialMesh* m_pMesh = nullptr;

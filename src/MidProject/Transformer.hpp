@@ -6,8 +6,8 @@ public:
 	Transformer();
 	~Transformer();
 
-	XMFLOAT4X4& GetWorldMatrix();
-	const XMFLOAT4X4& GetWorldMatrix() const;
+	XMFLOAT4X4& GetMatrix();
+	const XMFLOAT4X4& GetMatrix() const;
 	XYZWrapper& GetRight();
 	XYZWrapper& GetUp();
 	XYZWrapper& GetLook();
@@ -18,10 +18,12 @@ public:
 	const XYZWrapper& GetPosition() const;
 
 	void SetWorldMatrix(const XMFLOAT4X4& mat);
+	void SetWorldMatrix(XMFLOAT4X4&& mat);
 	void SetPosition(float x, float y, float z);
 	void SetPosition(const XMFLOAT3& pos);
 	void SetPosition(XMFLOAT3&& pos);
 	void SetRotation(const XMFLOAT4X4& tfrm);
+	void SetRotation(XMFLOAT4X4&& tfrm);
 
 	void Translate(float x, float y, float z);
 	void Translate(const XMFLOAT3& shift);
@@ -33,6 +35,7 @@ public:
 	void MoveUp(float distance);
 
 	void Rotate(const XMFLOAT4X4& tfrm);
+	void Rotate(XMFLOAT4X4&& tfrm);
 	void Rotate(float pitch, float yaw, float roll);
 	void Rotate(const XMFLOAT3& axis, float angle);
 
