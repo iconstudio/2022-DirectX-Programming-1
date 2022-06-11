@@ -1,32 +1,32 @@
 #include "pch.hpp"
-#include "DiffusedGraphicsPipeline.hpp"
+#include "PlainGraphicsPipeline.hpp"
 
-DiffusedGraphicsPipeline::DiffusedGraphicsPipeline()
+PlainGraphicsPipeline::PlainGraphicsPipeline()
 	: Pipeline()
 {}
 
-DiffusedGraphicsPipeline::~DiffusedGraphicsPipeline()
+PlainGraphicsPipeline::~PlainGraphicsPipeline()
 {}
 
-void DiffusedGraphicsPipeline::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
+void PlainGraphicsPipeline::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
-	AssignVertexShader(Shader("DiffusedVertexShader.hlsl.", "main", "vs_5_1"));
-	AssignPixelShader(Shader("DiffusedPixelShader.hlsl.", "main", "ps_5_1"));
+	AssignVertexShader(Shader("PlainVertexShader.hlsl.", "main", "vs_5_1"));
+	AssignPixelShader(Shader("PlainPixelShader.hlsl.", "main", "ps_5_1"));
 
 	Pipeline::Awake(device, cmdlist);
 }
 
-ShaderBlob DiffusedGraphicsPipeline::CreateVertexShader()
+ShaderBlob PlainGraphicsPipeline::CreateVertexShader()
 {
 	return myVertexShader.myCode;
 }
 
-ShaderBlob DiffusedGraphicsPipeline::CreatePixelShader()
+ShaderBlob PlainGraphicsPipeline::CreatePixelShader()
 {
 	return myPixelShader.myCode;
 }
 
-D3D12_INPUT_LAYOUT_DESC DiffusedGraphicsPipeline::CreateInputLayout()
+D3D12_INPUT_LAYOUT_DESC PlainGraphicsPipeline::CreateInputLayout()
 {
 	constexpr UINT params_count = 2;
 	auto vs_params = new D3D12_INPUT_ELEMENT_DESC[params_count]{};
@@ -41,22 +41,16 @@ D3D12_INPUT_LAYOUT_DESC DiffusedGraphicsPipeline::CreateInputLayout()
 	return d3dInputLayoutDesc;
 }
 
-P3DSignature DiffusedGraphicsPipeline::CreateGraphicsRootSignature()
+P3DSignature PlainGraphicsPipeline::CreateGraphicsRootSignature()
 {
 	P3DSignature signature = nullptr;
 
-	D3D12_ROOT_PARAMETER shader_params[2]{};
+	D3D12_ROOT_PARAMETER shader_params[1]{};
 
 	shader_params[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	shader_params[0].Descriptor.ShaderRegister = 0; // Camera
-	shader_params[0].Descriptor.RegisterSpace = 0;
+	shader_params[0].Descriptor.ShaderRegister = 0; // Resolution
+	shader_params[0].Descriptor.RegisterSpace = 2;
 	shader_params[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
-	shader_params[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	shader_params[1].Constants.Num32BitValues = 32;
-	shader_params[1].Constants.ShaderRegister = 1; // GameObject
-	shader_params[1].Constants.RegisterSpace = 0;
-	shader_params[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	// 정점 쉐이더, 픽셀 쉐이더, 입력 조립기, 출력 병합기 
 	auto flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;

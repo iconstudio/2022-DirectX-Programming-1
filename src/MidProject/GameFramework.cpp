@@ -1,8 +1,9 @@
 #include "pch.hpp"
 #include "GameFramework.h"
 #include "Model.hpp"
-#include "IlluminatedGraphicsPipeline.hpp"
 #include "DiffusedGraphicsPipeline.hpp"
+#include "IlluminatedGraphicsPipeline.hpp"
+#include "PlainGraphicsPipeline.hpp"
 #include "StageMain.hpp"
 #include "StageGame.hpp"
 #include "StageGameEnd.hpp"
@@ -493,8 +494,8 @@ void GameFramework::BuildPipeline()
 	Pipeline::diffusedShader->Awake(myDevice, myCommandList);
 	Pipeline::illuminatedShader = new IlluminatedGraphicsPipeline();
 	Pipeline::illuminatedShader->Awake(myDevice, myCommandList);
-	Pipeline::diffusedShader = new IlluminatedGraphicsPipeline();
-	Pipeline::diffusedShader->Awake(myDevice, myCommandList);
+	Pipeline::plainShader = new PlainGraphicsPipeline();
+	Pipeline::plainShader->Awake(myDevice, myCommandList);
 }
 
 void GameFramework::BuildAssets()

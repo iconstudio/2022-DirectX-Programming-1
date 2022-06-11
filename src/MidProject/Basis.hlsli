@@ -61,10 +61,26 @@ struct VS_DIFFUSED_INPUT
 
 struct VS_DIFFUSED_OUTPUT
 {
-    // 0~1 »çÀÌÀÇ ÁÂÇ¥
-    float4 position : SV_POSITION;
     // È­¸éÀÇ Àý´ë ÁÂÇ¥ 
+    float4 position : SV_POSITION;
+    // ·»´õ¸µ ÁÂÇ¥
     float3 position_world : POSITION;
+    // »ö»ó
+    float4 colour : COLOR;
+};
+
+struct VS_PLAIN_INPUT
+{
+    float2 position : POSITION;
+    float4 colour : COLOR;
+};
+
+struct VS_PLAIN_OUTPUT
+{
+    // È­¸éÀÇ Àý´ë ÁÂÇ¥
+    float4 position : SV_POSITION;
+    // ·»´õ¸µ ÁÂÇ¥
+    float2 position_world : POSITION;
     // »ö»ó
     float4 colour : COLOR;
 };
