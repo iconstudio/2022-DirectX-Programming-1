@@ -23,6 +23,11 @@ void Transformer::SetWorldMatrix(const XMFLOAT4X4& mat)
 	World = mat;
 }
 
+void Transformer::SetWorldMatrix(XMFLOAT4X4&& mat)
+{
+	World = std::forward<XMFLOAT4X4>(mat);
+}
+
 void Transformer::SetPosition(float x, float y, float z)
 {
 	myPosition.x = x;
@@ -55,6 +60,21 @@ void Transformer::SetRotation(const XMFLOAT4X4& tfrm)
 	myLook.x = tfrm._31;
 	myLook.y = tfrm._32;
 	myLook.z = tfrm._33;
+}
+
+void Transformer::SetRotation(XMFLOAT4X4&& tfrm)
+{
+	myRight.x = std::forward<float>(tfrm._11);
+	myRight.y = std::forward<float>(tfrm._12);
+	myRight.z = std::forward<float>(tfrm._13);
+
+	myUp.x = std::forward<float>(tfrm._21);
+	myUp.y = std::forward<float>(tfrm._22);
+	myUp.z = std::forward<float>(tfrm._23);
+
+	myLook.x = std::forward<float>(tfrm._31);
+	myLook.y = std::forward<float>(tfrm._32);
+	myLook.z = std::forward<float>(tfrm._33);
 }
 
 void Transformer::Translate(float x, float y, float z)
@@ -118,6 +138,9 @@ void Transformer::Rotate(const XMFLOAT4X4& tfrm)
 	myLook.z += tfrm._33;
 }
 
+void Transformer::Rotate(XMFLOAT4X4&& tfrm)
+{}
+
 void Transformer::Rotate(float pitch, float yaw, float roll)
 {
 	XMFLOAT4X4 mtxRotate = Matrix4x4::RotationYawPitchRoll(pitch, yaw, roll);
@@ -167,12 +190,12 @@ void Transformer::LookAt(const XMFLOAT3& look, const XMFLOAT3& up)
 	myLook = Vector3::Normalize(XMFLOAT3(myLook));
 }
 
-XMFLOAT4X4& Transformer::GetWorldMatrix()
+XMFLOAT4X4& Transformer::GetMatrix()
 {
 	return World;
 }
 
-const XMFLOAT4X4& Transformer::GetWorldMatrix() const
+const XMFLOAT4X4& Transformer::GetMatrix() const
 {
 	return World;
 }

@@ -3,6 +3,7 @@
 
 Pipeline* Pipeline::diffusedShader = nullptr;
 Pipeline* Pipeline::illuminatedShader = nullptr;
+Pipeline* Pipeline::plainShader = nullptr;
 
 Pipeline::Pipeline()
 	: dxDevice(nullptr), dxCommandList(nullptr)
@@ -59,105 +60,6 @@ void Pipeline::AssignPixelShader(const Shader& ps)
 void Pipeline::AssignPixelShader(Shader&& ps)
 {
 	myPixelShader = std::forward<Shader>(ps);
-}
-
-ShaderBlob Pipeline::CompileShaderFromFile(const WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob)
-{
-	UINT nCompileFlags = 0;
-#if defined(_DEBUG)
-	nCompileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-#endif
-
-	ID3DBlob* pd3dErrorBlob = NULL;
-	auto valid = D3DCompileFromFile(pszFileName
-		, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE
-		, pszShaderName, pszShaderProfile
-		, nCompileFlags, 0
-		, ppd3dShaderBlob
-		, &pd3dErrorBlob);
-	if (FAILED(valid))
-	{
-		throw "쉐이더 컴파일 실패!";
-	}
-
-	volatile char* pErrorString = nullptr;
-	if (pd3dErrorBlob)
-	{
-		pErrorString = (char*)pd3dErrorBlob->GetBufferPointer();
-	}
-
-	ShaderBlob d3dShaderByteCode{};
-	d3dShaderByteCode.BytecodeLength = (*ppd3dShaderBlob)->GetBufferSize();
-	d3dShaderByteCode.pShaderBytecode = (*ppd3dShaderBlob)->GetBufferPointer();
-
-	return d3dShaderByteCode;
-}
-
-#define _WITH_WFOPEN
-//#define _WITH_STD_STREAM
-
-#ifdef _WITH_STD_STREAM
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <sstream>
-#endif
-
-ShaderBlob Pipeline::ReadCompiledShaderFromFile(const WCHAR* pszFileName, ID3DBlob** ppd3dShaderBlob)
-{
-	UINT nReadBytes = 0;
-#ifdef _WITH_WFOPEN
-
-	FILE* pFile = NULL;
-	_wfopen_s(&pFile, pszFileName, L"rb");
-	if (NULL == pFile)
-	{
-		throw "쉐이더 파일을 찾을 수 없음!";
-	}
-
-	fseek(pFile, 0, SEEK_END);
-	int nFileSize = ftell(pFile);
-	BYTE* pByteCode = new BYTE[nFileSize];
-
-	::rewind(pFile);
-	nReadBytes = (UINT)::fread(pByteCode, sizeof(BYTE), nFileSize, pFile);
-	::fclose(pFile);
-#endif
-#ifdef _WITH_STD_STREAM
-	std::ifstream ifsFile;
-	ifsFile.open(pszFileName, std::ios::in | std::ios::ate | std::ios::binary);
-	nReadBytes = (int)ifsFile.tellg();
-	BYTE* pByteCode = new BYTE[*pnReadBytes];
-	ifsFile.seekg(0);
-	ifsFile.read((char*)pByteCode, nReadBytes);
-	ifsFile.close();
-#endif
-
-	ShaderBlob d3dShaderByteCode{};
-	if (ppd3dShaderBlob)
-	{
-		*ppd3dShaderBlob = NULL;
-		HRESULT hResult = D3DCreateBlob(nReadBytes, ppd3dShaderBlob);
-		memcpy((*ppd3dShaderBlob)->GetBufferPointer(), pByteCode, nReadBytes);
-		d3dShaderByteCode.BytecodeLength = (*ppd3dShaderBlob)->GetBufferSize();
-		d3dShaderByteCode.pShaderBytecode = (*ppd3dShaderBlob)->GetBufferPointer();
-	}
-	else
-	{
-		d3dShaderByteCode.BytecodeLength = nReadBytes;
-		d3dShaderByteCode.pShaderBytecode = pByteCode;
-	}
-
-	return(d3dShaderByteCode);
-}
-
-D3D12_INPUT_LAYOUT_DESC Pipeline::CreateInputLayout()
-{
-	D3D12_INPUT_LAYOUT_DESC result{};
-	result.pInputElementDescs = NULL;
-	result.NumElements = 0;
-
-	return result;
 }
 
 D3D12_RASTERIZER_DESC Pipeline::CreateRasterizerState()

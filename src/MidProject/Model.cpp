@@ -1,32 +1,36 @@
 #include "pch.hpp"
 #include "RawMesh.hpp"
 #include "Model.hpp"
-#include "Pipeline.hpp"
+#include "Mesh.h"
 
 Model* Model::Load(ID3D12Device* device
 	, ID3D12GraphicsCommandList* cmdlist
 	, Pipeline* pipeline
-	, const char* pstrFileName)
+	, const char* filepath)
 {
-	FILE* pInFile = NULL;
-	fopen_s(&pInFile, pstrFileName, "rb");
-	if (!pInFile)
+	if (!std::filesystem::exists(filepath))
+	{
+		throw "모델 파일을 찾을 수 없음!";
+	}
+
+	FILE* pfile = nullptr;
+	fopen_s(&pfile, filepath, "rb");
+	if (!pfile)
 	{
 		throw "모델 파일을 불러올 수 없습니다!";
 	}
+	rewind(pfile);
 
-	rewind(pInFile);
-
-	Model* root = NULL;
 	char token[64] = { '\0' };
 
+	Model* root = nullptr;
 	while (true)
 	{
-		::ReadStringFromFile(pInFile, token);
+		ReadStringFromFile(pfile, token);
 
 		if (!strcmp(token, "<Hierarchy>:"))
 		{
-			root = Model::LoadFrameHierarchyFromFile(device, cmdlist, pipeline, pInFile);
+			root = Model::LoadFrameHierarchyFromFile(device, cmdlist, pipeline, pfile);
 		}
 		else if (!strcmp(token, "</Hierarchy>"))
 		{
@@ -34,99 +38,132 @@ Model* Model::Load(ID3D12Device* device
 		}
 	}
 
-#ifdef _WITH_DEBUG_FRAME_HIERARCHY
-	TCHAR pstrDebug[256] = { 0 };
-	_stprintf_s(pstrDebug, 256, _T("Frame Hierarchy\n"));
-	OutputDebugString(pstrDebug);
+	if (!root)
+	{
+		throw "모델 객체가 생성되지 않음!";
+	}
 
-	GameObject::PrintFrameInfo(root, NULL);
+#ifdef _WITH_DEBUG_FRAME_HIERARCHY
+	root->PrintFrameInfo();
 #endif
 
 	return root;
 }
 
-RawMesh* Model::LoadRawMesh(FILE* pInFile)
+RawMesh* Model::LoadRawMesh(FILE* mfile)
 {
 	char token[64] = { '\0' };
-	UINT nReads = 0;
 
-	int nPositions = 0, nColors = 0, nNormals = 0, nIndices = 0, nSubMeshes = 0, nSubIndices = 0;
+	auto raw_mesh = new RawMesh;
+	raw_mesh->countVertices = ReadIntegerFromFile(mfile);
+	ReadStringFromFile(mfile, raw_mesh->m_pstrMeshName);
 
-	RawMesh* raw_mesh = new RawMesh;
-
-	raw_mesh->m_nVertices = ::ReadIntegerFromFile(pInFile);
-	::ReadStringFromFile(pInFile, raw_mesh->m_pstrMeshName);
-
-	for (; ; )
+	while (true)
 	{
-		::ReadStringFromFile(pInFile, token);
+		ReadStringFromFile(mfile, token);
 
 		if (!strcmp(token, "<Bounds>:"))
 		{
-			nReads = (UINT)::fread(&(raw_mesh->m_xmf3AABBCenter), sizeof(XMFLOAT3), 1, pInFile);
-			nReads = (UINT)::fread(&(raw_mesh->m_xmf3AABBExtents), sizeof(XMFLOAT3), 1, pInFile);
+			fread(&(raw_mesh->m_xmf3AABBCenter), sizeof(XMFLOAT3), 1, mfile);
+			fread(&(raw_mesh->m_xmf3AABBExtents), sizeof(XMFLOAT3), 1, mfile);
 		}
 		else if (!strcmp(token, "<Positions>:"))
 		{
-			nPositions = ::ReadIntegerFromFile(pInFile);
-			if (nPositions > 0)
+			auto count = ReadIntegerFromFile(mfile);
+			if (0 < count)
 			{
-				raw_mesh->m_nType |= VERTEXT_POSITION;
-				raw_mesh->m_pxmf3Positions = new XMFLOAT3[nPositions];
-				nReads = (UINT)::fread(raw_mesh->m_pxmf3Positions, sizeof(XMFLOAT3), nPositions, pInFile);
+				raw_mesh->myVertexType |= VERTEXT_POSITION;
+
+				auto& containter = raw_mesh->myPositions;
+				containter.reserve(count);
+
+				XMFLOAT3 result{};
+				for (int k = 0; k < count; ++k)
+				{
+					fread(&result, sizeof(XMFLOAT3), 1, mfile);
+
+					containter.push_back(result);
+				}
 			}
 		}
 		else if (!strcmp(token, "<Colors>:"))
 		{
-			nColors = ::ReadIntegerFromFile(pInFile);
-			if (nColors > 0)
+			auto count = ReadIntegerFromFile(mfile);
+			if (0 < count)
 			{
-				raw_mesh->m_nType |= VERTEXT_COLOR;
-				raw_mesh->m_pxmf4Colors = new XMFLOAT4[nColors];
-				nReads = (UINT)::fread(raw_mesh->m_pxmf4Colors, sizeof(XMFLOAT4), nColors, pInFile);
+				raw_mesh->myVertexType |= VERTEXT_COLOR;
+
+				auto& containter = raw_mesh->myColours;
+				containter.reserve(count);
+
+				XMFLOAT4 result{};
+				for (int k = 0; k < count; ++k)
+				{
+					fread(&result, sizeof(XMFLOAT4), 1, mfile);
+
+					containter.push_back(result);
+				}
 			}
 		}
 		else if (!strcmp(token, "<Normals>:"))
 		{
-			nNormals = ::ReadIntegerFromFile(pInFile);
-			if (nNormals > 0)
+			auto count = ReadIntegerFromFile(mfile);
+			if (0 < count)
 			{
-				raw_mesh->m_nType |= VERTEXT_NORMAL;
-				raw_mesh->m_pxmf3Normals = new XMFLOAT3[nNormals];
-				nReads = (UINT)::fread(raw_mesh->m_pxmf3Normals, sizeof(XMFLOAT3), nNormals, pInFile);
+				raw_mesh->myVertexType |= VERTEXT_NORMAL;
+
+				auto& containter = raw_mesh->myNormals;
+				containter.reserve(count);
+
+				XMFLOAT3 result{};
+				for (int k = 0; k < count; ++k)
+				{
+					fread(&result, sizeof(XMFLOAT3), 1, mfile);
+
+					containter.push_back(result);
+				}
 			}
 		}
 		else if (!strcmp(token, "<Indices>:"))
 		{
-			nIndices = ::ReadIntegerFromFile(pInFile);
-			if (nIndices > 0)
+			auto count = ReadIntegerFromFile(mfile);
+			if (0 < count)
 			{
-				raw_mesh->m_pnIndices = new UINT[nIndices];
-				nReads = (UINT)::fread(raw_mesh->m_pnIndices, sizeof(int), nIndices, pInFile);
+				raw_mesh->m_pnIndices = new UINT[count];
+				fread(raw_mesh->m_pnIndices, sizeof(int), count, mfile);
 			}
 		}
 		else if (!strcmp(token, "<SubMeshes>:"))
 		{
-			raw_mesh->countPolygons = ReadIntegerFromFile(pInFile);
-			if (raw_mesh->countPolygons > 0)
+			const auto polygons_count = static_cast<size_t>(ReadIntegerFromFile(mfile));
+
+			raw_mesh->countPolygons = polygons_count;
+			if (0 < polygons_count)
 			{
-				raw_mesh->countPolygonIndices = new int[raw_mesh->countPolygons];
-				raw_mesh->indexByPolygons = new UINT * [raw_mesh->countPolygons];
-				for (int i = 0; i < raw_mesh->countPolygons; i++)
+				raw_mesh->ReservePolygons(polygons_count);
+				for (size_t i = 0; i < polygons_count; i++)
 				{
-					ReadStringFromFile(pInFile, token);
+					ReadStringFromFile(mfile, token);
 					if (!strcmp(token, "<SubMesh>:"))
 					{
-						int nIndex = ::ReadIntegerFromFile(pInFile);
-						raw_mesh->countPolygonIndices[i] = ReadIntegerFromFile(pInFile);
-						if (raw_mesh->countPolygonIndices[i] > 0)
-						{
-							raw_mesh->indexByPolygons[i] = new UINT[raw_mesh->countPolygonIndices[i]];
-							nReads = (UINT)::fread(raw_mesh->indexByPolygons[i], sizeof(int), raw_mesh->countPolygonIndices[i], pInFile);
-						}
+						const int nIndex = ReadIntegerFromFile(mfile);
+						auto& polygon = raw_mesh->PolygonAt(i);
 
-					}
-				}
+						const size_t index_count = ReadIntegerFromFile(mfile);
+						
+						if (0 < index_count)
+						{
+							polygon.Reserve(index_count);
+
+							UINT read_index{};
+							for (size_t k = 0; k < index_count; ++k)
+							{
+								fread(&read_index, sizeof(int), 1, mfile);
+								polygon.Add(read_index);
+							}
+						}
+					} // a sub mesh
+				} // for polygons_count
 			}
 		}
 		else if (!strcmp(token, "</Mesh>"))
@@ -134,7 +171,7 @@ RawMesh* Model::LoadRawMesh(FILE* pInFile)
 			break;
 		}
 	}
-	return(raw_mesh);
+	return raw_mesh;
 }
 
 std::vector<RawMaterial*> Model::LoadRawMaterials(ID3D12Device* device, ID3D12GraphicsCommandList* cmdlist, FILE* pInFile)
@@ -209,9 +246,9 @@ std::vector<RawMaterial*> Model::LoadRawMaterials(ID3D12Device* device, ID3D12Gr
 Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 	, ID3D12GraphicsCommandList* cmdlist
 	, Pipeline* pipeline
-	, FILE* pInFile)
+	, FILE* pfile)
 {
-	char token[64] = { '\0' };
+	char token[64]{};
 	UINT nReads = 0;
 
 	int nFrame = 0;
@@ -219,15 +256,19 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 	Model* root = nullptr;
 	CLightenMesh* mesh = nullptr;
 
-	for (; ; )
+	while (true)
 	{
-		::ReadStringFromFile(pInFile, token);
+		ReadStringFromFile(pfile, token);
 		if (!strcmp(token, "<Frame>:"))
 		{
 			root = new Model();
 
-			nFrame = ::ReadIntegerFromFile(pInFile);
-			::ReadStringFromFile(pInFile, root->m_pstrFrameName);
+			nFrame = ReadIntegerFromFile(pfile);
+
+			char name[64]{};
+			ReadStringFromFile(pfile, name);
+
+			root->myName = name;
 		}
 		else if (!strcmp(token, "<Transform>:"))
 		{
@@ -238,10 +279,10 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 
 			XMFLOAT3 xmf3Position, xmf3Rotation, xmf3Scale;
 			XMFLOAT4 xmf4Rotation;
-			nReads = (UINT)::fread(&xmf3Position, sizeof(float), 3, pInFile);
-			nReads = (UINT)::fread(&xmf3Rotation, sizeof(float), 3, pInFile); //Euler Angle
-			nReads = (UINT)::fread(&xmf3Scale, sizeof(float), 3, pInFile);
-			nReads = (UINT)::fread(&xmf4Rotation, sizeof(float), 4, pInFile); //Quaternion
+			nReads = (UINT)::fread(&xmf3Position, sizeof(float), 3, pfile);
+			nReads = (UINT)::fread(&xmf3Rotation, sizeof(float), 3, pfile); //Euler Angle
+			nReads = (UINT)::fread(&xmf3Scale, sizeof(float), 3, pfile);
+			nReads = (UINT)::fread(&xmf4Rotation, sizeof(float), 4, pfile); //Quaternion
 		}
 		else if (!strcmp(token, "<TransformMatrix>:"))
 		{
@@ -250,7 +291,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 				throw "모델을 불러오는 중에 모델 객체가 생성되지 않음!";
 			}
 
-			nReads = (UINT)::fread(&root->localTransform, sizeof(float), 16, pInFile);
+			nReads = (UINT)::fread(&root->localMatrix, sizeof(float), 16, pfile);
 		}
 		else if (!strcmp(token, "<Mesh>:"))
 		{
@@ -259,11 +300,11 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 				throw "모델을 불러오는 중에 모델 객체가 생성되지 않음!";
 			}
 
-			auto raw_mesh = root->LoadRawMesh(pInFile);
+			auto raw_mesh = root->LoadRawMesh(pfile);
 
 			if (raw_mesh)
 			{
-				if (raw_mesh->m_nType & VERTEXT_NORMAL)
+				if (raw_mesh->myVertexType & VERTEXT_NORMAL)
 				{
 					mesh = new CLightenMesh(device, cmdlist, raw_mesh);
 				}
@@ -278,7 +319,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 		}
 		else if (!strcmp(token, "<Materials>:"))
 		{
-			auto raw_materials = root->LoadRawMaterials(device, cmdlist, pInFile);
+			auto raw_materials = root->LoadRawMaterials(device, cmdlist, pfile);
 			const auto raw_count = raw_materials.size();
 
 			if (0 < raw_count)
@@ -294,45 +335,26 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 				}
 
 				mesh->AssignMaterial(raw_materials, pipeline);
-				/*
-				for (int i = 0; i < raw_count; i++)
-				{
-					mesh->m_ppMaterials[i] = NULL;
 
-					auto pMaterial = new CMaterial;
-
-					auto matcol = new CMaterialColors(raw_materials.at(i));
-					pMaterial->SetMaterialColors(matcol);
-
-					if (root->GetMeshType() & VERTEXT_NORMAL)
-					{
-						pMaterial->SetShader(pipeline);
-					}
-
-					mesh->SetMaterial(i, pMaterial);
-				}
-				*/
 				raw_materials.erase(raw_materials.begin(), raw_materials.end());
 			}
 		}
 		else if (!strcmp(token, "<Children>:"))
 		{
-			int nChilds = ::ReadIntegerFromFile(pInFile);
-			if (0 < nChilds)
+			int children_count = ReadIntegerFromFile(pfile);
+			if (0 < children_count)
 			{
-				for (int i = 0; i < nChilds; i++)
+				for (int i = 0; i < children_count; i++)
 				{
-					auto pChild = Model::LoadFrameHierarchyFromFile(device, cmdlist, pipeline, pInFile);
-
-					if (pChild)
+					if (auto child = Model::LoadFrameHierarchyFromFile(device, cmdlist, pipeline, pfile); child)
 					{
-						root->Attach(pChild);
+						root->Attach(child);
 					}
 
 #ifdef _WITH_DEBUG_RUNTIME_FRAME_HIERARCHY
-					TCHAR pstrDebug[256] = { 0 };
-					_stprintf_s(pstrDebug, 256, _T("(Child Frame: %p) (Parent Frame: %p)\n"), pChild, root);
-					OutputDebugString(pstrDebug);
+					TCHAR debug_frame_info[256] = { 0 };
+					_stprintf_s(debug_frame_info, 256, _T("(Child Frame: %p) (Parent Frame: %p)\n"), child, root);
+					OutputDebugString(debug_frame_info);
 #endif
 				}
 			}

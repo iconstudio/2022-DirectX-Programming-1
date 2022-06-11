@@ -1,7 +1,9 @@
 #include "pch.hpp"
 #include "GameFramework.h"
 #include "Model.hpp"
+#include "DiffusedGraphicsPipeline.hpp"
 #include "IlluminatedGraphicsPipeline.hpp"
+#include "PlainGraphicsPipeline.hpp"
 #include "StageMain.hpp"
 #include "StageGame.hpp"
 #include "StageGameEnd.hpp"
@@ -237,10 +239,10 @@ void GameFramework::CreateDirect3DDevice()
 			wsprintf(out_desc, L"그래픽 카드 설명: %s\n", gc_desc);
 
 			WCHAR out_vendor[128]{};
-			wsprintf(out_vendor, L"그래픽 카드 제조사 ID: %I64u\n", gc_venderid);
+			wsprintf(out_vendor, L"그래픽 카드 제조사 ID: %u\n", gc_venderid);
 
 			WCHAR out_mem_cpu[128]{};
-			wsprintf(out_mem_cpu, L"시스템 메모리: I64u\n", gc_mem_cpu);
+			wsprintf(out_mem_cpu, L"시스템 메모리: %I64u\n", gc_mem_cpu);
 
 			WCHAR out_mem_gpu[128]{};
 			wsprintf(out_mem_gpu, L"그래픽 카드 메모리: %I64u\n", gc_mem_gpu);
@@ -471,7 +473,6 @@ void GameFramework::Start()
 	BuildPipeline();
 	BuildAssets();
 	BuildStages();
-	BuildWorld();
 	BuildParticles();
 	BuildPlayer();
 	BuildTerrains();
@@ -489,10 +490,12 @@ void GameFramework::Start()
 
 void GameFramework::BuildPipeline()
 {
-	Pipeline::diffusedShader = new IlluminatedGraphicsPipeline();
+	Pipeline::diffusedShader = new DiffusedGraphicsPipeline();
 	Pipeline::diffusedShader->Awake(myDevice, myCommandList);
 	Pipeline::illuminatedShader = new IlluminatedGraphicsPipeline();
 	Pipeline::illuminatedShader->Awake(myDevice, myCommandList);
+	Pipeline::plainShader = new PlainGraphicsPipeline();
+	Pipeline::plainShader->Awake(myDevice, myCommandList);
 }
 
 void GameFramework::BuildAssets()
@@ -530,9 +533,6 @@ void GameFramework::BuildStages()
 	}
 }
 
-void GameFramework::BuildWorld()
-{}
-
 void GameFramework::BuildParticles()
 {}
 
@@ -547,6 +547,11 @@ void GameFramework::BuildObjects()
 
 void GameFramework::CleanupBuilds()
 {
+	for (auto& model : myModels)
+	{
+		model.second->ReleaseUploadBuffers();
+	}
+
 	JumpToStage(0);
 }
 
@@ -689,7 +694,7 @@ bool GameFramework::JumpToNextStage()
 shared_ptr<Model> GameFramework::RegisterModel(const char* path, const char* name)
 {
 	auto& my_lighten_shader = Pipeline::illuminatedShader;
-	//auto& my_lighten_pipeline = myPipelines.at(0);
+	//auto& my_lighten_shader = myPipelines.at(0);
 	auto handle = Model::Load(myDevice, myCommandList, my_lighten_shader, path);
 	auto ptr = shared_ptr<Model>(handle);
 

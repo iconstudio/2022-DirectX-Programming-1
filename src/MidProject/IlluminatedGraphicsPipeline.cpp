@@ -11,18 +11,16 @@ IlluminatedGraphicsPipeline::~IlluminatedGraphicsPipeline()
 ShaderBlob IlluminatedGraphicsPipeline::CreateVertexShader()
 {
 	return myVertexShader.myCode;
-	//return CompileShaderFromFile(L"VertexShader.hlsl", "main", "vs_5_1", &myVertexShaderBlob);
 }
 
 ShaderBlob IlluminatedGraphicsPipeline::CreatePixelShader()
 {
 	return myPixelShader.myCode;
-	//return CompileShaderFromFile(L"PixelShader.hlsl", "main", "ps_5_1", &myPixelShaderBlob);
 }
 
 D3D12_INPUT_LAYOUT_DESC IlluminatedGraphicsPipeline::CreateInputLayout()
 {
-	const UINT params_count = 2;
+	constexpr UINT params_count = 2;
 	auto vs_params = new D3D12_INPUT_ELEMENT_DESC[params_count]{};
 
 	vs_params[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
