@@ -49,9 +49,11 @@ public:
 	virtual void CollideWith(GameObject* other) override;
 
 	virtual void OnPlayerUpdateCallback(float fTimeElapsed) {}
-	void SetPlayerUpdatedContext(LPVOID pContext) { m_pPlayerUpdatedContext = pContext; }
+	void SetPlayerUpdatedContext(LPVOID pContext) 
+	{ m_pPlayerUpdatedContext = pContext; }
 	virtual void OnCameraUpdateCallback(float fTimeElapsed) {}
-	void SetCameraUpdatedContext(LPVOID pContext) { m_pCameraUpdatedContext = pContext; }
+	void SetCameraUpdatedContext(LPVOID pContext) 
+	{ m_pCameraUpdatedContext = pContext; }
 	GameCamera* OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode);
 	virtual GameCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(NULL); }
 

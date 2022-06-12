@@ -125,9 +125,9 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	myLights[2].m_bEnable = true;
 	myLights[2].m_nType = DIRECTIONAL_LIGHT;
 	myLights[2].m_xmf4Ambient = XMFLOAT4(); // 0
-	myLights[2].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.8f, 0.6f, 1.0f);
-	myLights[2].m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-	myLights[2].m_xmf3Direction = XMFLOAT3(1.0f, -0.5f, 0.0f);
+	myLights[2].m_xmf4Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	myLights[2].m_xmf4Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	myLights[2].m_xmf3Direction = XMFLOAT3(0.3f, -0.5f, 0.5f);
 
 	myLights[3].m_bEnable = true;
 	myLights[3].m_nType = SPOT_LIGHT;

@@ -158,7 +158,6 @@
     <ClInclude Include="BasicScene.hpp" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DiffusedGraphicsPipeline.hpp" />
-    <ClInclude Include="GameObject.hpp" />
     <ClInclude Include="IlluminatedGraphicsPipeline.hpp" />
     <ClInclude Include="IlluminatedScene.hpp" />
     <ClInclude Include="Light.hpp" />
