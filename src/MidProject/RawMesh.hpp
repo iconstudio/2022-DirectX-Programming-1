@@ -63,7 +63,7 @@ constexpr void RawMesh::AddVertex(const VertexType& vbo)
 		countVertices++;
 
 		myPositions.push_back(vbo.myPosition);
-		myColours.push_back(vbo.myColour);
+		myNormals.push_back(vbo.myNormal);
 	}
 	else
 	{

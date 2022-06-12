@@ -92,7 +92,7 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
 	IlluminatedScene::Awake(device, cmdlist);
 	//
-	m_xmf4GlobalAmbient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_xmf4GlobalAmbient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	//
 	numberLights = 6;
@@ -102,9 +102,9 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	myLights[0].m_bEnable = true;
 	myLights[0].m_nType = POINT_LIGHT;
 	myLights[0].m_fRange = 1000.0f;
-	myLights[0].m_xmf4Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	myLights[0].m_xmf4Ambient = XMFLOAT4(); // 0
 	myLights[0].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.0f, 0.0f, 1.0f);
-	myLights[0].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
+	myLights[0].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	myLights[0].m_xmf3Position = XMFLOAT3(30.0f, 30.0f, 30.0f);
 	myLights[0].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	myLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
@@ -112,9 +112,9 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	myLights[1].m_bEnable = true;
 	myLights[1].m_nType = SPOT_LIGHT;
 	myLights[1].m_fRange = 500.0f;
-	myLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	myLights[1].m_xmf4Ambient = XMFLOAT4(); // 0
 	myLights[1].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-	myLights[1].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
+	myLights[1].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	myLights[1].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
 	myLights[1].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	myLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
@@ -124,9 +124,9 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 
 	myLights[2].m_bEnable = true;
 	myLights[2].m_nType = DIRECTIONAL_LIGHT;
-	myLights[2].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	myLights[2].m_xmf4Ambient = XMFLOAT4(); // 0
 	myLights[2].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.8f, 0.6f, 1.0f);
-	myLights[2].m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.0f);
+	myLights[2].m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	myLights[2].m_xmf3Direction = XMFLOAT3(1.0f, -0.5f, 0.0f);
 
 	myLights[3].m_bEnable = true;
@@ -134,21 +134,21 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	myLights[3].m_fRange = 600.0f;
 	myLights[3].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	myLights[3].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.7f, 0.0f, 1.0f);
-	myLights[3].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
+	myLights[3].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	myLights[3].m_xmf3Position = XMFLOAT3(50.0f, 30.0f, 30.0f);
 	myLights[3].m_xmf3Direction = XMFLOAT3(0.0f, 1.0f, 1.0f);
 	myLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
 	myLights[3].m_fFalloff = 8.0f;
 	myLights[3].m_fPhi = (float)cos(XMConvertToRadians(90.0f));
-	myLights[3].m_fTheta = (float)cos(XMConvertToRadians(30.0f));
+	myLights[3].m_fTheta = (float)cos(XMConvertToRadians(40.0f));
 
 	myLights[4].m_bEnable = true;
 	myLights[4].m_nType = POINT_LIGHT;
 	myLights[4].m_fRange = 300.0f;
-	myLights[4].m_xmf4Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	myLights[4].m_xmf4Ambient = XMFLOAT4(); // 0
 	myLights[4].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.5f, 0.9f, 1.0f);
-	myLights[4].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
-	myLights[4].m_xmf3Position = XMFLOAT3(roadWidth * 0.5f, 0.0f, roadHeight * 0.5f);
+	myLights[4].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	myLights[4].m_xmf3Position = XMFLOAT3(roadWidth * 0.5f, 10.0f, roadHeight * 0.5f);
 	myLights[4].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	myLights[4].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
 
@@ -160,17 +160,26 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	roadDestPoint = goal;
 
 	constexpr auto black = XMFLOAT4{ 0.0f, 0.0f, 0.0f, 1.0f };
+	constexpr auto up = Transformer::Up;
 
-	constexpr auto lt_pos = CVertex(0.0f, 0.0f, 0.0f);
+	constexpr auto lt_pos = CVertex(0.0f, -0.1f, 0.0f);
+	constexpr auto rt_pos = CVertex(roadWidth, -0.1f, 0.0f);
+	constexpr auto lb_pos = CVertex(0.0f, -0.1f, roadHeight);
+	constexpr auto rb_pos = CVertex(roadWidth, -0.1f, roadHeight);
 	constexpr auto lt = CDiffusedVertex(lt_pos, black);
-	constexpr auto rt = CDiffusedVertex(CVertex(roadWidth, 0.0f, 0.0f), black);
-	constexpr auto lb = CDiffusedVertex(CVertex(0.0f, 0.0f, roadHeight), black);
-	constexpr auto rb = CDiffusedVertex(CVertex(roadWidth, 0.0f, roadHeight), black);
-	roadData.AddVertex(lt);
-	roadData.AddVertex(lb);
-	roadData.AddVertex(rt);
-	roadData.AddVertex(rb);
+	constexpr auto rt = CDiffusedVertex(rt_pos, black);
+	constexpr auto lb = CDiffusedVertex(lb_pos, black);
+	constexpr auto rb = CDiffusedVertex(rb_pos, black);
+	constexpr auto lt_l = CLightenVertex(lt_pos, up);
+	constexpr auto rt_l = CLightenVertex(rt_pos, up);
+	constexpr auto lb_l = CLightenVertex(lb_pos, up);
+	constexpr auto rb_l = CLightenVertex(rb_pos, up);
+	roadData.AddVertex(lt_l);
+	roadData.AddVertex(lb_l);
+	roadData.AddVertex(rt_l);
+	roadData.AddVertex(rb_l);
 
+	// CDiffusedMesh
 	roadMesh = new CMaterialMesh(device, cmdlist, roadData);
 	if (!roadMesh)
 	{
@@ -180,7 +189,11 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 
 	auto road_mat = make_shared<CMaterial>();
 	road_mat->m_xmf4Diffuse = black;
+	road_mat->m_xmf4Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	road_mat->m_xmf4Emissive = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	road_mat->m_xmf4Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	road_mat->SetShader(Pipeline::illuminatedShader);
+	//road_mat->SetShader(Pipeline::diffusedShader);
 
 	roadMesh->AddMaterial(road_mat);
 	roadMesh->myDefaultMaterial = road_mat;
@@ -189,11 +202,12 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 
 	myLights[5].m_bEnable = true;
 	myLights[5].m_nType = POINT_LIGHT;
-	myLights[5].m_fRange = 100.0f;
-	myLights[5].m_xmf4Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	myLights[5].m_xmf4Diffuse = XMFLOAT4(0.1f, 1.0f, 0.5f, 1.0f);
+	myLights[5].m_fRange = 300.0f;
+	myLights[5].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	myLights[5].m_xmf4Diffuse = XMFLOAT4(0.1f, 0.0f, 0.9f, 1.0f);
 	myLights[5].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
 	myLights[5].m_xmf3Position = XMFLOAT3(goal);
+	myLights[5].m_xmf3Position.y += 20.0f;
 	myLights[5].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	myLights[5].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
 

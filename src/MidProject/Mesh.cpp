@@ -346,6 +346,10 @@ void CMaterialMesh::Render(P3DGrpCommandList cmdlist) const
 			}
 		}
 	}
+	else
+	{
+		cmdlist->DrawInstanced(countVertices, 1, m_nOffset, 0);
+	}
 }
 
 CLightenMesh::CLightenMesh(P3DDevice device, P3DGrpCommandList cmdlist, const RawMesh& raw_mesh)
