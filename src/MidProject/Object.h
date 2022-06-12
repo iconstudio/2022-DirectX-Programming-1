@@ -9,7 +9,7 @@ public:
 
 	virtual void ReleaseUploadBuffers();
 
-	void SetMesh(CMaterialMesh* pMesh);
+	void SetMesh(CMesh* pMesh);
 	void SetOriginalCollider(const shared_ptr<BoundingOrientedBox>& box);
 	void SetOriginalCollider(shared_ptr<BoundingOrientedBox>&& box);
 	void Attach(GameObject* pChild);
@@ -86,7 +86,7 @@ public:
 	XMFLOAT4X4& worldMatrix;
 	bool isTransformModified;
 
-	CMaterialMesh* m_pMesh = nullptr;
+	CMesh* m_pMesh;
 	GameObject* m_pParent = NULL;
 	GameObject* myChild = NULL;
 	GameObject* mySibling = NULL;

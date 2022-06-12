@@ -12,16 +12,16 @@ CMesh::CMesh()
 	, myPositionBuffer(nullptr), myPositionBufferView(), myUploadingPositonBuffer(nullptr)
 {}
 
-CMesh::CMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh * raw)
+CMesh::CMesh(P3DDevice device, P3DGrpCommandList cmdlist, const RawMesh& raw)
 	: CMesh()
 {
-	countVertices = raw->countVertices;
-	myVertexType = raw->myVertexType;
+	countVertices = raw.countVertices;
+	myVertexType = raw.myVertexType;
 
 	constexpr auto pos_obj_sz = sizeof(XMFLOAT3);
 	const auto pos_sz = pos_obj_sz * countVertices;
-	
-	const auto& container = raw->myPositions;
+
+	const auto& container = raw.myPositions;
 	const auto& blob = container.data();
 
 	myPositionBuffer = CreateBufferResource(device, cmdlist
@@ -34,11 +34,11 @@ CMesh::CMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh * raw)
 	myPositionBufferView.StrideInBytes = pos_obj_sz;
 	myPositionBufferView.SizeInBytes = static_cast<UINT>(pos_sz);
 
-	countPolygons = raw->countPolygons;
+	countPolygons = raw.countPolygons;
 	if (0 < countPolygons)
 	{
 		// 통째로 복사
-		myPolygons = raw->myPolygons;
+		myPolygons = raw.myPolygons;
 
 		myIndexBuffers = new ID3D12Resource * [countPolygons];
 		myUploadingIndexBuffer = new ID3D12Resource * [countPolygons];
@@ -174,14 +174,14 @@ UINT CMesh::GetType() const
 	return myVertexType;
 }
 
-CDiffusedMesh::CDiffusedMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw)
+CDiffusedMesh::CDiffusedMesh(P3DDevice device, P3DGrpCommandList cmdlist, const RawMesh& raw)
 	: CMesh(device, cmdlist, raw)
 	, myColourBuffer(nullptr), myColourBufferView(), myUploadingColourBuffer()
 {
 	constexpr auto col_obj_sz = sizeof(XMFLOAT4);
 	const auto col_sz = col_obj_sz * countVertices;
 
-	const auto& container = raw->myColours;
+	const auto& container = raw.myColours;
 	const auto& blob = container.data();
 
 	myColourBuffer = CreateBufferResource(device, cmdlist
@@ -229,35 +229,20 @@ void CDiffusedMesh::PrepareRendering(P3DGrpCommandList cmdlist) const
 	cmdlist->IASetVertexBuffers(m_nSlot, 2, vertex_buffers);
 }
 
-CMaterialMesh::CMaterialMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw)
+CMaterialMesh::CMaterialMesh(P3DDevice device, P3DGrpCommandList cmdlist, const RawMesh& raw)
 	: CMesh(device, cmdlist, raw)
 	, myDefaultMaterial(nullptr), myMaterials()
 {}
 
 CMaterialMesh::~CMaterialMesh()
-{
-	if (0 < myMaterials.size())
-	{
-		std::for_each(myMaterials.begin(), myMaterials.end()
-			, [](CMaterial* mat) {
-				mat->Release();
-			});
-	}
-}
+{}
 
 void CMaterialMesh::AssignShader(int mat_index, Pipeline* pipeline)
 {
 	if (mat_index < myMaterials.size())
 	{
 		auto& mat = myMaterials.at(mat_index);
-		if (mat)
-		{
-			mat->SetShader(pipeline);
-		}
-		else
-		{
-			throw "잘못된 재질이 들어있음!";
-		}
+		mat->SetShader(pipeline);
 	}
 	else
 	{
@@ -265,49 +250,62 @@ void CMaterialMesh::AssignShader(int mat_index, Pipeline* pipeline)
 	}
 }
 
-void CMaterialMesh::AssignMaterial(const std::vector<CMaterial*>& list)
+void CMaterialMesh::AssignMaterial(const std::vector<shared_ptr<CMaterial>>& list)
 {
 	myMaterials = list;
 }
 
-void CMaterialMesh::AssignMaterial(std::vector<CMaterial*>&& list)
+void CMaterialMesh::AssignMaterial(std::vector<shared_ptr<CMaterial>>&& list)
 {
-	myMaterials = std::forward<std::vector<CMaterial*>>(list);
+	myMaterials = std::forward<std::vector<shared_ptr<CMaterial>>>(list);
 }
 
-void CMaterialMesh::AssignMaterial(std::vector<RawMaterial*> list, Pipeline* pipeline)
+void CMaterialMesh::AssignMaterial(const std::vector<RawMaterial>& list, Pipeline* pipeline)
 {
 	auto inserter = std::back_inserter(myMaterials);
 
 	std::transform(list.begin(), list.end(), inserter
-		, [&](RawMaterial* raw_mat) -> CMaterial* {
-			auto result = new CMaterial(raw_mat);
+		, [&](const RawMaterial& raw_mat) -> shared_ptr<CMaterial> {
+			auto result = make_shared<CMaterial>(raw_mat);
 			result->SetShader(pipeline);
 			return result;
 		});
 }
 
-void CMaterialMesh::SetMaterial(int mat_index, CMaterial* material)
+void CMaterialMesh::SetMaterial(int mat_index, const CMaterial& material)
 {
 	if (mat_index < myMaterials.size())
 	{
 		auto& mat = myMaterials.at(mat_index);
-		if (mat)
-		{
-			mat->Release();
-		}
-
-		mat = material;
-
-		if (mat)
-		{
-			mat->AddRef();
-		}
+		mat = make_shared<CMaterial>(material);
 	}
 	else
 	{
 		throw "잘못된 재질의 번호를 참조하는 중!";
 	}
+}
+
+void CMaterialMesh::SetMaterial(int mat_index, CMaterial&& material)
+{
+	if (mat_index < myMaterials.size())
+	{
+		auto& mat = myMaterials.at(mat_index);
+		mat = make_shared<CMaterial>(std::forward<CMaterial>(material));
+	}
+	else
+	{
+		throw "잘못된 재질의 번호를 참조하는 중!";
+	}
+}
+
+void CMaterialMesh::AddMaterial(const shared_ptr<CMaterial>& material)
+{
+	myMaterials.push_back(material);
+}
+
+void CMaterialMesh::AddMaterial(shared_ptr<CMaterial>&& material)
+{
+	myMaterials.push_back(std::forward<shared_ptr<CMaterial>>(material));
 }
 
 void CMaterialMesh::Render(P3DGrpCommandList cmdlist) const
@@ -318,41 +316,45 @@ void CMaterialMesh::Render(P3DGrpCommandList cmdlist) const
 	{
 		for (int i = 0; i < countPolygons; i++)
 		{
-			auto& material = myMaterials.at(i);
-
-			auto proceed_mat = material;
-			if (!material)
+			shared_ptr<CMaterial> proceed_mat = nullptr;
+			if (i < myMaterials.size())
 			{
-				proceed_mat = myDefaultMaterial.get();
+				auto& material = myMaterials.at(i);
+				proceed_mat = material;
+			}
+			else if (myDefaultMaterial)
+			{
+				proceed_mat = myDefaultMaterial;
+			}
+			else
+			{
+				throw "메쉬에 재질이 존재하지 않음!";
 			}
 
-			if (proceed_mat)
+			auto& pipeline = proceed_mat->m_pShader;
+
+			if (pipeline)
 			{
-				auto& pipeline = proceed_mat->m_pShader;
+				pipeline->PrepareRendering(cmdlist);
+				proceed_mat->PrepareRendering(cmdlist);
 
-				if (pipeline)
-				{
-					pipeline->PrepareRendering(cmdlist);
-					proceed_mat->PrepareRendering(cmdlist);
-
-					CMesh::Render(cmdlist, i);
-				}
-				else
-				{
-					throw "파이프라인과 쉐이더가 존재하지 않음!";
-				}
+				CMesh::Render(cmdlist, i);
+			}
+			else
+			{
+				throw "파이프라인과 쉐이더가 존재하지 않음!";
 			}
 		}
 	}
 }
 
-CLightenMesh::CLightenMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw_mesh)
+CLightenMesh::CLightenMesh(P3DDevice device, P3DGrpCommandList cmdlist, const RawMesh& raw_mesh)
 	: CMaterialMesh(device, cmdlist, raw_mesh)
 {
 	constexpr auto nrm_obj_sz = sizeof(XMFLOAT3);
 	const auto nrm_sz = nrm_obj_sz * countVertices;
 
-	const auto& container = raw_mesh->myNormals;
+	const auto& container = raw_mesh.myNormals;
 	const auto& blob = container.data();
 
 	myNormalBuffer = CreateBufferResource(device, cmdlist
@@ -363,7 +365,7 @@ CLightenMesh::CLightenMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh*
 
 	myNormalBufferView.BufferLocation = myNormalBuffer->GetGPUVirtualAddress();
 	myNormalBufferView.StrideInBytes = nrm_obj_sz;
-	myNormalBufferView.SizeInBytes = nrm_sz;
+	myNormalBufferView.SizeInBytes = static_cast<UINT>(nrm_sz);
 }
 
 CLightenMesh::~CLightenMesh()

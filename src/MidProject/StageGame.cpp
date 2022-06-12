@@ -171,12 +171,21 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	roadData.AddVertex(rt);
 	roadData.AddVertex(rb);
 
-	roadMesh = new CDiffusedMesh(device, cmdlist, &roadData);
+	roadMesh = new CMaterialMesh(device, cmdlist, roadData);
 	if (!roadMesh)
 	{
 		throw "도로 생성 실패!";
 	}
 	roadMesh->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+	auto road_mat = make_shared<CMaterial>();
+	road_mat->m_xmf4Diffuse = black;
+	road_mat->SetShader(Pipeline::illuminatedShader);
+
+	roadMesh->AddMaterial(road_mat);
+	roadMesh->myDefaultMaterial = road_mat;
+	//roadMesh->SetMaterial(0, road_mat);
+	//roadMesh->AssignShader(0, Pipeline::illuminatedShader);
 
 	myLights[5].m_bEnable = true;
 	myLights[5].m_nType = POINT_LIGHT;

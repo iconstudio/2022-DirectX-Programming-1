@@ -22,7 +22,7 @@ public:
 	void ProcessInput(UCHAR* pKeysBuffer);
 
 	RawMesh roadData;
-	CDiffusedMesh* roadMesh;
+	CMaterialMesh* roadMesh;
 	XMFLOAT3 roadStartPoint;
 	XMFLOAT3 roadDestPoint;
 	XMFLOAT3 playerSpawnPoint;

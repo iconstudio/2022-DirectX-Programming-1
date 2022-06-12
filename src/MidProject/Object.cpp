@@ -11,16 +11,12 @@ GameObject::GameObject()
 	, localTransform(), localMatrix(localTransform.GetMatrix())
 	, worldTransform(), worldMatrix(worldTransform.GetMatrix())
 	, isTransformModified(true)
+	, m_pMesh(nullptr)
 	, staticCollider(nullptr), myCollider(nullptr)
 {}
 
 GameObject::~GameObject()
-{
-	if (m_pMesh)
-	{
-		m_pMesh->Release();
-	}
-}
+{}
 
 void GameObject::ReleaseUploadBuffers()
 {
@@ -30,11 +26,9 @@ void GameObject::ReleaseUploadBuffers()
 	if (myChild) myChild->ReleaseUploadBuffers();
 }
 
-void GameObject::SetMesh(CMaterialMesh* pMesh)
+void GameObject::SetMesh(CMesh* pMesh)
 {
-	if (m_pMesh) m_pMesh->Release();
 	m_pMesh = pMesh;
-	if (m_pMesh) m_pMesh->AddRef();
 }
 
 void GameObject::SetOriginalCollider(const shared_ptr<BoundingOrientedBox>& box)

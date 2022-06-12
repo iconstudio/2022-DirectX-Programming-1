@@ -17,7 +17,6 @@ public:
 		, Pipeline* pipeline
 		, FILE* pfile);
 
-	static RawMesh* LoadRawMesh(FILE* pfile);
-	static std::vector<RawMaterial*> LoadRawMaterials(P3DDevice device, P3DGrpCommandList cmdlist, FILE* pfile);
-
+	static RawMesh LoadRawMesh(FILE* pfile);
+	static std::vector<RawMaterial> LoadRawMaterials(P3DDevice device, P3DGrpCommandList cmdlist, FILE* pfile);
 };

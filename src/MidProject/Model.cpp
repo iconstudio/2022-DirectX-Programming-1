@@ -50,13 +50,13 @@ Model* Model::Load(ID3D12Device* device
 	return root;
 }
 
-RawMesh* Model::LoadRawMesh(FILE* mfile)
+RawMesh Model::LoadRawMesh(FILE* mfile)
 {
-	char token[64] = { '\0' };
+	char token[64]{};
 
-	auto raw_mesh = new RawMesh;
-	raw_mesh->countVertices = ReadIntegerFromFile(mfile);
-	ReadStringFromFile(mfile, raw_mesh->m_pstrMeshName);
+	RawMesh result{};
+	result.countVertices = ReadIntegerFromFile(mfile);
+	ReadStringFromFile(mfile, result.m_pstrMeshName);
 
 	while (true)
 	{
@@ -64,25 +64,25 @@ RawMesh* Model::LoadRawMesh(FILE* mfile)
 
 		if (!strcmp(token, "<Bounds>:"))
 		{
-			fread(&(raw_mesh->m_xmf3AABBCenter), sizeof(XMFLOAT3), 1, mfile);
-			fread(&(raw_mesh->m_xmf3AABBExtents), sizeof(XMFLOAT3), 1, mfile);
+			fread(&(result.m_xmf3AABBCenter), sizeof(XMFLOAT3), 1, mfile);
+			fread(&(result.m_xmf3AABBExtents), sizeof(XMFLOAT3), 1, mfile);
 		}
 		else if (!strcmp(token, "<Positions>:"))
 		{
 			auto count = ReadIntegerFromFile(mfile);
 			if (0 < count)
 			{
-				raw_mesh->myVertexType |= VERTEXT_POSITION;
+				result.myVertexType |= VERTEXT_POSITION;
 
-				auto& containter = raw_mesh->myPositions;
+				auto& containter = result.myPositions;
 				containter.reserve(count);
 
-				XMFLOAT3 result{};
+				XMFLOAT3 pos{};
 				for (int k = 0; k < count; ++k)
 				{
-					fread(&result, sizeof(XMFLOAT3), 1, mfile);
+					fread(&pos, sizeof(XMFLOAT3), 1, mfile);
 
-					containter.push_back(result);
+					containter.push_back(pos);
 				}
 			}
 		}
@@ -91,17 +91,17 @@ RawMesh* Model::LoadRawMesh(FILE* mfile)
 			auto count = ReadIntegerFromFile(mfile);
 			if (0 < count)
 			{
-				raw_mesh->myVertexType |= VERTEXT_COLOR;
+				result.myVertexType |= VERTEXT_COLOR;
 
-				auto& containter = raw_mesh->myColours;
+				auto& containter = result.myColours;
 				containter.reserve(count);
 
-				XMFLOAT4 result{};
+				XMFLOAT4 col{};
 				for (int k = 0; k < count; ++k)
 				{
-					fread(&result, sizeof(XMFLOAT4), 1, mfile);
+					fread(&col, sizeof(XMFLOAT4), 1, mfile);
 
-					containter.push_back(result);
+					containter.push_back(col);
 				}
 			}
 		}
@@ -110,17 +110,17 @@ RawMesh* Model::LoadRawMesh(FILE* mfile)
 			auto count = ReadIntegerFromFile(mfile);
 			if (0 < count)
 			{
-				raw_mesh->myVertexType |= VERTEXT_NORMAL;
+				result.myVertexType |= VERTEXT_NORMAL;
 
-				auto& containter = raw_mesh->myNormals;
+				auto& containter = result.myNormals;
 				containter.reserve(count);
 
-				XMFLOAT3 result{};
+				XMFLOAT3 nrm{};
 				for (int k = 0; k < count; ++k)
 				{
-					fread(&result, sizeof(XMFLOAT3), 1, mfile);
+					fread(&nrm, sizeof(XMFLOAT3), 1, mfile);
 
-					containter.push_back(result);
+					containter.push_back(nrm);
 				}
 			}
 		}
@@ -129,28 +129,28 @@ RawMesh* Model::LoadRawMesh(FILE* mfile)
 			auto count = ReadIntegerFromFile(mfile);
 			if (0 < count)
 			{
-				raw_mesh->m_pnIndices = new UINT[count];
-				fread(raw_mesh->m_pnIndices, sizeof(int), count, mfile);
+				result.m_pnIndices = new UINT[count];
+				fread(result.m_pnIndices, sizeof(int), count, mfile);
 			}
 		}
 		else if (!strcmp(token, "<SubMeshes>:"))
 		{
 			const auto polygons_count = static_cast<size_t>(ReadIntegerFromFile(mfile));
 
-			raw_mesh->countPolygons = polygons_count;
+			result.countPolygons = polygons_count;
 			if (0 < polygons_count)
 			{
-				raw_mesh->ReservePolygons(polygons_count);
+				result.ReservePolygons(polygons_count);
 				for (size_t i = 0; i < polygons_count; i++)
 				{
 					ReadStringFromFile(mfile, token);
 					if (!strcmp(token, "<SubMesh>:"))
 					{
 						const int nIndex = ReadIntegerFromFile(mfile);
-						auto& polygon = raw_mesh->PolygonAt(i);
+						auto& polygon = result.PolygonAt(i);
 
 						const size_t index_count = ReadIntegerFromFile(mfile);
-						
+
 						if (0 < index_count)
 						{
 							polygon.Reserve(index_count);
@@ -171,67 +171,67 @@ RawMesh* Model::LoadRawMesh(FILE* mfile)
 			break;
 		}
 	}
-	return raw_mesh;
+	return result;
 }
 
-std::vector<RawMaterial*> Model::LoadRawMaterials(ID3D12Device* device, ID3D12GraphicsCommandList* cmdlist, FILE* pInFile)
+std::vector<RawMaterial> Model::LoadRawMaterials(P3DDevice device, P3DGrpCommandList cmdlist, FILE* pfile)
 {
 	char token[64] = { '\0' };
 	UINT nReads = 0;
 
 	int nMaterial = 0;
 
-	const auto mat_count = ReadIntegerFromFile(pInFile);
+	const auto mat_count = ReadIntegerFromFile(pfile);
 
-	std::vector<RawMaterial*> result{};
+	std::vector<RawMaterial> result{};
 	result.reserve(mat_count);
 
-	RawMaterial* process = nullptr;
+	RawMaterial process;
 
 	while (0 < mat_count)
 	{
-		ReadStringFromFile(pInFile, token);
+		ReadStringFromFile(pfile, token);
 
 		if (!strcmp(token, "<Material>:"))
 		{
-			nMaterial = ReadIntegerFromFile(pInFile);
+			nMaterial = ReadIntegerFromFile(pfile);
 
-			process = new RawMaterial;
+			process = RawMaterial{};
 			result.push_back(process);
 		}
-		else if (nullptr != process)
+		else if (nullptr != &process)
 		{
 			if (!strcmp(token, "<AlbedoColor>:"))
 			{
-				nReads = (UINT)::fread(&(process->m_xmf4AlbedoColor), sizeof(float), 4, pInFile);
+				nReads = (UINT)::fread(&(process.m_xmf4AlbedoColor), sizeof(float), 4, pfile);
 			}
 			else if (!strcmp(token, "<EmissiveColor>:"))
 			{
-				nReads = (UINT)::fread(&(process->m_xmf4EmissiveColor), sizeof(float), 4, pInFile);
+				nReads = (UINT)::fread(&(process.m_xmf4EmissiveColor), sizeof(float), 4, pfile);
 			}
 			else if (!strcmp(token, "<SpecularColor>:"))
 			{
-				nReads = (UINT)::fread(&(process->m_xmf4SpecularColor), sizeof(float), 4, pInFile);
+				nReads = (UINT)::fread(&(process.m_xmf4SpecularColor), sizeof(float), 4, pfile);
 			}
 			else if (!strcmp(token, "<Glossiness>:"))
 			{
-				nReads = (UINT)::fread(&(process->m_fGlossiness), sizeof(float), 1, pInFile);
+				nReads = (UINT)::fread(&(process.m_fGlossiness), sizeof(float), 1, pfile);
 			}
 			else if (!strcmp(token, "<Smoothness>:"))
 			{
-				nReads = (UINT)::fread(&(process->m_fSmoothness), sizeof(float), 1, pInFile);
+				nReads = (UINT)::fread(&(process.m_fSmoothness), sizeof(float), 1, pfile);
 			}
 			else if (!strcmp(token, "<Metallic>:"))
 			{
-				nReads = (UINT)::fread(&(process->m_fSpecularHighlight), sizeof(float), 1, pInFile);
+				nReads = (UINT)::fread(&(process.m_fSpecularHighlight), sizeof(float), 1, pfile);
 			}
 			else if (!strcmp(token, "<SpecularHighlight>:"))
 			{
-				nReads = (UINT)::fread(&(process->m_fMetallic), sizeof(float), 1, pInFile);
+				nReads = (UINT)::fread(&(process.m_fMetallic), sizeof(float), 1, pfile);
 			}
 			else if (!strcmp(token, "<GlossyReflection>:"))
 			{
-				nReads = (UINT)::fread(&(process->m_fGlossyReflection), sizeof(float), 1, pInFile);
+				nReads = (UINT)::fread(&(process.m_fGlossyReflection), sizeof(float), 1, pfile);
 			}
 			else if (!strcmp(token, "</Materials>"))
 			{
@@ -254,7 +254,7 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 	int nFrame = 0;
 
 	Model* root = nullptr;
-	CLightenMesh* mesh = nullptr;
+	CMesh* mesh = nullptr;
 
 	while (true)
 	{
@@ -301,20 +301,18 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 			}
 
 			auto raw_mesh = root->LoadRawMesh(pfile);
-
-			if (raw_mesh)
+			if (raw_mesh.myVertexType & VERTEXT_NORMAL)
 			{
-				if (raw_mesh->myVertexType & VERTEXT_NORMAL)
-				{
-					mesh = new CLightenMesh(device, cmdlist, raw_mesh);
-				}
+				mesh = new CLightenMesh(device, cmdlist, raw_mesh);
+			}
+			else if (raw_mesh.myVertexType & VERTEXT_COLOR)
+			{
+				mesh = new CDiffusedMesh(device, cmdlist, raw_mesh);
+			}
 
-				if (mesh)
-				{
-					root->SetMesh(mesh);
-				}
-
-				delete raw_mesh;
+			if (mesh)
+			{
+				root->SetMesh(mesh);
 			}
 		}
 		else if (!strcmp(token, "<Materials>:"))
@@ -334,9 +332,13 @@ Model* Model::LoadFrameHierarchyFromFile(ID3D12Device* device
 					throw "재질을 저장할 메쉬가 생성되지 않음!";
 				}
 
-				mesh->AssignMaterial(raw_materials, pipeline);
+				if (mesh->myVertexType & VERTEXT_NORMAL)
+				{
+					auto lightenmesh = static_cast<CLightenMesh*>(mesh);
+					lightenmesh->AssignMaterial(raw_materials, pipeline);
 
-				raw_materials.erase(raw_materials.begin(), raw_materials.end());
+					//raw_materials.erase(raw_materials.begin(), raw_materials.end());
+				}
 			}
 		}
 		else if (!strcmp(token, "<Children>:"))
