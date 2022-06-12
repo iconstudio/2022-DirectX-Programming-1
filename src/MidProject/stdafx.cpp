@@ -117,7 +117,11 @@ ID3D12Resource* CreateBufferResource(P3DDevice device, P3DGrpCommandList cmdlist
 	auto uuid = __uuidof(ID3D12Resource);
 	auto place = reinterpret_cast<void**>(&result);
 
-	auto valid = device->CreateCommittedResource(&heap_property, D3D12_HEAP_FLAG_NONE, &res_desc, init_state, NULL, uuid, place);
+	auto valid = device->CreateCommittedResource(&heap_property, D3D12_HEAP_FLAG_NONE
+		, &res_desc
+		, init_state, NULL
+		, uuid
+		, place);
 	if (FAILED(valid))
 	{
 		throw "자원 생성 실패!";

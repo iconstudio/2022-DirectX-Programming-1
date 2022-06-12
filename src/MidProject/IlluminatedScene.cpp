@@ -88,6 +88,7 @@ void IlluminatedScene::PrepareRendering()
 		throw "조명 쉐이더가 존재하지 않음!";
 	}
 
+	pipeline->PrepareRendering(d3dTaskList);
 	d3dTaskList->SetGraphicsRootSignature(pipeline->GetRootSignature());
 
 	myCamera->SetViewportsAndScissorRects(d3dTaskList);

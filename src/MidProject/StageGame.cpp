@@ -8,6 +8,11 @@
 #include "Arithmetics.hpp"
 #include "Mesh.h"
 #include "Vertex.hpp"
+#include "Transformer.hpp"
+
+constexpr float roadWidth = 100.0f;
+constexpr float roadHeight = 3000.0f;
+Transformer roadTransform{};
 
 float MakeRandom()
 {
@@ -155,14 +160,23 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	roadDestPoint = goal;
 
 	constexpr auto black = XMFLOAT4{ 0.0f, 0.0f, 0.0f, 1.0f };
-	const auto b = black.x;
-	roadData.AddVertex(CDiffusedVertex({ 0.0f, 0.0f, 0.0f }, black));
+
+	constexpr auto lt_pos = CVertex(0.0f, 0.0f, 0.0f);
+	constexpr auto lt = CDiffusedVertex(lt_pos, black);
+	constexpr auto rt = CDiffusedVertex(CVertex(roadWidth, 0.0f, 0.0f), black);
+	constexpr auto lb = CDiffusedVertex(CVertex(0.0f, 0.0f, roadHeight), black);
+	constexpr auto rb = CDiffusedVertex(CVertex(roadWidth, 0.0f, roadHeight), black);
+	roadData.AddVertex(lt);
+	roadData.AddVertex(lb);
+	roadData.AddVertex(rt);
+	roadData.AddVertex(rb);
 
 	roadMesh = new CDiffusedMesh(device, cmdlist, &roadData);
 	if (!roadMesh)
 	{
 		throw "도로 생성 실패!";
 	}
+	roadMesh->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	myLights[5].m_bEnable = true;
 	myLights[5].m_nType = POINT_LIGHT;
@@ -392,6 +406,15 @@ void StageGame::PrepareRendering()
 void StageGame::Render() const
 {
 	IlluminatedScene::Render();
+
+	XMFLOAT4X4 xmf4x4World{};
+
+	const auto& road_mat = roadTransform.GetMatrix();
+	const auto my_mat = XMLoadFloat4x4(&road_mat);
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(my_mat));
+
+	// 두번째 루트 매개인자에서 0번째 메모리에 float 16개 전달
+	d3dTaskList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 
 	roadMesh->Render(d3dTaskList);
 }

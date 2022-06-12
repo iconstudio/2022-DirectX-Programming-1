@@ -56,22 +56,22 @@ constexpr void RawMesh::AddVertex(const VertexType& vbo)
 		countVertices++;
 
 		myPositions.push_back(vbo.myPosition);
-		myPositions.push_back(vbo.myColour);
+		myColours.push_back(vbo.myColour);
 	}
 	else if constexpr (std::is_same_v<VertexType, CLightenVertex>)
 	{
 		countVertices++;
 
 		myPositions.push_back(vbo.myPosition);
-		myPositions.push_back(vbo.myNormal);
+		myColours.push_back(vbo.myColour);
 	}
 	else
 	{
 		countVertices++;
 
 		myPositions.push_back(vbo.myPosition);
-		myPositions.push_back(vbo.myNormal);
-		myPositions.push_back(vbo.myColour);
+		myColours.push_back(vbo.myColour);
+		myNormals.push_back(vbo.myNormal);
 	}
 }
 
@@ -90,21 +90,21 @@ constexpr void RawMesh::AddVertex(VertexType&& vbo)
 		countVertices++;
 
 		myPositions.push_back(std::forward<XMFLOAT3>(vbo.myPosition));
-		myPositions.push_back(std::forward<XMFLOAT4>(vbo.myColour));
+		myColours.push_back(std::forward<XMFLOAT4>(vbo.myColour));
 	}
 	else if constexpr (std::is_same_v<VertexType, CLightenVertex>)
 	{
 		countVertices++;
 
 		myPositions.push_back(std::forward<XMFLOAT3>(vbo.myPosition));
-		myPositions.push_back(std::forward<XMFLOAT3>(vbo.myNormal));
+		myColours.push_back(std::forward<XMFLOAT3>(vbo.myNormal));
 	}
 	else
 	{
 		countVertices++;
 
 		myPositions.push_back(std::forward<XMFLOAT3>(vbo.myPosition));
-		myPositions.push_back(std::forward<XMFLOAT4>(vbo.myColour));
-		myPositions.push_back(std::forward<XMFLOAT3>(vbo.myNormal));
+		myColours.push_back(std::forward<XMFLOAT4>(vbo.myColour));
+		myNormals.push_back(std::forward<XMFLOAT3>(vbo.myNormal));
 	}
 }

@@ -10,6 +10,7 @@ public:
 	CMesh(P3DDevice device, P3DGrpCommandList cmdlist, RawMesh* raw);
 	virtual ~CMesh();
 
+	void SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY topology);
 	virtual void ReleaseUploadBuffers();
 
 	const CPolygon& PolygonAt(const size_t index) const;
@@ -80,6 +81,8 @@ public:
 	virtual void Render(P3DGrpCommandList cmdlist) const override;
 
 	shared_ptr<CMaterial> myDefaultMaterial;
+
+protected:
 	std::vector<CMaterial*> myMaterials;
 };
 

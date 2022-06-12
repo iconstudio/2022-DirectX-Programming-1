@@ -116,19 +116,21 @@ void CMesh::Render(P3DGrpCommandList cmdlist) const
 			Render(cmdlist, i);
 		}
 	}
-}
-
-void CMesh::Render(P3DGrpCommandList cmdlist, int polygon_index) const
-{
-	if (0 < countPolygons && polygon_index < countPolygons)
-	{
-		cmdlist->IASetIndexBuffer(&(myIndexBufferViews[polygon_index]));
-		PolygonAt(polygon_index).Render(cmdlist);
-	}
 	else
 	{
 		cmdlist->DrawInstanced(countVertices, 1, m_nOffset, 0);
 	}
+}
+
+void CMesh::Render(P3DGrpCommandList cmdlist, int polygon_index) const
+{
+	cmdlist->IASetIndexBuffer(&(myIndexBufferViews[polygon_index]));
+	PolygonAt(polygon_index).Render(cmdlist);
+}
+
+void CMesh::SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY topology)
+{
+	typePrimitive = topology;
 }
 
 void CMesh::ReleaseUploadBuffers()
