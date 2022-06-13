@@ -47,16 +47,25 @@ class CDiffusedMesh : public CMesh
 {
 public:
 	CDiffusedMesh(P3DDevice device, P3DGrpCommandList cmdlist, const RawMesh& raw);
-	~CDiffusedMesh();
+	virtual ~CDiffusedMesh();
 
 	void ReleaseUploadBuffers() override;
 
-	void PrepareRendering(P3DGrpCommandList cmdlist) const override;
+	virtual void PrepareRendering(P3DGrpCommandList cmdlist) const override;
 
 protected:
 	ID3D12Resource* myColourBuffer;
 	D3D12_VERTEX_BUFFER_VIEW myColourBufferView;
 	ID3D12Resource* myUploadingColourBuffer;
+};
+
+class CPlainMesh : public CDiffusedMesh
+{
+public:
+	CPlainMesh(P3DDevice device, P3DGrpCommandList cmdlist, const RawMesh& raw);
+	~CPlainMesh();
+
+	void PrepareRendering(P3DGrpCommandList cmdlist) const override;
 };
 
 class CMaterialMesh : public CMesh

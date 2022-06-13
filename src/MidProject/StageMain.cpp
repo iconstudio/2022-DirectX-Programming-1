@@ -4,6 +4,9 @@
 
 StageMain::StageMain(GameFramework& framework)
 	: Scene(framework, "Main")
+	, textTitle("HelliAttack", 24, Colors::CadetBlue)
+	, textAuthor("JinYoonSeong", 24, Colors::CadetBlue)
+	, textDate("2022-06-13", 24, Colors::CadetBlue)
 {
 	constexpr float colors[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	SetBackgroundColor(colors);
@@ -12,6 +15,10 @@ StageMain::StageMain(GameFramework& framework)
 void StageMain::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
 	Scene::Awake(device, cmdlist);
+
+	textTitle.Start(device, cmdlist);
+	textAuthor.Start(device, cmdlist);
+	textDate.Start(device, cmdlist);
 }
 
 void StageMain::Start()

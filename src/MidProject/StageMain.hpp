@@ -1,5 +1,6 @@
 #pragma once
 #include "Scene.h"
+#include "TextMerger.hpp"
 
 class StageMain : public Scene
 {
@@ -16,4 +17,6 @@ public:
 	void OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info) override;
 	void OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state) override;
 	void OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) override;
+
+	TextMerger textTitle, textAuthor, textDate;
 };

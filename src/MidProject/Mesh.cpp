@@ -234,6 +234,27 @@ CMaterialMesh::CMaterialMesh(P3DDevice device, P3DGrpCommandList cmdlist, const 
 	, myDefaultMaterial(nullptr), myMaterials()
 {}
 
+CPlainMesh::CPlainMesh(P3DDevice device, P3DGrpCommandList cmdlist, const RawMesh& raw)
+	: CDiffusedMesh(device, cmdlist, raw)
+{}
+
+CPlainMesh::~CPlainMesh()
+{}
+
+void CPlainMesh::PrepareRendering(P3DGrpCommandList cmdlist) const
+{
+	auto& pipeline = Pipeline::plainShader;
+	if (!pipeline)
+	{
+		throw "평면 색상 쉐이더가 존재하지 않음!";
+	}
+
+	cmdlist->IASetPrimitiveTopology(typePrimitive);
+
+	D3D12_VERTEX_BUFFER_VIEW vertex_buffers[2] = { myPositionBufferView, myColourBufferView };
+	cmdlist->IASetVertexBuffers(m_nSlot, 2, vertex_buffers);
+}
+
 CMaterialMesh::~CMaterialMesh()
 {}
 
