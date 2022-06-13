@@ -13,12 +13,15 @@ TextMerger::TextMerger(const char* text, float size, XMVECTORF32 color)
 
 std::vector<std::string> TextMerger::Awake()
 {
-	auto builder = std::back_inserter(myStructure);
+	std::vector<std::string> result{};
+	auto builder = std::back_inserter(result);
 
 	std::transform(myText.cbegin(), myText.cend(), builder
 		, [&](const char one) -> std::string {
-			return std::string(Build(one));
-		});
+		return std::string(Build(one));
+	});
+
+	return result;
 }
 
 void TextMerger::Start(P3DDevice device, P3DGrpCommandList cmdlist)
@@ -27,30 +30,30 @@ void TextMerger::Start(P3DDevice device, P3DGrpCommandList cmdlist)
 
 	std::for_each(myStructure.cbegin(), myStructure.cend()
 		, [&](const std::string& structure) {
-			float dx = 0.0f;
-			float dy = 0.0f;
+		float dx = 0.0f;
+		float dy = 0.0f;
 
-			std::for_each(structure.cbegin(), structure.cend()
-				, [&](const char& one) {
-					if ('¡á' == one)
-					{
-						const auto positions = MakeRect(XMFLOAT3(dx, dy, 0.0f));
+		std::for_each(structure.cbegin(), structure.cend()
+			, [&](const unsigned char& one) {
+			if ('95' == one)
+			{
+				const auto positions = MakeRect(XMFLOAT3(dx, dy, 0.0f));
 
-						for (int i = 0; i < 4; ++i)
-						{
-							const auto& pos = positions[i];
-							raw_text.AddVertex(CDiffusedVertex{ pos, myColour });
-						}
-					}
+				for (int i = 0; i < 4; ++i)
+				{
+					const auto& pos = positions[i];
+					raw_text.AddVertex(CDiffusedVertex{ pos, myColour });
+				}
+			}
 
-					dx += lineWidth;
-					if (textWidth <= dx)
-					{
-						dx = 0.0f;
-						dy += lineWidth;
-					}
-				});
+			dx += lineWidth;
+			if (textWidth <= dx)
+			{
+				dx = 0.0f;
+				dy += lineWidth;
+			}
 		});
+	});
 
 	myMerger = new CPlainMesh(device, cmdlist, raw_text);
 }
@@ -89,6 +92,38 @@ const char* TextMerger::Build(const char one) const
 		}
 		break;
 
+		case '?':
+		{
+			return "\
+¡á¡á¡á¡á¡á\
+¡à¡à¡à¡à¡á\
+¡à¡à¡á¡á¡á\
+¡à¡à¡à¡à¡à\
+¡à¡à¡á¡à¡à";
+		}
+		break;
+
+		case '(':
+		{
+			return "\
+¡à¡à¡á¡à¡à\
+¡à¡á¡à¡à¡à\
+¡á¡á¡à¡à¡à\
+¡à¡á¡à¡à¡à\
+¡à¡à¡á¡à¡à";
+		}
+		break;
+
+		case ')':
+		{
+			return "\
+¡à¡à¡á¡à¡à\
+¡à¡à¡à¡á¡à\
+¡à¡à¡à¡á¡á\
+¡à¡à¡à¡á¡à\
+¡à¡à¡á¡à¡à";
+		}
+		break;
 		case '-':
 		{
 			return "\
@@ -224,10 +259,285 @@ const char* TextMerger::Build(const char one) const
 		case 'A':
 		{
 			return "\
-¡á¡á¡á¡á¡á\
+¡à¡á¡á¡á¡à\
 ¡á¡à¡à¡à¡á\
 ¡á¡á¡á¡á¡á\
 ¡á¡à¡à¡à¡á\
+¡á¡à¡à¡à¡á";
+		}
+		break;
+
+		case 'B':
+		{
+			return "\
+¡á¡á¡á¡á¡à\
+¡á¡à¡à¡à¡á\
+¡á¡á¡á¡á¡à\
+¡á¡à¡à¡à¡á\
+¡á¡á¡á¡á¡à";
+		}
+		break;
+
+		case 'C':
+		{
+			return "\
+¡à¡á¡á¡á¡á\
+¡á¡à¡à¡à¡à\
+¡á¡à¡à¡à¡à\
+¡á¡à¡à¡à¡à\
+¡à¡á¡á¡á¡á";
+		}
+		break;
+
+		case 'D':
+		{
+			return "\
+¡á¡á¡á¡á¡à\
+¡á¡à¡à¡à¡á\
+¡á¡à¡à¡à¡á\
+¡á¡à¡à¡à¡á\
+¡á¡á¡á¡á¡à";
+		}
+		break;
+
+		case 'E':
+		{
+			return "\
+¡á¡á¡á¡á¡á\
+¡á¡à¡à¡à¡à\
+¡á¡á¡á¡á¡á\
+¡á¡à¡à¡à¡à\
+¡á¡á¡á¡á¡á";
+		}
+		break;
+
+		case 'F':
+		{
+			return "\
+¡á¡á¡á¡á¡á\
+¡á¡à¡à¡à¡à\
+¡á¡á¡á¡á¡á\
+¡á¡à¡à¡à¡à\
+¡á¡à¡à¡à¡à";
+		}
+		break;
+
+		case 'G':
+		{
+			return "\
+¡á¡á¡á¡á¡á\
+¡á¡à¡à¡à¡à\
+¡á¡à¡à¡á¡á\
+¡á¡à¡à¡à¡á\
+¡á¡á¡á¡á¡á";
+		}
+		break;
+
+		case 'H':
+		{
+			return "\
+¡á¡à¡à¡à¡á\
+¡á¡à¡à¡à¡á\
+¡á¡á¡á¡á¡á\
+¡á¡à¡à¡à¡á\
+¡á¡à¡à¡à¡á";
+		}
+		break;
+
+		case 'I':
+		{
+			return "\
+¡á¡á¡á¡á¡á\
+¡à¡à¡á¡à¡à\
+¡à¡à¡á¡à¡à\
+¡à¡à¡á¡à¡à\
+¡á¡á¡á¡á¡á";
+		}
+		break;
+
+		case 'J':
+		{
+			return "\
+¡á¡á¡á¡á¡á\
+¡à¡à¡á¡à¡à\
+¡à¡à¡á¡à¡à\
+¡à¡à¡á¡à¡à\
+¡á¡á¡á¡à¡à";
+		}
+		break;
+
+		case 'K':
+		{
+			return "\
+¡á¡à¡à¡à¡á\
+¡á¡à¡à¡á¡à\
+¡á¡à¡á¡à¡à\
+¡á¡á¡à¡á¡à\
+¡á¡à¡à¡à¡á";
+		}
+		break;
+
+		case 'L':
+		{
+			return "\
+¡á¡à¡à¡à¡à\
+¡á¡à¡à¡à¡à\
+¡á¡à¡à¡à¡à\
+¡á¡à¡à¡à¡à\
+¡á¡á¡á¡á¡á";
+		}
+		break;
+
+		case 'M':
+		{
+			return "\
+¡á¡á¡á¡á¡á\
+¡á¡à¡á¡à¡á\
+¡á¡à¡á¡à¡á\
+¡á¡à¡á¡à¡á\
+¡á¡à¡á¡à¡á";
+		}
+		break;
+
+		case 'N':
+		{
+			return "\
+¡á¡à¡à¡à¡á\
+¡á¡á¡à¡à¡á\
+¡á¡à¡á¡à¡á\
+¡á¡à¡à¡á¡á\
+¡á¡à¡à¡à¡á";
+		}
+		break;
+
+		case 'O':
+		{
+			return "\
+¡à¡á¡á¡á¡à\
+¡á¡à¡à¡à¡á\
+¡á¡à¡à¡à¡á\
+¡á¡à¡à¡à¡á\
+¡à¡á¡á¡á¡à";
+		}
+		break;
+
+		case 'P':
+		{
+			return "\
+¡á¡á¡á¡á¡à\
+¡á¡à¡à¡à¡á\
+¡á¡á¡á¡á¡à\
+¡á¡à¡à¡à¡à\
+¡á¡à¡à¡à¡à";
+		}
+		break;
+
+		case 'Q':
+		{
+			return "\
+¡à¡á¡á¡á¡à\
+¡á¡à¡à¡à¡á\
+¡á¡à¡á¡à¡á\
+¡á¡à¡à¡á¡á\
+¡à¡á¡á¡à¡á";
+		}
+		break;
+
+		case 'R':
+		{
+			return "\
+¡á¡á¡á¡á¡à\
+¡á¡à¡à¡à¡á\
+¡á¡á¡á¡á¡à\
+¡á¡à¡à¡à¡á\
+¡á¡à¡à¡à¡á";
+		}
+		break;
+
+		case 'S':
+		{
+			return "\
+¡á¡á¡á¡á¡á\
+¡á¡à¡à¡à¡à\
+¡á¡á¡á¡á¡á\
+¡à¡à¡à¡à¡á\
+¡á¡á¡á¡á¡á";
+		}
+		break;
+
+		case 'T':
+		{
+			return "\
+¡á¡á¡á¡á¡á\
+¡à¡à¡á¡à¡à\
+¡à¡à¡á¡à¡à\
+¡à¡à¡á¡à¡à\
+¡à¡à¡á¡à¡à";
+		}
+		break;
+
+		case 'U':
+		{
+			return "\
+¡á¡à¡à¡à¡á\
+¡á¡à¡à¡à¡á\
+¡á¡à¡à¡à¡á\
+¡á¡à¡à¡à¡á\
+¡à¡á¡á¡á¡à";
+		}
+		break;
+
+		case 'V':
+		{
+			return "\
+¡á¡à¡à¡à¡á\
+¡á¡à¡à¡à¡á\
+¡á¡à¡à¡à¡á\
+¡à¡á¡à¡á¡à\
+¡à¡à¡á¡à¡à";
+		}
+		break;
+
+		case 'W':
+		{
+			return "\
+¡á¡à¡á¡à¡á\
+¡á¡à¡á¡à¡á\
+¡á¡à¡á¡à¡á\
+¡á¡á¡á¡á¡á\
+¡à¡á¡à¡á¡à";
+		}
+		break;
+
+		case 'X':
+		{
+			return "\
+¡á¡à¡à¡à¡á\
+¡à¡á¡à¡á¡à\
+¡à¡à¡á¡à¡à\
+¡à¡á¡à¡á¡à\
+¡á¡à¡à¡à¡á";
+		}
+		break;
+
+		case 'Y':
+		{
+			return "\
+¡á¡à¡à¡à¡á\
+¡à¡á¡à¡á¡à\
+¡à¡à¡á¡à¡à\
+¡à¡à¡á¡à¡à\
+¡à¡à¡á¡à¡à";
+		}
+		break;
+
+		case 'Z':
+		{
+			return "\
+¡á¡á¡á¡á¡á\
+¡à¡à¡à¡á¡à\
+¡à¡à¡á¡à¡à\
+¡à¡á¡à¡à¡à\
 ¡á¡á¡á¡á¡á";
 		}
 		break;
