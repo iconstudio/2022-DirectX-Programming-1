@@ -72,8 +72,8 @@ D3D12_RASTERIZER_DESC Pipeline::CreateRasterizerState()
 	result.DepthBiasClamp = 0.0f;
 	result.SlopeScaledDepthBias = 0.0f;
 	result.DepthClipEnable = TRUE;
-	result.MultisampleEnable = FALSE;
-	result.AntialiasedLineEnable = FALSE;
+	result.MultisampleEnable = TRUE;
+	result.AntialiasedLineEnable = TRUE;
 	result.ForcedSampleCount = 0;
 	result.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 
