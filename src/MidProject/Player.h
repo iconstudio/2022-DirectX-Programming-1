@@ -58,10 +58,7 @@ public:
 	virtual GameCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(NULL); }
 
 	virtual constexpr COLLISION_TAGS GetTag() const noexcept override;
-	XMFLOAT3 GetPosition() { return(m_xmf3Position); }
-	XMFLOAT3 GetLookVector() { return(m_xmf3Look); }
-	XMFLOAT3 GetUpVector() { return(m_xmf3Up); }
-	XMFLOAT3 GetRightVector() { return(m_xmf3Right); }
+
 	const XMFLOAT3& GetVelocity() const { return(m_xmf3Velocity); }
 	float GetYaw() const { return(m_fYaw); }
 	float GetPitch() const { return(m_fPitch); }
@@ -71,10 +68,6 @@ public:
 	GameCamera* GetCamera();
 
 public:
-	XMFLOAT3					m_xmf3Position;
-	XMFLOAT3					m_xmf3Right;
-	XMFLOAT3					m_xmf3Up;
-	XMFLOAT3					m_xmf3Look;
 
 	float           			m_fPitch;
 	float           			m_fYaw;
