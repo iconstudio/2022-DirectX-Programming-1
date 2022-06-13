@@ -1,5 +1,6 @@
 #pragma once
 #include "Mesh.h"
+#include <array>
 
 class TextMerger
 {
@@ -20,5 +21,5 @@ public:
 
 private:
 	const char* Build(const char one) const;
-	const XMFLOAT3* MakeRect(const XMFLOAT3 offset) const;
+	std::array<XMFLOAT3, 4> MakeRect(const XMFLOAT3 offset) const;
 };

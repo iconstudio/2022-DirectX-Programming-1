@@ -34,7 +34,7 @@ void TextMerger::Start(P3DDevice device, P3DGrpCommandList cmdlist)
 				, [&](const char& one) {
 					if ('бс' == one)
 					{
-						auto positions = MakeRect(XMFLOAT3(dx, dy, 0.0f));
+						const auto positions = MakeRect(XMFLOAT3(dx, dy, 0.0f));
 
 						for (int i = 0; i < 4; ++i)
 						{
@@ -55,9 +55,9 @@ void TextMerger::Start(P3DDevice device, P3DGrpCommandList cmdlist)
 	myMerger = new CPlainMesh(device, cmdlist, raw_text);
 }
 
-const XMFLOAT3* TextMerger::MakeRect(const XMFLOAT3 offset) const
+std::array<XMFLOAT3, 4> TextMerger::MakeRect(const XMFLOAT3 offset) const
 {
-	XMFLOAT3 result[4]{};
+	std::array<XMFLOAT3, 4> result{};
 
 	result[0] = offset;
 

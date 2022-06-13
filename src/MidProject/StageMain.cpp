@@ -37,10 +37,14 @@ void StageMain::Update(float delta_time)
 }
 
 void StageMain::PrepareRendering()
-{}
+{
+	textTitle.myMerger->PrepareRendering(d3dTaskList);
+}
 
 void StageMain::Render() const
-{}
+{
+	textTitle.myMerger->Render(d3dTaskList);
+}
 
 void StageMain::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {}
