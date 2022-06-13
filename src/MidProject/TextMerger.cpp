@@ -35,9 +35,9 @@ void TextMerger::Start(P3DDevice device, P3DGrpCommandList cmdlist)
 
 		std::for_each(structure.cbegin(), structure.cend()
 			, [&](const unsigned char& one) {
-			if ('95' == one)
+			if ('O' == one)
 			{
-				const auto positions = MakeRect(XMFLOAT3(dx, dy, 0.0f));
+				const auto positions = MakeRect(XMFLOAT3(dx, dy, 1.0f));
 
 				for (int i = 0; i < 4; ++i)
 				{
@@ -84,472 +84,472 @@ const char* TextMerger::Build(const char one) const
 		case ' ':
 		{
 			return "\
-¡à¡à¡à¡à¡à\
-¡à¡à¡à¡à¡à\
-¡à¡à¡à¡à¡à\
-¡à¡à¡à¡à¡à\
-¡à¡à¡à¡à¡à";
+XXXXX\
+XXXXX\
+XXXXX\
+XXXXX\
+XXXXX";
 		}
 		break;
 
 		case '?':
 		{
 			return "\
-¡á¡á¡á¡á¡á\
-¡à¡à¡à¡à¡á\
-¡à¡à¡á¡á¡á\
-¡à¡à¡à¡à¡à\
-¡à¡à¡á¡à¡à";
+OOOOO\
+XXXXO\
+XXOOO\
+XXXXX\
+XXOXX";
 		}
 		break;
 
 		case '(':
 		{
 			return "\
-¡à¡à¡á¡à¡à\
-¡à¡á¡à¡à¡à\
-¡á¡á¡à¡à¡à\
-¡à¡á¡à¡à¡à\
-¡à¡à¡á¡à¡à";
+XXOXX\
+XOXXX\
+OOXXX\
+XOXXX\
+XXOXX";
 		}
 		break;
 
 		case ')':
 		{
 			return "\
-¡à¡à¡á¡à¡à\
-¡à¡à¡à¡á¡à\
-¡à¡à¡à¡á¡á\
-¡à¡à¡à¡á¡à\
-¡à¡à¡á¡à¡à";
+XXOXX\
+XXXOX\
+XXXOO\
+XXXOX\
+XXOXX";
 		}
 		break;
 		case '-':
 		{
 			return "\
-¡à¡à¡à¡à¡à\
-¡à¡à¡à¡à¡à\
-¡á¡á¡á¡á¡á\
-¡à¡à¡à¡à¡à\
-¡à¡à¡à¡à¡à";
+XXXXX\
+XXXXX\
+OOOOO\
+XXXXX\
+XXXXX";
 		}
 		break;
 
 		case '!':
 		{
 			return "\
-¡à¡à¡á¡à¡à\
-¡à¡à¡á¡à¡à\
-¡à¡à¡á¡à¡à\
-¡à¡à¡à¡à¡à\
-¡à¡à¡á¡à¡à";
+XXOXX\
+XXOXX\
+XXOXX\
+XXXXX\
+XXOXX";
 		}
 		break;
 
 		case '0':
 		{
 			return "\
-¡á¡á¡á¡á¡á\
-¡á¡à¡à¡à¡á\
-¡á¡à¡à¡à¡á\
-¡á¡à¡à¡à¡á\
-¡á¡á¡á¡á¡á";
+OOOOO\
+OXXXO\
+OXXXO\
+OXXXO\
+OOOOO";
 		}
 		break;
 
 		case '1':
 		{
 			return "\
-¡á¡á¡á¡à¡à\
-¡à¡à¡á¡à¡à\
-¡à¡à¡á¡à¡à\
-¡à¡à¡á¡à¡à\
-¡á¡á¡á¡á¡á";
+OOOXX\
+XXOXX\
+XXOXX\
+XXOXX\
+OOOOO";
 		}
 		break;
 
 		case '2':
 		{
 			return "\
-¡á¡á¡á¡á¡á\
-¡à¡à¡à¡à¡á\
-¡á¡á¡á¡á¡á\
-¡á¡à¡à¡à¡à\
-¡á¡á¡á¡á¡á";
+OOOOO\
+XXXXO\
+OOOOO\
+OXXXX\
+OOOOO";
 		}
 		break;
 
 		case '3':
 		{
 			return "\
-¡á¡á¡á¡á¡á\
-¡à¡à¡à¡à¡á\
-¡á¡á¡á¡á¡á\
-¡à¡à¡à¡à¡á\
-¡á¡á¡á¡á¡á";
+OOOOO\
+XXXXO\
+OOOOO\
+XXXXO\
+OOOOO";
 		}
 		break;
 
 		case '4':
 		{
 			return "\
-¡á¡à¡à¡á¡à\
-¡á¡à¡à¡á¡à\
-¡á¡à¡à¡á¡à\
-¡á¡á¡á¡á¡á\
-¡à¡à¡à¡á¡à";
+OXXOX\
+OXXOX\
+OXXOX\
+OOOOO\
+XXXOX";
 		}
 		break;
 
 		case '5':
 		{
 			return "\
-¡á¡á¡á¡á¡á\
-¡á¡à¡à¡à¡à\
-¡á¡á¡á¡á¡á\
-¡à¡à¡à¡à¡á\
-¡á¡á¡á¡á¡á";
+OOOOO\
+OXXXX\
+OOOOO\
+XXXXO\
+OOOOO";
 		}
 		break;
 
 		case '6':
 		{
 			return "\
-¡á¡á¡á¡á¡á\
-¡á¡à¡à¡à¡à\
-¡á¡á¡á¡á¡á\
-¡á¡à¡à¡à¡á\
-¡á¡á¡á¡á¡á";
+OOOOO\
+OXXXX\
+OOOOO\
+OXXXO\
+OOOOO";
 		}
 		break;
 
 		case '7':
 		{
 			return "\
-¡á¡á¡á¡á¡á\
-¡à¡à¡à¡à¡á\
-¡à¡à¡à¡à¡á\
-¡à¡à¡à¡à¡á\
-¡à¡à¡à¡à¡á";
+OOOOO\
+XXXXO\
+XXXXO\
+XXXXO\
+XXXXO";
 		}
 		break;
 
 		case '8':
 		{
 			return "\
-¡á¡á¡á¡á¡á\
-¡á¡à¡à¡à¡á\
-¡á¡á¡á¡á¡á\
-¡á¡à¡à¡à¡á\
-¡á¡á¡á¡á¡á";
+OOOOO\
+OXXXO\
+OOOOO\
+OXXXO\
+OOOOO";
 		}
 		break;
 
 		case '9':
 		{
 			return "\
-¡á¡á¡á¡á¡á\
-¡á¡à¡à¡à¡á\
-¡á¡á¡á¡á¡á\
-¡à¡à¡à¡à¡á\
-¡á¡á¡á¡á¡á";
+OOOOO\
+OXXXO\
+OOOOO\
+XXXXO\
+OOOOO";
 		}
 		break;
 
 		case 'A':
 		{
 			return "\
-¡à¡á¡á¡á¡à\
-¡á¡à¡à¡à¡á\
-¡á¡á¡á¡á¡á\
-¡á¡à¡à¡à¡á\
-¡á¡à¡à¡à¡á";
+XOOOX\
+OXXXO\
+OOOOO\
+OXXXO\
+OXXXO";
 		}
 		break;
 
 		case 'B':
 		{
 			return "\
-¡á¡á¡á¡á¡à\
-¡á¡à¡à¡à¡á\
-¡á¡á¡á¡á¡à\
-¡á¡à¡à¡à¡á\
-¡á¡á¡á¡á¡à";
+OOOOX\
+OXXXO\
+OOOOX\
+OXXXO\
+OOOOX";
 		}
 		break;
 
 		case 'C':
 		{
 			return "\
-¡à¡á¡á¡á¡á\
-¡á¡à¡à¡à¡à\
-¡á¡à¡à¡à¡à\
-¡á¡à¡à¡à¡à\
-¡à¡á¡á¡á¡á";
+XOOOO\
+OXXXX\
+OXXXX\
+OXXXX\
+XOOOO";
 		}
 		break;
 
 		case 'D':
 		{
 			return "\
-¡á¡á¡á¡á¡à\
-¡á¡à¡à¡à¡á\
-¡á¡à¡à¡à¡á\
-¡á¡à¡à¡à¡á\
-¡á¡á¡á¡á¡à";
+OOOOX\
+OXXXO\
+OXXXO\
+OXXXO\
+OOOOX";
 		}
 		break;
 
 		case 'E':
 		{
 			return "\
-¡á¡á¡á¡á¡á\
-¡á¡à¡à¡à¡à\
-¡á¡á¡á¡á¡á\
-¡á¡à¡à¡à¡à\
-¡á¡á¡á¡á¡á";
+OOOOO\
+OXXXX\
+OOOOO\
+OXXXX\
+OOOOO";
 		}
 		break;
 
 		case 'F':
 		{
 			return "\
-¡á¡á¡á¡á¡á\
-¡á¡à¡à¡à¡à\
-¡á¡á¡á¡á¡á\
-¡á¡à¡à¡à¡à\
-¡á¡à¡à¡à¡à";
+OOOOO\
+OXXXX\
+OOOOO\
+OXXXX\
+OXXXX";
 		}
 		break;
 
 		case 'G':
 		{
 			return "\
-¡á¡á¡á¡á¡á\
-¡á¡à¡à¡à¡à\
-¡á¡à¡à¡á¡á\
-¡á¡à¡à¡à¡á\
-¡á¡á¡á¡á¡á";
+OOOOO\
+OXXXX\
+OXXOO\
+OXXXO\
+OOOOO";
 		}
 		break;
 
 		case 'H':
 		{
 			return "\
-¡á¡à¡à¡à¡á\
-¡á¡à¡à¡à¡á\
-¡á¡á¡á¡á¡á\
-¡á¡à¡à¡à¡á\
-¡á¡à¡à¡à¡á";
+OXXXO\
+OXXXO\
+OOOOO\
+OXXXO\
+OXXXO";
 		}
 		break;
 
 		case 'I':
 		{
 			return "\
-¡á¡á¡á¡á¡á\
-¡à¡à¡á¡à¡à\
-¡à¡à¡á¡à¡à\
-¡à¡à¡á¡à¡à\
-¡á¡á¡á¡á¡á";
+OOOOO\
+XXOXX\
+XXOXX\
+XXOXX\
+OOOOO";
 		}
 		break;
 
 		case 'J':
 		{
 			return "\
-¡á¡á¡á¡á¡á\
-¡à¡à¡á¡à¡à\
-¡à¡à¡á¡à¡à\
-¡à¡à¡á¡à¡à\
-¡á¡á¡á¡à¡à";
+OOOOO\
+XXOXX\
+XXOXX\
+XXOXX\
+OOOXX";
 		}
 		break;
 
 		case 'K':
 		{
 			return "\
-¡á¡à¡à¡à¡á\
-¡á¡à¡à¡á¡à\
-¡á¡à¡á¡à¡à\
-¡á¡á¡à¡á¡à\
-¡á¡à¡à¡à¡á";
+OXXXO\
+OXXOX\
+OXOXX\
+OOXOX\
+OXXXO";
 		}
 		break;
 
 		case 'L':
 		{
 			return "\
-¡á¡à¡à¡à¡à\
-¡á¡à¡à¡à¡à\
-¡á¡à¡à¡à¡à\
-¡á¡à¡à¡à¡à\
-¡á¡á¡á¡á¡á";
+OXXXX\
+OXXXX\
+OXXXX\
+OXXXX\
+OOOOO";
 		}
 		break;
 
 		case 'M':
 		{
 			return "\
-¡á¡á¡á¡á¡á\
-¡á¡à¡á¡à¡á\
-¡á¡à¡á¡à¡á\
-¡á¡à¡á¡à¡á\
-¡á¡à¡á¡à¡á";
+OOOOO\
+OXOXO\
+OXOXO\
+OXOXO\
+OXOXO";
 		}
 		break;
 
 		case 'N':
 		{
 			return "\
-¡á¡à¡à¡à¡á\
-¡á¡á¡à¡à¡á\
-¡á¡à¡á¡à¡á\
-¡á¡à¡à¡á¡á\
-¡á¡à¡à¡à¡á";
+OXXXO\
+OOXXO\
+OXOXO\
+OXXOO\
+OXXXO";
 		}
 		break;
 
 		case 'O':
 		{
 			return "\
-¡à¡á¡á¡á¡à\
-¡á¡à¡à¡à¡á\
-¡á¡à¡à¡à¡á\
-¡á¡à¡à¡à¡á\
-¡à¡á¡á¡á¡à";
+XOOOX\
+OXXXO\
+OXXXO\
+OXXXO\
+XOOOX";
 		}
 		break;
 
 		case 'P':
 		{
 			return "\
-¡á¡á¡á¡á¡à\
-¡á¡à¡à¡à¡á\
-¡á¡á¡á¡á¡à\
-¡á¡à¡à¡à¡à\
-¡á¡à¡à¡à¡à";
+OOOOX\
+OXXXO\
+OOOOX\
+OXXXX\
+OXXXX";
 		}
 		break;
 
 		case 'Q':
 		{
 			return "\
-¡à¡á¡á¡á¡à\
-¡á¡à¡à¡à¡á\
-¡á¡à¡á¡à¡á\
-¡á¡à¡à¡á¡á\
-¡à¡á¡á¡à¡á";
+XOOOX\
+OXXXO\
+OXOXO\
+OXXOO\
+XOOXO";
 		}
 		break;
 
 		case 'R':
 		{
 			return "\
-¡á¡á¡á¡á¡à\
-¡á¡à¡à¡à¡á\
-¡á¡á¡á¡á¡à\
-¡á¡à¡à¡à¡á\
-¡á¡à¡à¡à¡á";
+OOOOX\
+OXXXO\
+OOOOX\
+OXXXO\
+OXXXO";
 		}
 		break;
 
 		case 'S':
 		{
 			return "\
-¡á¡á¡á¡á¡á\
-¡á¡à¡à¡à¡à\
-¡á¡á¡á¡á¡á\
-¡à¡à¡à¡à¡á\
-¡á¡á¡á¡á¡á";
+OOOOO\
+OXXXX\
+OOOOO\
+XXXXO\
+OOOOO";
 		}
 		break;
 
 		case 'T':
 		{
 			return "\
-¡á¡á¡á¡á¡á\
-¡à¡à¡á¡à¡à\
-¡à¡à¡á¡à¡à\
-¡à¡à¡á¡à¡à\
-¡à¡à¡á¡à¡à";
+OOOOO\
+XXOXX\
+XXOXX\
+XXOXX\
+XXOXX";
 		}
 		break;
 
 		case 'U':
 		{
 			return "\
-¡á¡à¡à¡à¡á\
-¡á¡à¡à¡à¡á\
-¡á¡à¡à¡à¡á\
-¡á¡à¡à¡à¡á\
-¡à¡á¡á¡á¡à";
+OXXXO\
+OXXXO\
+OXXXO\
+OXXXO\
+XOOOX";
 		}
 		break;
 
 		case 'V':
 		{
 			return "\
-¡á¡à¡à¡à¡á\
-¡á¡à¡à¡à¡á\
-¡á¡à¡à¡à¡á\
-¡à¡á¡à¡á¡à\
-¡à¡à¡á¡à¡à";
+OXXXO\
+OXXXO\
+OXXXO\
+XOXOX\
+XXOXX";
 		}
 		break;
 
 		case 'W':
 		{
 			return "\
-¡á¡à¡á¡à¡á\
-¡á¡à¡á¡à¡á\
-¡á¡à¡á¡à¡á\
-¡á¡á¡á¡á¡á\
-¡à¡á¡à¡á¡à";
+OXOXO\
+OXOXO\
+OXOXO\
+OOOOO\
+XOXOX";
 		}
 		break;
 
 		case 'X':
 		{
 			return "\
-¡á¡à¡à¡à¡á\
-¡à¡á¡à¡á¡à\
-¡à¡à¡á¡à¡à\
-¡à¡á¡à¡á¡à\
-¡á¡à¡à¡à¡á";
+OXXXO\
+XOXOX\
+XXOXX\
+XOXOX\
+OXXXO";
 		}
 		break;
 
 		case 'Y':
 		{
 			return "\
-¡á¡à¡à¡à¡á\
-¡à¡á¡à¡á¡à\
-¡à¡à¡á¡à¡à\
-¡à¡à¡á¡à¡à\
-¡à¡à¡á¡à¡à";
+OXXXO\
+XOXOX\
+XXOXX\
+XXOXX\
+XXOXX";
 		}
 		break;
 
 		case 'Z':
 		{
 			return "\
-¡á¡á¡á¡á¡á\
-¡à¡à¡à¡á¡à\
-¡à¡à¡á¡à¡à\
-¡à¡á¡à¡à¡à\
-¡á¡á¡á¡á¡á";
+OOOOO\
+XXXOX\
+XXOXX\
+XOXXX\
+OOOOO";
 		}
 		break;
 
 		default:
 		{
 			return "\
-¡à¡à¡à¡à¡à\
-¡à¡à¡à¡à¡à\
-¡à¡à¡à¡à¡à\
-¡à¡à¡à¡à¡à\
-¡à¡à¡à¡à¡à";
+XXXXX\
+XXXXX\
+XXXXX\
+XXXXX\
+XXXXX";
 		}
 		break;
 	}

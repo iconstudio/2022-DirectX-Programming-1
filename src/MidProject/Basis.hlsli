@@ -71,7 +71,7 @@ struct VS_DIFFUSED_OUTPUT
 
 struct VS_PLAIN_INPUT
 {
-    float2 position : POSITION;
+    float3 position : POSITION;
     float4 colour : COLOR;
 };
 
@@ -80,7 +80,7 @@ struct VS_PLAIN_OUTPUT
     // È­¸éÀÇ Àý´ë ÁÂÇ¥
     float4 position : SV_POSITION;
     // ·»´õ¸µ ÁÂÇ¥
-    float2 position_world : POSITION;
+    float3 position_world : POSITION;
     // »ö»ó
     float4 colour : COLOR;
 };

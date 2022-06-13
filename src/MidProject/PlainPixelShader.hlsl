@@ -2,5 +2,6 @@
 
 float4 main(VS_PLAIN_OUTPUT vsout) : SV_TARGET
 {
-    return vsout.colour;
+    return float4(0.0f, 0.0f, 0.0f, 1.0f);
+    //vsout.colour;
 }
