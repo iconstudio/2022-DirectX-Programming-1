@@ -28,6 +28,7 @@ public:
 	XMFLOAT3 roadDestPoint;
 
 	Terrain myTerrain;
+	TerrainMesh myTerrainMesh;
 	TerrainData myTerrainData;
 
 	XMFLOAT3 playerSpawnPoint;

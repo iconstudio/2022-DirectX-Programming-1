@@ -24,7 +24,7 @@ StageGame::StageGame(GameFramework& framework, HWND hwnd)
 	, myGoalie(), playerSpawnPoint()
 	, roadData(), roadMesh(nullptr)
 	, roadStartPoint(), roadDestPoint()
-	, myTerrain()
+	, myTerrain(), myTerrainMesh()
 	, myTerrainData(256, 256, {2.0f, 2.0f, 2.0f})
 	, handleWindow(hwnd)
 	, raceColors
@@ -156,6 +156,10 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 
 	// 지형 불러오기
 	myTerrainData.Awake("Resources/HeightMap.raw");
+
+	myTerrainMesh.Awake(myTerrainData);
+
+	myTerrain.Awake(myTerrainMesh);
 
 	// 결승선
 	XMFLOAT3 goal = XMFLOAT3(roadWidth * 0.5f, 0.0f, roadHeight);
