@@ -14,7 +14,7 @@ public:
 	virtual void Update(float delta_time) override;
 	virtual void PrepareRendering(P3DGrpCommandList cmdlist) const override;
 	virtual void Render(P3DGrpCommandList cmdlist, GameCamera* camera = NULL) const override;
-	virtual void ReleaseUniforms() override;
+	virtual void Release() override;
 
 	virtual void CollideWith(GameObject* other) override;
 

@@ -16,7 +16,9 @@ GameObject::GameObject()
 {}
 
 GameObject::~GameObject()
-{}
+{
+	Release();
+}
 
 void GameObject::ReleaseUploadBuffers()
 {
@@ -229,7 +231,7 @@ void GameObject::Render(P3DGrpCommandList cmdlist, GameCamera* camera) const
 	}
 }
 
-void GameObject::ReleaseUniforms()
+void GameObject::Release()
 {}
 
 bool GameObject::CheckCollisionWith(GameObject* other) const

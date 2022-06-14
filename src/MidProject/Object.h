@@ -28,7 +28,7 @@ public:
 	void UpdateCollider();
 	virtual void PrepareRendering(P3DGrpCommandList cmdlist) const;
 	virtual void Render(P3DGrpCommandList cmdlist, GameCamera* camera) const;
-	virtual void ReleaseUniforms();
+	virtual void Release();
 
 	bool CheckCollisionWith(GameObject* other) const;
 	virtual void CollideWith(GameObject* other);

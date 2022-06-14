@@ -23,7 +23,7 @@ CPlayer::CPlayer()
 
 CPlayer::~CPlayer()
 {
-	ReleaseUniforms();
+	Release();
 	ReleaseUploadBuffers();
 
 	if (myCamera)
@@ -164,7 +164,7 @@ void CPlayer::Render(P3DGrpCommandList cmdlist, GameCamera* pCamera) const
 	}
 }
 
-void CPlayer::ReleaseUniforms()
+void CPlayer::Release()
 {
 	if (myCamera)
 	{
