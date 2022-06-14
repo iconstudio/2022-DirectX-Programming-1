@@ -1,6 +1,7 @@
 #pragma once
 #include "IlluminatedScene.hpp"
 #include "RawMesh.hpp"
+#include "Terrains.hpp"
 
 class StageGame : public IlluminatedScene
 {
@@ -25,6 +26,10 @@ public:
 	CMaterialMesh* roadMesh; // CDiffusedMesh
 	XMFLOAT3 roadStartPoint;
 	XMFLOAT3 roadDestPoint;
+
+	Terrain myTerrain;
+	TerrainData myTerrainData;
+
 	XMFLOAT3 playerSpawnPoint;
 	BoundingSphere myGoalie;
 

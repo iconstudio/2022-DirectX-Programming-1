@@ -3,29 +3,38 @@
 #include "Mesh.h"
 #include "RawMesh.hpp"
 
-class Terrain : public GameObject
-{
-
-};
-
-class CTerrainMesh : public CDiffusedMesh
+class TerrainMesh
 {
 public:
+	TerrainMesh();
+	~TerrainMesh();
 
+	void Awake(const TerrainData& data);
+
+	CDiffusedMesh* myRawMesh;
 };
 
 struct TerrainData
 {
-	TerrainData(const Filepath& image, int w, int size, XMFLOAT3 scale);
+	TerrainData(int w, int h, XMFLOAT3 scale);
 	~TerrainData();
 
-	RawMesh Build() const;
+	void Awake(const Filepath& image);
 
-	BYTE* m_pHeightMapPixels;
+	BYTE GetHeight(int x, int z) const;
 
-	int m_nWidth;
-	int m_nLength;
-	XMFLOAT3 m_xmf3Scale;
+	std::vector<std::vector<BYTE>> m_pHeightMapPixels;
 
+	const int m_nWidth;
+	const int m_nLength;
+	const XMFLOAT3 m_xmf3Scale;
+};
 
+class Terrain// : public GameObject
+{
+public:
+	Terrain();
+	~Terrain();
+
+	TerrainMesh myMesh;
 };
