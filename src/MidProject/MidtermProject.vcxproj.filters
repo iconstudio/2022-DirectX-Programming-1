@@ -46,6 +46,9 @@
     <Filter Include="소스 파일\Generals">
       <UniqueIdentifier>{8ddb3605-08a0-44aa-baeb-80d86df1c635}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\Graphics\Resources">
+      <UniqueIdentifier>{38396c56-bc4a-422d-a6cd-2f15bd694872}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -105,18 +108,6 @@
     <ClInclude Include="Vehicles.hpp">
       <Filter>헤더 파일\Contents</Filter>
     </ClInclude>
-    <ClInclude Include="Light.hpp">
-      <Filter>헤더 파일\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Material.hpp">
-      <Filter>헤더 파일\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>헤더 파일\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Model.hpp">
-      <Filter>헤더 파일\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="BasicScene.hpp">
       <Filter>헤더 파일\System</Filter>
     </ClInclude>
@@ -129,19 +120,10 @@
     <ClInclude Include="Pipeline.hpp">
       <Filter>헤더 파일\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="RawMesh.hpp">
-      <Filter>헤더 파일\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Vertex.hpp">
-      <Filter>헤더 파일\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="DiffusedGraphicsPipeline.hpp">
       <Filter>헤더 파일\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="IlluminatedGraphicsPipeline.hpp">
-      <Filter>헤더 파일\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Polygon.hpp">
       <Filter>헤더 파일\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="TextMerger.hpp">
@@ -155,6 +137,27 @@
     </ClInclude>
     <ClInclude Include="GameEntity.hpp">
       <Filter>헤더 파일\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.hpp">
+      <Filter>헤더 파일\Graphics\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.hpp">
+      <Filter>헤더 파일\Graphics\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>헤더 파일\Graphics\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.hpp">
+      <Filter>헤더 파일\Graphics\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Polygon.hpp">
+      <Filter>헤더 파일\Graphics\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="RawMesh.hpp">
+      <Filter>헤더 파일\Graphics\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.hpp">
+      <Filter>헤더 파일\Graphics\Resources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
