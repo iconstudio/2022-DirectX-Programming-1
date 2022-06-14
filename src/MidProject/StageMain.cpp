@@ -64,7 +64,7 @@ void StageMain::PrepareRendering()
 	constexpr auto frame_height = float(FRAME_BUFFER_HEIGHT);
 
 	d3dTaskList->SetGraphicsRoot32BitConstants(0, 1, &frame_width, 0);
-	d3dTaskList->SetGraphicsRoot32BitConstants(0, 1, &frame_height, 4);
+	d3dTaskList->SetGraphicsRoot32BitConstants(0, 1, &frame_height, 1);
 
 	D3D12_VIEWPORT viewport{};
 	viewport.MinDepth = 0.0f;

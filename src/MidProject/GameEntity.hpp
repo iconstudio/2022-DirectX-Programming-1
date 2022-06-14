@@ -28,12 +28,12 @@ public:
 	void Accelerate(const XMFLOAT3& dir, float speed);
 
 	float GetSpeed() const;
-	XMFLOAT3 GetVelocity() const;
+	const XMFLOAT3& GetVelocity() const;
+	XMFLOAT3& GetVelocity();
 	const XMFLOAT3& GetGravity() const;
 	XMFLOAT3& GetGravity();
 
-	XMFLOAT3 myDirection;
-	float mySpeed;
+	XMFLOAT3 myVelocity;
 	XMFLOAT3 myGravity;
 
 	float myFriction;
@@ -43,4 +43,3 @@ public:
 	XMFLOAT3 m_xmf3RotationAxis;
 	float m_fRotationSpeed;
 };
-

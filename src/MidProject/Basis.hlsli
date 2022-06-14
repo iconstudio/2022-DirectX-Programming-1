@@ -109,6 +109,6 @@ cbuffer cbLights : register(b0, space1)
 // 화면 해상도
 cbuffer cbResolutions : register(b0, space2)
 {
-    float screen_w;
-    float screen_h;
+    float screen_w : packoffset(c0);
+    float screen_h : packoffset(c1);
 };

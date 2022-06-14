@@ -4,7 +4,7 @@
 
 GameEntity::GameEntity()
 	: GameObject()
-	, myDirection(XMFLOAT3()), mySpeed(0.0f), myGravity()
+	, myVelocity(), myGravity()
 	, myFriction(0.0f), m_fMaxVelocityXZ(0.0f), m_fMaxVelocityY(0.0f)
 	, m_xmf3RotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f)), m_fRotationSpeed(0.0f)
 {}
@@ -19,21 +19,39 @@ void GameEntity::Update(float delta_time)
 		Rotate(m_xmf3RotationAxis, m_fRotationSpeed * delta_time);
 	}
 
-	if (0.0f != mySpeed) 
+	auto xz_vel = Vector3::CrossProduct(myVelocity, { 0, 1, 0 }, false);
+	auto xz_speed = sqrtf(xz_vel.x * xz_vel.x + xz_vel.z + xz_vel.z);
+	if (m_fMaxVelocityXZ < xz_speed)
 	{
-		Move(myDirection, mySpeed * delta_time);
+		myVelocity.x *= (m_fMaxVelocityXZ / xz_speed);
+		myVelocity.z *= (m_fMaxVelocityXZ / xz_speed);
 	}
 
-	if (0.0f != myFriction)
+	auto& y_vel = myVelocity.y;
+	auto y_speed = abs(myVelocity.y);
+	if (m_fMaxVelocityY < y_speed)
 	{
-		float deceleration = myFriction * delta_time;
-		if (mySpeed <= deceleration)
+		myVelocity.y *= (m_fMaxVelocityY / y_speed);
+	}
+
+	const auto movement = Vector3::ScalarProduct(myVelocity, delta_time, false);
+	Translate(movement);
+
+	const auto speed = Vector3::Length(myVelocity);
+	if (0.0f != speed && 0.0f != myFriction)
+	{
+		const auto deceleration = myFriction * delta_time;
+
+		if (speed <= deceleration)
 		{
-			mySpeed = 0.0f;
+			myVelocity = XMFLOAT3();
 		}
 		else
 		{
-			mySpeed -= deceleration;
+			const auto dir = Vector3::Normalize(myVelocity);
+			const auto deaccel = speed - deceleration;
+
+			myVelocity = Vector3::ScalarProduct(dir, deaccel);
 		}
 	}
 
@@ -47,9 +65,7 @@ void GameEntity::SetVelocity(const XMFLOAT3& vector)
 
 void GameEntity::SetVelocity(XMFLOAT3&& vector)
 {
-	const XMFLOAT3 vel = std::forward<XMFLOAT3>(vector);
-	myDirection = Vector3::Normalize(vel);
-	mySpeed = Vector3::Length(vel);
+	myVelocity = std::forward<XMFLOAT3>(vector);
 }
 
 void GameEntity::SetDirection(const XMFLOAT3& direction)
@@ -59,18 +75,23 @@ void GameEntity::SetDirection(const XMFLOAT3& direction)
 
 void GameEntity::SetDirection(XMFLOAT3&& direction)
 {
-	myDirection = Vector3::Normalize(std::forward<XMFLOAT3>(direction));
+	auto speed = Vector3::Length(myVelocity);
+
+	myVelocity = Vector3::ScalarProduct(std::forward<XMFLOAT3>(direction), speed);
 }
 
 void GameEntity::SetSpeed(const float value)
 {
-	mySpeed = value;
+	myVelocity = Vector3::ScalarProduct(myVelocity, value);
 }
 
 void GameEntity::AddSpeed(const float value, const float max)
 {
 	auto speed = GetSpeed() + value;
-	if (max < speed) speed = max;
+	if (max < speed)
+	{
+		speed = max;
+	}
 
 	SetSpeed(speed);
 }
@@ -82,30 +103,27 @@ void GameEntity::AddSpeed(const float value)
 
 void GameEntity::Accelerate(const XMFLOAT3& accel)
 {
-	const auto new_vel = Vector3::Add(accel, myDirection, mySpeed);
-	myDirection = Vector3::Normalize(new_vel);
-	mySpeed = Vector3::Length(new_vel);
+	myVelocity = Vector3::Add(myVelocity, accel);
 }
 
 void GameEntity::Accelerate(const XMFLOAT3& dir, float speed)
 {
-	const auto my_vel = GetVelocity();
-	const auto add_vel = Vector3::ScalarProduct(dir, speed);
-
-	const auto new_vel = Vector3::Add(my_vel, add_vel);
-	
-	myDirection = Vector3::Normalize(new_vel);
-	mySpeed = Vector3::Length(new_vel);
+	myVelocity = Vector3::Add(myVelocity, dir, speed);
 }
 
 float GameEntity::GetSpeed() const
 {
-	return mySpeed;
+	return Vector3::Length(myVelocity);
 }
 
-XMFLOAT3 GameEntity::GetVelocity() const
+const XMFLOAT3& GameEntity::GetVelocity() const
 {
-	return Vector3::ScalarProduct(myDirection, mySpeed);
+	return myVelocity;
+}
+
+XMFLOAT3& GameEntity::GetVelocity()
+{
+	return myVelocity;
 }
 
 const XMFLOAT3& GameEntity::GetGravity() const

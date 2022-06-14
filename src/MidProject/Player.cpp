@@ -14,8 +14,8 @@ CPlayer::CPlayer()
 
 	SetFriction(50.0f);
 	SetGravity(XMFLOAT3());
-	SetMaxXZVelocity(2.5f);
-	SetMaxYVelocity(40.0f);
+	SetMaxXZVelocity(90.0f);
+	SetMaxYVelocity(150.0f);
 
 	m_pPlayerUpdatedContext = NULL;
 	m_pCameraUpdatedContext = NULL;
@@ -114,39 +114,23 @@ void CPlayer::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 
 void CPlayer::Update(float delta_time)
 {
-	const auto my_pos = GetPosition();
-
 	GameEntity::Accelerate(myGravity);
+	GameEntity::Update(delta_time);
 
-	auto velocity = GetVelocity();
+	const auto movement = Vector3::ScalarProduct(GetVelocity(), delta_time, false);
 
-	auto xz_vel = Vector3::CrossProduct(velocity, { 0, 1, 0 }, false);
-
-	auto& y_vel = velocity.y;
-	auto y_speed = abs(velocity.y);
-	if (m_fMaxVelocityY < y_speed)
-	{
-		y_speed *= (m_fMaxVelocityY / y_speed);
-	}
-
-	const auto movement = Vector3::ScalarProduct(velocity, delta_time, false);
-
-	if (0.0f != mySpeed)
-	{
-		myCamera->Move(movement);
-	}
+	myCamera->Move(movement);
 
 	DWORD nCurrentCameraMode = myCamera->GetMode();
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA)
 	{
-		myCamera->Update(my_pos, delta_time);
+		const auto my_pos = GetPosition();
 
+		myCamera->Update(my_pos, delta_time);
 		myCamera->SetLookAt(my_pos);
 	}
 
 	myCamera->RegenerateViewMatrix();
-
-	GameEntity::Update(delta_time);
 }
 
 void CPlayer::PrepareRendering(P3DGrpCommandList cmdlist) const

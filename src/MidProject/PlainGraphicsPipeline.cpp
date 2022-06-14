@@ -47,9 +47,10 @@ P3DSignature PlainGraphicsPipeline::CreateGraphicsRootSignature()
 
 	D3D12_ROOT_PARAMETER shader_params[1]{};
 
-	shader_params[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	shader_params[0].Descriptor.ShaderRegister = 0; // Resolution
-	shader_params[0].Descriptor.RegisterSpace = 2;
+	shader_params[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	shader_params[0].Constants.ShaderRegister = 0; // Resolution
+	shader_params[0].Constants.RegisterSpace = 2;
+	shader_params[0].Constants.Num32BitValues = 2; // Resolution
 	shader_params[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	// 정점 쉐이더, 픽셀 쉐이더, 입력 조립기, 출력 병합기 
