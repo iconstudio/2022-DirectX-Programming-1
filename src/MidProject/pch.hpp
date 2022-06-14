@@ -24,6 +24,10 @@ class CLightenMesh;
 class CMaterial;
 class CLight;
 
+class Terrain;
+class CTerrainMesh;
+struct TerrainData;
+
 class Transformer;
 class GameCamera;
 class GameObject;

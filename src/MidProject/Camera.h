@@ -95,8 +95,8 @@ public:
 
 	virtual void Move(const XMFLOAT3& xmf3Shift) { m_xmf3Position.x += xmf3Shift.x; m_xmf3Position.y += xmf3Shift.y; m_xmf3Position.z += xmf3Shift.z; }
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f) { }
-	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed) { }
-	virtual void SetLookAt(XMFLOAT3& xmf3LookAt) { }
+	virtual void Update(const XMFLOAT3& xmf3LookAt, float fTimeElapsed) { }
+	virtual void SetLookAt(const XMFLOAT3& xmf3LookAt) { }
 };
 
 class CSpaceShipCamera : public GameCamera
@@ -123,7 +123,7 @@ public:
 	CThirdPersonCamera(GameCamera *pCamera);
 	virtual ~CThirdPersonCamera() { }
 
-	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
-	virtual void SetLookAt(XMFLOAT3& vLookAt);
+	virtual void Update(const XMFLOAT3& xmf3LookAt, float fTimeElapsed);
+	virtual void SetLookAt(const XMFLOAT3& vLookAt);
 };
 

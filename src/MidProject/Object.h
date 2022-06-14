@@ -104,40 +104,6 @@ enum class COLLISION_TAGS
 	PLAYER
 };
 
-class CRotatingObject : public GameObject
-{
-public:
-	CRotatingObject();
-	virtual ~CRotatingObject();
-
-private:
-	XMFLOAT3					m_xmf3RotationAxis;
-	float						m_fRotationSpeed;
-
-public:
-	void SetRotationSpeed(float fRotationSpeed) { m_fRotationSpeed = fRotationSpeed; }
-	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
-
-	virtual void Update(float delta_time) override;
-};
-
-class CRevolvingObject : public GameObject
-{
-public:
-	CRevolvingObject();
-	virtual ~CRevolvingObject();
-
-private:
-	XMFLOAT3 m_xmf3RevolutionAxis;
-	float m_fRevolutionSpeed;
-
-public:
-	void SetRevolutionSpeed(float fRevolutionSpeed) { m_fRevolutionSpeed = fRevolutionSpeed; }
-	void SetRevolutionAxis(XMFLOAT3 xmf3RevolutionAxis) { m_xmf3RevolutionAxis = xmf3RevolutionAxis; }
-
-	virtual void Update(float delta_time) override;
-};
-
 class CHellicopterObject : public GameObject
 {
 public:

@@ -5,23 +5,17 @@
 #include "Arithmetics.hpp"
 
 CPlayer::CPlayer()
-	: GameObject()
+	: GameEntity()
 	, myCamera(nullptr)
 {
-	m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
-
-	m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_fMaxVelocityXZ = 0.0f;
-	m_fMaxVelocityY = 0.0f;
-	m_fFriction = 0.0f;
-
 	m_fPitch = 0.0f;
 	m_fRoll = 0.0f;
 	m_fYaw = 0.0f;
+
+	SetFriction(50.0f);
+	SetGravity(XMFLOAT3());
+	SetMaxXZVelocity(2.5f);
+	SetMaxYVelocity(40.0f);
 
 	m_pPlayerUpdatedContext = NULL;
 	m_pCameraUpdatedContext = NULL;
@@ -43,125 +37,74 @@ void CPlayer::SetCamera(GameCamera* camera)
 	myCamera = camera;
 }
 
-void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
+void CPlayer::Accelerate(DWORD direction, float dist)
 {
-	if (dwDirection)
+	if (direction)
 	{
-		XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
-		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
-		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
-		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance);
-		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
-		if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, fDistance);
-		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance);
+		auto shift = XMFLOAT3(0, 0, 0);
+		const auto right = GetRight();
+		const auto up = GetUp();
+		const auto look = GetLook();
 
-		Move(xmf3Shift, bUpdateVelocity);
-		if (!bUpdateVelocity)
-		{
-			myCamera->Move(xmf3Shift);
-			OnTransformUpdate();
-		}
+		if (direction & DIR_FORWARD) shift = Vector3::Add(shift, look, dist);
+		if (direction & DIR_BACKWARD) shift = Vector3::Add(shift, look, -dist);
+		if (direction & DIR_RIGHT) shift = Vector3::Add(shift, right, dist);
+		if (direction & DIR_LEFT) shift = Vector3::Add(shift, right, -dist);
+		if (direction & DIR_UP) shift = Vector3::Add(shift, up, dist);
+		if (direction & DIR_DOWN) shift = Vector3::Add(shift, up, -dist);
+
+		GameEntity::Accelerate(shift);
 	}
-}
-
-void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
-{
-	if (bUpdateVelocity)
-	{
-		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);
-	}
-	else
-	{
-		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
-		myCamera->Move(xmf3Shift);
-
-		OnTransformUpdate();
-	}
-}
-
-void CPlayer::Move(float fxOffset, float fyOffset, float fzOffset)
-{
-	m_xmf3Position.x += fxOffset;
-	m_xmf3Position.y += fyOffset;
-	m_xmf3Position.z += fzOffset;
-
-	OnTransformUpdate();
-}
-
-void CPlayer::MoveForward(float fDistance)
-{
-	const auto look = GetLookVector();
-	const auto velocity = Vector3::ScalarProduct(look, fDistance);
-
-	m_xmf3Position = Vector3::Add(m_xmf3Position, velocity);
-
-	OnTransformUpdate();
 }
 
 void CPlayer::Rotate(float x, float y, float z)
 {
 	DWORD nCurrentCameraMode = myCamera->GetMode();
+
 	if ((nCurrentCameraMode == FIRST_PERSON_CAMERA) || (nCurrentCameraMode == THIRD_PERSON_CAMERA))
 	{
 		if (x != 0.0f)
 		{
 			m_fPitch += x;
-			if (m_fPitch > +89.0f) { x -= (m_fPitch - 89.0f); m_fPitch = +89.0f; }
-			if (m_fPitch < -89.0f) { x -= (m_fPitch + 89.0f); m_fPitch = -89.0f; }
+			if (m_fPitch > +89.0f)
+			{
+				x -= (m_fPitch - 89.0f); m_fPitch = +89.0f;
+			}
+			if (m_fPitch < -89.0f)
+			{
+				x -= (m_fPitch + 89.0f); m_fPitch = -89.0f;
+			}
 		}
+
 		if (y != 0.0f)
 		{
 			m_fYaw += y;
 			if (m_fYaw > 360.0f) m_fYaw -= 360.0f;
 			if (m_fYaw < 0.0f) m_fYaw += 360.0f;
 		}
+
 		if (z != 0.0f)
 		{
 			m_fRoll += z;
 			if (m_fRoll > +20.0f) { z -= (m_fRoll - 20.0f); m_fRoll = +20.0f; }
 			if (m_fRoll < -20.0f) { z -= (m_fRoll + 20.0f); m_fRoll = -20.0f; }
 		}
+
 		myCamera->Rotate(x, y, z);
-		if (y != 0.0f)
-		{
-			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(y));
-			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
-			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
-		}
+
+		GameEntity::Rotate(0.0f, y, 0.0f);
 	}
 	else if (nCurrentCameraMode == SPACESHIP_CAMERA)
 	{
 		myCamera->Rotate(x, y, z);
-		if (x != 0.0f)
-		{
-			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(x));
-			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
-			m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
-		}
-		if (y != 0.0f)
-		{
-			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(y));
-			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
-			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
-		}
-		if (z != 0.0f)
-		{
-			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Look), XMConvertToRadians(z));
-			m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
-			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
-		}
+
+		GameEntity::Rotate(x, y, z);
 	}
-
-	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
-	m_xmf3Right = Vector3::CrossProduct(m_xmf3Up, m_xmf3Look, true);
-	m_xmf3Up = Vector3::CrossProduct(m_xmf3Look, m_xmf3Right, true);
-
-	OnTransformUpdate();
 }
 
 void CPlayer::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
-	GameObject::Awake(device, cmdlist);
+	GameEntity::Awake(device, cmdlist);
 
 	if (myCamera)
 	{
@@ -169,80 +112,46 @@ void CPlayer::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	}
 }
 
-void CPlayer::Update(float fTimeElapsed)
+void CPlayer::Update(float delta_time)
 {
-	localMatrix._11 = m_xmf3Right.x;
-	localMatrix._12 = m_xmf3Right.y;
-	localMatrix._13 = m_xmf3Right.z;
+	const auto my_pos = GetPosition();
 
-	localMatrix._21 = m_xmf3Up.x;
-	localMatrix._22 = m_xmf3Up.y;
-	localMatrix._23 = m_xmf3Up.z;
+	GameEntity::Accelerate(myGravity);
 
-	localMatrix._31 = m_xmf3Look.x;
-	localMatrix._32 = m_xmf3Look.y;
-	localMatrix._33 = m_xmf3Look.z;
+	auto velocity = GetVelocity();
 
-	localMatrix._41 = m_xmf3Position.x;
-	localMatrix._42 = m_xmf3Position.y;
-	localMatrix._43 = m_xmf3Position.z;
+	auto xz_vel = Vector3::CrossProduct(velocity, { 0, 1, 0 }, false);
 
-	GameObject::Update(fTimeElapsed);
-
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
-
-	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-
-	float fMaxVelocityXZ = m_fMaxVelocityXZ;
-	if (fLength > m_fMaxVelocityXZ)
+	auto& y_vel = velocity.y;
+	auto y_speed = abs(velocity.y);
+	if (m_fMaxVelocityY < y_speed)
 	{
-		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
-		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
+		y_speed *= (m_fMaxVelocityY / y_speed);
 	}
 
-	float fMaxVelocityY = m_fMaxVelocityY;
+	const auto movement = Vector3::ScalarProduct(velocity, delta_time, false);
 
-	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
-	if (fLength > m_fMaxVelocityY)
+	if (0.0f != mySpeed)
 	{
-		m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
-	}
-
-	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
-	Move(xmf3Velocity, false);
-
-	if (m_pPlayerUpdatedContext)
-	{
-		OnPlayerUpdateCallback(fTimeElapsed);
+		myCamera->Move(movement);
 	}
 
 	DWORD nCurrentCameraMode = myCamera->GetMode();
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA)
 	{
-		myCamera->Update(m_xmf3Position, fTimeElapsed);
-	}
+		myCamera->Update(my_pos, delta_time);
 
-	if (m_pCameraUpdatedContext)
-	{
-		OnCameraUpdateCallback(fTimeElapsed);
-	}
-
-	if (nCurrentCameraMode == THIRD_PERSON_CAMERA)
-	{
-		myCamera->SetLookAt(m_xmf3Position);
+		myCamera->SetLookAt(my_pos);
 	}
 
 	myCamera->RegenerateViewMatrix();
 
-	fLength = Vector3::Length(m_xmf3Velocity);
-	float fDeceleration = (m_fFriction * fTimeElapsed);
-	if (fDeceleration > fLength) fDeceleration = fLength;
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
+	GameEntity::Update(delta_time);
 }
 
 void CPlayer::PrepareRendering(P3DGrpCommandList cmdlist) const
 {
-	GameObject::PrepareRendering(cmdlist);
+	GameEntity::PrepareRendering(cmdlist);
 }
 
 void CPlayer::Render(P3DGrpCommandList cmdlist, GameCamera* pCamera) const
@@ -251,13 +160,16 @@ void CPlayer::Render(P3DGrpCommandList cmdlist, GameCamera* pCamera) const
 
 	if (nCameraMode == THIRD_PERSON_CAMERA)
 	{
-		GameObject::Render(cmdlist, pCamera);
+		GameEntity::Render(cmdlist, pCamera);
 	}
 }
 
 void CPlayer::ReleaseUniforms()
 {
-	if (myCamera) myCamera->ReleaseUniforms();
+	if (myCamera)
+	{
+		myCamera->ReleaseUniforms();
+	}
 }
 
 void CPlayer::CollideWith(GameObject* other)
@@ -285,8 +197,8 @@ void CPlayer::CollideWith(GameObject* other)
 			const auto my_inverseddir = Vector3::ScalarProduct(my_vel, -1.0f, false);
 
 			const auto power = Vector3::Add(my_inverseddir, reflection);
-			const auto my_dir = Vector3::ScalarProduct(power, ratio, true);
-			Move(my_dir, true);
+			const auto accel = Vector3::ScalarProduct(power, ratio, true);
+			GameEntity::Accelerate(accel);
 		}
 		break;
 
@@ -306,8 +218,8 @@ void CPlayer::CollideWith(GameObject* other)
 			const auto my_inverseddir = Vector3::ScalarProduct(my_vel, -1.0f, false);
 
 			const auto power = Vector3::Add(my_inverseddir, reflection);
-			const auto my_dir = Vector3::ScalarProduct(power, ratio, true);
-			Move(my_dir, true);
+			const auto accel = Vector3::ScalarProduct(power, ratio, true);
+			GameEntity::Accelerate(accel);
 		}
 		break;
 
@@ -327,8 +239,8 @@ void CPlayer::CollideWith(GameObject* other)
 			const auto my_inverseddir = Vector3::ScalarProduct(my_vel, -1.0f, false);
 
 			const auto power = Vector3::Add(my_inverseddir, reflection);
-			const auto my_dir = Vector3::ScalarProduct(power, ratio, true);
-			Move(my_dir, true);
+			const auto accel = Vector3::ScalarProduct(power, ratio, true);
+			GameEntity::Accelerate(accel);
 		}
 		break;
 	}
@@ -337,35 +249,8 @@ void CPlayer::CollideWith(GameObject* other)
 GameCamera* CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
 {
 	GameCamera* pNewCamera = NULL;
-	switch (nNewCameraMode)
-	{
-		case FIRST_PERSON_CAMERA:
-		pNewCamera = new CFirstPersonCamera(myCamera);
-		break;
-		case THIRD_PERSON_CAMERA:
-		pNewCamera = new CThirdPersonCamera(myCamera);
-		break;
-		case SPACESHIP_CAMERA:
-		pNewCamera = new CSpaceShipCamera(myCamera);
-		break;
-	}
-	if (nCurrentCameraMode == SPACESHIP_CAMERA)
-	{
-		m_xmf3Right = Vector3::Normalize(XMFLOAT3(m_xmf3Right.x, 0.0f, m_xmf3Right.z));
-		m_xmf3Up = Vector3::Normalize(XMFLOAT3(0.0f, 1.0f, 0.0f));
-		m_xmf3Look = Vector3::Normalize(XMFLOAT3(m_xmf3Look.x, 0.0f, m_xmf3Look.z));
 
-		m_fPitch = 0.0f;
-		m_fRoll = 0.0f;
-		m_fYaw = Vector3::Angle(XMFLOAT3(0.0f, 0.0f, 1.0f), m_xmf3Look);
-		if (m_xmf3Look.x < 0.0f) m_fYaw = -m_fYaw;
-	}
-	else if ((nNewCameraMode == SPACESHIP_CAMERA) && myCamera)
-	{
-		m_xmf3Right = myCamera->GetRightVector();
-		m_xmf3Up = myCamera->GetUpVector();
-		m_xmf3Look = myCamera->GetLookVector();
-	}
+	pNewCamera = new CThirdPersonCamera(myCamera);
 
 	if (pNewCamera)
 	{
@@ -437,10 +322,6 @@ GameCamera* CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElaps
 	switch (nNewCameraMode)
 	{
 		case FIRST_PERSON_CAMERA:
-		SetFriction(2.0f);
-		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		SetMaxVelocityXZ(2.5f);
-		SetMaxVelocityY(40.0f);
 		myCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
 		myCamera->SetTimeLag(0.0f);
 		myCamera->SetOffset(XMFLOAT3(0.0f, 20.0f, 0.0f));
@@ -450,10 +331,6 @@ GameCamera* CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElaps
 		break;
 
 		case SPACESHIP_CAMERA:
-		SetFriction(10.5f);
-		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		SetMaxVelocityXZ(40.0f);
-		SetMaxVelocityY(40.0f);
 		myCamera = OnChangeCamera(SPACESHIP_CAMERA, nCurrentCameraMode);
 		myCamera->SetTimeLag(0.0f);
 		myCamera->SetOffset(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -463,13 +340,9 @@ GameCamera* CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElaps
 		break;
 
 		case THIRD_PERSON_CAMERA:
-		SetFriction(90.0f);
-		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		SetMaxVelocityXZ(150.0f);
-		SetMaxVelocityY(30.0f);
 		myCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		myCamera->SetTimeLag(0.25f);
-		myCamera->SetOffset(XMFLOAT3(0.0f, 60.0f, -90.0f));
+		myCamera->SetOffset(XMFLOAT3(0.0f, 60.0f, -80.0f));
 		myCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		myCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		myCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -479,7 +352,7 @@ GameCamera* CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElaps
 		break;
 	}
 
-	myCamera->SetPosition(Vector3::Add(m_xmf3Position, myCamera->GetOffset()));
+	myCamera->SetPosition(Vector3::Add(GetPosition(), myCamera->GetOffset()));
 	Update(fTimeElapsed);
 
 	return(myCamera);

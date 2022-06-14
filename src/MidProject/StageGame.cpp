@@ -83,7 +83,7 @@ void StageGame::ProcessInput(UCHAR* pKeysBuffer)
 
 		if (dwDirection)
 		{
-			myPlayer->Move(dwDirection, 2.0f, true);
+			myPlayer->Accelerate(dwDirection, 70.0f * lastDeltaTime);
 		}
 	}
 }
@@ -92,7 +92,7 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
 	IlluminatedScene::Awake(device, cmdlist);
 	//
-	m_xmf4GlobalAmbient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	m_xmf4GlobalAmbient = XMFLOAT4(0.1f, 0.2f, 0.1f, 1.0f);
 
 	//
 	numberLights = 6;
@@ -217,6 +217,7 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 
 	auto model_rock1 = myFramework.GetModel("Rock1").lock();
 	model_rock1->SetScale(15.0f, 15.0f, 15.0f);
+	model_rock1->SetPosition(0.0f, 0.0f, -2.4f);
 
 	auto model_rock2 = myFramework.GetModel("Rock2").lock();
 	model_rock2->SetScale(15.0f, 15.0f, 15.0f);
@@ -270,6 +271,7 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 
 	auto model_policecar = myFramework.GetModel("PoliceCar").lock();
 	model_policecar->SetScale(8.5f, 8.5f, 8.5f);
+	//model_policecar->SetPosition(5.0f, 0.0f, 0.0f);
 
 	auto policecar = new Vehicles();
 	policecar->Attach(model_policecar.get());
@@ -334,7 +336,7 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	}
 
 	auto model_rallycar = myFramework.GetModel("RallyCar").lock();
-	model_rallycar->SetPosition(-8.0f, -0.0f, 0.0f);
+	model_rallycar->SetPosition(0.0f, -0.0f, 0.0f);
 	model_rallycar->SetScale(10.0f, 10.0f, 10.0f);
 
 	playerSpawnPoint = XMFLOAT3(width * 0.5f, 0.0f, -3.0f);
@@ -345,7 +347,7 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	player->SetOriginalCollider(collider_car);
 	player->BuildCollider();
 	player->SetPosition(playerSpawnPoint);
-	player->m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	player->LookTo(XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
 	SetCamera(player->GetCamera());
 	myPlayer = player;
 

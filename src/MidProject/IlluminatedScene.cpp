@@ -67,7 +67,7 @@ void IlluminatedScene::Update(float delta_time)
 		if (myLights)
 		{
 			myLights[1].m_xmf3Position = myPlayer->GetPosition();
-			myLights[1].m_xmf3Direction = myPlayer->GetLookVector();
+			myLights[1].m_xmf3Direction = myPlayer->GetLook();
 		}
 
 		for (auto& instance : myInstances)

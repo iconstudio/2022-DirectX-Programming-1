@@ -547,41 +547,7 @@ void GameObject::PrintFrameInfo(const GameObject* parent) const
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CRotatingObject::CRotatingObject()
-{
-	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	m_fRotationSpeed = 15.0f;
-}
 
-CRotatingObject::~CRotatingObject()
-{}
-
-void CRotatingObject::Update(float delta_time)
-{
-	GameObject::Rotate(m_xmf3RotationAxis, m_fRotationSpeed * delta_time);
-
-	GameObject::Update(delta_time);
-}
-
-CRevolvingObject::CRevolvingObject()
-{
-	m_xmf3RevolutionAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	m_fRevolutionSpeed = 0.0f;
-}
-
-CRevolvingObject::~CRevolvingObject()
-{}
-
-void CRevolvingObject::Update(float delta_time)
-{
-	XMMATRIX mtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3RevolutionAxis), XMConvertToRadians(m_fRevolutionSpeed * delta_time));
-	localMatrix = Matrix4x4::Multiply(localMatrix, mtxRotate);
-
-	GameObject::Update(delta_time);
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//
 CHellicopterObject::CHellicopterObject()
 {}
 
