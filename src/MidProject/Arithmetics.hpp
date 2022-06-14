@@ -94,19 +94,37 @@ namespace Vector3
 		return result.x;
 	}
 
-	inline XMFLOAT3 CrossProduct(const XMFLOAT3& vector1, const XMFLOAT3& vector2, bool normalize = true)
+	inline XMFLOAT3 CrossProduct(XMFLOAT3&& vector1, XMFLOAT3&& vector2, bool normalize = true)
 	{
 		XMFLOAT3 result{};
 
+		const auto mid1 = XMLoadFloat3(std::forward<XMFLOAT3*>(&vector1));
+		const auto mid2 = XMLoadFloat3(std::forward<XMFLOAT3*>(&vector2));
+
 		if (normalize)
 		{
-			XMStoreFloat3(&result, XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&vector1), XMLoadFloat3(&vector2))));
+			XMStoreFloat3(&result, XMVector3Normalize(XMVector3Cross(mid1, mid2)));
 		}
 		else
 		{
-			XMStoreFloat3(&result, XMVector3Cross(XMLoadFloat3(&vector1), XMLoadFloat3(&vector2)));
+			XMStoreFloat3(&result, XMVector3Cross(mid1, mid2));
 		}
 		return result;
+	}
+
+	inline XMFLOAT3 CrossProduct(const XMFLOAT3& vector1, const XMFLOAT3& vector2, bool normalize = true)
+	{
+		return CrossProduct(XMFLOAT3(vector1), XMFLOAT3(vector2), normalize);
+	}
+
+	inline XMFLOAT3 CrossProduct(const XMFLOAT3& vector1, XMFLOAT3&& vector2, bool normalize = true)
+	{
+		return CrossProduct(XMFLOAT3(vector1), std::forward<XMFLOAT3>(vector2), normalize);
+	}
+
+	inline XMFLOAT3 CrossProduct(XMFLOAT3&& vector1, const XMFLOAT3& vector2, bool normalize = true)
+	{
+		return CrossProduct(std::forward<XMFLOAT3>(vector1), XMFLOAT3(vector2), normalize);
 	}
 
 	inline XMFLOAT3 Normalize(XMFLOAT3&& vector)
