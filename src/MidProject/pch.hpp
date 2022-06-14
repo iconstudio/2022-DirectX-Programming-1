@@ -25,7 +25,7 @@ class CMaterial;
 class CLight;
 
 class Terrain;
-class CTerrainMesh;
+class TerrainMesh;
 struct TerrainData;
 
 class Transformer;
