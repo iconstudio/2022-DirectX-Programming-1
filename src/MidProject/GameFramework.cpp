@@ -474,8 +474,6 @@ void GameFramework::Start()
 	BuildPipeline();
 	BuildAssets();
 	BuildStages();
-	BuildParticles();
-	BuildPlayer();
 	BuildTerrains();
 	BuildObjects();
 	CloseCmdList();
@@ -508,16 +506,19 @@ void GameFramework::BuildAssets()
 	auto model_tree = RegisterModel("Model/Tree.bin", "Tree");
 	auto model_cactus = RegisterModel("Model/Cactus.bin", "Cactus");
 	auto model_copter1 = RegisterModel("Model/Apache.bin", "Hellicoter1");
+	auto model_copter2 = RegisterModel("Model/Mi24.bin", "Hellicoter2");
+	auto model_copter3 = RegisterModel("Model/SuperCobra.bin", "Hellicoter3");
 }
 
 void GameFramework::BuildStages()
 {
 	auto room_main = RegisterScene(StageMain(*this));
-	auto room_game = RegisterScene(StageHelliattack(*this, myWindow));
-	//auto room_game = RegisterScene(StageGame(*this, myWindow));
+	auto room_hell = RegisterScene(StageHelliattack(*this, myWindow));
+	auto room_game = RegisterScene(StageGame(*this, myWindow));
 	auto room_complete = RegisterScene(StageGameEnd(*this));
 
 	AddStage(room_main);
+	AddStage(room_hell);
 	AddStage(room_game);
 	AddStage(room_complete);
 
@@ -535,12 +536,6 @@ void GameFramework::BuildStages()
 		}
 	}
 }
-
-void GameFramework::BuildParticles()
-{}
-
-void GameFramework::BuildPlayer()
-{}
 
 void GameFramework::BuildTerrains()
 {}

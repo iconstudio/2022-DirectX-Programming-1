@@ -94,14 +94,14 @@ protected:
 class CLightenMesh : public CMaterialMesh
 {
 public:
-	CLightenMesh(P3DDevice device, P3DGrpCommandList cmdlist, const RawMesh& pMeshInfo);
-	~CLightenMesh();
+	CLightenMesh(P3DDevice device, P3DGrpCommandList cmdlist, const RawMesh& raw);
+	virtual ~CLightenMesh();
 
 	void ReleaseUploadBuffers() override;
 
-	void PrepareRendering(P3DGrpCommandList cmdlist) const override;
-	void Render(P3DGrpCommandList cmdlist) const override;
-	void Render(P3DGrpCommandList cmdlist, int polygon_index) const override;
+	virtual void PrepareRendering(P3DGrpCommandList cmdlist) const override;
+	virtual void Render(P3DGrpCommandList cmdlist) const override;
+	virtual void Render(P3DGrpCommandList cmdlist, int polygon_index) const override;
 
 protected:
 	ID3D12Resource* myNormalBuffer = NULL;

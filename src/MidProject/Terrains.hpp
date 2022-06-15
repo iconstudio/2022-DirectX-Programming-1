@@ -13,7 +13,7 @@ struct TerrainData
 	void Start(const XMFLOAT3& scale);
 
 	float GetHeight(int x, int z) const;
-	BYTE GetRawHeight(int x, int z) const;
+	float GetRawHeight(int x, int z) const;
 	float GetActualHeight(float x, float z, bool reverse) const;
 	XMFLOAT4 GetColor(int x, int z) const;
 	XMFLOAT3 GetNormal(int x, int z) const;

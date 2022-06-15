@@ -45,7 +45,9 @@ void TerrainData::Awake(const Filepath& image)
 		for (size_t t = 0; t < myMapWidth; ++t)
 		{
 			reader >> byte_read;
-			row.push_back(float(byte_read) / float(byte_max));
+
+			const auto height_normalized = float(byte_read) / float(byte_max);
+			row.push_back(height_normalized);
 		}
 	}
 	reader.close();
@@ -102,7 +104,7 @@ float TerrainData::GetHeight(int x, int z) const
 	return myHeights.at(z).at(x);
 }
 
-BYTE TerrainData::GetRawHeight(int x, int z) const
+float TerrainData::GetRawHeight(int x, int z) const
 {
 	return myHeightMap.at(z).at(x);
 }
@@ -130,9 +132,10 @@ XMFLOAT3 TerrainData::GetNormal(int x, int z) const
 	int xHeightMapAdd = x < myMapWidth - 1 ? 1 : -1;
 	int zHeightMapAdd = z < myMapHeight - 1 ? 1 : -1;
 
-	const auto y1 = GetHeight(x, z);
-	const auto y2 = GetHeight(x + xHeightMapAdd, z);
-	const auto y3 = GetHeight(x, z + zHeightMapAdd);
+	const auto& yscale = m_xmf3Scale.y;
+	const auto y1 = GetRawHeight(x, z) * yscale;
+	const auto y2 = GetRawHeight(x + xHeightMapAdd, z) * yscale;
+	const auto y3 = GetRawHeight(x, z + zHeightMapAdd) * yscale;
 
 	XMFLOAT3 edge1 = { 0.0f, y3 - y1, m_xmf3Scale.z };
 	XMFLOAT3 edge2 = { m_xmf3Scale.x, y2 - y1, 0.0f };

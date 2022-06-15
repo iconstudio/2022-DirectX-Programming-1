@@ -21,8 +21,6 @@ public:
 	void BuildPipeline();
 	void BuildAssets();
 	void BuildStages();
-	void BuildParticles();
-	void BuildPlayer();
 	void BuildTerrains();
 	void BuildObjects();
 	void CleanupBuilds();
@@ -37,9 +35,6 @@ public:
 
 	// 동기화
 	void WaitForGpuComplete();
-
-	// 파이프라인 등록
-	//void AddPipeline(GraphicsPipeline* pipeline);
 
 	// 장면 등록
 	template<typename SceneType> requires(std::is_base_of_v<Scene, SceneType>)

@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++에서 생성한 포함 파일입니다.
-// LabProject07-9-1.rc에서 사용되고 있습니다.
+// myresource.rc에서 사용되고 있습니다.
 //
 #define IDC_MYICON                      2
 #define IDS_APP_TITLE                   103

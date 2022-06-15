@@ -9,6 +9,7 @@
 #include "Mesh.h"
 #include "Vertex.hpp"
 #include "Transformer.hpp"
+#include "Player.h"
 
 constexpr float roadWidth = 100.0f;
 constexpr float roadHeight = 3000.0f;
@@ -341,9 +342,10 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 
 	playerSpawnPoint = XMFLOAT3(width * 0.5f, 0.0f, -3.0f);
 
-	auto player = new CAirplanePlayer();
-	player->Awake(d3dDevice, d3dTaskList);
+	// 플레이어
+	auto player = new CPlayer();
 	player->Attach(model_rallycar.get());
+	player->Awake(d3dDevice, d3dTaskList);
 	player->SetOriginalCollider(collider_car);
 	player->BuildCollider();
 	player->SetPosition(playerSpawnPoint);

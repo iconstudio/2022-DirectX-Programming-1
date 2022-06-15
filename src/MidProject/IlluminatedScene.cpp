@@ -44,11 +44,6 @@ void IlluminatedScene::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 void IlluminatedScene::Start()
 {
 	Scene::Start();
-
-	if (myPlayer)
-	{
-		myPlayer->Awake(d3dDevice, d3dTaskList);
-	}
 }
 
 void IlluminatedScene::Reset()

@@ -2,6 +2,8 @@
 #include "StageHelliattack.hpp"
 #include "GameFramework.h"
 #include "Arithmetics.hpp"
+#include "HelicopterPlayer.hpp"
+#include "Terrains.hpp"
 
 StageHelliattack::StageHelliattack(GameFramework& framework, HWND hwnd)
 	: IlluminatedScene(framework, "Helliattack")
@@ -22,7 +24,7 @@ void StageHelliattack::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 
 	// 지형 불러오기
 	myTerrain.Awake("Resources/HeightMap.raw");
-	myTerrain.Start(d3dDevice, d3dTaskList, { wscale, 100.0f, hscale });
+	myTerrain.Start(d3dDevice, d3dTaskList, { wscale, 1000.0f, hscale });
 
 	worldWidth = myTerrain.myData.myMapWidth * wscale;
 	worldHeight = myTerrain.myData.myMapHeight * hscale;
@@ -38,18 +40,19 @@ void StageHelliattack::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	model_copter1->SetPosition(0.0f, 0.0f, 0.0f);
 	model_copter1->SetScale(1.0f, 1.0f, 1.0f);
 
-	playerSpawnPoint = XMFLOAT3(worldWidth * 0.5f, 30.0f, worldHeight * 0.5f);
+	playerSpawnPoint = XMFLOAT3(worldWidth * 0.5f, 350.0f, worldHeight * 0.5f);
 
-	auto player = new CAirplanePlayer();
-	player->Awake(d3dDevice, d3dTaskList);
+	auto player = new HellicopterPlayer();
 	player->Attach(model_copter1.get());
+	player->Awake(d3dDevice, d3dTaskList);
 	player->SetOriginalCollider(collider_copter);
 	player->BuildCollider();
 	player->SetPosition(playerSpawnPoint);
 	player->LookTo(XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
 
 	auto cam = player->GetCamera();
-	cam->SetOffset(XMFLOAT3(0.0f, 90.0f, -80.0f));
+	cam->SetPosition(playerSpawnPoint);
+	cam->SetOffset(XMFLOAT3(0.0f, 500.0f, -900.0f));
 
 	SetCamera(cam);
 	myPlayer = player;

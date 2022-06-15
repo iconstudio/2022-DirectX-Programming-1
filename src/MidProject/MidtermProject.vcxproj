@@ -159,7 +159,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DiffusedGraphicsPipeline.hpp" />
     <ClInclude Include="GameEntity.hpp" />
-    <ClInclude Include="HellicopterPlayer.hpp" />
+    <ClInclude Include="HelicopterPlayer.hpp" />
     <ClInclude Include="IlluminatedGraphicsPipeline.hpp" />
     <ClInclude Include="IlluminatedScene.hpp" />
     <ClInclude Include="Light.hpp" />
@@ -203,7 +203,7 @@
     <ClCompile Include="BasicScene.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="GameEntity.cpp" />
-    <ClCompile Include="HellicopterPlayer.cpp" />
+    <ClCompile Include="HelicopterPlayer.cpp" />
     <ClCompile Include="PlainGraphicsPipeline.cpp" />
     <ClCompile Include="Polygon.cpp" />
     <ClCompile Include="DiffusedGraphicsPipeline.cpp" />

@@ -27,7 +27,7 @@ public:
 		m_pCameraUpdatedContext = pContext;
 	}
 
-	virtual GameCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return nullptr;  };
+	GameCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 	GameCamera* OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode);
 
 	virtual constexpr COLLISION_TAGS GetTag() const noexcept override;
@@ -51,21 +51,3 @@ public:
 
 	GameCamera* myCamera;
 };
-
-class CAirplanePlayer : public CPlayer
-{
-public:
-	CAirplanePlayer();
-	virtual ~CAirplanePlayer();
-
-	void Awake(P3DDevice device, P3DGrpCommandList cmdlist) override;
-	void Update(float delta_time) override;
-
-	virtual GameCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) override;
-
-private:
-	GameObject* m_pMainRotorFrame = NULL;
-	GameObject* m_pTailRotorFrame = NULL;
-};
-
-

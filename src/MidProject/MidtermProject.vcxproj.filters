@@ -159,7 +159,7 @@
     <ClInclude Include="Vertex.hpp">
       <Filter>헤더 파일\Graphics\Resources</Filter>
     </ClInclude>
-    <ClInclude Include="HellicopterPlayer.hpp">
+    <ClInclude Include="HelicopterPlayer.hpp">
       <Filter>헤더 파일\Contents</Filter>
     </ClInclude>
     <ClInclude Include="StageHelliattack.hpp">
@@ -269,7 +269,7 @@
     <ClCompile Include="GameEntity.cpp">
       <Filter>소스 파일\System</Filter>
     </ClCompile>
-    <ClCompile Include="HellicopterPlayer.cpp">
+    <ClCompile Include="HelicopterPlayer.cpp">
       <Filter>소스 파일\Contents</Filter>
     </ClCompile>
     <ClCompile Include="StageHelliattack.cpp">
