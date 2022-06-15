@@ -7,6 +7,7 @@
 #include "StageMain.hpp"
 #include "StageGame.hpp"
 #include "StageGameEnd.hpp"
+#include "StageHelliattack.hpp"
 
 GameFramework::GameFramework(unsigned int width, unsigned int height)
 	: frameWidth(width), frameHeight(height)
@@ -506,12 +507,14 @@ void GameFramework::BuildAssets()
 	auto model_rock2 = RegisterModel("Model/Rock2.bin", "Rock2");
 	auto model_tree = RegisterModel("Model/Tree.bin", "Tree");
 	auto model_cactus = RegisterModel("Model/Cactus.bin", "Cactus");
+	auto model_copter1 = RegisterModel("Model/Apache.bin", "Hellicoter1");
 }
 
 void GameFramework::BuildStages()
 {
 	auto room_main = RegisterScene(StageMain(*this));
-	auto room_game = RegisterScene(StageGame(*this, myWindow));
+	auto room_game = RegisterScene(StageHelliattack(*this, myWindow));
+	//auto room_game = RegisterScene(StageGame(*this, myWindow));
 	auto room_complete = RegisterScene(StageGameEnd(*this));
 
 	AddStage(room_main);

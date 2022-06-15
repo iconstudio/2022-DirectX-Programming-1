@@ -24,7 +24,6 @@ StageGame::StageGame(GameFramework& framework, HWND hwnd)
 	, myGoalie(), playerSpawnPoint()
 	, roadData(), roadMesh(nullptr)
 	, roadStartPoint(), roadDestPoint()
-	, myTerrain(256, 256)
 	, handleWindow(hwnd)
 	, raceColors
 { { 0.2f, 0.2f, 0.2f, 1.0f }, { 0.4f, 0.6f, 0.6f, 1.0f }
@@ -152,10 +151,6 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	myLights[4].m_xmf3Position = XMFLOAT3(roadWidth * 0.5f, 10.0f, roadHeight * 0.5f);
 	myLights[4].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	myLights[4].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
-
-	// 지형 불러오기
-	myTerrain.Awake("Resources/HeightMap.raw");
-	myTerrain.Start(d3dDevice, d3dTaskList, { 10.0f, 100.0f, 10.0f });
 
 	// 결승선
 	XMFLOAT3 goal = XMFLOAT3(roadWidth * 0.5f, 0.0f, roadHeight);
@@ -447,16 +442,6 @@ void StageGame::Render() const
 	d3dTaskList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 
 	roadMesh->Render(d3dTaskList);
-
-	ZeroMemory(&xmf4x4World, sizeof(xmf4x4World));
-	const auto& terrain_mat = Matrix4x4::Identity();
-	const auto tr_mat = XMLoadFloat4x4(&terrain_mat);
-	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(tr_mat));
-
-	// 두번째 루트 매개인자에서 0번째 메모리에 float 16개 전달
-	d3dTaskList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
-
-	myTerrain.Render(d3dTaskList);
 }
 
 void StageGame::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)

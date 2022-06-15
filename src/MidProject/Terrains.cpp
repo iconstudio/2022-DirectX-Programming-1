@@ -1,5 +1,6 @@
 #include "pch.hpp"
 #include "Terrains.hpp"
+#include "Pipeline.hpp"
 #include "Arithmetics.hpp"
 #include <limits>
 
@@ -75,14 +76,17 @@ void TerrainData::Start(const XMFLOAT3& scale)
 
 			auto& my_height_item = my_heights_row.at(height_index_x);
 			my_height_item = cy; // 높이 저장
-			height_index_x++;
-
+			
 			pos = CVertex(cx, cy, cz);
-			CDiffusedVertex result{ pos, XMFLOAT4(Colors::Aquamarine) };
-			//CLightenVertex result{ pos, Transformer::Up };
+			//CDiffusedVertex result{ pos, XMFLOAT4(Colors::Aquamarine) };
+
+			const auto norm = GetNormal(int(height_index_x), int(height_index_z));
+
+			CLightenVertex result{ pos, norm };
 			myRawMesh.AddVertex(result);
 
 			cx += scale.x;
+			height_index_x++;
 		}
 
 		cx = 0.0f;
@@ -152,14 +156,6 @@ void Terrain::Start(P3DDevice device, P3DGrpCommandList cmdlist, const XMFLOAT3&
 {
 	myData.Start(scale);
 
-	const auto& raw_terrain = myData.myRawMesh;
-	myMesh = new CDiffusedMesh(device, cmdlist, raw_terrain);
-	if (!myMesh)
-	{
-		throw "지형의 메쉬 생성 실패!";
-	}
-	myMesh->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-
 	const auto& w = myData.myMapWidth;
 	const auto& h = myData.myMapHeight;
 	const auto& heights = myData.myHeightMap;
@@ -169,7 +165,7 @@ void Terrain::Start(P3DDevice device, P3DGrpCommandList cmdlist, const XMFLOAT3&
 	UINT temp;
 
 	// 정점 색인
-	//CPolygon terrain_poly{};
+	CPolygon terrain_poly{};
 	for (int j = 0, z = 0; z < int(h) - 1; z++)
 	{
 		if ((z % 2) == 0)
@@ -179,11 +175,17 @@ void Terrain::Start(P3DDevice device, P3DGrpCommandList cmdlist, const XMFLOAT3&
 				if (x == 0 && 0 < z) // 두번째 줄
 				{
 					temp = (UINT)(x + (z * w));
-					//terrain_poly.Add(temp);
+					terrain_poly.Add(temp);
 					pnIndices[j++] = temp;
 				}
-				pnIndices[j++] = (UINT)(x + (z * w));
-				pnIndices[j++] = (UINT)((x + (z * w)) + w);
+
+				temp = (UINT)(x + (z * w));
+				terrain_poly.Add(temp);
+				pnIndices[j++] = temp;
+
+				temp = (UINT)((x + (z * w)) + w);
+				terrain_poly.Add(temp);
+				pnIndices[j++] = temp;
 			}
 		}
 		else
@@ -192,14 +194,41 @@ void Terrain::Start(P3DDevice device, P3DGrpCommandList cmdlist, const XMFLOAT3&
 			{
 				if (x == w - 1) // 마지막 열
 				{
-					pnIndices[j++] = UINT(x + (z * w));
+					temp = UINT(x + (z * w));
+					terrain_poly.Add(temp);
+					pnIndices[j++] = temp;
 				}
 
-				pnIndices[j++] = UINT(x + (z * w));
-				pnIndices[j++] = UINT((x + (z * w)) + w);
+				temp = UINT(x + (z * w));
+				terrain_poly.Add(temp);
+				pnIndices[j++] = temp;
+
+				temp = UINT((x + (z * w)) + w);
+				terrain_poly.Add(temp);
+				pnIndices[j++] = temp;
 			}
 		}
 	}
+
+	auto& raw_terrain = myData.myRawMesh;
+	//raw_terrain.AddPolygon(terrain_poly);
+
+	myMesh = new CLightenMesh(device, cmdlist, raw_terrain);
+	if (!myMesh)
+	{
+		throw "지형의 메쉬 생성 실패!";
+	}
+	myMesh->SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+	auto terrain_mat = make_shared<CMaterial>();
+	terrain_mat->m_xmf4Diffuse = XMFLOAT4(Colors::Chocolate);
+	terrain_mat->m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	terrain_mat->m_xmf4Emissive = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	terrain_mat->m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	terrain_mat->SetShader(Pipeline::illuminatedShader);
+
+	myMesh->AddMaterial(terrain_mat);
+	myMesh->myDefaultMaterial = terrain_mat;
 
 	myMesh->countPolygons = 1;
 	myMesh->myIndexBuffers = new ID3D12Resource * [1];
@@ -221,6 +250,8 @@ void Terrain::Start(P3DDevice device, P3DGrpCommandList cmdlist, const XMFLOAT3&
 	buffer_view.BufferLocation = index_buffer->GetGPUVirtualAddress();
 	buffer_view.Format = DXGI_FORMAT_R32_UINT;
 	buffer_view.SizeInBytes = static_cast<UINT>(indice_size);
+
+	delete[] pnIndices;
 }
 
 void Terrain::PrepareRendering(P3DGrpCommandList cmdlist) const
@@ -237,7 +268,20 @@ void Terrain::Render(P3DGrpCommandList cmdlist) const
 
 	if (myMesh)
 	{
-		myMesh->RenderIndexed(cmdlist, 0, countVertices);
+		auto& proceed_mat = myMesh->myDefaultMaterial;
+		auto& pipeline = proceed_mat->m_pShader;
+
+		if (pipeline)
+		{
+			pipeline->PrepareRendering(cmdlist);
+			proceed_mat->PrepareRendering(cmdlist);
+
+			myMesh->RenderIndexed(cmdlist, 0, countVertices);
+		}
+		else
+		{
+			throw "파이프라인과 쉐이더가 존재하지 않음!";
+		}
 	}
 }
 
@@ -249,6 +293,11 @@ float Terrain::GetHeight(int x, int z) const
 float Terrain::GetHeight(float x, float z) const
 {
 	return 0.0f;
+}
+
+BYTE Terrain::GetRawHeight(int x, int z) const
+{
+	return myData.GetRawHeight(x, z);
 }
 
 XMFLOAT4 Terrain::GetColor(int x, int z) const

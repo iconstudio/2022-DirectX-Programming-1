@@ -100,6 +100,7 @@ public:
 	void ReleaseUploadBuffers() override;
 
 	void PrepareRendering(P3DGrpCommandList cmdlist) const override;
+	void Render(P3DGrpCommandList cmdlist) const override;
 	void Render(P3DGrpCommandList cmdlist, int polygon_index) const override;
 
 protected:

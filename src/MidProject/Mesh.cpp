@@ -416,6 +416,11 @@ void CLightenMesh::PrepareRendering(P3DGrpCommandList cmdlist) const
 	cmdlist->IASetVertexBuffers(m_nSlot, 2, vertex_buffers);
 }
 
+void CLightenMesh::Render(P3DGrpCommandList cmdlist) const
+{
+	CMaterialMesh::Render(cmdlist);
+}
+
 void CLightenMesh::Render(P3DGrpCommandList cmdlist, int polygon_index) const
 {
 	PrepareRendering(cmdlist);

@@ -3,11 +3,11 @@
 #include "RawMesh.hpp"
 #include "Terrains.hpp"
 
-class StageGame : public IlluminatedScene
+class StageHelliattack : public IlluminatedScene
 {
 public:
-	StageGame(GameFramework& framework, HWND hwnd);
-	virtual ~StageGame();
+	StageHelliattack(GameFramework& framework, HWND hwnd);
+	virtual ~StageHelliattack();
 
 	void Awake(P3DDevice device, P3DGrpCommandList cmdlist) override;
 	void Start() override;
@@ -22,18 +22,10 @@ public:
 
 	void ProcessInput(UCHAR* pKeysBuffer);
 
-	RawMesh roadData;
-	CMaterialMesh* roadMesh; // CDiffusedMesh
-	XMFLOAT3 roadStartPoint;
-	XMFLOAT3 roadDestPoint;
-
 	XMFLOAT3 playerSpawnPoint;
-	BoundingSphere myGoalie;
 
-	const float defaultColor[4] = { 0.2f, 0.6f, 0.4f, 1.0f };
-
-	const float raceColors[4][4];
-	float raceTimer = 4.0f;
+	Terrain myTerrain;
+	float worldWidth, worldHeight;
 
 	HWND handleWindow;
 };

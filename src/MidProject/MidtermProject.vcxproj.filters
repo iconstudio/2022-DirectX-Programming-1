@@ -159,6 +159,12 @@
     <ClInclude Include="Vertex.hpp">
       <Filter>헤더 파일\Graphics\Resources</Filter>
     </ClInclude>
+    <ClInclude Include="HellicopterPlayer.hpp">
+      <Filter>헤더 파일\Contents</Filter>
+    </ClInclude>
+    <ClInclude Include="StageHelliattack.hpp">
+      <Filter>헤더 파일\Contents\Stages</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DirectX.cpp">
@@ -262,6 +268,12 @@
     </ClCompile>
     <ClCompile Include="GameEntity.cpp">
       <Filter>소스 파일\System</Filter>
+    </ClCompile>
+    <ClCompile Include="HellicopterPlayer.cpp">
+      <Filter>소스 파일\Contents</Filter>
+    </ClCompile>
+    <ClCompile Include="StageHelliattack.cpp">
+      <Filter>소스 파일\Contents\Stages</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
