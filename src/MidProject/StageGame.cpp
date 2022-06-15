@@ -24,8 +24,7 @@ StageGame::StageGame(GameFramework& framework, HWND hwnd)
 	, myGoalie(), playerSpawnPoint()
 	, roadData(), roadMesh(nullptr)
 	, roadStartPoint(), roadDestPoint()
-	, myTerrain(), myTerrainMesh()
-	, myTerrainData(256, 256, {2.0f, 2.0f, 2.0f})
+	, myTerrain(256, 256)
 	, handleWindow(hwnd)
 	, raceColors
 { { 0.2f, 0.2f, 0.2f, 1.0f }, { 0.4f, 0.6f, 0.6f, 1.0f }
@@ -94,7 +93,7 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
 	IlluminatedScene::Awake(device, cmdlist);
 	//
-	m_xmf4GlobalAmbient = XMFLOAT4(0.1f, 0.2f, 0.1f, 1.0f);
+	m_xmf4GlobalAmbient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 
 	//
 	numberLights = 6;
@@ -104,10 +103,10 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	myLights[0].m_bEnable = true;
 	myLights[0].m_nType = POINT_LIGHT;
 	myLights[0].m_fRange = 1000.0f;
-	myLights[0].m_xmf4Ambient = XMFLOAT4(); // 0
-	myLights[0].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.0f, 0.0f, 1.0f);
+	myLights[0].m_xmf4Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f); // 0
+	myLights[0].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 	myLights[0].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	myLights[0].m_xmf3Position = XMFLOAT3(30.0f, 30.0f, 30.0f);
+	myLights[0].m_xmf3Position = XMFLOAT3(30.0f, 130.0f, 30.0f);
 	myLights[0].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	myLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
 
@@ -115,9 +114,9 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	myLights[1].m_nType = SPOT_LIGHT;
 	myLights[1].m_fRange = 500.0f;
 	myLights[1].m_xmf4Ambient = XMFLOAT4(); // 0
-	myLights[1].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-	myLights[1].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	myLights[1].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
+	myLights[1].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	myLights[1].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	myLights[1].m_xmf3Position = XMFLOAT3(-50.0f, 30.0f, -5.0f);
 	myLights[1].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	myLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
 	myLights[1].m_fFalloff = 8.0f;
@@ -155,11 +154,8 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	myLights[4].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
 
 	// 지형 불러오기
-	myTerrainData.Awake("Resources/HeightMap.raw");
-
-	myTerrainMesh.Awake(myTerrainData);
-
-	myTerrain.Awake(myTerrainMesh);
+	myTerrain.Awake("Resources/HeightMap.raw");
+	myTerrain.Start(d3dDevice, d3dTaskList, { 10.0f, 100.0f, 10.0f });
 
 	// 결승선
 	XMFLOAT3 goal = XMFLOAT3(roadWidth * 0.5f, 0.0f, roadHeight);
@@ -451,6 +447,16 @@ void StageGame::Render() const
 	d3dTaskList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 
 	roadMesh->Render(d3dTaskList);
+
+	ZeroMemory(&xmf4x4World, sizeof(xmf4x4World));
+	const auto& terrain_mat = Matrix4x4::Identity();
+	const auto tr_mat = XMLoadFloat4x4(&terrain_mat);
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(tr_mat));
+
+	// 두번째 루트 매개인자에서 0번째 메모리에 float 16개 전달
+	d3dTaskList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+
+	myTerrain.Render(d3dTaskList);
 }
 
 void StageGame::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)

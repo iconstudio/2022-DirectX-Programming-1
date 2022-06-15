@@ -19,6 +19,7 @@ public:
 	virtual void PrepareRendering(P3DGrpCommandList cmdlist) const;
 	virtual void Render(P3DGrpCommandList cmdlist) const;
 	virtual void Render(P3DGrpCommandList cmdlist, int polygon_index) const;
+	virtual void RenderIndexed(P3DGrpCommandList cmdlist, int index, UINT count) const;
 
 	UINT GetType() const;
 
@@ -27,7 +28,6 @@ public:
 	UINT m_nSlot;
 	UINT m_nOffset;
 
-protected:
 	UINT countVertices;
 	std::vector<CVertex*> myVertices;
 

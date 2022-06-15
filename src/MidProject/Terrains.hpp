@@ -6,46 +6,37 @@
 
 struct TerrainData
 {
-	TerrainData(size_t w, size_t h, XMFLOAT3 scale);
+	TerrainData(size_t w, size_t h);
 	~TerrainData();
 
 	void Awake(const Filepath& image);
+	void Start(const XMFLOAT3& scale);
 
-	BYTE GetHeight(int x, int z) const;
+	float GetHeight(int x, int z) const;
+	BYTE GetRawHeight(int x, int z) const;
+	float GetActualHeight(float x, float z, bool reverse) const;
 	XMFLOAT4 GetColor(int x, int z) const;
+	XMFLOAT3 GetNormal(int x, int z) const;
 
-	std::vector<std::vector<BYTE>> myHeightMap;
+	const size_t myMapWidth;
+	const size_t myMapHeight;
+	XMFLOAT3 m_xmf3Scale;
+
+	std::vector<std::vector<float>> myHeightMap;
 	std::vector<std::vector<XMFLOAT4>> myColourMap;
-
-	const size_t myWidth;
-	const size_t myHeight;
-	const XMFLOAT3 m_xmf3Scale;
-};
-
-class TerrainMesh
-{
-public:
-	TerrainMesh();
-	~TerrainMesh();
-
-	void Awake(const TerrainData& data);
-
-	float GetPeekHeight(int x, int z) const;
-	float GetHeight(float x, float z) const;
+	std::vector<std::vector<float>> myHeights;
 
 	RawMesh myRawMesh;
-	CDiffusedMesh* myMesh;
-
-	std::vector<std::vector<float>> myHeights;
 };
 
 class Terrain// : public GameObject
 {
 public:
-	Terrain();
+	Terrain(size_t w, size_t h);
 	~Terrain();
 
-	void Awake(const TerrainMesh& data);
+	void Awake(const Filepath& image);
+	void Start(P3DDevice device, P3DGrpCommandList cmdlist, const XMFLOAT3& scale);
 	void PrepareRendering(P3DGrpCommandList cmdlist) const;
 	void Render(P3DGrpCommandList cmdlist) const;
 
@@ -53,4 +44,9 @@ public:
 	float GetHeight(float x, float z) const;
 	XMFLOAT4 GetColor(int x, int z) const;
 	XMFLOAT3 GetNormal(int x, int z) const;
+
+	TerrainData myData;
+
+	UINT countVertices;
+	CDiffusedMesh* myMesh;
 };

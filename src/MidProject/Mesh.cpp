@@ -41,10 +41,8 @@ CMesh::CMesh(P3DDevice device, P3DGrpCommandList cmdlist, const RawMesh& raw)
 		myPolygons = raw.myPolygons;
 
 		myIndexBuffers = new ID3D12Resource * [countPolygons];
-		myUploadingIndexBuffer = new ID3D12Resource * [countPolygons];
 		myIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[countPolygons];
-
-		//countPolygonIndices = new int[countPolygons];
+		myUploadingIndexBuffer = new ID3D12Resource * [countPolygons];
 
 		for (int i = 0; i < countPolygons; i++)
 		{
@@ -53,8 +51,6 @@ CMesh::CMesh(P3DDevice device, P3DGrpCommandList cmdlist, const RawMesh& raw)
 			const auto indice_size = sizeof(UINT) * index_count;
 			const auto indice_blob = reinterpret_cast<const void*>(polygon.GetData());
 
-			// countPolygonIndices[i] = raw->countPolygonIndices[i];
-			// raw->indexByPolygons[i]
 			myIndexBuffers[i] = CreateBufferResource(device, cmdlist
 				, indice_blob, indice_size
 				, D3D12_HEAP_TYPE_DEFAULT
@@ -126,6 +122,12 @@ void CMesh::Render(P3DGrpCommandList cmdlist, int polygon_index) const
 {
 	cmdlist->IASetIndexBuffer(&(myIndexBufferViews[polygon_index]));
 	PolygonAt(polygon_index).Render(cmdlist);
+}
+
+void CMesh::RenderIndexed(P3DGrpCommandList cmdlist, int index, UINT count) const
+{
+	cmdlist->IASetIndexBuffer(&(myIndexBufferViews[index]));
+	cmdlist->DrawIndexedInstanced(count, 1, 0, 0, 0);
 }
 
 void CMesh::SetPrimitiveTopology(D3D12_PRIMITIVE_TOPOLOGY topology)
