@@ -22,10 +22,15 @@ public:
 
 	void ProcessInput(UCHAR* pKeysBuffer);
 
+	float globalTime;
+
 	XMFLOAT3 playerSpawnPoint;
+	XMFLOAT3 playerLightRotations[2];
 
 	Terrain myTerrain;
+	XMFLOAT4X4 matrixTerrain;
 	float worldWidth, worldHeight;
+
 
 	HWND handleWindow;
 };

@@ -103,8 +103,8 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	myLights[0].m_bEnable = true;
 	myLights[0].m_nType = POINT_LIGHT;
 	myLights[0].m_fRange = 1000.0f;
-	myLights[0].m_xmf4Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f); // 0
-	myLights[0].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	myLights[0].m_xmf4Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	myLights[0].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.2f, 0.2f, 1.0f);
 	myLights[0].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	myLights[0].m_xmf3Position = XMFLOAT3(30.0f, 130.0f, 30.0f);
 	myLights[0].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -113,15 +113,15 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	myLights[1].m_bEnable = true;
 	myLights[1].m_nType = SPOT_LIGHT;
 	myLights[1].m_fRange = 500.0f;
-	myLights[1].m_xmf4Ambient = XMFLOAT4(); // 0
+	myLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	myLights[1].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	myLights[1].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	myLights[1].m_xmf3Position = XMFLOAT3(-50.0f, 30.0f, -5.0f);
 	myLights[1].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	myLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
 	myLights[1].m_fFalloff = 8.0f;
-	myLights[1].m_fPhi = (float)cos(XMConvertToRadians(45.0f));
-	myLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	myLights[1].m_fPhi = std::cosf(XMConvertToRadians(45.0f));
+	myLights[1].m_fTheta = std::cosf(XMConvertToRadians(20.0f));
 
 	myLights[2].m_bEnable = true;
 	myLights[2].m_nType = DIRECTIONAL_LIGHT;
@@ -140,8 +140,8 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	myLights[3].m_xmf3Direction = XMFLOAT3(0.0f, 1.0f, 1.0f);
 	myLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
 	myLights[3].m_fFalloff = 8.0f;
-	myLights[3].m_fPhi = (float)cos(XMConvertToRadians(90.0f));
-	myLights[3].m_fTheta = (float)cos(XMConvertToRadians(40.0f));
+	myLights[3].m_fPhi = std::cosf(XMConvertToRadians(90.0f));
+	myLights[3].m_fTheta = std::cosf(XMConvertToRadians(40.0f));
 
 	myLights[4].m_bEnable = true;
 	myLights[4].m_nType = POINT_LIGHT;
@@ -446,9 +446,6 @@ void StageGame::Render() const
 	roadMesh->Render(d3dTaskList);
 }
 
-void StageGame::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
-{}
-
 void StageGame::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 {
 	switch (msg)
@@ -461,8 +458,7 @@ void StageGame::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 		break;
 
 		case WM_RBUTTONDOWN:
-		{
-		}
+		{}
 		break;
 
 		case WM_LBUTTONUP:
@@ -472,13 +468,11 @@ void StageGame::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 		break;
 
 		case WM_RBUTTONUP:
-		{
-		}
+		{}
 		break;
 
 		case WM_MOUSEMOVE:
-		{
-		}
+		{}
 		break;
 
 		default:
@@ -489,8 +483,6 @@ void StageGame::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
 
 void StageGame::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
 {
-	auto& something = myInstances.at(0);
-
 	switch (msg)
 	{
 		case WM_KEYDOWN:
@@ -505,19 +497,7 @@ void StageGame::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
 				}
 				break;
 
-				case VK_UP:
-				case 'W':
-				{
-				}
-				break;
-
-				case VK_DOWN:
-				case 'S':
-				{
-				}
-				break;
-
-				case VK_F4:
+				case VK_F5:
 				{
 					myFramework.JumpToNextStage();
 				}
@@ -531,3 +511,6 @@ void StageGame::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
 		break;
 	}
 }
+
+void StageGame::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+{}

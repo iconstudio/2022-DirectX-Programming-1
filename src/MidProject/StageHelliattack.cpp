@@ -7,8 +7,9 @@
 
 StageHelliattack::StageHelliattack(GameFramework& framework, HWND hwnd)
 	: IlluminatedScene(framework, "Helliattack")
-	, playerSpawnPoint()
-	, myTerrain(256, 256)
+	, globalTime(0.0f)
+	, playerSpawnPoint(), playerLightRotations()
+	, myTerrain(256, 256), matrixTerrain(Matrix4x4::Identity())
 	, handleWindow(hwnd)
 {}
 
@@ -52,7 +53,7 @@ void StageHelliattack::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 
 	auto cam = player->GetCamera();
 	cam->SetPosition(playerSpawnPoint);
-	cam->SetOffset(XMFLOAT3(0.0f, 500.0f, -900.0f));
+	cam->SetOffset(XMFLOAT3(0.0f, 50.0f, -90.0f));
 
 	SetCamera(cam);
 	myPlayer = player;
@@ -61,16 +62,46 @@ void StageHelliattack::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	m_xmf4GlobalAmbient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 
 	//
-	numberLights = 1;
+	numberLights = 5;
 	myLights = new CLight[numberLights];
 	ZeroMemory(myLights, sizeof(CLight) * numberLights);
 
-	myLights[0].m_bEnable = true;
-	myLights[0].m_nType = DIRECTIONAL_LIGHT;
-	myLights[0].m_xmf4Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	myLights[0].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-	myLights[0].m_xmf4Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	myLights[0].m_xmf3Direction = XMFLOAT3(0.3f, -0.5f, 0.5f);
+	auto& light_global = myLights[0];
+	light_global.m_bEnable = true;
+	light_global.m_nType = DIRECTIONAL_LIGHT;
+	light_global.m_xmf4Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	light_global.m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
+	light_global.m_xmf4Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	light_global.m_xmf3Direction = XMFLOAT3(0.3f, -0.5f, 0.5f);
+
+	auto& light_for_player1 = myLights[1];
+	light_for_player1.m_bEnable = true;
+	light_for_player1.m_nType = SPOT_LIGHT;
+	light_for_player1.m_xmf3Position = playerSpawnPoint;
+	light_for_player1.m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	light_for_player1.m_fRange = 600.0f;
+	light_for_player1.m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	light_for_player1.m_xmf4Diffuse = XMFLOAT4(0.3f, 0.7f, 0.5f, 1.0f);
+	light_for_player1.m_xmf4Specular = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	light_for_player1.m_xmf3Attenuation = XMFLOAT3(1.0f, 0.05f, 0.0001f);
+	light_for_player1.m_fFalloff = 6.0f;
+	light_for_player1.m_fPhi = std::cosf(XMConvertToRadians(70.0f));
+	light_for_player1.m_fTheta = std::cosf(XMConvertToRadians(30.0f));
+
+	auto& light_for_player2 = myLights[2];
+	light_for_player2 = light_for_player1;
+	/*light_for_player2.m_bEnable = true;
+	light_for_player2.m_nType = SPOT_LIGHT;
+	light_for_player2.m_xmf3Position = playerSpawnPoint;
+	light_for_player2.m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	light_for_player2.m_fRange = 600.0f;
+	light_for_player2.m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	light_for_player2.m_xmf4Diffuse = XMFLOAT4(0.3f, 0.7f, 0.5f, 1.0f);
+	light_for_player2.m_xmf4Specular = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	light_for_player2.m_xmf3Attenuation = XMFLOAT3(1.0f, 0.05f, 0.0001f);
+	light_for_player2.m_fFalloff = 6.0f;
+	light_for_player2.m_fPhi = std::cosf(XMConvertToRadians(70.0f));
+	light_for_player2.m_fTheta = std::cosf(XMConvertToRadians(30.0f));*/
 }
 
 void StageHelliattack::Start()
@@ -85,7 +116,14 @@ void StageHelliattack::Reset()
 
 void StageHelliattack::Update(float delta_time)
 {
+	globalTime += delta_time;
+
 	IlluminatedScene::Update(delta_time);
+
+	if (myCamera)
+	{
+
+	}
 }
 
 void StageHelliattack::PrepareRendering()
@@ -97,24 +135,87 @@ void StageHelliattack::Render() const
 {
 	IlluminatedScene::Render();
 
-	XMFLOAT4X4 xmf4x4World{};
-
-	ZeroMemory(&xmf4x4World, sizeof(xmf4x4World));
-	const auto& terrain_mat = Matrix4x4::Identity();
-	const auto tr_mat = XMLoadFloat4x4(&terrain_mat);
-	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(tr_mat));
-
-	// 두번째 루트 매개인자에서 0번째 메모리에 float 16개 전달
-	d3dTaskList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+	// 게임 객체 대신에 변환 행렬 전달
+	d3dTaskList->SetGraphicsRoot32BitConstants(1, 16, &matrixTerrain, 0);
 
 	myTerrain.Render(d3dTaskList);
 }
 
 void StageHelliattack::OnMouse(HWND hwnd, UINT msg, WPARAM btn, LPARAM info)
-{}
+{
+	switch (msg)
+	{
+		case WM_LBUTTONDOWN:
+		{
+			SetCapture(hwnd);
+			GetCursorPos(&posCursor);
+		}
+		break;
+
+		case WM_RBUTTONDOWN:
+		{
+			GetCursorPos(&posCursor);
+		}
+		break;
+
+		case WM_LBUTTONUP:
+		{
+			ReleaseCapture();
+		}
+		break;
+
+		case WM_RBUTTONUP:
+		{
+		}
+		break;
+
+		case WM_MOUSEMOVE:
+		{
+		}
+		break;
+
+		default:
+		{}
+		break;
+	}
+}
 
 void StageHelliattack::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
-{}
+{
+	switch (msg)
+	{
+		case WM_KEYDOWN:
+		{
+			switch (key)
+			{
+				case VK_F1:
+				{
+					auto cam = myPlayer->GetCamera();
+					cam->SetOffset(XMFLOAT3(0.0f, 500.0f, -900.0f));
+				}
+				break;
+
+				case VK_F2:
+				{
+					auto cam = myPlayer->GetCamera();
+					cam->SetOffset(XMFLOAT3(0.0f, 50.0f, -90.0f));
+				}
+				break;
+
+				case VK_F5:
+				{
+					myFramework.JumpToNextStage();
+				}
+				break;
+			}
+			break;
+		}
+
+		default:
+		{}
+		break;
+	}
+}
 
 void StageHelliattack::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {}
