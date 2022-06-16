@@ -32,20 +32,20 @@ void StageHelliattack::ProcessInput(UCHAR pKeysBuffer[256])
 
 	if (pKeysBuffer['Z'] & 0xF0)
 	{
-		myPlayer->MoveStrafe(60.0f * lastDeltaTime);
+		myPlayer->MoveStrafe(-60.0f * lastDeltaTime);
 	}
 	if (pKeysBuffer['C'] & 0xF0)
 	{
-		myPlayer->MoveStrafe(-60.0f * lastDeltaTime);
+		myPlayer->MoveStrafe(60.0f * lastDeltaTime);
 	}
 
 	if (pKeysBuffer[VK_LEFT] & 0xF0 || pKeysBuffer['A'] & 0xF0)
 	{
-		myPlayer->Rotate(0, 40.0f * lastDeltaTime, 0);
+		myPlayer->Rotate(0, -40.0f * lastDeltaTime, 0);
 	}
 	if (pKeysBuffer[VK_RIGHT] & 0xF0 || pKeysBuffer['D'] & 0xF0)
 	{
-		myPlayer->Rotate(0, -40.0f * lastDeltaTime, 0);
+		myPlayer->Rotate(0, 40.0f * lastDeltaTime, 0);
 	}
 
 	if (pKeysBuffer['Q'] & 0xF0)
@@ -164,12 +164,23 @@ void StageHelliattack::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 
 void StageHelliattack::Start()
 {
+	myTerrain.ReleaseUploadBuffer();
+
 	IlluminatedScene::Start();
 }
 
 void StageHelliattack::Reset()
 {
 	IlluminatedScene::Reset();
+
+	globalTime = 0.0f;
+
+	auto player = new HellicopterPlayer();
+	player->SetPosition(playerSpawnPoint);
+	player->LookTo(XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
+
+	auto cam = player->GetCamera();
+	cam->SetOffset(XMFLOAT3(0.0f, 50.0f, -90.0f));
 }
 
 void StageHelliattack::Update(float delta_time)
@@ -194,7 +205,7 @@ void StageHelliattack::Update(float delta_time)
 		{
 			const auto movement = pl_addition * delta_time;
 
-			if (1.0f <= pl_addition)
+			if (4.0f <= pl_addition)
 			{
 				// 뒤로 물러나는 반대 속도 계산
 				const auto pl_look = myPlayer->GetLook();
@@ -216,15 +227,12 @@ void StageHelliattack::Update(float delta_time)
 		const auto light_deg = globalTime * 80.0f;
 		const auto light_cos = std::cosf(XMConvertToRadians(light_deg));
 
-		const auto pitch = abs(light_cos * 20.0f) - 10.0f;
+		const auto pitch = abs(light_cos * 20.0f);
 		const auto yaw = light_cos * 80.0f - 40.0f;
 		const auto roll = abs(light_cos * 20.0f);
 
 		// 
-		lightTransform.SetMatrix(Matrix4x4::Identity());
-		lightTransform.SetPosition(player_pos);
-
-		lightTransform.SetRotation(myPlayer->worldMatrix);
+		lightTransform.SetMatrix(myPlayer->worldMatrix);
 		lightTransform.Rotate(XMFLOAT3(0, 1, 0), yaw);
 		lightTransform.Rotate(XMFLOAT3(1, 0, 0), pitch);
 		lightTransform.Rotate(XMFLOAT3(0, 0, 1), roll);

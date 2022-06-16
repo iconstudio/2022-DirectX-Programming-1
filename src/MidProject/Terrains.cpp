@@ -178,6 +178,23 @@ Terrain::Terrain(size_t w, size_t h)
 Terrain::~Terrain()
 {}
 
+void Terrain::ReleaseUploadBuffer()
+{
+	if (myMesh)
+	{
+		if (myMesh->myUploadingIndexBuffer)
+		{
+			if (myMesh->myUploadingIndexBuffer[0])
+			{
+				myMesh->myUploadingIndexBuffer[0]->Release();
+			}
+
+			delete[] myMesh->myUploadingIndexBuffer;
+			myMesh->myUploadingIndexBuffer = nullptr;
+		}
+	}
+}
+
 void Terrain::Awake(const Filepath& image)
 {
 	myData.Awake(image);
@@ -206,16 +223,13 @@ void Terrain::Start(P3DDevice device, P3DGrpCommandList cmdlist, const XMFLOAT3&
 				if (x == 0 && 0 < z) // 두번째 줄
 				{
 					temp = UINT(x + z * w);
-					terrain_poly.Add(temp);
 					indices[j++] = temp;
 				}
 
 				temp = UINT(x + z * w);
-				terrain_poly.Add(temp);
 				indices[j++] = temp;
 
 				temp = UINT(x + z * w + w);
-				terrain_poly.Add(temp);
 				indices[j++] = temp;
 			}
 		}
@@ -226,16 +240,13 @@ void Terrain::Start(P3DDevice device, P3DGrpCommandList cmdlist, const XMFLOAT3&
 				if (x == w - 1) // 마지막 열
 				{
 					temp = UINT(x + z * w);
-					terrain_poly.Add(temp);
 					indices[j++] = temp;
 				}
 
 				temp = UINT(x + z * w);
-				terrain_poly.Add(temp);
 				indices[j++] = temp;
 
 				temp = UINT(x + z * w + w);
-				terrain_poly.Add(temp);
 				indices[j++] = temp;
 			}
 		}

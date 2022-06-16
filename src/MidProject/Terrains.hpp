@@ -33,6 +33,8 @@ public:
 	Terrain(size_t w, size_t h);
 	~Terrain();
 
+	void ReleaseUploadBuffer();
+
 	void Awake(const Filepath& image);
 	void Start(P3DDevice device, P3DGrpCommandList cmdlist, const XMFLOAT3& scale);
 	void PrepareRendering(P3DGrpCommandList cmdlist) const;
