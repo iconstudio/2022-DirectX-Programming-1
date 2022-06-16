@@ -434,22 +434,22 @@ constexpr COLLISION_TAGS GameObject::GetTag() const noexcept
 	return COLLISION_TAGS::NONE;
 }
 
-XMFLOAT3 GameObject::GetPosition()
+XMFLOAT3 GameObject::GetPosition() const
 {
 	return XMFLOAT3(worldTransform.GetPosition());
 }
 
-XMFLOAT3 GameObject::GetLook()
+XMFLOAT3 GameObject::GetLook() const
 {
 	return XMFLOAT3(worldTransform.GetLook());
 }
 
-XMFLOAT3 GameObject::GetUp()
+XMFLOAT3 GameObject::GetUp() const
 {
 	return XMFLOAT3(worldTransform.GetUp());
 }
 
-XMFLOAT3 GameObject::GetRight()
+XMFLOAT3 GameObject::GetRight() const
 {
 	return XMFLOAT3(worldTransform.GetRight());
 }

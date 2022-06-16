@@ -65,10 +65,10 @@ public:
 	void LookTo(const XMFLOAT3& look, const XMFLOAT3& up);
 	void LookAt(const XMFLOAT3& look, const XMFLOAT3& up);
 
-	XMFLOAT3 GetPosition();
-	XMFLOAT3 GetLook();
-	XMFLOAT3 GetUp();
-	XMFLOAT3 GetRight();
+	XMFLOAT3 GetPosition() const;
+	XMFLOAT3 GetLook() const;
+	XMFLOAT3 GetUp() const;
+	XMFLOAT3 GetRight() const;
 	const GameObject* FindFrame(const char* name) const;
 	GameObject* FindFrame(const char* name);
 	const GameObject* GetParent() const;
