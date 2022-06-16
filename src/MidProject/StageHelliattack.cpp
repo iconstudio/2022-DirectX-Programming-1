@@ -194,7 +194,7 @@ void StageHelliattack::Update(float delta_time)
 		{
 			const auto movement = pl_addition * delta_time;
 
-			if (10.0f <= pl_addition)
+			if (1.0f <= pl_addition)
 			{
 				// 뒤로 물러나는 반대 속도 계산
 				const auto pl_look = myPlayer->GetLook();
@@ -204,7 +204,7 @@ void StageHelliattack::Update(float delta_time)
 				auto mv_look = Vector3::Normalize(Vector3::Subtract(pl_moved, player_pos));
 				mv_look.y = 0.0f;
 
-				myPlayer->Translate(Vector3::ScalarProduct(mv_look, -movement * 10.0f));
+				myPlayer->Translate(Vector3::ScalarProduct(mv_look, -movement * 10.0f - 0.1f));
 				myPlayer->Translate(XMFLOAT3(0, movement, 0));
 			}
 			else
