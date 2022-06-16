@@ -42,7 +42,7 @@ public:
 
 	float GetHeight(int x, int z) const;
 	float GetHeight(float x, float z) const;
-	BYTE GetRawHeight(int x, int z) const;
+	float GetRawHeight(int x, int z) const;
 	XMFLOAT4 GetColor(int x, int z) const;
 	XMFLOAT3 GetNormal(int x, int z) const;
 

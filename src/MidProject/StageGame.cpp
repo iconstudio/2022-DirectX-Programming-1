@@ -354,7 +354,7 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	myPlayer = player;
 
 	myGoalie.Center = goal;
-	myGoalie.Radius = 5.0f;
+	myGoalie.Radius = 10.0f;
 
 	auto model_cactus = myFramework.GetModel("Cactus").lock();
 	model_cactus->SetPosition(0.0f, 0.0f, 0.0f);

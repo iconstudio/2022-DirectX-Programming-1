@@ -4,6 +4,9 @@
 #include "Arithmetics.hpp"
 
 GameCamera::GameCamera()
+	: localTransform(), worldTransform()
+	, localMatrix(localTransform.GetMatrix())
+	, worldMatrix(worldTransform.GetMatrix())
 {
 	m_xmf4x4View = Matrix4x4::Identity();
 	m_xmf4x4Projection = Matrix4x4::Identity();
@@ -23,35 +26,58 @@ GameCamera::GameCamera()
 	myPlayer = NULL;
 }
 
-GameCamera::GameCamera(GameCamera* pCamera)
-{
-	if (pCamera)
-	{
-		*this = *pCamera;
-	}
-	else
-	{
-		m_xmf4x4View = Matrix4x4::Identity();
-		m_xmf4x4Projection = Matrix4x4::Identity();
-		m_d3dViewport = { 0, 0, FRAME_BUFFER_WIDTH , FRAME_BUFFER_HEIGHT, 0.0f, 1.0f };
-		m_d3dScissorRect = { 0, 0, FRAME_BUFFER_WIDTH , FRAME_BUFFER_HEIGHT };
-		m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-		m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
-		m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
-		m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
-		m_fPitch = 0.0f;
-		m_fRoll = 0.0f;
-		m_fYaw = 0.0f;
-		m_xmf3Offset = XMFLOAT3(0.0f, 0.0f, 0.0f);
-		m_fTimeLag = 0.0f;
-		m_xmf3LookAtWorld = XMFLOAT3(0.0f, 0.0f, 0.0f);
-		m_nMode = 0x00;
-		myPlayer = NULL;
-	}
-}
-
 GameCamera::~GameCamera()
 {}
+
+void GameCamera::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
+{
+	UINT ncbElementBytes = ((sizeof(CBufferCamera) + 255) & ~255);
+
+	m_pd3dcbCamera = CreateBufferResource(device, cmdlist
+		, NULL, ncbElementBytes
+		, D3D12_HEAP_TYPE_UPLOAD
+		, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
+		, NULL);
+
+	m_pd3dcbCamera->Map(0, NULL, (void**)&m_pcbMappedCamera);
+}
+
+void GameCamera::UpdateOffset(const XMFLOAT3 addition)
+{
+	addtionalPositon = addition;
+}
+
+void GameCamera::Update(const XMFLOAT3& xmf3LookAt, float delta_time)
+{}
+
+void GameCamera::PrepareRendering(P3DGrpCommandList cmdlist)
+{
+	cmdlist->RSSetViewports(1, &m_d3dViewport);
+	cmdlist->RSSetScissorRects(1, &m_d3dScissorRect);
+
+	XMFLOAT4X4 xmf4x4View;
+	XMStoreFloat4x4(&xmf4x4View, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4View)));
+	::memcpy(&m_pcbMappedCamera->m_xmf4x4View, &xmf4x4View, sizeof(XMFLOAT4X4));
+
+	XMFLOAT4X4 xmf4x4Projection;
+	XMStoreFloat4x4(&xmf4x4Projection, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Projection)));
+	::memcpy(&m_pcbMappedCamera->m_xmf4x4Projection, &xmf4x4Projection, sizeof(XMFLOAT4X4));
+
+	::memcpy(&m_pcbMappedCamera->m_xmf3Position, &m_xmf3Position, sizeof(XMFLOAT3));
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
+	cmdlist->SetGraphicsRootConstantBufferView(0, d3dGpuVirtualAddress);
+}
+
+
+void GameCamera::Release()
+{
+	if (m_pd3dcbCamera)
+	{
+		m_pd3dcbCamera->Unmap(0, NULL);
+		m_pd3dcbCamera->Release();
+	}
+}
 
 void GameCamera::SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight, float fMinZ, float fMaxZ)
 {
@@ -71,11 +97,10 @@ void GameCamera::SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom
 	m_d3dScissorRect.bottom = yBottom;
 }
 
-void GameCamera::GenerateProjectionMatrix(float fNearPlaneDistance, float fFarPlaneDistance, float fAspectRatio, float fFOVAngle)
+void GameCamera::BuildProjectionMatrix(float znear, float zfar, float aspect, float degfov)
 {
-	m_xmf4x4Projection = Matrix4x4::PerspectiveFovLH(XMConvertToRadians(fFOVAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
-//	XMMATRIX xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(fFOVAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
-//	XMStoreFloat4x4(&m_xmf4x4Projection, xmmtxProjection);
+	const auto fov = XMConvertToRadians(degfov);
+	m_xmf4x4Projection = Matrix4x4::PerspectiveFovLH(fov, aspect, znear, zfar);
 }
 
 void GameCamera::GenerateViewMatrix(XMFLOAT3 xmf3Position, XMFLOAT3 xmf3LookAt, XMFLOAT3 xmf3Up)
@@ -106,57 +131,20 @@ void GameCamera::RegenerateViewMatrix()
 	m_xmf4x4View._43 = -Vector3::DotProduct(m_xmf3Position, m_xmf3Look);
 }
 
-void GameCamera::InitializeUniforms(P3DDevice device, P3DGrpCommandList cmdlist)
-{
-	UINT ncbElementBytes = ((sizeof(VS_CB_CAMERA_INFO) + 255) & ~255);
-
-	m_pd3dcbCamera = CreateBufferResource(device, cmdlist
-		, NULL, ncbElementBytes
-		, D3D12_HEAP_TYPE_UPLOAD
-		, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER
-		, NULL);
-
-	m_pd3dcbCamera->Map(0, NULL, (void**)&m_pcbMappedCamera);
-}
-
-void GameCamera::UpdateUniforms(P3DGrpCommandList cmdlist)
-{
-	XMFLOAT4X4 xmf4x4View;
-	XMStoreFloat4x4(&xmf4x4View, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4View)));
-	::memcpy(&m_pcbMappedCamera->m_xmf4x4View, &xmf4x4View, sizeof(XMFLOAT4X4));
-
-	XMFLOAT4X4 xmf4x4Projection;
-	XMStoreFloat4x4(&xmf4x4Projection, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Projection)));
-	::memcpy(&m_pcbMappedCamera->m_xmf4x4Projection, &xmf4x4Projection, sizeof(XMFLOAT4X4));
-
-	::memcpy(&m_pcbMappedCamera->m_xmf3Position, &m_xmf3Position, sizeof(XMFLOAT3));
-
-	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbCamera->GetGPUVirtualAddress();
-	cmdlist->SetGraphicsRootConstantBufferView(0, d3dGpuVirtualAddress);
-}
-
-void GameCamera::ReleaseUniforms()
-{
-	if (m_pd3dcbCamera)
-	{
-		m_pd3dcbCamera->Unmap(0, NULL);
-		m_pd3dcbCamera->Release();
-	}
-}
-
-void GameCamera::SetViewportsAndScissorRects(P3DGrpCommandList cmdlist)
-{
-	cmdlist->RSSetViewports(1, &m_d3dViewport);
-	cmdlist->RSSetScissorRects(1, &m_d3dScissorRect);
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CSpaceShipCamera
 
-CSpaceShipCamera::CSpaceShipCamera(GameCamera* pCamera) : GameCamera(pCamera)
+CSpaceShipCamera::CSpaceShipCamera()
+	: GameCamera()
+{}
+
+CSpaceShipCamera::CSpaceShipCamera(const GameCamera& pCamera)
+	: GameCamera(pCamera)
 {
 	m_nMode = SPACESHIP_CAMERA;
 }
+
+CSpaceShipCamera::~CSpaceShipCamera() {}
 
 void CSpaceShipCamera::Rotate(float x, float y, float z)
 {
@@ -202,12 +190,16 @@ void CSpaceShipCamera::Rotate(float x, float y, float z)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CFirstPersonCamera
 
-CFirstPersonCamera::CFirstPersonCamera(GameCamera* pCamera) : GameCamera(pCamera)
+CFirstPersonCamera::CFirstPersonCamera()
+	: GameCamera()
+{}
+
+CFirstPersonCamera::CFirstPersonCamera(const GameCamera& pCamera)
+	: GameCamera(pCamera)
 {
 	m_nMode = FIRST_PERSON_CAMERA;
-	if (pCamera)
-	{
-		if (pCamera->GetMode() == SPACESHIP_CAMERA)
+	
+		if (pCamera.GetMode() == SPACESHIP_CAMERA)
 		{
 			m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
 			m_xmf3Right.y = 0.0f;
@@ -215,8 +207,9 @@ CFirstPersonCamera::CFirstPersonCamera(GameCamera* pCamera) : GameCamera(pCamera
 			m_xmf3Right = Vector3::Normalize(m_xmf3Right);
 			m_xmf3Look = Vector3::Normalize(m_xmf3Look);
 		}
-	}
 }
+
+CFirstPersonCamera::~CFirstPersonCamera() {}
 
 void CFirstPersonCamera::Rotate(float x, float y, float z)
 {
@@ -253,21 +246,27 @@ void CFirstPersonCamera::Rotate(float x, float y, float z)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CThirdPersonCamera
 
-CThirdPersonCamera::CThirdPersonCamera(GameCamera* pCamera) : GameCamera(pCamera)
+CThirdPersonCamera::CThirdPersonCamera()
+	: GameCamera()
+{}
+
+CThirdPersonCamera::CThirdPersonCamera(const GameCamera& pCamera)
+	: GameCamera(pCamera)
 {
 	m_nMode = THIRD_PERSON_CAMERA;
-	if (pCamera)
+
+	if (pCamera.GetMode() == SPACESHIP_CAMERA)
 	{
-		if (pCamera->GetMode() == SPACESHIP_CAMERA)
-		{
-			m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
-			m_xmf3Right.y = 0.0f;
-			m_xmf3Look.y = 0.0f;
-			m_xmf3Right = Vector3::Normalize(m_xmf3Right);
-			m_xmf3Look = Vector3::Normalize(m_xmf3Look);
-		}
+		m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+		m_xmf3Right.y = 0.0f;
+		m_xmf3Look.y = 0.0f;
+		m_xmf3Right = Vector3::Normalize(m_xmf3Right);
+		m_xmf3Look = Vector3::Normalize(m_xmf3Look);
 	}
+
 }
+
+CThirdPersonCamera::~CThirdPersonCamera() {}
 
 void CThirdPersonCamera::Update(const XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {

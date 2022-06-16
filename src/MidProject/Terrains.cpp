@@ -298,7 +298,7 @@ float Terrain::GetHeight(float x, float z) const
 	return 0.0f;
 }
 
-BYTE Terrain::GetRawHeight(int x, int z) const
+float Terrain::GetRawHeight(int x, int z) const
 {
 	return myData.GetRawHeight(x, z);
 }

@@ -30,6 +30,7 @@ struct TerrainData;
 
 class Transformer;
 class GameCamera;
+struct CBufferCamera;
 class GameObject;
 class GameKinematicObject; // ¡§¿˚¿”
 class Model;
@@ -44,6 +45,10 @@ class Player;
 constexpr UINT FRAME_BUFFER_WIDTH = 800;
 constexpr UINT FRAME_BUFFER_HEIGHT = 600;
 constexpr float ASPECT_RATIO = (float(FRAME_BUFFER_WIDTH) / float(FRAME_BUFFER_HEIGHT));
+
+#define FIRST_PERSON_CAMERA			0x01
+#define SPACESHIP_CAMERA			0x02
+#define THIRD_PERSON_CAMERA			0x03
 
 #define DIR_FORWARD					0x01
 #define DIR_BACKWARD				0x02

@@ -122,7 +122,13 @@ void StageHelliattack::Update(float delta_time)
 
 	if (myCamera)
 	{
+		const auto& campos = myCamera->GetPosition();
+		const auto overlapped_pos = myTerrain.GetHeight(campos.x, campos.z);
 
+		if (campos.y < overlapped_pos)
+		{
+
+		}
 	}
 }
 

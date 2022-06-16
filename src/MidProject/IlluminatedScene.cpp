@@ -86,8 +86,7 @@ void IlluminatedScene::PrepareRendering()
 	pipeline->PrepareRendering(d3dTaskList);
 	d3dTaskList->SetGraphicsRootSignature(pipeline->GetRootSignature());
 
-	myCamera->SetViewportsAndScissorRects(d3dTaskList);
-	myCamera->UpdateUniforms(d3dTaskList);
+	myCamera->PrepareRendering(d3dTaskList);
 
 	memcpy(myStaticLights->everyLights, myLights, sizeof(CLight) * numberLights);
 

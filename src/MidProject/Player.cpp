@@ -44,7 +44,7 @@ void CPlayer::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	myCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0);
 	if (myCamera)
 	{
-		myCamera->InitializeUniforms(device, cmdlist);
+		myCamera->Awake(device, cmdlist);
 	}
 }
 
@@ -88,7 +88,7 @@ void CPlayer::Release()
 {
 	if (myCamera)
 	{
-		myCamera->ReleaseUniforms();
+		myCamera->Release();
 	}
 }
 
@@ -178,7 +178,7 @@ GameCamera* CPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		myCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
 		myCamera->SetTimeLag(0.0f);
 		myCamera->SetOffset(XMFLOAT3(0.0f, 20.0f, 0.0f));
-		myCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+		myCamera->BuildProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		myCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		myCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
@@ -187,7 +187,7 @@ GameCamera* CPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		myCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		myCamera->SetTimeLag(0.25f);
 		myCamera->SetOffset(XMFLOAT3(0.0f, 60.0f, -80.0f));
-		myCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+		myCamera->BuildProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		myCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		myCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
@@ -209,13 +209,19 @@ GameCamera* CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMo
 	{
 		case FIRST_PERSON_CAMERA:
 		{
-			pNewCamera = new CFirstPersonCamera(myCamera);
+			if (myCamera)
+				pNewCamera = new CFirstPersonCamera(*myCamera);
+			else
+				pNewCamera = new CFirstPersonCamera();
 		}
 		break;
 
 		case THIRD_PERSON_CAMERA:
 		{
-			pNewCamera = new CThirdPersonCamera(myCamera);
+			if (myCamera)
+				pNewCamera = new CThirdPersonCamera(*myCamera);
+			else
+				pNewCamera = new CThirdPersonCamera();
 		}
 		break;
 	}
