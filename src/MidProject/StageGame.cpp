@@ -337,21 +337,26 @@ void StageGame::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	}
 
 	auto model_rallycar = myFramework.GetModel("RallyCar").lock();
-	model_rallycar->SetPosition(0.0f, -0.0f, 0.0f);
+	model_rallycar->SetPosition(0.0f, 0.0f, 0.0f);
 	model_rallycar->SetScale(10.0f, 10.0f, 10.0f);
 
 	playerSpawnPoint = XMFLOAT3(width * 0.5f, 0.0f, -3.0f);
 
 	// 플레이어
 	auto player = new CPlayer();
+
 	player->Attach(model_rallycar.get());
+	player->SetPosition(playerSpawnPoint);
+	player->LookTo(XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
 	player->Awake(d3dDevice, d3dTaskList);
 	player->SetOriginalCollider(collider_car);
 	player->BuildCollider();
-	player->SetPosition(playerSpawnPoint);
-	player->LookTo(XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
-	SetCamera(player->GetCamera());
 	myPlayer = player;
+
+	// 카메라
+	auto cam = player->GetCamera();
+	cam->SetOffset(XMFLOAT3(0.0f, 60.0f, -80.0f));
+	SetCamera(cam);
 
 	myGoalie.Center = goal;
 	myGoalie.Radius = 10.0f;
@@ -399,8 +404,6 @@ void StageGame::Update(float delta_time)
 	if (raceTimer <= 0)
 	{
 		BYTE keystate[256]{};
-		ZeroMemory(keystate, sizeof(keystate));
-
 		if (GetKeyboardState(keystate))
 		{
 			ProcessInput(keystate);
@@ -493,7 +496,7 @@ void StageGame::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
 				case VK_F2:
 				case VK_F3:
 				{
-					//myCamera = myPlayer->ChangeCamera((DWORD)(key - VK_F1 + 1), 1.0f);
+					//myCamera = myFollower->ChangeCamera((DWORD)(key - VK_F1 + 1), 1.0f);
 				}
 				break;
 

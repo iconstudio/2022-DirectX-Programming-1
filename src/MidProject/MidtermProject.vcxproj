@@ -173,6 +173,7 @@
     <ClInclude Include="pch.hpp" />
     <ClInclude Include="PlainGraphicsPipeline.hpp" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="PlayerBullet.hpp" />
     <ClInclude Include="Polygon.hpp" />
     <ClInclude Include="RawMesh.hpp" />
     <ClInclude Include="Resource.h" />
@@ -205,6 +206,7 @@
     <ClCompile Include="GameEntity.cpp" />
     <ClCompile Include="HelicopterPlayer.cpp" />
     <ClCompile Include="PlainGraphicsPipeline.cpp" />
+    <ClCompile Include="PlayerBullet.cpp" />
     <ClCompile Include="Polygon.cpp" />
     <ClCompile Include="DiffusedGraphicsPipeline.cpp" />
     <ClCompile Include="IlluminatedGraphicsPipeline.cpp" />

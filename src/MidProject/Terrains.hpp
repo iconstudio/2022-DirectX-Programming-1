@@ -15,15 +15,13 @@ struct TerrainData
 	float GetHeight(int x, int z) const;
 	float GetRawHeight(int x, int z) const;
 	float GetActualHeight(float x, float z, bool reverse) const;
-	XMFLOAT4 GetColor(int x, int z) const;
 	XMFLOAT3 GetNormal(int x, int z) const;
 
 	const size_t myMapWidth;
 	const size_t myMapHeight;
-	XMFLOAT3 m_xmf3Scale;
+	XMFLOAT3 myScale;
 
 	std::vector<std::vector<float>> myHeightMap;
-	std::vector<std::vector<XMFLOAT4>> myColourMap;
 	std::vector<std::vector<float>> myHeights;
 
 	RawMesh myRawMesh;
@@ -43,7 +41,6 @@ public:
 	float GetHeight(int x, int z) const;
 	float GetHeight(float x, float z, bool reverse) const;
 	float GetRawHeight(int x, int z) const;
-	XMFLOAT4 GetColor(int x, int z) const;
 	XMFLOAT3 GetNormal(int x, int z) const;
 
 	TerrainData myData;

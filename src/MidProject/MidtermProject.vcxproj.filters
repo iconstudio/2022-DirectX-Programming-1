@@ -165,6 +165,9 @@
     <ClInclude Include="StageHelliattack.hpp">
       <Filter>헤더 파일\Contents\Stages</Filter>
     </ClInclude>
+    <ClInclude Include="PlayerBullet.hpp">
+      <Filter>헤더 파일\Contents</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DirectX.cpp">
@@ -274,6 +277,9 @@
     </ClCompile>
     <ClCompile Include="StageHelliattack.cpp">
       <Filter>소스 파일\Contents\Stages</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerBullet.cpp">
+      <Filter>소스 파일\Contents</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

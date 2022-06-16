@@ -178,18 +178,18 @@ GameCamera* CPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		myCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
 		myCamera->SetTimeLag(0.0f);
 		myCamera->SetOffset(XMFLOAT3(0.0f, 20.0f, 0.0f));
-		myCamera->BuildProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
-		myCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-		myCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
 
 		case THIRD_PERSON_CAMERA:
 		myCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		myCamera->SetTimeLag(0.25f);
 		myCamera->SetOffset(XMFLOAT3(0.0f, 60.0f, -80.0f));
-		myCamera->BuildProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
-		myCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-		myCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+		break;
+
+		case SPACESHIP_CAMERA:
+		myCamera = OnChangeCamera(SPACESHIP_CAMERA, nCurrentCameraMode);
+		myCamera->SetTimeLag(0.25f);
+		myCamera->SetOffset(XMFLOAT3(0.0f, 60.0f, -60.0f));
 		break;
 
 		default:
@@ -197,6 +197,9 @@ GameCamera* CPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	}
 
 	myCamera->SetPosition(Vector3::Add(GetPosition(), myCamera->GetOffset()));
+	myCamera->BuildProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+	myCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+	myCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 	Update(fTimeElapsed);
 
 	return(myCamera);
@@ -222,6 +225,15 @@ GameCamera* CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMo
 				pNewCamera = new CThirdPersonCamera(*myCamera);
 			else
 				pNewCamera = new CThirdPersonCamera();
+		}
+		break;
+
+		case SPACESHIP_CAMERA:
+		{
+			if (myCamera)
+				pNewCamera = new CSpaceShipCamera(*myCamera);
+			else
+				pNewCamera = new CSpaceShipCamera();
 		}
 		break;
 	}

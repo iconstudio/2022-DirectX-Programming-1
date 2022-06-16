@@ -7,7 +7,7 @@ private:
 
 	int							m_nWidth;
 	int							m_nLength;
-	XMFLOAT3					m_xmf3Scale;
+	XMFLOAT3					myScale;
 
 public:
 	CHeightMapImage(LPCTSTR pFileName, int nWidth, int nLength, XMFLOAT3 xmf3Scale);
@@ -15,7 +15,7 @@ public:
 
 	float GetHeight(float x, float z, bool bReverseQuad = false);
 	XMFLOAT3 GetHeightMapNormal(int x, int z);
-	XMFLOAT3 GetScale() { return(m_xmf3Scale); }
+	XMFLOAT3 GetScale() { return(myScale); }
 
 	BYTE* GetHeightMapPixels() { return(myHeightMap); }
 	int GetHeightMapWidth() { return(m_nWidth); }
@@ -27,13 +27,13 @@ class CHeightMapGridMesh : public CMesh
 protected:
 	int							m_nWidth;
 	int							m_nLength;
-	XMFLOAT3					m_xmf3Scale;
+	XMFLOAT3					myScale;
 
 public:
 	CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int xStart, int zStart, int nWidth, int nLength, XMFLOAT3 xmf3Scale = XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4 xmf4Color = XMFLOAT4(1.0f, 1.0f, 0.0f, 0.0f), void* pContext = NULL);
 	virtual ~CHeightMapGridMesh();
 
-	XMFLOAT3 GetScale() { return(m_xmf3Scale); }
+	XMFLOAT3 GetScale() { return(myScale); }
 	int GetWidth() { return(m_nWidth); }
 	int GetLength() { return(m_nLength); }
 
@@ -60,18 +60,18 @@ private:
 	int							m_nWidth;
 	int							m_nLength;
 
-	XMFLOAT3					m_xmf3Scale;
+	XMFLOAT3					myScale;
 
 public:
-	float GetHeight(float x, float z, bool bReverseQuad = false) { return(m_pHeightMapImage->GetHeight(x, z, bReverseQuad) * m_xmf3Scale.y); } //World
-	XMFLOAT3 GetNormal(float x, float z) { return(m_pHeightMapImage->GetHeightMapNormal(int(x / m_xmf3Scale.x), int(z / m_xmf3Scale.z))); }
+	float GetHeight(float x, float z, bool bReverseQuad = false) { return(m_pHeightMapImage->GetHeight(x, z, bReverseQuad) * myScale.y); } //World
+	XMFLOAT3 GetNormal(float x, float z) { return(m_pHeightMapImage->GetHeightMapNormal(int(x / myScale.x), int(z / myScale.z))); }
 
 	int GetHeightMapWidth() { return(m_pHeightMapImage->GetHeightMapWidth()); }
 	int GetHeightMapLength() { return(m_pHeightMapImage->GetHeightMapLength()); }
 
-	XMFLOAT3 GetScale() { return(m_xmf3Scale); }
-	float GetWidth() { return(m_nWidth * m_xmf3Scale.x); }
-	float GetLength() { return(m_nLength * m_xmf3Scale.z); }
+	XMFLOAT3 GetScale() { return(myScale); }
+	float GetWidth() { return(m_nWidth * myScale.x); }
+	float GetLength() { return(m_nLength * myScale.z); }
 };
 
 class CSkyBox : public GameObject

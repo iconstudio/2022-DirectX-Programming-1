@@ -10,6 +10,8 @@ void HellicopterPlayer::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
 	CPlayer::Awake(device, cmdlist);
 
+	SetFriction(50.0f);
+
 	m_pMainRotorFrame = FindFrame("rotor");
 	m_pTailRotorFrame = FindFrame("black_m_7");
 }

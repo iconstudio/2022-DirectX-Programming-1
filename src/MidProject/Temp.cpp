@@ -8,7 +8,7 @@ CHeightMapImage::CHeightMapImage(LPCTSTR pFileName, int nWidth, int nLength, XMF
 {
 	m_nWidth = nWidth;
 	m_nLength = nLength;
-	m_xmf3Scale = xmf3Scale;
+	myScale = xmf3Scale;
 
 	BYTE* pHeightMapPixels = new BYTE[m_nWidth * m_nLength];
 
@@ -42,11 +42,11 @@ XMFLOAT3 CHeightMapImage::GetHeightMapNormal(int x, int z)
 	int nHeightMapIndex = x + (z * m_nWidth);
 	int xHeightMapAdd = (x < (m_nWidth - 1)) ? 1 : -1;
 	int zHeightMapAdd = (z < (m_nLength - 1)) ? m_nWidth : -m_nWidth;
-	float y1 = (float)myHeightMap[nHeightMapIndex] * m_xmf3Scale.y;
-	float y2 = (float)myHeightMap[nHeightMapIndex + xHeightMapAdd] * m_xmf3Scale.y;
-	float y3 = (float)myHeightMap[nHeightMapIndex + zHeightMapAdd] * m_xmf3Scale.y;
-	XMFLOAT3 xmf3Edge1 = XMFLOAT3(0.0f, y3 - y1, m_xmf3Scale.z);
-	XMFLOAT3 xmf3Edge2 = XMFLOAT3(m_xmf3Scale.x, y2 - y1, 0.0f);
+	float y1 = (float)myHeightMap[nHeightMapIndex] * myScale.y;
+	float y2 = (float)myHeightMap[nHeightMapIndex + xHeightMapAdd] * myScale.y;
+	float y3 = (float)myHeightMap[nHeightMapIndex + zHeightMapAdd] * myScale.y;
+	XMFLOAT3 xmf3Edge1 = XMFLOAT3(0.0f, y3 - y1, myScale.z);
+	XMFLOAT3 xmf3Edge2 = XMFLOAT3(myScale.x, y2 - y1, 0.0f);
 	XMFLOAT3 xmf3Normal = Vector3::CrossProduct(xmf3Edge1, xmf3Edge2, true);
 
 	return(xmf3Normal);
@@ -56,8 +56,8 @@ XMFLOAT3 CHeightMapImage::GetHeightMapNormal(int x, int z)
 
 float CHeightMapImage::GetHeight(float fx, float fz, bool bReverseQuad)
 {
-	fx = fx / m_xmf3Scale.x;
-	fz = fz / m_xmf3Scale.z;
+	fx = fx / myScale.x;
+	fz = fz / myScale.z;
 	if ((fx < 0.0f) || (fz < 0.0f) || (fx >= m_nWidth) || (fz >= m_nLength)) return(0.0f);
 
 	int x = (int)fx;
@@ -102,7 +102,7 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 	m_nWidth = nWidth;
 	m_nLength = nLength;
-	m_xmf3Scale = xmf3Scale;
+	myScale = xmf3Scale;
 
 	CDiffused2TexturedVertex* pVertices = new CDiffused2TexturedVertex[m_nVertices];
 
@@ -116,10 +116,10 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 		for (int x = xStart; x < (xStart + nWidth); x++, i++)
 		{
 			fHeight = OnGetHeight(x, z, pContext);
-			pVertices[i].m_xmf3Position = XMFLOAT3((x * m_xmf3Scale.x), fHeight, (z * m_xmf3Scale.z));
+			pVertices[i].m_xmf3Position = XMFLOAT3((x * myScale.x), fHeight, (z * myScale.z));
 			pVertices[i].m_xmf4Diffuse = Vector4::Add(OnGetColor(x, z, pContext), xmf4Color);
 			pVertices[i].m_xmf2TexCoord0 = XMFLOAT2(float(x) / float(cxHeightMap - 1), float(czHeightMap - 1 - z) / float(czHeightMap - 1));
-			pVertices[i].m_xmf2TexCoord1 = XMFLOAT2(float(x) / float(m_xmf3Scale.x * 0.5f), float(z) / float(m_xmf3Scale.z * 0.5f));
+			pVertices[i].m_xmf2TexCoord1 = XMFLOAT2(float(x) / float(myScale.x * 0.5f), float(z) / float(myScale.z * 0.5f));
 			if (fHeight < fMinHeight) fMinHeight = fHeight;
 			if (fHeight > fMaxHeight) fMaxHeight = fHeight;
 		}

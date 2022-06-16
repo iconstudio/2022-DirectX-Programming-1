@@ -5,14 +5,13 @@
 #include <limits>
 
 TerrainData::TerrainData(size_t w, size_t h)
-	: myHeightMap(), myColourMap()
-	, myMapWidth(w), myMapHeight(h), m_xmf3Scale()
+	: myHeightMap()
+	, myMapWidth(w), myMapHeight(h), myScale()
 {}
 
 TerrainData::~TerrainData()
 {
 	myHeightMap.clear();
-	myColourMap.clear();
 }
 
 void TerrainData::Awake(const Filepath& image)
@@ -29,7 +28,6 @@ void TerrainData::Awake(const Filepath& image)
 	}
 
 	myHeightMap.resize(myMapHeight);
-	myColourMap.resize(myMapHeight);
 
 	BYTE byte_read{};
 	constexpr auto byte_max = std::numeric_limits<BYTE>::max();
@@ -38,9 +36,6 @@ void TerrainData::Awake(const Filepath& image)
 	{
 		auto& row = myHeightMap.at(k);
 		row.reserve(myMapWidth);
-
-		auto& color_row = myColourMap.at(k);
-		color_row.reserve(myMapWidth);
 
 		for (size_t t = 0; t < myMapWidth; ++t)
 		{
@@ -55,7 +50,7 @@ void TerrainData::Awake(const Filepath& image)
 
 void TerrainData::Start(const XMFLOAT3& scale)
 {
-	m_xmf3Scale = scale;
+	myScale = scale;
 
 	const auto& w = myMapWidth;
 	const auto& h = myMapHeight;
@@ -111,72 +106,67 @@ float TerrainData::GetRawHeight(int x, int z) const
 
 float TerrainData::GetActualHeight(float fx, float fz, bool reverse) const
 {
-	fx = fx / m_xmf3Scale.x;
-	fz = fz / m_xmf3Scale.z;
+	fx = fx / myScale.x;
+	fz = fz / myScale.z;
+
+	auto x = static_cast<size_t>(fx);
+	auto z = static_cast<size_t>(fz);
 
 	const auto& w = myMapWidth;
 	const auto& h = myMapHeight;
 	const auto& heights = myHeightMap;
 
-	if ((fx < 0.0f) || (fz < 0.0f) || (fx >= w) || (fz >= h)) return(0.0f);
+	if (x < 0 || z < 0 || w <= x || h <= z)
+	{
+		return 0.0f;
+	}
 
-	int x = (int)fx;
-	int z = (int)fz;
-	float fxPercent = fx - x;
-	float fzPercent = fz - z;
+	const float x_ratio = fx - int(fx);
+	const float z_ratio = fz - int(fz);
 
-	float fBottomLeft = GetRawHeight(x, z);
-	float fBottomRight = GetRawHeight(x + 1, z);
-	float fTopLeft = GetRawHeight(x, z + 1);
-	float fTopRight = GetRawHeight(x + 1, z + 1);
-
+	float height_bl = GetRawHeight(x, z);
+	float height_br = GetRawHeight(x + 1, z);
+	float height_tl = GetRawHeight(x, z + 1);
+	float height_tr = GetRawHeight(x + 1, z + 1);
 	if (reverse)
 	{
-		if (fzPercent >= fxPercent)
-			fBottomRight = fBottomLeft + (fTopRight - fTopLeft);
+		if (x_ratio <= z_ratio)
+			height_br = height_bl + (height_tr - height_tl);
 		else
-			fTopLeft = fTopRight + (fBottomLeft - fBottomRight);
+			height_tl = height_tr + (height_bl - height_br);
 	}
 	else
 	{
-		if (fzPercent < (1.0f - fxPercent))
-			fTopRight = fTopLeft + (fBottomRight - fBottomLeft);
+		if (z_ratio < 1.0f - x_ratio)
+			height_tr = height_tl + (height_br - height_bl);
 		else
-			fBottomLeft = fTopLeft + (fBottomRight - fTopRight);
+			height_bl = height_tl + (height_br - height_tr);
 	}
 
-	float fTopHeight = fTopLeft * (1 - fxPercent) + fTopRight * fxPercent;
-	float fBottomHeight = fBottomLeft * (1 - fxPercent) + fBottomRight * fxPercent;
-	float fHeight = fBottomHeight * (1 - fzPercent) + fTopHeight * fzPercent;
+	float height_top = height_tl * (1 - x_ratio) + height_tr * x_ratio;
+	float height_bot = height_bl * (1 - x_ratio) + height_br * x_ratio;
+	float result = height_bot * (1 - z_ratio) + height_top * z_ratio;
 
-	return(fHeight);
-}
-
-XMFLOAT4 TerrainData::GetColor(int x, int z) const
-{
-	return myColourMap.at(z).at(x);
+	return result * myScale.y;
 }
 
 XMFLOAT3 TerrainData::GetNormal(int x, int z) const
 {
-	if (x < 0.0f
-		|| z < 0.0f
-		|| x >= myMapWidth
-		|| z >= myMapHeight)
+	if (x < 0.0f || z < 0.0f || myMapWidth <= x || myMapHeight <= z)
 	{
 		return Transformer::Up;
 	}
 
-	int xHeightMapAdd = x < myMapWidth - 1 ? 1 : -1;
-	int zHeightMapAdd = z < myMapHeight - 1 ? 1 : -1;
+	int x_add = x < myMapWidth - 1 ? 1 : -1;
+	int z_add = z < myMapHeight - 1 ? 1 : -1;
 
-	const auto& yscale = m_xmf3Scale.y;
+	const auto& yscale = myScale.y;
 	const auto y1 = GetRawHeight(x, z) * yscale;
-	const auto y2 = GetRawHeight(x + xHeightMapAdd, z) * yscale;
-	const auto y3 = GetRawHeight(x, z + zHeightMapAdd) * yscale;
+	const auto y2 = GetRawHeight(x + x_add, z) * yscale;
+	const auto y3 = GetRawHeight(x, z + z_add) * yscale;
 
-	XMFLOAT3 edge1 = { 0.0f, y3 - y1, m_xmf3Scale.z };
-	XMFLOAT3 edge2 = { m_xmf3Scale.x, y2 - y1, 0.0f };
+	XMFLOAT3 edge1 = { 0.0f, y3 - y1, myScale.z };
+	XMFLOAT3 edge2 = { myScale.x, y2 - y1, 0.0f };
 
 	return Vector3::CrossProduct(edge1, edge2);
 }
@@ -202,7 +192,7 @@ void Terrain::Start(P3DDevice device, P3DGrpCommandList cmdlist, const XMFLOAT3&
 	const auto& heights = myData.myHeightMap;
 
 	countVertices = ((w * 2) * (h - 1)) + ((h - 1) - 1);
-	UINT* pnIndices = new UINT[countVertices];
+	auto indices = new UINT[countVertices];
 	UINT temp;
 
 	// 정점 색인
@@ -215,18 +205,18 @@ void Terrain::Start(P3DDevice device, P3DGrpCommandList cmdlist, const XMFLOAT3&
 			{
 				if (x == 0 && 0 < z) // 두번째 줄
 				{
-					temp = (UINT)(x + (z * w));
+					temp = UINT(x + z * w);
 					terrain_poly.Add(temp);
-					pnIndices[j++] = temp;
+					indices[j++] = temp;
 				}
 
-				temp = (UINT)(x + (z * w));
+				temp = UINT(x + z * w);
 				terrain_poly.Add(temp);
-				pnIndices[j++] = temp;
+				indices[j++] = temp;
 
-				temp = (UINT)((x + (z * w)) + w);
+				temp = UINT(x + z * w + w);
 				terrain_poly.Add(temp);
-				pnIndices[j++] = temp;
+				indices[j++] = temp;
 			}
 		}
 		else
@@ -235,18 +225,18 @@ void Terrain::Start(P3DDevice device, P3DGrpCommandList cmdlist, const XMFLOAT3&
 			{
 				if (x == w - 1) // 마지막 열
 				{
-					temp = UINT(x + (z * w));
+					temp = UINT(x + z * w);
 					terrain_poly.Add(temp);
-					pnIndices[j++] = temp;
+					indices[j++] = temp;
 				}
 
-				temp = UINT(x + (z * w));
+				temp = UINT(x + z * w);
 				terrain_poly.Add(temp);
-				pnIndices[j++] = temp;
+				indices[j++] = temp;
 
-				temp = UINT((x + (z * w)) + w);
+				temp = UINT(x + z * w + w);
 				terrain_poly.Add(temp);
-				pnIndices[j++] = temp;
+				indices[j++] = temp;
 			}
 		}
 	}
@@ -283,7 +273,7 @@ void Terrain::Start(P3DDevice device, P3DGrpCommandList cmdlist, const XMFLOAT3&
 	auto& upload_buffer = myMesh->myUploadingIndexBuffer[0];
 
 	index_buffer = CreateBufferResource(device, cmdlist
-		, pnIndices, indice_size
+		, indices, indice_size
 		, D3D12_HEAP_TYPE_DEFAULT
 		, D3D12_RESOURCE_STATE_INDEX_BUFFER
 		, &upload_buffer);
@@ -292,7 +282,7 @@ void Terrain::Start(P3DDevice device, P3DGrpCommandList cmdlist, const XMFLOAT3&
 	buffer_view.Format = DXGI_FORMAT_R32_UINT;
 	buffer_view.SizeInBytes = static_cast<UINT>(indice_size);
 
-	delete[] pnIndices;
+	delete[] indices;
 }
 
 void Terrain::PrepareRendering(P3DGrpCommandList cmdlist) const
@@ -339,11 +329,6 @@ float Terrain::GetHeight(float x, float z, bool reverse) const
 float Terrain::GetRawHeight(int x, int z) const
 {
 	return myData.GetRawHeight(x, z);
-}
-
-XMFLOAT4 Terrain::GetColor(int x, int z) const
-{
-	return XMFLOAT4();
 }
 
 XMFLOAT3 Terrain::GetNormal(int x, int z) const
