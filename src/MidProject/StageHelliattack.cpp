@@ -5,16 +5,74 @@
 #include "HelicopterPlayer.hpp"
 #include "Terrains.hpp"
 
+Transformer lightTransform{};
+
 StageHelliattack::StageHelliattack(GameFramework& framework, HWND hwnd)
 	: IlluminatedScene(framework, "Helliattack")
 	, globalTime(0.0f)
 	, playerSpawnPoint(), playerLightRotations()
 	, myTerrain(256, 256), matrixTerrain(Matrix4x4::Identity())
+	, worldWidth(0.0f), worldHeight(0.0f)
 	, handleWindow(hwnd)
 {}
 
 StageHelliattack::~StageHelliattack()
 {}
+
+void StageHelliattack::ProcessInput(UCHAR pKeysBuffer[256])
+{
+	if (pKeysBuffer[VK_UP] & 0xF0 || pKeysBuffer['W'] & 0xF)
+	{
+		myPlayer->MoveForward(40.0f * lastDeltaTime);
+		//myFollower->Accelerate(DIR_FORWARD, 120.0f * lastDeltaTime);
+	}
+	else if (pKeysBuffer[VK_DOWN] & 0xF0 || pKeysBuffer['S'] & 0xF0)
+	{
+		myPlayer->MoveForward(-30.0f * lastDeltaTime);
+		//myFollower->Accelerate(DIR_BACKWARD, 50.0f * lastDeltaTime);
+	}
+
+	if (pKeysBuffer[VK_LEFT] & 0xF0 || pKeysBuffer['A'] & 0xF0)
+	{
+		myPlayer->MoveStrafe(-60.0f * lastDeltaTime);
+		//myFollower->Accelerate(DIR_LEFT, 90.0f * lastDeltaTime);
+	}
+	if (pKeysBuffer[VK_RIGHT] & 0xF0 || pKeysBuffer['D'] & 0xF0)
+	{
+		myPlayer->MoveStrafe(60.0f * lastDeltaTime);
+		//myFollower->Accelerate(DIR_RIGHT, 90.0f * lastDeltaTime);
+	}
+
+	if (pKeysBuffer['Q'] & 0xF0)
+	{
+		myPlayer->MoveUp(50.0f * lastDeltaTime);
+		//myFollower->Accelerate(DIR_UP, 70.0f * lastDeltaTime);
+	}
+	else if (pKeysBuffer['E'] & 0xF0)
+	{
+		myPlayer->MoveUp(-20.0f * lastDeltaTime);
+		//myFollower->Accelerate(DIR_DOWN, 50.0f * lastDeltaTime);
+	}
+
+	float cxDelta = 0.0f;
+	float cyDelta = 0.0f;
+	POINT ptCursorPos;
+
+	if (GetCapture() == handleWindow)
+	{
+		SetCursor(NULL);
+		GetCursorPos(&ptCursorPos);
+		cxDelta = (float)(ptCursorPos.x - posCursor.x) / 3.0f;
+		cyDelta = (float)(ptCursorPos.y - posCursor.y) / 4.0f;
+		SetCursorPos(posCursor.x, posCursor.y);
+	}
+
+	if (cxDelta || cyDelta)
+	{
+		myPlayer->Rotate(0.0f, cxDelta, 0.0f);
+		myCamera->Rotate(cyDelta, 0.0f, 0.0f);
+	}
+}
 
 void StageHelliattack::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
@@ -78,11 +136,11 @@ void StageHelliattack::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 	light_for_player1.m_bEnable = true;
 	light_for_player1.m_nType = SPOT_LIGHT;
 	light_for_player1.m_xmf3Position = playerSpawnPoint;
-	light_for_player1.m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	light_for_player1.m_xmf3Direction = XMFLOAT3(0.0f, 0.5f, 1.0f);
 	light_for_player1.m_fRange = 600.0f;
 	light_for_player1.m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	light_for_player1.m_xmf4Diffuse = XMFLOAT4(0.3f, 0.7f, 0.5f, 1.0f);
-	light_for_player1.m_xmf4Specular = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	light_for_player1.m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	light_for_player1.m_xmf3Attenuation = XMFLOAT3(1.0f, 0.05f, 0.0001f);
 	light_for_player1.m_fFalloff = 6.0f;
 	light_for_player1.m_fPhi = std::cosf(XMConvertToRadians(70.0f));
@@ -90,18 +148,6 @@ void StageHelliattack::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 
 	auto& light_for_player2 = myLights[2];
 	light_for_player2 = light_for_player1;
-	/*light_for_player2.m_bEnable = true;
-	light_for_player2.m_nType = SPOT_LIGHT;
-	light_for_player2.m_xmf3Position = playerSpawnPoint;
-	light_for_player2.m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
-	light_for_player2.m_fRange = 600.0f;
-	light_for_player2.m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	light_for_player2.m_xmf4Diffuse = XMFLOAT4(0.3f, 0.7f, 0.5f, 1.0f);
-	light_for_player2.m_xmf4Specular = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	light_for_player2.m_xmf3Attenuation = XMFLOAT3(1.0f, 0.05f, 0.0001f);
-	light_for_player2.m_fFalloff = 6.0f;
-	light_for_player2.m_fPhi = std::cosf(XMConvertToRadians(70.0f));
-	light_for_player2.m_fTheta = std::cosf(XMConvertToRadians(30.0f));*/
 }
 
 void StageHelliattack::Start()
@@ -123,12 +169,53 @@ void StageHelliattack::Update(float delta_time)
 	if (myCamera)
 	{
 		const auto& campos = myCamera->GetPosition();
-		const auto overlapped_pos = myTerrain.GetHeight(campos.x, campos.z);
+		const auto overlapped_pos = myTerrain.GetHeight(campos.x, campos.z, false);
 
-		if (campos.y < overlapped_pos)
+		const auto addition = overlapped_pos - campos.y;
+		if (0 < addition)
 		{
-
+			myCamera->UpdateOffset(XMFLOAT3(0, addition, 0));
 		}
+		else
+		{
+			myCamera->UpdateOffset(XMFLOAT3());
+		}
+
+		const auto player_pos = myPlayer->GetPosition();
+		const auto light_deg = globalTime * 80.0f;
+		const auto light_cos = std::cosf(XMConvertToRadians(light_deg));
+
+		const auto pitch = abs(light_cos * 20.0f) - 10.0f;
+		const auto yaw = light_cos * 80.0f - 40.0f;
+		const auto roll = abs(light_cos * 20.0f);
+
+		// 
+		lightTransform.SetMatrix(Matrix4x4::Identity());
+		lightTransform.SetPosition(player_pos);
+
+		lightTransform.SetRotation(myPlayer->worldMatrix);
+		lightTransform.Rotate(XMFLOAT3(0, 1, 0), yaw);
+		lightTransform.Rotate(XMFLOAT3(1, 0, 0), pitch);
+		lightTransform.Rotate(XMFLOAT3(0, 0, 1), roll);
+
+		auto& light_for_player1 = myLights[1];
+		light_for_player1.m_xmf3Position = player_pos;
+		light_for_player1.m_xmf3Direction = XMFLOAT3(lightTransform.myLook);
+
+		lightTransform.SetRotation(myPlayer->worldMatrix);
+		lightTransform.Rotate(XMFLOAT3(0, 1, 0), -yaw);
+		lightTransform.Rotate(XMFLOAT3(1, 0, 0), pitch);
+		lightTransform.Rotate(XMFLOAT3(0, 0, 1), roll);
+
+		auto& light_for_player2 = myLights[2];
+		light_for_player2.m_xmf3Position = player_pos;
+		light_for_player2.m_xmf3Direction = XMFLOAT3(lightTransform.myLook);
+	}
+
+	BYTE keystate[256]{};
+	if (GetKeyboardState(keystate))
+	{
+		ProcessInput(keystate);
 	}
 }
 
@@ -224,7 +311,4 @@ void StageHelliattack::OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state)
 }
 
 void StageHelliattack::OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
-{}
-
-void StageHelliattack::ProcessInput(UCHAR * pKeysBuffer)
 {}

@@ -78,7 +78,7 @@ void TerrainData::Start(const XMFLOAT3& scale)
 
 			auto& my_height_item = my_heights_row.at(height_index_x);
 			my_height_item = cy; // 높이 저장
-			
+
 			pos = CVertex(cx, cy, cz);
 			//CDiffusedVertex result{ pos, XMFLOAT4(Colors::Aquamarine) };
 
@@ -109,9 +109,47 @@ float TerrainData::GetRawHeight(int x, int z) const
 	return myHeightMap.at(z).at(x);
 }
 
-float TerrainData::GetActualHeight(float x, float z, bool reverse) const
+float TerrainData::GetActualHeight(float fx, float fz, bool reverse) const
 {
-	return 0.0f;
+	fx = fx / m_xmf3Scale.x;
+	fz = fz / m_xmf3Scale.z;
+
+	const auto& w = myMapWidth;
+	const auto& h = myMapHeight;
+	const auto& heights = myHeightMap;
+
+	if ((fx < 0.0f) || (fz < 0.0f) || (fx >= w) || (fz >= h)) return(0.0f);
+
+	int x = (int)fx;
+	int z = (int)fz;
+	float fxPercent = fx - x;
+	float fzPercent = fz - z;
+
+	float fBottomLeft = GetRawHeight(x, z);
+	float fBottomRight = GetRawHeight(x + 1, z);
+	float fTopLeft = GetRawHeight(x, z + 1);
+	float fTopRight = GetRawHeight(x + 1, z + 1);
+
+	if (reverse)
+	{
+		if (fzPercent >= fxPercent)
+			fBottomRight = fBottomLeft + (fTopRight - fTopLeft);
+		else
+			fTopLeft = fTopRight + (fBottomLeft - fBottomRight);
+	}
+	else
+	{
+		if (fzPercent < (1.0f - fxPercent))
+			fTopRight = fTopLeft + (fBottomRight - fBottomLeft);
+		else
+			fBottomLeft = fTopLeft + (fBottomRight - fTopRight);
+	}
+
+	float fTopHeight = fTopLeft * (1 - fxPercent) + fTopRight * fxPercent;
+	float fBottomHeight = fBottomLeft * (1 - fxPercent) + fBottomRight * fxPercent;
+	float fHeight = fBottomHeight * (1 - fzPercent) + fTopHeight * fzPercent;
+
+	return(fHeight);
 }
 
 XMFLOAT4 TerrainData::GetColor(int x, int z) const
@@ -290,12 +328,12 @@ void Terrain::Render(P3DGrpCommandList cmdlist) const
 
 float Terrain::GetHeight(int x, int z) const
 {
-	return 0.0f;
+	return myData.GetHeight(x, z);
 }
 
-float Terrain::GetHeight(float x, float z) const
+float Terrain::GetHeight(float x, float z, bool reverse) const
 {
-	return 0.0f;
+	return myData.GetActualHeight(x, z, reverse);
 }
 
 float Terrain::GetRawHeight(int x, int z) const

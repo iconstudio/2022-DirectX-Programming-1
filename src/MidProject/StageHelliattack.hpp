@@ -20,7 +20,7 @@ public:
 	void OnKeyboard(HWND hwnd, UINT msg, WPARAM key, LPARAM state) override;
 	void OnWindows(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) override;
 
-	void ProcessInput(UCHAR* pKeysBuffer);
+	void ProcessInput(UCHAR buffer[256]);
 
 	float globalTime;
 
