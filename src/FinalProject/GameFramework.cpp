@@ -471,7 +471,7 @@ void GameFramework::CreateDepthStencilView()
 void GameFramework::Start()
 {
 	ResetCmdList();
-	BuildPipeline();
+	BuildPipelines();
 	BuildAssets();
 	BuildStages();
 	BuildTerrains();
@@ -487,7 +487,7 @@ void GameFramework::Start()
 	CleanupBuilds();
 }
 
-void GameFramework::BuildPipeline()
+void GameFramework::BuildPipelines()
 {
 	Pipeline::diffusedShader = new DiffusedGraphicsPipeline();
 	Pipeline::diffusedShader->Awake(myDevice, myCommandList);

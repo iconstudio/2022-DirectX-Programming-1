@@ -10,8 +10,10 @@ DiffusedGraphicsPipeline::~DiffusedGraphicsPipeline()
 
 void DiffusedGraphicsPipeline::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
-	AssignVertexShader(Shader("DiffusedVertexShader.hlsl.", "main", "vs_5_1"));
-	AssignPixelShader(Shader("DiffusedPixelShader.hlsl.", "main", "ps_5_1"));
+	//AssignVertexShader(Shader("DiffusedVertexShader.hlsl.", "main", "vs_5_1"));
+	//AssignPixelShader(Shader("DiffusedPixelShader.hlsl.", "main", "ps_5_1"));
+	AssignVertexShader(Shader("DiffusedVertexShader.cso", "vs_5_1"));
+	AssignPixelShader(Shader("DiffusedPixelShader.cso", "ps_5_1"));
 
 	Pipeline::Awake(device, cmdlist);
 }

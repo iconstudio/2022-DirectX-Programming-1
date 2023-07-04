@@ -18,7 +18,7 @@ public:
 
 	// °ÔÀÓ ÄÜÅÙÃ÷ ÃÊ±âÈ­
 	void Start();
-	void BuildPipeline();
+	void BuildPipelines();
 	void BuildAssets();
 	void BuildStages();
 	void BuildTerrains();

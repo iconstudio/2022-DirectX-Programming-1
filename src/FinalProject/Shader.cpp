@@ -9,6 +9,12 @@ Shader::Shader(const Filepath& filepath, const char* entry, const char* version)
 	Complile(filepath, entry);
 }
 
+Shader::Shader(const Filepath& filepath, const char* version)
+	: Shader(version)
+{
+	Load(filepath);
+}
+
 Shader::Shader(const char* version)
 	: isCompiled(false)
 	, myVersion(version)

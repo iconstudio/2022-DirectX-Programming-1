@@ -10,8 +10,11 @@ PlainGraphicsPipeline::~PlainGraphicsPipeline()
 
 void PlainGraphicsPipeline::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
 {
-	AssignVertexShader(Shader("PlainVertexShader.hlsl.", "main", "vs_5_1"));
-	AssignPixelShader(Shader("PlainPixelShader.hlsl.", "main", "ps_5_1"));
+	//AssignVertexShader(Shader("PlainVertexShader.hlsl.", "main", "vs_5_1"));
+	//AssignPixelShader(Shader("PlainPixelShader.hlsl.", "main", "ps_5_1"));
+	AssignVertexShader(Shader("PlainVertexShader.cso", "vs_5_1"));
+	AssignPixelShader(Shader("PlainPixelShader.cso", "ps_5_1"));
+
 
 	Pipeline::Awake(device, cmdlist);
 }

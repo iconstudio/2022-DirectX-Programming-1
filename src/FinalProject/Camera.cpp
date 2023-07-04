@@ -97,6 +97,12 @@ void GameCamera::SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom
 	m_d3dScissorRect.bottom = yBottom;
 }
 
+void GameCamera::Rotate(float pitch, float yaw, float roll)
+{}
+
+void GameCamera::SetLookAt(const XMFLOAT3& look)
+{}
+
 void GameCamera::BuildProjectionMatrix(float znear, float zfar, float aspect, float degfov)
 {
 	const auto fov = XMConvertToRadians(degfov);

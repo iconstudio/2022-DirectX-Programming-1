@@ -197,9 +197,32 @@ void StageHelliattack::Update(float delta_time)
 
 	if (myPlayer)
 	{
-		const auto player_pos = myPlayer->GetPosition();
-		const auto pl_overlapped_pos = myTerrain.GetHeight(player_pos.x, player_pos.z, false);
+		auto player_pos = myPlayer->GetPosition();
 
+		if (player_pos.x < 0)
+		{
+			player_pos.x = 0.0f;
+			myPlayer->localTransform.GetPosition().x = player_pos.x;
+		}
+		else if (worldWidth <= player_pos.x)
+		{
+			player_pos.x = worldWidth - 0.001f;
+			myPlayer->localTransform.GetPosition().x = player_pos.x;
+			//myPlayer->SetPosition(player_pos);
+		}
+
+		if (player_pos.z < 0)
+		{
+			player_pos.z = 0.0f;
+			myPlayer->localTransform.GetPosition().z = player_pos.z;
+		}
+		else if (worldHeight <= player_pos.z)
+		{
+			player_pos.z = worldHeight - 0.001f;
+			myPlayer->localTransform.GetPosition().z = player_pos.z;
+		}
+
+		const auto pl_overlapped_pos = myTerrain.GetHeight(player_pos.x, player_pos.z, false);
 		const auto pl_addition = pl_overlapped_pos - player_pos.y;
 		if (player_pos.y < pl_overlapped_pos) // °ãÄ§!
 		{

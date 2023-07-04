@@ -75,7 +75,6 @@ void TerrainData::Start(const XMFLOAT3& scale)
 			my_height_item = cy; // 높이 저장
 
 			pos = CVertex(cx, cy, cz);
-			//CDiffusedVertex result{ pos, XMFLOAT4(Colors::Aquamarine) };
 
 			const auto norm = GetNormal(int(height_index_x), int(height_index_z));
 
@@ -114,9 +113,8 @@ float TerrainData::GetActualHeight(float fx, float fz, bool reverse) const
 
 	const auto& w = myMapWidth;
 	const auto& h = myMapHeight;
-	const auto& heights = myHeightMap;
 
-	if (x < 0 || z < 0 || w <= x || h <= z)
+	if (x < 0 || z < 0 || w - 1 <= x || h - 1 <= z)
 	{
 		return 0.0f;
 	}
@@ -255,7 +253,7 @@ void Terrain::Start(P3DDevice device, P3DGrpCommandList cmdlist, const XMFLOAT3&
 	auto& raw_terrain = myData.myRawMesh;
 	//raw_terrain.AddPolygon(terrain_poly);
 
-	myMesh = new CLightenMesh(device, cmdlist, raw_terrain);
+	myMesh = make_shared<CLightenMesh>(device, cmdlist, raw_terrain);
 	if (!myMesh)
 	{
 		throw "지형의 메쉬 생성 실패!";

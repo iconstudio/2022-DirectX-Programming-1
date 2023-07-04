@@ -96,8 +96,8 @@ public:
 	D3D12_RECT GetScissorRect() { return(m_d3dScissorRect); }
 
 	virtual void Move(const XMFLOAT3& xmf3Shift) { m_xmf3Position.x += xmf3Shift.x; m_xmf3Position.y += xmf3Shift.y; m_xmf3Position.z += xmf3Shift.z; }
-	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f) {}
-	virtual void SetLookAt(const XMFLOAT3& look) {}
+	virtual void Rotate(float pitch, float yaw, float roll);
+	virtual void SetLookAt(const XMFLOAT3& look);
 };
 
 class CSpaceShipCamera : public GameCamera
@@ -107,7 +107,7 @@ public:
 	CSpaceShipCamera(const GameCamera& pCamera);
 	virtual ~CSpaceShipCamera();
 
-	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
+	virtual void Rotate(float pitch, float yaw, float roll) override;
 };
 
 class CFirstPersonCamera : public GameCamera
@@ -117,7 +117,7 @@ public:
 	CFirstPersonCamera(const GameCamera& pCamera);
 	virtual ~CFirstPersonCamera();
 
-	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
+	virtual void Rotate(float pitch, float yaw, float roll) override;
 };
 
 class CThirdPersonCamera : public GameCamera

@@ -8,6 +8,23 @@ IlluminatedGraphicsPipeline::IlluminatedGraphicsPipeline()
 IlluminatedGraphicsPipeline::~IlluminatedGraphicsPipeline()
 {}
 
+void IlluminatedGraphicsPipeline::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
+{
+	//AssignVertexShader(Shader("VertexShader.hlsl", "main", "vs_5_1"));
+	//AssignPixelShader(Shader("PixelShader.hlsl", "main", "ps_5_1"));
+	AssignVertexShader(Shader("VertexShader.cso", "vs_5_1"));
+	AssignPixelShader(Shader("PixelShader.cso", "ps_5_1"));
+
+	myDerivedStates.clear();
+	myDerivedStates.reserve(2);
+
+	Pipeline::Awake(device, cmdlist);
+
+	myStateDescription.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
+
+	BuildState(1);
+}
+
 ShaderBlob IlluminatedGraphicsPipeline::CreateVertexShader()
 {
 	return myVertexShader.myCode;
@@ -98,19 +115,4 @@ P3DSignature IlluminatedGraphicsPipeline::CreateGraphicsRootSignature()
 	}
 
 	return signature;
-}
-
-void IlluminatedGraphicsPipeline::Awake(P3DDevice device, P3DGrpCommandList cmdlist)
-{
-	AssignVertexShader(Shader("VertexShader.hlsl.", "main", "vs_5_1"));
-	AssignPixelShader(Shader("PixelShader.hlsl.", "main", "ps_5_1"));
-
-	myDerivedStates.clear();
-	myDerivedStates.reserve(2);
-
-	Pipeline::Awake(device, cmdlist);
-
-	myStateDescription.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
-	
-	BuildState(1);
 }

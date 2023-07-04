@@ -48,5 +48,5 @@ public:
 	TerrainData myData;
 
 	UINT countVertices;
-	CLightenMesh* myMesh;
+	shared_ptr<CLightenMesh> myMesh;
 };
